@@ -1,0 +1,60 @@
+## Requisitos Funcionais
+Com as atualizações recentes que fizemos para incluir o ecossistema de Criptomoedas, o Radar FX agora conta com 7 Estratégias Principais (Master Bots / IAs) focadas em alta performance (Radar Elite) atuando em 3 mercados diferentes (Forex, Índices/Materiais e Cripto).
+
+Aqui estão as Inteligências Artificiais e Estratégias que compõem o arsenal do Radar FX:
+
+🪙 Especialistas em Criptomoedas (Nova Geração)
+Alpha Nakamoto (NEURAL CRIPTO)
+
+Foco: Bitcoin Momentum (Alta Assertividade 24/7).
+Como Atua: Uma inteligência focada exclusivamente em domar a volatilidade do Bitcoin, utilizando cálculos de momentum algorítmico e rastreamento de volume financeiro nas corretoras.
+Expectativa (Benchmark): ~94.8%
+Altcoin Sniper (GEMS CRIPTO)
+
+Foco: Micro-cap Volatility (Alta Assertividade).
+Como Atua: Criada para caçar "Gems" (moedas de baixo valor de mercado ou mid-caps) na nossa lista de 23 ativos, pegando os inícios de tendência dessas moedas mais explosivas.
+Expectativa (Benchmark): ~89.5%
+Crypto Whale Hunt (MOMENTUM / ON-CHAIN)
+
+Foco: Rastreamento de Grandes Ordens On-Chain (23 Moedas).
+Como Atua: Vasculha continuamente as 23 altcoins configuradas buscando por anomalias institucionais (compras de "Baleias") para entrar "surfando" na onde dessas grandes instituições.
+Expectativa (Benchmark): ~89.5%
+💱 Especialistas Institucionais (Forex & Commodities)
+Intelligence 7 (SMART MONEY)
+
+Foco: Volume Neural + Confluência de Fluxo H1.
+Como Atua: O "Carro Chefe" para pares de moedas maiores (como EUR/USD e GBP/USD). Busca exaustão institucional mesclada ao cruzamento de tendência limpa. Extremamente cirúrgico.
+Expectativa (Benchmark): ~94.2%
+Alpha Shark (VSA - Volume Spread Analysis)
+
+Foco: Detecção de Stop Hunting em Ouro e Forex.
+Como Atua: Detecta a famosa "caça aos stops" dos traders de varejo. Quando visualiza que um fundo falso foi rompido só para estopar investidores menores, ele entra a favor dos "Tubarões" (bancos).
+Expectativa (Benchmark): ~91.8%
+Golden Rejection (SCALPER)
+
+Foco: Rejeição em Zonas de Liquidez de Ouro (XAU/USD).
+Como Atua: Operador de curtíssimo prazo no Ouro. Compra suportes e vende resistências absolutas através da detecção de pavios/rejeições de preços nas extremidades com extrema rapidez.
+Expectativa (Benchmark): ~88.2%
+Smart Momentum (TREND)
+
+Foco: Seguimento de Tendência Institucional.
+Como Atua: O arroz com feijão robótico infalível: identifica uma tendência macro instalada por bancos e entra sempre após uma leve correção a favor da tendência maior. Menos trades, mas alvos alongados.
+Expectativa (Benchmark): ~86.4%
+Essas são as "mentes" que o seu robô Alpha Auto-Pilot pode usar para gerir as operações automaticamente, ou que os usuários podem acompanhar pelo painel de Sinais.
+O Alpha Station Scanner VSA Ativo agora é um ecossistema completo de inteligência artificial e análise institucional. Ativei todas as 10 estratégias de elite e cada uma possui agora uma identidade visual premium exclusiva no seu Dashboard.
+
+🛡️ Estratégias em Execução Simultânea:
+Golden Whale 🐳: Ouro (XAUUSD) com acabamento dourado e precisão de 93%+.
+Quantum Pro 🤖: Algoritmo cibernético (Verde Esmeralda) para Bitcoin e Índices.
+Alpha Nakamoto ₿: Rastreador de baleias de Bitcoin (Laranja) baseado em fluxos on-chain.
+Squeeze Breakout 💥: Detecta explosões de volatilidade (Fúcsia) após compressão.
+Altcoin Sniper 🎯: Identifica "Gems" e moedas com volume explosivo (Lima).
+Elite SMC 💎: Mapeamento de blocos de ordens e fendas de valor.
+Shark Hunt 🦈: Fluxo de tubarão e capturas de liquidez.
+VSA Core 📊: Padrões de Clímax, No Demand e Shakeouts.
+Alpha Confluence ✨: O sinal master que combina VSA + Institucional (Âmbar).
+Alpha Scalper Grid ⛓️: Entradas curtas de alta frequência em sessões líquidas.
+📈 Cobertura Total:
+Indices: UK100, HK50, JPN225, FRA40, US500, NAS100, DAX40.
+Forex: Todos os Major Pairs e pares cruzados (EURJPY, EURGBP, etc.).
+Cripto: As 23 principais moedas do mercado monitoradas em tempo real.

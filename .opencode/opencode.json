@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "financialmodelingprep": {
+      "type": "remote",
+      "url": "https://financialmodelingprep.com/mcp?apikey=38H3sDW3t09VitCF3QJe3f0X2g8ZlQJc",
+      "enabled": true
+    }
+  },
+  "agent": {
+    "financial-analyst": {
+      "model": "deepseek/deepseek-v4-flash-free",
+      "mode": "subagent",
+      "description": "Financial data analyst using FMP MCP — use when the user asks about stock prices, financial statements, market data, company fundamentals, or economic indicators. Only trigger for financial data queries.",
+      "permission": { "bash": "deny", "edit": "deny" }
+    }
+  }
+}

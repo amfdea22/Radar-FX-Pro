@@ -1,0 +1,300 @@
+2026-04-21 21:39:55,195 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:55] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:39:55,681 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:39:55,684 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:55] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:39:55,689 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:39:55,691 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:55] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:39:55,692 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:39:55,694 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:55] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:39:55,697 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:55] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:39:55,701 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:55] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:39:55,854 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:55] "GET /history?t=1776818395702 HTTP/1.1" 200 -
+2026-04-21 21:39:56,805 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:56] "GET /history?t=1776818396654 HTTP/1.1" 200 -
+2026-04-21 21:39:56,857 - INFO - Candles request for GOLD (200 bars, M1)
+2026-04-21 21:39:56,859 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:56] "GET /candles?symbol=GOLD&count=200&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:39:56,863 - INFO - Candles request for EURUSD (200 bars, M1)
+2026-04-21 21:39:56,867 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:56] "GET /candles?symbol=EURUSD&count=200&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:39:56,872 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:56] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:39:56,875 - INFO - Order Request Received: {'symbol': 'EURUSD', 'action': 'BUY', 'lot': 0.01, 'magic': 7777, 'comment': 'Omni TWIN_TOWERS G0'}
+2026-04-21 21:39:56,876 - INFO - Final MT5 Request: {'action': 1, 'symbol': 'EURUSD', 'volume': 0.01, 'type': 0, 'price': 1.17488, 'magic': 7777, 'comment': 'Omni TWIN_TOWERS G0', 'type_time': 0, 'type_filling': 1}
+2026-04-21 21:39:56,881 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:56] "[31m[1mPOST /order HTTP/1.1[0m" 400 -
+2026-04-21 21:39:57,114 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:57] "GET /account HTTP/1.1" 200 -
+2026-04-21 21:39:57,267 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:57] "GET /history?t=1776818397112 HTTP/1.1" 200 -
+2026-04-21 21:39:57,269 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:39:57,272 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:57] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:39:57,274 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:57] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:39:57,305 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:39:57,306 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:57] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:39:57,307 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:39:57,309 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:57] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:39:57,312 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:57] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:39:57,315 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:57] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:39:57,466 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:57] "GET /history?t=1776818397316 HTTP/1.1" 200 -
+2026-04-21 21:39:58,694 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:39:58,697 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:58] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:39:58,703 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:39:58,703 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:39:58,705 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:58] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:39:58,706 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:58] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:39:58,709 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:58] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:39:58,713 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:58] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:39:58,878 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:58] "GET /history?t=1776818398714 HTTP/1.1" 200 -
+2026-04-21 21:39:59,203 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:59] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:39:59,490 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:59] "GET /history?t=1776818399338 HTTP/1.1" 200 -
+2026-04-21 21:39:59,643 - INFO - 127.0.0.1 - - [21/Apr/2026 21:39:59] "GET /history?t=1776818399446 HTTP/1.1" 200 -
+2026-04-21 21:40:00,128 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /account HTTP/1.1" 200 -
+2026-04-21 21:40:00,282 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /history?t=1776818400125 HTTP/1.1" 200 -
+2026-04-21 21:40:00,285 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:40:00,287 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:40:00,321 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:40:00,322 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:40:00,322 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:00,323 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:00,327 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:00,331 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:00,481 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /history?t=1776818400332 HTTP/1.1" 200 -
+2026-04-21 21:40:00,487 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /symbols HTTP/1.1" 200 -
+2026-04-21 21:40:00,495 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:00,501 - INFO - Candles request for GOLD (20 bars, M1)
+2026-04-21 21:40:00,503 - INFO - Candles request for EURUSD (20 bars, M1)
+2026-04-21 21:40:00,505 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=GOLD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,506 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=EURUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,506 - INFO - Candles request for BTCUSD (20 bars, M1)
+2026-04-21 21:40:00,508 - INFO - Candles request for ETHUSD (20 bars, M1)
+2026-04-21 21:40:00,508 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=BTCUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,509 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=ETHUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,510 - INFO - Candles request for GBPUSD (20 bars, M1)
+2026-04-21 21:40:00,511 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=GBPUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,546 - INFO - Order Request Received: {'symbol': 'GOLD', 'action': 'BUY', 'lot': 0.01, 'sl': 4693.97, 'tp': 4893.97, 'magic': 9999, 'comment': 'GSL1'}
+2026-04-21 21:40:00,565 - INFO - Candles request for USDJPY (20 bars, M1)
+2026-04-21 21:40:00,700 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=USDJPY&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,713 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /history?t=1776818400538 HTTP/1.1" 200 -
+2026-04-21 21:40:00,713 - INFO - Final MT5 Request: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 0, 'price': 4743.94, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4693.97, 'tp': 4893.97}
+2026-04-21 21:40:00,714 - INFO - Candles request for US100Cash (20 bars, M1)
+2026-04-21 21:40:00,716 - INFO - Candles request for US30Cash (20 bars, M1)
+2026-04-21 21:40:00,718 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=US100Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,720 - INFO - Candles request for US100Cash (20 bars, M1)
+2026-04-21 21:40:00,721 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=US30Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,722 - INFO - Candles request for US500Cash (20 bars, M1)
+2026-04-21 21:40:00,726 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "[31m[1mPOST /order HTTP/1.1[0m" 400 -
+2026-04-21 21:40:00,727 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=US100Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,728 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=US500Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,758 - INFO - Candles request for GER40Cash (20 bars, M1)
+2026-04-21 21:40:00,759 - INFO - Candles request for UK100Cash (20 bars, M1)
+2026-04-21 21:40:00,760 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=GER40Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,761 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=UK100Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,762 - INFO - Candles request for HK50Cash (20 bars, M1)
+2026-04-21 21:40:00,763 - INFO - Candles request for JP225Cash (20 bars, M1)
+2026-04-21 21:40:00,764 - INFO - Candles request for FRA40Cash (20 bars, M1)
+2026-04-21 21:40:00,765 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=HK50Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,767 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=JP225Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,769 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=FRA40Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,774 - INFO - Candles request for AUS200Cash (20 bars, M1)
+2026-04-21 21:40:00,775 - INFO - Candles request for EU50Cash (20 bars, M1)
+2026-04-21 21:40:00,776 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=AUS200Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,777 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=EU50Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,777 - INFO - Candles request for SPAIN35Cash (20 bars, M1)
+2026-04-21 21:40:00,778 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=SPAIN35Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,779 - INFO - Candles request for NETH25Cash (20 bars, M1)
+2026-04-21 21:40:00,780 - INFO - Candles request for SWI20Cash (20 bars, M1)
+2026-04-21 21:40:00,781 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=NETH25Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,784 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=SWI20Cash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,789 - INFO - Candles request for OILCash (20 bars, M1)
+2026-04-21 21:40:00,790 - INFO - Candles request for BRENTCash (20 bars, M1)
+2026-04-21 21:40:00,791 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=OILCash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,792 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=BRENTCash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,793 - INFO - Candles request for NGASCash (20 bars, M1)
+2026-04-21 21:40:00,793 - INFO - Candles request for EURJPY (20 bars, M1)
+2026-04-21 21:40:00,795 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=NGASCash&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,797 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=EURJPY&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,797 - INFO - Candles request for EURGBP (20 bars, M1)
+2026-04-21 21:40:00,799 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=EURGBP&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,805 - INFO - Candles request for XAGUSD (20 bars, M1)
+2026-04-21 21:40:00,805 - INFO - Candles request for BNBUSD (20 bars, M1)
+2026-04-21 21:40:00,806 - WARNING - No candles found for XAGUSD
+2026-04-21 21:40:00,807 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=BNBUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,808 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=XAGUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,808 - INFO - Candles request for DOGUSD (20 bars, M1)
+2026-04-21 21:40:00,809 - INFO - Candles request for SOLUSD (20 bars, M1)
+2026-04-21 21:40:00,810 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=DOGUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,811 - INFO - Candles request for XRPUSD (20 bars, M1)
+2026-04-21 21:40:00,812 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=SOLUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:00,813 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:00] "GET /candles?symbol=XRPUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:01,204 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:01] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:01,816 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:01] "GET /history?t=1776818401664 HTTP/1.1" 200 -
+2026-04-21 21:40:01,818 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:40:01,821 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:01] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:40:01,853 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:40:01,854 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:01] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:01,855 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:40:01,856 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:01] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:01,860 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:01] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:01,864 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:01] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:02,020 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:02] "GET /history?t=1776818401865 HTTP/1.1" 200 -
+2026-04-21 21:40:02,501 - INFO - Candles request for ADAUSD (20 bars, M1)
+2026-04-21 21:40:02,502 - INFO - Candles request for AVAXUSD (20 bars, M1)
+2026-04-21 21:40:02,503 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:02] "GET /candles?symbol=ADAUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:02,504 - WARNING - No candles found for AVAXUSD
+2026-04-21 21:40:02,505 - INFO - Candles request for MATICUSD (20 bars, M1)
+2026-04-21 21:40:02,506 - INFO - Candles request for DOTUSD (20 bars, M1)
+2026-04-21 21:40:02,507 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:02] "GET /candles?symbol=AVAXUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:02,508 - WARNING - No candles found for MATICUSD
+2026-04-21 21:40:02,509 - INFO - Candles request for LNKUSD (20 bars, M1)
+2026-04-21 21:40:02,511 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:02] "GET /candles?symbol=DOTUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:02,512 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:02] "GET /candles?symbol=MATICUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:02,513 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:02] "GET /candles?symbol=LNKUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:02,851 - INFO - Candles request for AVAXUSD (10 bars, M1)
+2026-04-21 21:40:02,851 - WARNING - No candles found for AVAXUSD
+2026-04-21 21:40:02,852 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:02] "GET /candles?symbol=AVAXUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,118 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /account HTTP/1.1" 200 -
+2026-04-21 21:40:03,274 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /history?t=1776818403114 HTTP/1.1" 200 -
+2026-04-21 21:40:03,275 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:40:03,277 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:03,279 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:40:03,281 - INFO - Candles request for MATICUSD (10 bars, M1)
+2026-04-21 21:40:03,281 - WARNING - No candles found for MATICUSD
+2026-04-21 21:40:03,282 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=MATICUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,313 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:40:03,313 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:40:03,314 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:03,317 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:03,320 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:03,324 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:03,480 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /history?t=1776818403326 HTTP/1.1" 200 -
+2026-04-21 21:40:03,488 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /symbols HTTP/1.1" 200 -
+2026-04-21 21:40:03,521 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:03,537 - INFO - Candles request for AVAXUSD (20 bars, M1)
+2026-04-21 21:40:03,538 - INFO - Candles request for MATICUSD (20 bars, M1)
+2026-04-21 21:40:03,538 - WARNING - No candles found for AVAXUSD
+2026-04-21 21:40:03,538 - WARNING - No candles found for MATICUSD
+2026-04-21 21:40:03,539 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=AVAXUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,539 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=MATICUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,662 - INFO - Candles request for TRXUSD (20 bars, M1)
+2026-04-21 21:40:03,663 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=TRXUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,664 - INFO - Candles request for LTCUSD (20 bars, M1)
+2026-04-21 21:40:03,666 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=LTCUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,668 - INFO - Candles request for SHBUSD (20 bars, M1)
+2026-04-21 21:40:03,669 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=SHBUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,670 - INFO - Candles request for BCHUSD (20 bars, M1)
+2026-04-21 21:40:03,671 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=BCHUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,672 - INFO - Candles request for ETCUSD (20 bars, M1)
+2026-04-21 21:40:03,674 - WARNING - No candles found for ETCUSD
+2026-04-21 21:40:03,675 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=ETCUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,868 - INFO - Candles request for MATICUSD (10 bars, M1)
+2026-04-21 21:40:03,868 - WARNING - No candles found for MATICUSD
+2026-04-21 21:40:03,869 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=MATICUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:03,870 - INFO - Candles request for AVAXUSD (10 bars, M1)
+2026-04-21 21:40:03,871 - WARNING - No candles found for AVAXUSD
+2026-04-21 21:40:03,872 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:03] "GET /candles?symbol=AVAXUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:04,232 - INFO - Candles request for ETCUSD (20 bars, M1)
+2026-04-21 21:40:04,232 - WARNING - No candles found for ETCUSD
+2026-04-21 21:40:04,233 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /candles?symbol=ETCUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:04,426 - INFO - Candles request for ETCUSD (10 bars, M1)
+2026-04-21 21:40:04,427 - WARNING - No candles found for ETCUSD
+2026-04-21 21:40:04,427 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /candles?symbol=ETCUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:04,578 - INFO - Candles request for ETCUSD (10 bars, M1)
+2026-04-21 21:40:04,578 - WARNING - No candles found for ETCUSD
+2026-04-21 21:40:04,579 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /candles?symbol=ETCUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:04,728 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:40:04,731 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:40:04,735 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:40:04,737 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:04,737 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:40:04,739 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:04,743 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:04,746 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:04,900 - INFO - Candles request for DAIUSD (20 bars, M1)
+2026-04-21 21:40:04,901 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /history?t=1776818404747 HTTP/1.1" 200 -
+2026-04-21 21:40:04,901 - WARNING - No candles found for DAIUSD
+2026-04-21 21:40:04,902 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /candles?symbol=DAIUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:04,925 - INFO - Candles request for DAIUSD (20 bars, M1)
+2026-04-21 21:40:04,926 - WARNING - No candles found for DAIUSD
+2026-04-21 21:40:04,927 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:04] "GET /candles?symbol=DAIUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:05,219 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:05] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:05,248 - INFO - Candles request for DAIUSD (10 bars, M1)
+2026-04-21 21:40:05,248 - WARNING - No candles found for DAIUSD
+2026-04-21 21:40:05,249 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:05] "GET /candles?symbol=DAIUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:05,320 - INFO - Candles request for DAIUSD (10 bars, M1)
+2026-04-21 21:40:05,321 - WARNING - No candles found for DAIUSD
+2026-04-21 21:40:05,321 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:05] "GET /candles?symbol=DAIUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:05,634 - INFO - Candles request for USDCUSD (20 bars, M1)
+2026-04-21 21:40:05,635 - WARNING - No candles found for USDCUSD
+2026-04-21 21:40:05,636 - INFO - Candles request for USDTUSD (20 bars, M1)
+2026-04-21 21:40:05,636 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:05] "GET /candles?symbol=USDCUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:05,636 - WARNING - No candles found for USDTUSD
+2026-04-21 21:40:05,637 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:05] "GET /candles?symbol=USDTUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:05,681 - INFO - Candles request for USDCUSD (20 bars, M1)
+2026-04-21 21:40:05,682 - WARNING - No candles found for USDCUSD
+2026-04-21 21:40:05,683 - INFO - Candles request for USDTUSD (20 bars, M1)
+2026-04-21 21:40:05,683 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:05] "GET /candles?symbol=USDCUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:05,684 - WARNING - No candles found for USDTUSD
+2026-04-21 21:40:05,684 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:05] "GET /candles?symbol=USDTUSD&count=20&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:05,974 - INFO - Candles request for USDCUSD (10 bars, M1)
+2026-04-21 21:40:05,974 - WARNING - No candles found for USDCUSD
+2026-04-21 21:40:05,975 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:05] "GET /candles?symbol=USDCUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:05,995 - INFO - Candles request for USDTUSD (10 bars, M1)
+2026-04-21 21:40:05,995 - WARNING - No candles found for USDTUSD
+2026-04-21 21:40:05,996 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:05] "GET /candles?symbol=USDTUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:06,048 - INFO - Candles request for USDCUSD (10 bars, M1)
+2026-04-21 21:40:06,048 - WARNING - No candles found for USDCUSD
+2026-04-21 21:40:06,049 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /candles?symbol=USDCUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:06,121 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /account HTTP/1.1" 200 -
+2026-04-21 21:40:06,279 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /history?t=1776818406119 HTTP/1.1" 200 -
+2026-04-21 21:40:06,280 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:40:06,284 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:40:06,320 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:40:06,321 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:40:06,323 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:06,324 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:06,329 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:06,332 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:06,494 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /history?t=1776818406334 HTTP/1.1" 200 -
+2026-04-21 21:40:06,536 - INFO - Candles request for USDTUSD (10 bars, M1)
+2026-04-21 21:40:06,537 - WARNING - No candles found for USDTUSD
+2026-04-21 21:40:06,537 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /candles?symbol=USDTUSD&count=10&timeframe=M1 HTTP/1.1" 200 -
+2026-04-21 21:40:06,826 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:06] "GET /history?t=1776818406679 HTTP/1.1" 200 -
+2026-04-21 21:40:07,223 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:07] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:07,895 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:07] "GET /history HTTP/1.1" 200 -
+2026-04-21 21:40:08,011 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:40:08,014 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:08] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:40:08,018 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:40:08,021 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:08] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:08,022 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:40:08,024 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:08] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:08,027 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:08] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:08,030 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:08] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:08,185 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:08] "GET /history?t=1776818408031 HTTP/1.1" 200 -
+2026-04-21 21:40:09,126 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:09] "GET /account HTTP/1.1" 200 -
+2026-04-21 21:40:09,281 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:09] "GET /history?t=1776818409124 HTTP/1.1" 200 -
+2026-04-21 21:40:09,284 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:09] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:09,286 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:40:09,289 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:09] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:40:09,320 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:40:09,321 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:40:09,322 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:09] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:09,324 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:09] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:09,328 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:09] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:09,332 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:09] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:09,487 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:09] "GET /history?t=1776818409333 HTTP/1.1" 200 -
+2026-04-21 21:40:10,700 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:10] "GET /history?t=1776818410550 HTTP/1.1" 200 -
+2026-04-21 21:40:10,759 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:40:10,761 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:10] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:40:10,765 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:40:10,767 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:10] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:10,768 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:40:10,770 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:10] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:10,772 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:10] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:10,776 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:10] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:10,928 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:10] "GET /history?t=1776818410777 HTTP/1.1" 200 -
+2026-04-21 21:40:11,231 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:11] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:11,836 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:11] "GET /history?t=1776818411680 HTTP/1.1" 200 -
+2026-04-21 21:40:12,116 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:12] "GET /account HTTP/1.1" 200 -
+2026-04-21 21:40:12,282 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:12] "GET /history?t=1776818412112 HTTP/1.1" 200 -
+2026-04-21 21:40:12,283 - INFO - Candles request for GOLD (200 bars, M15)
+2026-04-21 21:40:12,286 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:12] "GET /candles?symbol=GOLD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-04-21 21:40:12,332 - INFO - Candles request for GOLD (60 bars, M1)
+2026-04-21 21:40:12,334 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:12] "GET /candles?symbol=GOLD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:12,335 - INFO - Candles request for GOLD (60 bars, M5)
+2026-04-21 21:40:12,336 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:12] "GET /candles?symbol=GOLD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-04-21 21:40:12,343 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:12] "GET /positions HTTP/1.1" 200 -
+2026-04-21 21:40:12,349 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:12] "POST /ticks HTTP/1.1" 200 -
+2026-04-21 21:40:12,503 - INFO - 127.0.0.1 - - [21/Apr/2026 21:40:12] "GET /history?t=1776818412351 HTTP/1.1" 200 -

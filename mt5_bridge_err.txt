@@ -1,0 +1,1034 @@
+2026-05-20 23:48:19,615 - INFO - MT5 Proxy Initialized Successfully [v1.1 - Verbose Diagnostics]
+2026-05-20 23:48:19,650 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5555
+2026-05-20 23:48:19,652 - INFO - [33mPress CTRL+C to quit[0m
+2026-05-20 23:48:20,449 - INFO - 127.0.0.1 - - [20/May/2026 23:48:20] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:20,460 - INFO - 127.0.0.1 - - [20/May/2026 23:48:20] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:20,464 - INFO - 127.0.0.1 - - [20/May/2026 23:48:20] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:20,469 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:20,470 - INFO - 127.0.0.1 - - [20/May/2026 23:48:20] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:20,471 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:20,473 - INFO - 127.0.0.1 - - [20/May/2026 23:48:20] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:20,583 - INFO - 127.0.0.1 - - [20/May/2026 23:48:20] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:20,585 - INFO - 127.0.0.1 - - [20/May/2026 23:48:20] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:20,590 - INFO - 127.0.0.1 - - [20/May/2026 23:48:20] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:48:20,979 - INFO - 127.0.0.1 - - [20/May/2026 23:48:20] "GET /history?t=1779331700966 HTTP/1.1" 200 -
+2026-05-20 23:48:21,484 - INFO - 127.0.0.1 - - [20/May/2026 23:48:21] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:21,486 - INFO - 127.0.0.1 - - [20/May/2026 23:48:21] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:21,958 - INFO - 127.0.0.1 - - [20/May/2026 23:48:21] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:21,968 - INFO - 127.0.0.1 - - [20/May/2026 23:48:21] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:21,972 - INFO - 127.0.0.1 - - [20/May/2026 23:48:21] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:21,977 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:21,979 - INFO - 127.0.0.1 - - [20/May/2026 23:48:21] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:21,979 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:21,981 - INFO - 127.0.0.1 - - [20/May/2026 23:48:21] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:22,086 - INFO - 127.0.0.1 - - [20/May/2026 23:48:22] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:22,475 - INFO - 127.0.0.1 - - [20/May/2026 23:48:22] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:22,478 - INFO - 127.0.0.1 - - [20/May/2026 23:48:22] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:22,481 - INFO - 127.0.0.1 - - [20/May/2026 23:48:22] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:22,491 - INFO - 127.0.0.1 - - [20/May/2026 23:48:22] "GET /history?t=1779331702475 HTTP/1.1" 200 -
+2026-05-20 23:48:22,583 - INFO - 127.0.0.1 - - [20/May/2026 23:48:22] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:22,587 - INFO - 127.0.0.1 - - [20/May/2026 23:48:22] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:48:23,459 - INFO - 127.0.0.1 - - [20/May/2026 23:48:23] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:23,468 - INFO - 127.0.0.1 - - [20/May/2026 23:48:23] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:23,472 - INFO - 127.0.0.1 - - [20/May/2026 23:48:23] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:23,476 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:23,479 - INFO - 127.0.0.1 - - [20/May/2026 23:48:23] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:23,480 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:23,481 - INFO - 127.0.0.1 - - [20/May/2026 23:48:23] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:23,586 - INFO - 127.0.0.1 - - [20/May/2026 23:48:23] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:24,586 - INFO - 127.0.0.1 - - [20/May/2026 23:48:24] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:24,969 - INFO - 127.0.0.1 - - [20/May/2026 23:48:24] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:24,979 - INFO - 127.0.0.1 - - [20/May/2026 23:48:24] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:24,983 - INFO - 127.0.0.1 - - [20/May/2026 23:48:24] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:24,987 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:24,989 - INFO - 127.0.0.1 - - [20/May/2026 23:48:24] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:24,990 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:24,991 - INFO - 127.0.0.1 - - [20/May/2026 23:48:24] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:25,094 - INFO - 127.0.0.1 - - [20/May/2026 23:48:25] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:25,476 - INFO - 127.0.0.1 - - [20/May/2026 23:48:25] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:25,479 - INFO - 127.0.0.1 - - [20/May/2026 23:48:25] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:25,482 - INFO - 127.0.0.1 - - [20/May/2026 23:48:25] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:25,491 - INFO - 127.0.0.1 - - [20/May/2026 23:48:25] "GET /history?t=1779331705475 HTTP/1.1" 200 -
+2026-05-20 23:48:26,478 - INFO - 127.0.0.1 - - [20/May/2026 23:48:26] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:26,489 - INFO - 127.0.0.1 - - [20/May/2026 23:48:26] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:26,490 - INFO - 127.0.0.1 - - [20/May/2026 23:48:26] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:26,491 - INFO - 127.0.0.1 - - [20/May/2026 23:48:26] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:26,498 - INFO - 127.0.0.1 - - [20/May/2026 23:48:26] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:26,501 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:26,503 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:26,504 - INFO - 127.0.0.1 - - [20/May/2026 23:48:26] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:26,503 - INFO - 127.0.0.1 - - [20/May/2026 23:48:26] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:26,608 - INFO - 127.0.0.1 - - [20/May/2026 23:48:26] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:26,611 - INFO - 127.0.0.1 - - [20/May/2026 23:48:26] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:27,987 - INFO - 127.0.0.1 - - [20/May/2026 23:48:27] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:27,996 - INFO - 127.0.0.1 - - [20/May/2026 23:48:27] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:28,000 - INFO - 127.0.0.1 - - [20/May/2026 23:48:28] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:28,004 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:28,006 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:28,007 - INFO - 127.0.0.1 - - [20/May/2026 23:48:28] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:28,008 - INFO - 127.0.0.1 - - [20/May/2026 23:48:28] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:28,112 - INFO - 127.0.0.1 - - [20/May/2026 23:48:28] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:28,477 - INFO - 127.0.0.1 - - [20/May/2026 23:48:28] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:28,480 - INFO - 127.0.0.1 - - [20/May/2026 23:48:28] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:28,479 - INFO - 127.0.0.1 - - [20/May/2026 23:48:28] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:28,487 - INFO - 127.0.0.1 - - [20/May/2026 23:48:28] "GET /history?t=1779331708474 HTTP/1.1" 200 -
+2026-05-20 23:48:28,603 - INFO - 127.0.0.1 - - [20/May/2026 23:48:28] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:29,491 - INFO - 127.0.0.1 - - [20/May/2026 23:48:29] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:29,497 - INFO - 127.0.0.1 - - [20/May/2026 23:48:29] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:29,501 - INFO - 127.0.0.1 - - [20/May/2026 23:48:29] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:29,505 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:29,508 - INFO - 127.0.0.1 - - [20/May/2026 23:48:29] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:29,508 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:29,509 - INFO - 127.0.0.1 - - [20/May/2026 23:48:29] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:29,627 - INFO - 127.0.0.1 - - [20/May/2026 23:48:29] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:30,604 - INFO - 127.0.0.1 - - [20/May/2026 23:48:30] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:30,989 - INFO - 127.0.0.1 - - [20/May/2026 23:48:30] "GET /history?t=1779331710977 HTTP/1.1" 200 -
+2026-05-20 23:48:31,005 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:31,011 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:31,015 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:31,018 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:31,020 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:31,021 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:31,023 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:31,128 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:31,477 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:31,479 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:31,481 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:31,489 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /history?t=1779331711475 HTTP/1.1" 200 -
+2026-05-20 23:48:31,500 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:31,502 - INFO - 127.0.0.1 - - [20/May/2026 23:48:31] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:32,506 - INFO - 127.0.0.1 - - [20/May/2026 23:48:32] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:32,516 - INFO - 127.0.0.1 - - [20/May/2026 23:48:32] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:32,520 - INFO - 127.0.0.1 - - [20/May/2026 23:48:32] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:32,524 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:32,526 - INFO - 127.0.0.1 - - [20/May/2026 23:48:32] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:32,527 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:32,528 - INFO - 127.0.0.1 - - [20/May/2026 23:48:32] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:32,658 - INFO - 127.0.0.1 - - [20/May/2026 23:48:32] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:32,660 - INFO - 127.0.0.1 - - [20/May/2026 23:48:32] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:34,017 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:34,027 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:34,031 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:34,034 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:34,036 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:34,038 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:34,037 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:34,145 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:34,476 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:34,479 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:34,482 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:34,492 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /history?t=1779331714475 HTTP/1.1" 200 -
+2026-05-20 23:48:34,617 - INFO - 127.0.0.1 - - [20/May/2026 23:48:34] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:35,522 - INFO - 127.0.0.1 - - [20/May/2026 23:48:35] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:35,530 - INFO - 127.0.0.1 - - [20/May/2026 23:48:35] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:35,534 - INFO - 127.0.0.1 - - [20/May/2026 23:48:35] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:35,538 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:35,539 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:35,541 - INFO - 127.0.0.1 - - [20/May/2026 23:48:35] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:35,540 - INFO - 127.0.0.1 - - [20/May/2026 23:48:35] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:35,649 - INFO - 127.0.0.1 - - [20/May/2026 23:48:35] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:36,482 - INFO - 127.0.0.1 - - [20/May/2026 23:48:36] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:36,483 - INFO - 127.0.0.1 - - [20/May/2026 23:48:36] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:36,628 - INFO - 127.0.0.1 - - [20/May/2026 23:48:36] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:37,024 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:37,030 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:37,034 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:37,036 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:37,039 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:37,038 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:37,040 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:37,147 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:37,476 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:37,479 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:37,481 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:37,490 - INFO - 127.0.0.1 - - [20/May/2026 23:48:37] "GET /history?t=1779331717474 HTTP/1.1" 200 -
+2026-05-20 23:48:38,334 - INFO - 127.0.0.1 - - [20/May/2026 23:48:38] "GET /health HTTP/1.1" 200 -
+2026-05-20 23:48:38,531 - INFO - 127.0.0.1 - - [20/May/2026 23:48:38] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:38,543 - INFO - 127.0.0.1 - - [20/May/2026 23:48:38] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:38,547 - INFO - 127.0.0.1 - - [20/May/2026 23:48:38] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:38,551 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:38,552 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:38,553 - INFO - 127.0.0.1 - - [20/May/2026 23:48:38] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:38,554 - INFO - 127.0.0.1 - - [20/May/2026 23:48:38] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:38,670 - INFO - 127.0.0.1 - - [20/May/2026 23:48:38] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:38,672 - INFO - 127.0.0.1 - - [20/May/2026 23:48:38] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:39,852 - INFO - 127.0.0.1 - - [20/May/2026 23:48:39] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:39,856 - INFO - 127.0.0.1 - - [20/May/2026 23:48:39] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:39,860 - INFO - 127.0.0.1 - - [20/May/2026 23:48:39] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:39,874 - INFO - 127.0.0.1 - - [20/May/2026 23:48:39] "GET /history?t=1779331719853 HTTP/1.1" 200 -
+2026-05-20 23:48:40,043 - INFO - 127.0.0.1 - - [20/May/2026 23:48:40] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:40,050 - INFO - 127.0.0.1 - - [20/May/2026 23:48:40] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:40,054 - INFO - 127.0.0.1 - - [20/May/2026 23:48:40] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:40,058 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:40,060 - INFO - 127.0.0.1 - - [20/May/2026 23:48:40] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:40,061 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:40,063 - INFO - 127.0.0.1 - - [20/May/2026 23:48:40] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:40,174 - INFO - 127.0.0.1 - - [20/May/2026 23:48:40] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:40,640 - INFO - 127.0.0.1 - - [20/May/2026 23:48:40] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:40,986 - INFO - 127.0.0.1 - - [20/May/2026 23:48:40] "GET /history?t=1779331720976 HTTP/1.1" 200 -
+2026-05-20 23:48:41,489 - INFO - 127.0.0.1 - - [20/May/2026 23:48:41] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:41,491 - INFO - 127.0.0.1 - - [20/May/2026 23:48:41] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:41,552 - INFO - 127.0.0.1 - - [20/May/2026 23:48:41] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:41,559 - INFO - 127.0.0.1 - - [20/May/2026 23:48:41] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:41,566 - INFO - 127.0.0.1 - - [20/May/2026 23:48:41] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:41,570 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:41,572 - INFO - 127.0.0.1 - - [20/May/2026 23:48:41] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:41,573 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:41,574 - INFO - 127.0.0.1 - - [20/May/2026 23:48:41] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:41,699 - INFO - 127.0.0.1 - - [20/May/2026 23:48:41] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:42,011 - INFO - 127.0.0.1 - - [20/May/2026 23:48:42] "GET /smc_levels?symbol=XAUUSD&direction=BUY HTTP/1.1" 200 -
+2026-05-20 23:48:42,649 - INFO - 127.0.0.1 - - [20/May/2026 23:48:42] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:42,656 - INFO - 127.0.0.1 - - [20/May/2026 23:48:42] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:48:43,060 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:43,070 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:43,074 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:43,078 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:43,081 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:43,082 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:43,083 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:43,191 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:43,475 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:43,477 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:43,479 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:43,487 - INFO - 127.0.0.1 - - [20/May/2026 23:48:43] "GET /history?t=1779331723473 HTTP/1.1" 200 -
+2026-05-20 23:48:44,566 - INFO - 127.0.0.1 - - [20/May/2026 23:48:44] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:44,572 - INFO - 127.0.0.1 - - [20/May/2026 23:48:44] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:44,576 - INFO - 127.0.0.1 - - [20/May/2026 23:48:44] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:44,579 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:44,581 - INFO - 127.0.0.1 - - [20/May/2026 23:48:44] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:44,582 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:44,583 - INFO - 127.0.0.1 - - [20/May/2026 23:48:44] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:44,691 - INFO - 127.0.0.1 - - [20/May/2026 23:48:44] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:44,693 - INFO - 127.0.0.1 - - [20/May/2026 23:48:44] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:46,069 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:46,078 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:46,081 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:46,085 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:46,087 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:46,088 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:46,089 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:46,196 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:46,477 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:46,479 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:46,491 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /history?t=1779331726475 HTTP/1.1" 200 -
+2026-05-20 23:48:46,483 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:46,502 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:46,504 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:46,651 - INFO - 127.0.0.1 - - [20/May/2026 23:48:46] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:47,577 - INFO - 127.0.0.1 - - [20/May/2026 23:48:47] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:47,586 - INFO - 127.0.0.1 - - [20/May/2026 23:48:47] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:47,590 - INFO - 127.0.0.1 - - [20/May/2026 23:48:47] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:47,594 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:47,595 - INFO - 127.0.0.1 - - [20/May/2026 23:48:47] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:47,596 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:47,597 - INFO - 127.0.0.1 - - [20/May/2026 23:48:47] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:47,715 - INFO - 127.0.0.1 - - [20/May/2026 23:48:47] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:48,268 - INFO - 127.0.0.1 - - [20/May/2026 23:48:48] "GET /smc_levels?symbol=XAUUSD&direction=SELL HTTP/1.1" 200 -
+2026-05-20 23:48:48,661 - INFO - 127.0.0.1 - - [20/May/2026 23:48:48] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:49,088 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:49,098 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:49,102 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:49,105 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:49,107 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:49,108 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:49,109 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:49,213 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:49,475 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:49,478 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:49,480 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:49,489 - INFO - 127.0.0.1 - - [20/May/2026 23:48:49] "GET /history?t=1779331729474 HTTP/1.1" 200 -
+2026-05-20 23:48:50,593 - INFO - 127.0.0.1 - - [20/May/2026 23:48:50] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:50,604 - INFO - 127.0.0.1 - - [20/May/2026 23:48:50] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:50,607 - INFO - 127.0.0.1 - - [20/May/2026 23:48:50] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:50,611 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:50,613 - INFO - 127.0.0.1 - - [20/May/2026 23:48:50] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:50,613 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:50,615 - INFO - 127.0.0.1 - - [20/May/2026 23:48:50] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:50,705 - INFO - 127.0.0.1 - - [20/May/2026 23:48:50] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:50,729 - INFO - 127.0.0.1 - - [20/May/2026 23:48:50] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:50,996 - INFO - 127.0.0.1 - - [20/May/2026 23:48:50] "GET /history?t=1779331730984 HTTP/1.1" 200 -
+2026-05-20 23:48:51,484 - INFO - 127.0.0.1 - - [20/May/2026 23:48:51] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:51,486 - INFO - 127.0.0.1 - - [20/May/2026 23:48:51] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:52,093 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:52,102 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:52,105 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:52,109 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:52,111 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:52,111 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:52,114 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:52,219 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:52,475 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:52,478 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:52,482 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:52,491 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /history?t=1779331732474 HTTP/1.1" 200 -
+2026-05-20 23:48:52,674 - INFO - 127.0.0.1 - - [20/May/2026 23:48:52] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:53,584 - INFO - 127.0.0.1 - - [20/May/2026 23:48:53] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:53,590 - INFO - 127.0.0.1 - - [20/May/2026 23:48:53] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:53,594 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:53,597 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:53,598 - INFO - 127.0.0.1 - - [20/May/2026 23:48:53] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:53,600 - INFO - 127.0.0.1 - - [20/May/2026 23:48:53] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:53,707 - INFO - 127.0.0.1 - - [20/May/2026 23:48:53] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:54,686 - INFO - 127.0.0.1 - - [20/May/2026 23:48:54] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:55,095 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:55,100 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:55,104 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:55,107 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:55,109 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:55,110 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:55,111 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:55,220 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:55,478 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:55,481 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:55,482 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:55,489 - INFO - 127.0.0.1 - - [20/May/2026 23:48:55] "GET /history?t=1779331735475 HTTP/1.1" 200 -
+2026-05-20 23:48:56,482 - INFO - 127.0.0.1 - - [20/May/2026 23:48:56] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:56,484 - INFO - 127.0.0.1 - - [20/May/2026 23:48:56] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:56,605 - INFO - 127.0.0.1 - - [20/May/2026 23:48:56] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:56,612 - INFO - 127.0.0.1 - - [20/May/2026 23:48:56] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:56,616 - INFO - 127.0.0.1 - - [20/May/2026 23:48:56] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:56,619 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:56,621 - INFO - 127.0.0.1 - - [20/May/2026 23:48:56] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:56,622 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:56,623 - INFO - 127.0.0.1 - - [20/May/2026 23:48:56] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:56,729 - INFO - 127.0.0.1 - - [20/May/2026 23:48:56] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:56,731 - INFO - 127.0.0.1 - - [20/May/2026 23:48:56] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:58,123 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:58,131 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:58,135 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:58,140 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:58,141 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:58,142 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:58,143 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:58,251 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:48:58,484 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:58,489 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:48:58,487 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /history?t=1779331738471 HTTP/1.1" 200 -
+2026-05-20 23:48:58,486 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:58,701 - INFO - 127.0.0.1 - - [20/May/2026 23:48:58] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:59,626 - INFO - 127.0.0.1 - - [20/May/2026 23:48:59] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:48:59,636 - INFO - 127.0.0.1 - - [20/May/2026 23:48:59] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:48:59,642 - INFO - 127.0.0.1 - - [20/May/2026 23:48:59] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:48:59,647 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:48:59,649 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:48:59,649 - INFO - 127.0.0.1 - - [20/May/2026 23:48:59] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:59,650 - INFO - 127.0.0.1 - - [20/May/2026 23:48:59] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:48:59,775 - INFO - 127.0.0.1 - - [20/May/2026 23:48:59] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:00,691 - INFO - 127.0.0.1 - - [20/May/2026 23:49:00] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:00,694 - INFO - 127.0.0.1 - - [20/May/2026 23:49:00] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:00,692 - INFO - 127.0.0.1 - - [20/May/2026 23:49:00] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:00,703 - INFO - 127.0.0.1 - - [20/May/2026 23:49:00] "GET /history?t=1779331740689 HTTP/1.1" 200 -
+2026-05-20 23:49:00,706 - INFO - 127.0.0.1 - - [20/May/2026 23:49:00] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:00,913 - INFO - 127.0.0.1 - - [20/May/2026 23:49:00] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:00,915 - INFO - 127.0.0.1 - - [20/May/2026 23:49:00] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:01,004 - INFO - 127.0.0.1 - - [20/May/2026 23:49:01] "GET /history?t=1779331740994 HTTP/1.1" 200 -
+2026-05-20 23:49:01,126 - INFO - 127.0.0.1 - - [20/May/2026 23:49:01] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:01,133 - INFO - 127.0.0.1 - - [20/May/2026 23:49:01] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:01,137 - INFO - 127.0.0.1 - - [20/May/2026 23:49:01] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:01,141 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:01,143 - INFO - 127.0.0.1 - - [20/May/2026 23:49:01] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:01,144 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:01,145 - INFO - 127.0.0.1 - - [20/May/2026 23:49:01] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:01,263 - INFO - 127.0.0.1 - - [20/May/2026 23:49:01] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:02,641 - INFO - 127.0.0.1 - - [20/May/2026 23:49:02] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:02,650 - INFO - 127.0.0.1 - - [20/May/2026 23:49:02] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:02,655 - INFO - 127.0.0.1 - - [20/May/2026 23:49:02] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:02,658 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:02,661 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:02,662 - INFO - 127.0.0.1 - - [20/May/2026 23:49:02] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:02,663 - INFO - 127.0.0.1 - - [20/May/2026 23:49:02] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:02,754 - INFO - 127.0.0.1 - - [20/May/2026 23:49:02] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:02,775 - INFO - 127.0.0.1 - - [20/May/2026 23:49:02] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:04,148 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:04,158 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:04,162 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:04,168 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:04,170 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:04,171 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:04,172 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:04,295 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:04,368 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:04,372 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:04,376 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:04,396 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /history?t=1779331744368 HTTP/1.1" 200 -
+2026-05-20 23:49:04,710 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:04,714 - INFO - 127.0.0.1 - - [20/May/2026 23:49:04] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:05,654 - INFO - 127.0.0.1 - - [20/May/2026 23:49:05] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:05,663 - INFO - 127.0.0.1 - - [20/May/2026 23:49:05] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:05,668 - INFO - 127.0.0.1 - - [20/May/2026 23:49:05] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:05,672 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:05,673 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:05,674 - INFO - 127.0.0.1 - - [20/May/2026 23:49:05] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:05,676 - INFO - 127.0.0.1 - - [20/May/2026 23:49:05] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:05,786 - INFO - 127.0.0.1 - - [20/May/2026 23:49:05] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:05,913 - INFO - 127.0.0.1 - - [20/May/2026 23:49:05] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:05,914 - INFO - 127.0.0.1 - - [20/May/2026 23:49:05] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:06,721 - INFO - 127.0.0.1 - - [20/May/2026 23:49:06] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:06,728 - INFO - 127.0.0.1 - - [20/May/2026 23:49:06] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:07,165 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:07,173 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:07,177 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:07,180 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:07,181 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:07,182 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:07,183 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:07,297 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:07,475 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:07,479 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:07,477 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:07,486 - INFO - 127.0.0.1 - - [20/May/2026 23:49:07] "GET /history?t=1779331747473 HTTP/1.1" 200 -
+2026-05-20 23:49:08,674 - INFO - 127.0.0.1 - - [20/May/2026 23:49:08] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:08,680 - INFO - 127.0.0.1 - - [20/May/2026 23:49:08] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:08,684 - INFO - 127.0.0.1 - - [20/May/2026 23:49:08] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:08,688 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:08,690 - INFO - 127.0.0.1 - - [20/May/2026 23:49:08] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:08,690 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:08,692 - INFO - 127.0.0.1 - - [20/May/2026 23:49:08] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:08,774 - INFO - 127.0.0.1 - - [20/May/2026 23:49:08] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:08,809 - INFO - 127.0.0.1 - - [20/May/2026 23:49:08] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:08,812 - INFO - 127.0.0.1 - - [20/May/2026 23:49:08] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:10,175 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:10,182 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:10,186 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:10,190 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:10,191 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:10,192 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:10,193 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:10,320 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:10,476 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:10,479 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:10,481 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:10,491 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /history?t=1779331750475 HTTP/1.1" 200 -
+2026-05-20 23:49:10,729 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:10,737 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:10,767 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /history?t=1779331750757 HTTP/1.1" 200 -
+2026-05-20 23:49:10,790 - INFO - Candles request for XAUUSD (200 bars, M15)
+2026-05-20 23:49:10,793 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /candles?symbol=XAUUSD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-05-20 23:49:10,797 - INFO - Candles request for XAUUSD (30 bars, M15)
+2026-05-20 23:49:10,799 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /candles?symbol=XAUUSD&count=30&timeframe=M15 HTTP/1.1" 200 -
+2026-05-20 23:49:10,802 - INFO - Candles request for XAUUSD (60 bars, M1)
+2026-05-20 23:49:10,804 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /candles?symbol=XAUUSD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-05-20 23:49:10,804 - INFO - Candles request for XAUUSD (60 bars, M5)
+2026-05-20 23:49:10,806 - INFO - 127.0.0.1 - - [20/May/2026 23:49:10] "GET /candles?symbol=XAUUSD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-05-20 23:49:11,016 - INFO - 127.0.0.1 - - [20/May/2026 23:49:11] "GET /history?t=1779331751005 HTTP/1.1" 200 -
+2026-05-20 23:49:11,482 - INFO - 127.0.0.1 - - [20/May/2026 23:49:11] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:11,484 - INFO - 127.0.0.1 - - [20/May/2026 23:49:11] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:11,687 - INFO - 127.0.0.1 - - [20/May/2026 23:49:11] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:11,695 - INFO - 127.0.0.1 - - [20/May/2026 23:49:11] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:11,699 - INFO - 127.0.0.1 - - [20/May/2026 23:49:11] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:11,702 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:11,704 - INFO - 127.0.0.1 - - [20/May/2026 23:49:11] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:11,705 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:11,706 - INFO - 127.0.0.1 - - [20/May/2026 23:49:11] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:11,814 - INFO - 127.0.0.1 - - [20/May/2026 23:49:11] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:12,732 - INFO - 127.0.0.1 - - [20/May/2026 23:49:12] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:13,191 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:13,200 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:13,204 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:13,207 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:13,209 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:13,211 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:13,212 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:13,318 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:13,479 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:13,482 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:13,481 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:13,489 - INFO - 127.0.0.1 - - [20/May/2026 23:49:13] "GET /history?t=1779331753475 HTTP/1.1" 200 -
+2026-05-20 23:49:14,695 - INFO - 127.0.0.1 - - [20/May/2026 23:49:14] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:14,704 - INFO - 127.0.0.1 - - [20/May/2026 23:49:14] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:14,707 - INFO - 127.0.0.1 - - [20/May/2026 23:49:14] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:14,710 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:14,712 - INFO - 127.0.0.1 - - [20/May/2026 23:49:14] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:14,712 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:14,713 - INFO - 127.0.0.1 - - [20/May/2026 23:49:14] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:14,795 - INFO - 127.0.0.1 - - [20/May/2026 23:49:14] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:14,823 - INFO - 127.0.0.1 - - [20/May/2026 23:49:14] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:16,206 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:16,213 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:16,216 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:16,219 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:16,221 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:16,223 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:16,222 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:16,332 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:16,486 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:16,488 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:16,491 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:16,500 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /history?t=1779331756485 HTTP/1.1" 200 -
+2026-05-20 23:49:16,504 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:16,508 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:16,745 - INFO - 127.0.0.1 - - [20/May/2026 23:49:16] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:17,707 - INFO - 127.0.0.1 - - [20/May/2026 23:49:17] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:17,714 - INFO - 127.0.0.1 - - [20/May/2026 23:49:17] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:17,718 - INFO - 127.0.0.1 - - [20/May/2026 23:49:17] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:17,721 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:17,723 - INFO - 127.0.0.1 - - [20/May/2026 23:49:17] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:17,724 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:17,726 - INFO - 127.0.0.1 - - [20/May/2026 23:49:17] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:17,830 - INFO - 127.0.0.1 - - [20/May/2026 23:49:17] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:18,758 - INFO - 127.0.0.1 - - [20/May/2026 23:49:18] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:19,214 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:19,223 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:19,227 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:19,232 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:19,233 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:19,234 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:19,235 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:19,341 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:19,477 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:19,480 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:19,484 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:19,493 - INFO - 127.0.0.1 - - [20/May/2026 23:49:19] "GET /history?t=1779331759476 HTTP/1.1" 200 -
+2026-05-20 23:49:20,718 - INFO - 127.0.0.1 - - [20/May/2026 23:49:20] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:20,726 - INFO - 127.0.0.1 - - [20/May/2026 23:49:20] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:20,731 - INFO - 127.0.0.1 - - [20/May/2026 23:49:20] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:20,734 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:20,736 - INFO - 127.0.0.1 - - [20/May/2026 23:49:20] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:20,736 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:20,738 - INFO - 127.0.0.1 - - [20/May/2026 23:49:20] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:20,831 - INFO - 127.0.0.1 - - [20/May/2026 23:49:20] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:20,849 - INFO - 127.0.0.1 - - [20/May/2026 23:49:20] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:21,024 - INFO - 127.0.0.1 - - [20/May/2026 23:49:21] "GET /history?t=1779331761015 HTTP/1.1" 200 -
+2026-05-20 23:49:21,494 - INFO - 127.0.0.1 - - [20/May/2026 23:49:21] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:21,496 - INFO - 127.0.0.1 - - [20/May/2026 23:49:21] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:22,217 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:22,227 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:22,231 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:22,234 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:22,236 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:22,237 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:22,239 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:22,344 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:22,483 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:22,485 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:22,487 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:22,496 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /history?t=1779331762481 HTTP/1.1" 200 -
+2026-05-20 23:49:22,785 - INFO - 127.0.0.1 - - [20/May/2026 23:49:22] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:23,723 - INFO - 127.0.0.1 - - [20/May/2026 23:49:23] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:23,730 - INFO - 127.0.0.1 - - [20/May/2026 23:49:23] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:23,734 - INFO - 127.0.0.1 - - [20/May/2026 23:49:23] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:23,738 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:23,739 - INFO - 127.0.0.1 - - [20/May/2026 23:49:23] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:23,740 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:23,741 - INFO - 127.0.0.1 - - [20/May/2026 23:49:23] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:23,849 - INFO - 127.0.0.1 - - [20/May/2026 23:49:23] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:24,788 - INFO - 127.0.0.1 - - [20/May/2026 23:49:24] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:25,231 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:25,240 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:25,245 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:25,248 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:25,250 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:25,251 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:25,252 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:25,357 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:25,479 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:25,481 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:25,484 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:25,493 - INFO - 127.0.0.1 - - [20/May/2026 23:49:25] "GET /history?t=1779331765477 HTTP/1.1" 200 -
+2026-05-20 23:49:26,494 - INFO - 127.0.0.1 - - [20/May/2026 23:49:26] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:26,496 - INFO - 127.0.0.1 - - [20/May/2026 23:49:26] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:26,737 - INFO - 127.0.0.1 - - [20/May/2026 23:49:26] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:26,747 - INFO - 127.0.0.1 - - [20/May/2026 23:49:26] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:26,751 - INFO - 127.0.0.1 - - [20/May/2026 23:49:26] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:26,755 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:26,757 - INFO - 127.0.0.1 - - [20/May/2026 23:49:26] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:26,758 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:26,759 - INFO - 127.0.0.1 - - [20/May/2026 23:49:26] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:26,866 - INFO - 127.0.0.1 - - [20/May/2026 23:49:26] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:26,868 - INFO - 127.0.0.1 - - [20/May/2026 23:49:26] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:28,246 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:28,255 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:28,259 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:28,264 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:28,265 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:28,266 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:28,267 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:28,373 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:28,476 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:28,478 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:28,481 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:28,491 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /history?t=1779331768474 HTTP/1.1" 200 -
+2026-05-20 23:49:28,800 - INFO - 127.0.0.1 - - [20/May/2026 23:49:28] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:29,756 - INFO - 127.0.0.1 - - [20/May/2026 23:49:29] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:29,765 - INFO - 127.0.0.1 - - [20/May/2026 23:49:29] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:29,769 - INFO - 127.0.0.1 - - [20/May/2026 23:49:29] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:29,772 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:29,774 - INFO - 127.0.0.1 - - [20/May/2026 23:49:29] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:29,774 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:29,775 - INFO - 127.0.0.1 - - [20/May/2026 23:49:29] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:29,902 - INFO - 127.0.0.1 - - [20/May/2026 23:49:29] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:30,804 - INFO - 127.0.0.1 - - [20/May/2026 23:49:30] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:31,032 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /history?t=1779331771022 HTTP/1.1" 200 -
+2026-05-20 23:49:31,266 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:31,276 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:31,280 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:31,284 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:31,286 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:31,286 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:31,288 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:31,392 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:31,479 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:31,482 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:31,485 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:31,496 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /history?t=1779331771480 HTTP/1.1" 200 -
+2026-05-20 23:49:31,499 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:31,502 - INFO - 127.0.0.1 - - [20/May/2026 23:49:31] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:32,770 - INFO - 127.0.0.1 - - [20/May/2026 23:49:32] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:32,780 - INFO - 127.0.0.1 - - [20/May/2026 23:49:32] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:32,785 - INFO - 127.0.0.1 - - [20/May/2026 23:49:32] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:32,787 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:32,789 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:32,790 - INFO - 127.0.0.1 - - [20/May/2026 23:49:32] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:32,791 - INFO - 127.0.0.1 - - [20/May/2026 23:49:32] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:32,870 - INFO - 127.0.0.1 - - [20/May/2026 23:49:32] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:32,913 - INFO - 127.0.0.1 - - [20/May/2026 23:49:32] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:34,281 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:34,291 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:34,295 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:34,299 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:34,301 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:34,302 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:34,303 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:34,412 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:34,482 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:34,484 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:34,487 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:34,499 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /history?t=1779331774481 HTTP/1.1" 200 -
+2026-05-20 23:49:34,819 - INFO - 127.0.0.1 - - [20/May/2026 23:49:34] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:35,797 - INFO - 127.0.0.1 - - [20/May/2026 23:49:35] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:35,806 - INFO - 127.0.0.1 - - [20/May/2026 23:49:35] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:35,809 - INFO - 127.0.0.1 - - [20/May/2026 23:49:35] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:35,813 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:35,815 - INFO - 127.0.0.1 - - [20/May/2026 23:49:35] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:35,816 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:35,817 - INFO - 127.0.0.1 - - [20/May/2026 23:49:35] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:35,922 - INFO - 127.0.0.1 - - [20/May/2026 23:49:35] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:36,485 - INFO - 127.0.0.1 - - [20/May/2026 23:49:36] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:36,487 - INFO - 127.0.0.1 - - [20/May/2026 23:49:36] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:36,828 - INFO - 127.0.0.1 - - [20/May/2026 23:49:36] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:36,836 - INFO - 127.0.0.1 - - [20/May/2026 23:49:36] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:37,305 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:37,311 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:37,316 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:37,319 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:37,321 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:37,322 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:37,324 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:37,429 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:37,492 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:37,493 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:37,495 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:37,502 - INFO - 127.0.0.1 - - [20/May/2026 23:49:37] "GET /history?t=1779331777488 HTTP/1.1" 200 -
+2026-05-20 23:49:38,806 - INFO - 127.0.0.1 - - [20/May/2026 23:49:38] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:38,813 - INFO - 127.0.0.1 - - [20/May/2026 23:49:38] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:38,817 - INFO - 127.0.0.1 - - [20/May/2026 23:49:38] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:38,820 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:38,822 - INFO - 127.0.0.1 - - [20/May/2026 23:49:38] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:38,823 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:38,824 - INFO - 127.0.0.1 - - [20/May/2026 23:49:38] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:38,888 - INFO - 127.0.0.1 - - [20/May/2026 23:49:38] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:38,934 - INFO - 127.0.0.1 - - [20/May/2026 23:49:38] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:38,936 - INFO - 127.0.0.1 - - [20/May/2026 23:49:38] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:40,319 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:40,329 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:40,332 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:40,335 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:40,336 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:40,337 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:40,338 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:40,443 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:40,488 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:40,491 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:40,494 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:40,504 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /history?t=1779331780487 HTTP/1.1" 200 -
+2026-05-20 23:49:40,837 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:40,845 - INFO - 127.0.0.1 - - [20/May/2026 23:49:40] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:41,047 - INFO - 127.0.0.1 - - [20/May/2026 23:49:41] "GET /history?t=1779331781035 HTTP/1.1" 200 -
+2026-05-20 23:49:41,493 - INFO - 127.0.0.1 - - [20/May/2026 23:49:41] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:41,495 - INFO - 127.0.0.1 - - [20/May/2026 23:49:41] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:41,830 - INFO - 127.0.0.1 - - [20/May/2026 23:49:41] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:41,839 - INFO - 127.0.0.1 - - [20/May/2026 23:49:41] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:41,842 - INFO - 127.0.0.1 - - [20/May/2026 23:49:41] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:41,846 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:41,848 - INFO - 127.0.0.1 - - [20/May/2026 23:49:41] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:41,848 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:41,850 - INFO - 127.0.0.1 - - [20/May/2026 23:49:41] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:41,957 - INFO - 127.0.0.1 - - [20/May/2026 23:49:41] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:42,848 - INFO - 127.0.0.1 - - [20/May/2026 23:49:42] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:42,854 - INFO - 127.0.0.1 - - [20/May/2026 23:49:42] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:43,336 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:43,347 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:43,350 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:43,354 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:43,356 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:43,357 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:43,359 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:43,465 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:43,486 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:43,488 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:43,491 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:43,500 - INFO - 127.0.0.1 - - [20/May/2026 23:49:43] "GET /history?t=1779331783485 HTTP/1.1" 200 -
+2026-05-20 23:49:44,841 - INFO - 127.0.0.1 - - [20/May/2026 23:49:44] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:44,850 - INFO - 127.0.0.1 - - [20/May/2026 23:49:44] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:44,852 - INFO - 127.0.0.1 - - [20/May/2026 23:49:44] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:44,855 - INFO - 127.0.0.1 - - [20/May/2026 23:49:44] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:44,857 - INFO - 127.0.0.1 - - [20/May/2026 23:49:44] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:44,859 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:44,861 - INFO - 127.0.0.1 - - [20/May/2026 23:49:44] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:44,862 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:44,863 - INFO - 127.0.0.1 - - [20/May/2026 23:49:44] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:44,969 - INFO - 127.0.0.1 - - [20/May/2026 23:49:44] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:46,347 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:46,355 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:46,360 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:46,364 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:46,366 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:46,366 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:46,368 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:46,476 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:46,486 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:46,488 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:46,491 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:46,501 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /history?t=1779331786486 HTTP/1.1" 200 -
+2026-05-20 23:49:46,503 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:46,508 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:46,853 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:46,857 - INFO - 127.0.0.1 - - [20/May/2026 23:49:46] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:47,857 - INFO - 127.0.0.1 - - [20/May/2026 23:49:47] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:47,866 - INFO - 127.0.0.1 - - [20/May/2026 23:49:47] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:47,869 - INFO - 127.0.0.1 - - [20/May/2026 23:49:47] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:47,873 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:47,875 - INFO - 127.0.0.1 - - [20/May/2026 23:49:47] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:47,876 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:47,877 - INFO - 127.0.0.1 - - [20/May/2026 23:49:47] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:47,982 - INFO - 127.0.0.1 - - [20/May/2026 23:49:47] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:48,860 - INFO - 127.0.0.1 - - [20/May/2026 23:49:48] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:48,868 - INFO - 127.0.0.1 - - [20/May/2026 23:49:48] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:49,365 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:49,374 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:49,378 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:49,381 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:49,383 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:49,384 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:49,385 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:49,491 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:49,493 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:49,495 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:49,499 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:49,506 - INFO - 127.0.0.1 - - [20/May/2026 23:49:49] "GET /history?t=1779331789487 HTTP/1.1" 200 -
+2026-05-20 23:49:50,876 - INFO - 127.0.0.1 - - [20/May/2026 23:49:50] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:50,878 - INFO - 127.0.0.1 - - [20/May/2026 23:49:50] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:50,886 - INFO - 127.0.0.1 - - [20/May/2026 23:49:50] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:50,887 - INFO - 127.0.0.1 - - [20/May/2026 23:49:50] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:50,891 - INFO - 127.0.0.1 - - [20/May/2026 23:49:50] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:50,894 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:50,895 - INFO - 127.0.0.1 - - [20/May/2026 23:49:50] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:50,896 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:50,897 - INFO - 127.0.0.1 - - [20/May/2026 23:49:50] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:51,005 - INFO - 127.0.0.1 - - [20/May/2026 23:49:51] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:51,059 - INFO - 127.0.0.1 - - [20/May/2026 23:49:51] "GET /history?t=1779331791047 HTTP/1.1" 200 -
+2026-05-20 23:49:51,496 - INFO - 127.0.0.1 - - [20/May/2026 23:49:51] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:51,498 - INFO - 127.0.0.1 - - [20/May/2026 23:49:51] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:52,366 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:52,369 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:52,374 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:52,376 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:52,378 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:52,379 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:52,487 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:52,495 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:52,497 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:52,506 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /history?t=1779331792480 HTTP/1.1" 200 -
+2026-05-20 23:49:52,509 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:52,512 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:52,881 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:52,891 - INFO - 127.0.0.1 - - [20/May/2026 23:49:52] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:53,877 - INFO - 127.0.0.1 - - [20/May/2026 23:49:53] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:53,884 - INFO - 127.0.0.1 - - [20/May/2026 23:49:53] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:53,888 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:53,890 - INFO - 127.0.0.1 - - [20/May/2026 23:49:53] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:53,891 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:53,893 - INFO - 127.0.0.1 - - [20/May/2026 23:49:53] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:53,999 - INFO - 127.0.0.1 - - [20/May/2026 23:49:53] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:54,886 - INFO - 127.0.0.1 - - [20/May/2026 23:49:54] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:54,894 - INFO - 127.0.0.1 - - [20/May/2026 23:49:54] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:55,391 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:55,401 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:55,405 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:55,409 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:55,410 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:55,411 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:55,413 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:55,523 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:55,525 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:55,528 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:55,531 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:55,541 - INFO - 127.0.0.1 - - [20/May/2026 23:49:55] "GET /history?t=1779331795481 HTTP/1.1" 200 -
+2026-05-20 23:49:56,496 - INFO - 127.0.0.1 - - [20/May/2026 23:49:56] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:56,498 - INFO - 127.0.0.1 - - [20/May/2026 23:49:56] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:56,892 - INFO - 127.0.0.1 - - [20/May/2026 23:49:56] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:56,894 - INFO - 127.0.0.1 - - [20/May/2026 23:49:56] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:56,902 - INFO - 127.0.0.1 - - [20/May/2026 23:49:56] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:56,904 - INFO - 127.0.0.1 - - [20/May/2026 23:49:56] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:56,907 - INFO - 127.0.0.1 - - [20/May/2026 23:49:56] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:56,910 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:56,912 - INFO - 127.0.0.1 - - [20/May/2026 23:49:56] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:56,913 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:56,914 - INFO - 127.0.0.1 - - [20/May/2026 23:49:56] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:57,022 - INFO - 127.0.0.1 - - [20/May/2026 23:49:57] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:58,400 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:58,412 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:58,415 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:58,420 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:58,421 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:58,422 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:58,424 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:58,531 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:58,541 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:49:58,544 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:58,547 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:49:58,557 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /history?t=1779331798473 HTTP/1.1" 200 -
+2026-05-20 23:49:58,889 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:58,897 - INFO - 127.0.0.1 - - [20/May/2026 23:49:58] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:49:59,908 - INFO - 127.0.0.1 - - [20/May/2026 23:49:59] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:49:59,918 - INFO - 127.0.0.1 - - [20/May/2026 23:49:59] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:49:59,920 - INFO - 127.0.0.1 - - [20/May/2026 23:49:59] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:49:59,925 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:49:59,927 - INFO - 127.0.0.1 - - [20/May/2026 23:49:59] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:49:59,928 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:49:59,929 - INFO - 127.0.0.1 - - [20/May/2026 23:49:59] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:00,035 - INFO - 127.0.0.1 - - [20/May/2026 23:50:00] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:00,894 - INFO - 127.0.0.1 - - [20/May/2026 23:50:00] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:00,899 - INFO - 127.0.0.1 - - [20/May/2026 23:50:00] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:01,072 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /history?t=1779331801059 HTTP/1.1" 200 -
+2026-05-20 23:50:01,416 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:01,423 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:01,427 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:01,430 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:01,432 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:01,433 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:01,434 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:01,547 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:01,549 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:01,551 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:50:01,554 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:50:01,563 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /history?t=1779331801489 HTTP/1.1" 200 -
+2026-05-20 23:50:01,566 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:01,569 - INFO - 127.0.0.1 - - [20/May/2026 23:50:01] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:50:02,900 - INFO - 127.0.0.1 - - [20/May/2026 23:50:02] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:02,904 - INFO - 127.0.0.1 - - [20/May/2026 23:50:02] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:02,914 - INFO - 127.0.0.1 - - [20/May/2026 23:50:02] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:02,919 - INFO - 127.0.0.1 - - [20/May/2026 23:50:02] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:02,923 - INFO - 127.0.0.1 - - [20/May/2026 23:50:02] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:02,928 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:02,929 - INFO - 127.0.0.1 - - [20/May/2026 23:50:02] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:02,930 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:02,931 - INFO - 127.0.0.1 - - [20/May/2026 23:50:02] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:03,037 - INFO - 127.0.0.1 - - [20/May/2026 23:50:03] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:04,426 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:04,436 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:04,439 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:04,443 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:04,444 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:04,445 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:04,447 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:04,544 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:04,561 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:04,564 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:50:04,567 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /account HTTP/1.1" 200 -
+2026-05-20 23:50:04,577 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /history?t=1779331804488 HTTP/1.1" 200 -
+2026-05-20 23:50:04,905 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:04,912 - INFO - 127.0.0.1 - - [20/May/2026 23:50:04] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:05,936 - INFO - 127.0.0.1 - - [20/May/2026 23:50:05] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:05,943 - INFO - 127.0.0.1 - - [20/May/2026 23:50:05] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:05,947 - INFO - 127.0.0.1 - - [20/May/2026 23:50:05] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:05,950 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:05,952 - INFO - 127.0.0.1 - - [20/May/2026 23:50:05] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:05,952 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:05,954 - INFO - 127.0.0.1 - - [20/May/2026 23:50:05] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:06,060 - INFO - 127.0.0.1 - - [20/May/2026 23:50:06] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:06,906 - INFO - 127.0.0.1 - - [20/May/2026 23:50:06] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:06,910 - INFO - 127.0.0.1 - - [20/May/2026 23:50:06] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:07,439 - INFO - 127.0.0.1 - - [20/May/2026 23:50:07] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:07,446 - INFO - 127.0.0.1 - - [20/May/2026 23:50:07] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:07,451 - INFO - 127.0.0.1 - - [20/May/2026 23:50:07] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:07,455 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:07,457 - INFO - 127.0.0.1 - - [20/May/2026 23:50:07] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:07,458 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:07,459 - INFO - 127.0.0.1 - - [20/May/2026 23:50:07] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:07,568 - INFO - 127.0.0.1 - - [20/May/2026 23:50:07] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:08,909 - INFO - 127.0.0.1 - - [20/May/2026 23:50:08] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:08,946 - INFO - 127.0.0.1 - - [20/May/2026 23:50:08] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:08,953 - INFO - 127.0.0.1 - - [20/May/2026 23:50:08] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:08,956 - INFO - 127.0.0.1 - - [20/May/2026 23:50:08] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:08,960 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:08,961 - INFO - 127.0.0.1 - - [20/May/2026 23:50:08] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:08,963 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:08,964 - INFO - 127.0.0.1 - - [20/May/2026 23:50:08] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:09,069 - INFO - 127.0.0.1 - - [20/May/2026 23:50:09] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:10,453 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:10,462 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:10,466 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:10,470 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:10,472 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:10,473 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:10,474 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:10,585 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:10,764 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /history?t=1779331810752 HTTP/1.1" 200 -
+2026-05-20 23:50:10,778 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /history?t=1779331810769 HTTP/1.1" 200 -
+2026-05-20 23:50:10,802 - INFO - Candles request for XAUUSD (200 bars, M15)
+2026-05-20 23:50:10,805 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /candles?symbol=XAUUSD&count=200&timeframe=M15 HTTP/1.1" 200 -
+2026-05-20 23:50:10,809 - INFO - Candles request for XAUUSD (30 bars, M15)
+2026-05-20 23:50:10,810 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /candles?symbol=XAUUSD&count=30&timeframe=M15 HTTP/1.1" 200 -
+2026-05-20 23:50:10,814 - INFO - Candles request for XAUUSD (60 bars, M1)
+2026-05-20 23:50:10,817 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /candles?symbol=XAUUSD&timeframe=M1&count=60 HTTP/1.1" 200 -
+2026-05-20 23:50:10,818 - INFO - Candles request for XAUUSD (60 bars, M5)
+2026-05-20 23:50:10,819 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /candles?symbol=XAUUSD&timeframe=M5&count=60 HTTP/1.1" 200 -
+2026-05-20 23:50:10,911 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:10,915 - INFO - 127.0.0.1 - - [20/May/2026 23:50:10] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:11,075 - INFO - 127.0.0.1 - - [20/May/2026 23:50:11] "GET /history?t=1779331811063 HTTP/1.1" 200 -
+2026-05-20 23:50:11,956 - INFO - 127.0.0.1 - - [20/May/2026 23:50:11] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:11,966 - INFO - 127.0.0.1 - - [20/May/2026 23:50:11] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:11,970 - INFO - 127.0.0.1 - - [20/May/2026 23:50:11] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:11,974 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:11,975 - INFO - 127.0.0.1 - - [20/May/2026 23:50:11] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:11,976 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:11,978 - INFO - 127.0.0.1 - - [20/May/2026 23:50:11] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:12,091 - INFO - 127.0.0.1 - - [20/May/2026 23:50:12] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:12,920 - INFO - 127.0.0.1 - - [20/May/2026 23:50:12] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:12,928 - INFO - 127.0.0.1 - - [20/May/2026 23:50:12] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:13,469 - INFO - 127.0.0.1 - - [20/May/2026 23:50:13] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:13,475 - INFO - 127.0.0.1 - - [20/May/2026 23:50:13] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:13,480 - INFO - 127.0.0.1 - - [20/May/2026 23:50:13] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:13,484 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:13,486 - INFO - 127.0.0.1 - - [20/May/2026 23:50:13] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:13,487 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:13,489 - INFO - 127.0.0.1 - - [20/May/2026 23:50:13] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:13,595 - INFO - 127.0.0.1 - - [20/May/2026 23:50:13] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:14,922 - INFO - 127.0.0.1 - - [20/May/2026 23:50:14] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:14,929 - INFO - 127.0.0.1 - - [20/May/2026 23:50:14] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:14,976 - INFO - 127.0.0.1 - - [20/May/2026 23:50:14] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:14,982 - INFO - 127.0.0.1 - - [20/May/2026 23:50:14] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:14,986 - INFO - 127.0.0.1 - - [20/May/2026 23:50:14] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:14,989 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:14,992 - INFO - 127.0.0.1 - - [20/May/2026 23:50:14] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:14,992 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:14,995 - INFO - 127.0.0.1 - - [20/May/2026 23:50:14] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:15,101 - INFO - 127.0.0.1 - - [20/May/2026 23:50:15] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:16,492 - INFO - 127.0.0.1 - - [20/May/2026 23:50:16] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:16,500 - INFO - 127.0.0.1 - - [20/May/2026 23:50:16] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:16,505 - INFO - 127.0.0.1 - - [20/May/2026 23:50:16] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:16,509 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:16,511 - INFO - 127.0.0.1 - - [20/May/2026 23:50:16] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:16,512 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:16,513 - INFO - 127.0.0.1 - - [20/May/2026 23:50:16] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:16,621 - INFO - 127.0.0.1 - - [20/May/2026 23:50:16] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:16,933 - INFO - 127.0.0.1 - - [20/May/2026 23:50:16] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:16,938 - INFO - 127.0.0.1 - - [20/May/2026 23:50:16] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:17,993 - INFO - 127.0.0.1 - - [20/May/2026 23:50:17] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:18,002 - INFO - 127.0.0.1 - - [20/May/2026 23:50:18] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:18,005 - INFO - 127.0.0.1 - - [20/May/2026 23:50:18] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:18,008 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:18,010 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:18,011 - INFO - 127.0.0.1 - - [20/May/2026 23:50:18] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:18,012 - INFO - 127.0.0.1 - - [20/May/2026 23:50:18] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:18,122 - INFO - 127.0.0.1 - - [20/May/2026 23:50:18] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:18,944 - INFO - 127.0.0.1 - - [20/May/2026 23:50:18] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:18,951 - INFO - 127.0.0.1 - - [20/May/2026 23:50:18] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:19,522 - INFO - 127.0.0.1 - - [20/May/2026 23:50:19] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:19,528 - INFO - 127.0.0.1 - - [20/May/2026 23:50:19] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:19,534 - INFO - 127.0.0.1 - - [20/May/2026 23:50:19] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:19,537 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:19,539 - INFO - 127.0.0.1 - - [20/May/2026 23:50:19] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:19,540 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:19,541 - INFO - 127.0.0.1 - - [20/May/2026 23:50:19] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:19,676 - INFO - 127.0.0.1 - - [20/May/2026 23:50:19] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:20,958 - INFO - 127.0.0.1 - - [20/May/2026 23:50:20] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:20,962 - INFO - 127.0.0.1 - - [20/May/2026 23:50:20] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:21,015 - INFO - 127.0.0.1 - - [20/May/2026 23:50:21] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:21,020 - INFO - 127.0.0.1 - - [20/May/2026 23:50:21] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:21,024 - INFO - 127.0.0.1 - - [20/May/2026 23:50:21] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:21,027 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:21,029 - INFO - 127.0.0.1 - - [20/May/2026 23:50:21] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:21,031 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:21,032 - INFO - 127.0.0.1 - - [20/May/2026 23:50:21] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:21,102 - INFO - 127.0.0.1 - - [20/May/2026 23:50:21] "GET /history?t=1779331821063 HTTP/1.1" 200 -
+2026-05-20 23:50:21,153 - INFO - 127.0.0.1 - - [20/May/2026 23:50:21] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:22,515 - INFO - 127.0.0.1 - - [20/May/2026 23:50:22] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:22,524 - INFO - 127.0.0.1 - - [20/May/2026 23:50:22] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:22,528 - INFO - 127.0.0.1 - - [20/May/2026 23:50:22] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:22,532 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:22,533 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:22,534 - INFO - 127.0.0.1 - - [20/May/2026 23:50:22] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:22,535 - INFO - 127.0.0.1 - - [20/May/2026 23:50:22] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:22,642 - INFO - 127.0.0.1 - - [20/May/2026 23:50:22] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:22,960 - INFO - 127.0.0.1 - - [20/May/2026 23:50:22] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:22,968 - INFO - 127.0.0.1 - - [20/May/2026 23:50:22] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:24,022 - INFO - 127.0.0.1 - - [20/May/2026 23:50:24] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:24,032 - INFO - 127.0.0.1 - - [20/May/2026 23:50:24] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:24,036 - INFO - 127.0.0.1 - - [20/May/2026 23:50:24] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:24,039 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:24,041 - INFO - 127.0.0.1 - - [20/May/2026 23:50:24] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:24,041 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:24,043 - INFO - 127.0.0.1 - - [20/May/2026 23:50:24] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:24,154 - INFO - 127.0.0.1 - - [20/May/2026 23:50:24] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:24,975 - INFO - 127.0.0.1 - - [20/May/2026 23:50:24] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:24,978 - INFO - 127.0.0.1 - - [20/May/2026 23:50:24] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:25,525 - INFO - 127.0.0.1 - - [20/May/2026 23:50:25] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:25,535 - INFO - 127.0.0.1 - - [20/May/2026 23:50:25] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:25,540 - INFO - 127.0.0.1 - - [20/May/2026 23:50:25] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:25,543 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:25,544 - INFO - 127.0.0.1 - - [20/May/2026 23:50:25] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:25,546 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:25,547 - INFO - 127.0.0.1 - - [20/May/2026 23:50:25] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:25,655 - INFO - 127.0.0.1 - - [20/May/2026 23:50:25] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:26,977 - INFO - 127.0.0.1 - - [20/May/2026 23:50:26] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:26,984 - INFO - 127.0.0.1 - - [20/May/2026 23:50:26] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:27,029 - INFO - 127.0.0.1 - - [20/May/2026 23:50:27] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:27,035 - INFO - 127.0.0.1 - - [20/May/2026 23:50:27] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:27,039 - INFO - 127.0.0.1 - - [20/May/2026 23:50:27] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:27,042 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:27,043 - INFO - 127.0.0.1 - - [20/May/2026 23:50:27] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:27,044 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:27,045 - INFO - 127.0.0.1 - - [20/May/2026 23:50:27] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:27,152 - INFO - 127.0.0.1 - - [20/May/2026 23:50:27] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:28,533 - INFO - 127.0.0.1 - - [20/May/2026 23:50:28] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:28,543 - INFO - 127.0.0.1 - - [20/May/2026 23:50:28] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:28,547 - INFO - 127.0.0.1 - - [20/May/2026 23:50:28] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:28,552 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:28,553 - INFO - 127.0.0.1 - - [20/May/2026 23:50:28] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:28,555 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:28,556 - INFO - 127.0.0.1 - - [20/May/2026 23:50:28] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:28,687 - INFO - 127.0.0.1 - - [20/May/2026 23:50:28] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:28,979 - INFO - 127.0.0.1 - - [20/May/2026 23:50:28] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:28,985 - INFO - 127.0.0.1 - - [20/May/2026 23:50:28] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:30,046 - INFO - 127.0.0.1 - - [20/May/2026 23:50:30] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:30,055 - INFO - 127.0.0.1 - - [20/May/2026 23:50:30] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:30,058 - INFO - 127.0.0.1 - - [20/May/2026 23:50:30] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:30,062 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:30,064 - INFO - 127.0.0.1 - - [20/May/2026 23:50:30] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:30,066 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:30,067 - INFO - 127.0.0.1 - - [20/May/2026 23:50:30] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:30,173 - INFO - 127.0.0.1 - - [20/May/2026 23:50:30] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:30,984 - INFO - 127.0.0.1 - - [20/May/2026 23:50:30] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:30,992 - INFO - 127.0.0.1 - - [20/May/2026 23:50:30] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:31,082 - INFO - 127.0.0.1 - - [20/May/2026 23:50:31] "GET /history?t=1779331831073 HTTP/1.1" 200 -
+2026-05-20 23:50:31,549 - INFO - 127.0.0.1 - - [20/May/2026 23:50:31] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:31,558 - INFO - 127.0.0.1 - - [20/May/2026 23:50:31] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:31,562 - INFO - 127.0.0.1 - - [20/May/2026 23:50:31] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:31,568 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:31,568 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:31,569 - INFO - 127.0.0.1 - - [20/May/2026 23:50:31] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:31,571 - INFO - 127.0.0.1 - - [20/May/2026 23:50:31] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:31,678 - INFO - 127.0.0.1 - - [20/May/2026 23:50:31] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -
+2026-05-20 23:50:32,992 - INFO - 127.0.0.1 - - [20/May/2026 23:50:32] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:32,999 - INFO - 127.0.0.1 - - [20/May/2026 23:50:32] "[31m[1mPOST /update_order HTTP/1.1[0m" 400 -
+2026-05-20 23:50:33,059 - INFO - 127.0.0.1 - - [20/May/2026 23:50:33] "GET /history HTTP/1.1" 200 -
+2026-05-20 23:50:33,064 - INFO - 127.0.0.1 - - [20/May/2026 23:50:33] "GET /positions HTTP/1.1" 200 -
+2026-05-20 23:50:33,069 - INFO - 127.0.0.1 - - [20/May/2026 23:50:33] "POST /ticks HTTP/1.1" 200 -
+2026-05-20 23:50:33,072 - INFO - Candles request for XAUUSD (30 bars, M1)
+2026-05-20 23:50:33,074 - INFO - 127.0.0.1 - - [20/May/2026 23:50:33] "GET /candles?symbol=XAUUSD&timeframe=M1&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:33,075 - INFO - Candles request for XAUUSD (30 bars, M5)
+2026-05-20 23:50:33,076 - INFO - 127.0.0.1 - - [20/May/2026 23:50:33] "GET /candles?symbol=XAUUSD&timeframe=M5&count=30 HTTP/1.1" 200 -
+2026-05-20 23:50:33,192 - INFO - 127.0.0.1 - - [20/May/2026 23:50:33] "GET /smc_levels?symbol=XAUUSD&direction=SELL&entry_price=4533.36 HTTP/1.1" 200 -

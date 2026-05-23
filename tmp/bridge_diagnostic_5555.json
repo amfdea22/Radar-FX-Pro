@@ -1,0 +1,32 @@
+[
+  {
+    "symbol": "GOLD",
+    "status": "success",
+    "data": {
+      "order_id": 69320068,
+      "retcode": 10009,
+      "status": "success"
+    }
+  },
+  {
+    "symbol": "XAUUSD",
+    "status": "fail",
+    "data": {
+      "error": "Symbol XAUUSD not found"
+    }
+  },
+  {
+    "symbol": "XAUUSD.v",
+    "status": "fail",
+    "data": {
+      "error": "Symbol XAUUSD.v not found"
+    }
+  },
+  {
+    "symbol": "GOLD.v",
+    "status": "fail",
+    "data": {
+      "error": "Symbol GOLD.v not found"
+    }
+  }
+]

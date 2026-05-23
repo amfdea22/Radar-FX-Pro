@@ -1,0 +1,22 @@
+[
+  {
+    "symbol": "GOLD",
+    "status": "error",
+    "message": "fetch failed"
+  },
+  {
+    "symbol": "XAUUSD",
+    "status": "error",
+    "message": "fetch failed"
+  },
+  {
+    "symbol": "XAUUSD.v",
+    "status": "error",
+    "message": "fetch failed"
+  },
+  {
+    "symbol": "GOLD.v",
+    "status": "error",
+    "message": "fetch failed"
+  }
+]

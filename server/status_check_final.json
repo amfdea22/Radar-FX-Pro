@@ -1,0 +1,176 @@
+﻿{
+    "enabled":  true,
+    "settings":  {
+                     "enabled":  true,
+                     "lotSize":  0.01,
+                     "gridLevels":  3,
+                     "gridDistance":  3,
+                     "gridMultiplier":  1,
+                     "trailingStart":  0.5,
+                     "trailingStep":  0.5,
+                     "breakEvenTrigger":  1.5,
+                     "breakEvenOffset":  0.3,
+                     "takeProfitUSD":  2.5,
+                     "stopLossUSD":  20,
+                     "basketTP":  4,
+                     "basketSL":  -15,
+                     "maxDailyLoss":  20,
+                     "maxDailyProfit":  10,
+                     "sessionFilter":  false,
+                     "direction":  "BOTH",
+                     "cooldownSeconds":  30,
+                     "maxSpreadPoints":  50,
+                     "newsGuardEnabled":  false,
+                     "strategyMode":  "AGGRESSIVE",
+                     "swingTrendFilter":  false,
+                     "dynamicATRMode":  true,
+                     "antiMartingale":  true,
+                     "orderBlockFilter":  false,
+                     "smartGridIA":  false,
+                     "smartTargeting":  true,
+                     "smartTrailing":  true,
+                     "smartBreakeven":  true,
+                     "dxyFilter":  false,
+                     "sentimentFilter":  true,
+                     "rsiFilter":  false,
+                     "volumeFilter":  false,
+                     "trendFiltroM5":  false,
+                     "trendFiltroM1":  false,
+                     "useRiskPercentage":  false,
+                     "riskPercentage":  0.1,
+                     "smartNeuroIA":  true,
+                     "smartAdaptiveIA":  true
+                 },
+    "resolvedSymbol":  "GOLD",
+    "microTrend":  "DOWN",
+    "swingTrend":  "OFF",
+    "currentATR":  18.473571428571308,
+    "volMultiplier":  2.5,
+    "winStreak":  6,
+    "lotMultiplier":  3,
+    "supplyZone":  null,
+    "demandZone":  null,
+    "dxyTrend":  "OFF",
+    "sentiment":  {
+                      "long":  39,
+                      "short":  61
+                  },
+    "rsi":  null,
+    "volume":  null,
+    "m1Trend":  "OFF",
+    "m5Trend":  "OFF",
+    "m5Strength":  0,
+    "m5Gap":  0,
+    "m5Vol":  1,
+    "dailyProfit":  74.39,
+    "dailyLoss":  81.71,
+    "totalProfit":  505483639.68855727,
+    "currentSpread":  23,
+    "isKillZone":  true,
+    "useRiskPercentage":  false,
+    "riskPercentage":  0.1,
+    "lastSyncTime":  1774534958864,
+    "operationLog":  [
+                         {
+                             "time":  "11:24:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:23:02",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:22:40",
+                             "action":  "SYNC",
+                             "details":  "49629 novos trades importados do MT5 (Total: 500)"
+                         },
+                         {
+                             "time":  "11:22:40",
+                             "action":  "DEBUG",
+                             "details":  "🔥 ANTI-MARTINGALE ATIVO: Win Streak = 6 | Multiplicador de Lote Acionado: 3.0x"
+                         },
+                         {
+                             "time":  "11:22:02",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:21:02",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:20:40",
+                             "action":  "SYNC",
+                             "details":  "49629 novos trades importados do MT5 (Total: 500)"
+                         },
+                         {
+                             "time":  "11:20:02",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:19:01",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:18:40",
+                             "action":  "SYNC",
+                             "details":  "49629 novos trades importados do MT5 (Total: 500)"
+                         },
+                         {
+                             "time":  "11:18:40",
+                             "action":  "DEBUG",
+                             "details":  "🔥 ANTI-MARTINGALE ATIVO: Win Streak = 6 | Multiplicador de Lote Acionado: 3.0x"
+                         },
+                         {
+                             "time":  "11:18:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:17:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:16:38",
+                             "action":  "SYNC",
+                             "details":  "49629 novos trades importados do MT5 (Total: 500)"
+                         },
+                         {
+                             "time":  "11:16:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:15:33",
+                             "action":  "SENTIMENT",
+                             "details":  "SSI Atualizado → Long: 39% | Short: 61%"
+                         },
+                         {
+                             "time":  "11:15:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         },
+                         {
+                             "time":  "11:14:38",
+                             "action":  "SYNC",
+                             "details":  "49629 novos trades importados do MT5 (Total: 500)"
+                         },
+                         {
+                             "time":  "11:14:38",
+                             "action":  "DEBUG",
+                             "details":  "🔥 ANTI-MARTINGALE ATIVO: Win Streak = 6 | Multiplicador de Lote Acionado: 3.0x"
+                         },
+                         {
+                             "time":  "11:14:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA Neuro Score: 0% (Abaixo do limite de 80%). Aguardando sinal institutional."
+                         }
+                     ],
+    "iaScore":  0
+}

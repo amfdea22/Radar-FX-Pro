@@ -1,0 +1,8 @@
+{
+  "capital": 1000,
+  "profile": "conservative",
+  "accountSize": "small",
+  "dailyStopLoss": 50,
+  "suggestedLots": 0.01,
+  "isActive": true
+}

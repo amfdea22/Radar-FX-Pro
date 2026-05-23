@@ -1,0 +1,13 @@
+{
+  "minScoreThreshold": 62,
+  "weights": {
+    "tripleAlign": 40,
+    "dxy": 20,
+    "vsa": 20,
+    "rsi": 10,
+    "gap": 5,
+    "sentiment": 5
+  },
+  "lastOptimized": 1779492519002,
+  "totalTradesAnalyzed": 1129
+}

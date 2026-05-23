@@ -1,0 +1,18 @@
+{
+  "enabled": false,
+  "symbols": [
+    "GOLD",
+    "EURUSD"
+  ],
+  "strategy": "MHI3",
+  "timeframe": "M1",
+  "defaultLot": 0.01,
+  "useMartingale": true,
+  "martingaleLevels": 1,
+  "martingaleMultiplier": 2,
+  "useTrendFilter": true,
+  "useRSIFilter": true,
+  "minRSITreshold": 30,
+  "maxRSITreshold": 70,
+  "magic": 7777
+}

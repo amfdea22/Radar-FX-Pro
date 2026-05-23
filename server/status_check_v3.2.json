@@ -1,0 +1,178 @@
+﻿{
+    "enabled":  true,
+    "settings":  {
+                     "enabled":  true,
+                     "lotSize":  0.01,
+                     "gridLevels":  3,
+                     "gridDistance":  3,
+                     "gridMultiplier":  1,
+                     "trailingStart":  0.5,
+                     "trailingStep":  0.5,
+                     "breakEvenTrigger":  1.5,
+                     "breakEvenOffset":  0.3,
+                     "takeProfitUSD":  2.5,
+                     "stopLossUSD":  20,
+                     "basketTP":  4,
+                     "basketSL":  -15,
+                     "maxDailyLoss":  20,
+                     "maxDailyProfit":  10,
+                     "sessionFilter":  false,
+                     "direction":  "BOTH",
+                     "cooldownSeconds":  30,
+                     "maxSpreadPoints":  50,
+                     "newsGuardEnabled":  false,
+                     "strategyMode":  "AGGRESSIVE",
+                     "swingTrendFilter":  false,
+                     "dynamicATRMode":  true,
+                     "antiMartingale":  true,
+                     "orderBlockFilter":  false,
+                     "smartGridIA":  false,
+                     "smartTargeting":  true,
+                     "smartTrailing":  true,
+                     "smartBreakeven":  true,
+                     "dxyFilter":  false,
+                     "sentimentFilter":  false,
+                     "rsiFilter":  false,
+                     "volumeFilter":  false,
+                     "trendFiltroM5":  true,
+                     "trendFiltroM1":  false,
+                     "useRiskPercentage":  false,
+                     "riskPercentage":  0.1,
+                     "smartNeuroIA":  true,
+                     "smartAdaptiveIA":  false
+                 },
+    "resolvedSymbol":  "GOLD",
+    "microTrend":  "DOWN",
+    "swingTrend":  "OFF",
+    "currentATR":  18.863571428571245,
+    "volMultiplier":  2.5,
+    "winStreak":  10,
+    "lotMultiplier":  3,
+    "supplyZone":  null,
+    "demandZone":  null,
+    "dxyTrend":  "OFF",
+    "sentiment":  null,
+    "rsi":  null,
+    "volume":  null,
+    "m1Trend":  "OFF",
+    "m5Trend":  "FLAT",
+    "m5Strength":  100,
+    "m5Gap":  10.348888888888723,
+    "m5Vol":  0.6674476646462589,
+    "dailyProfit":  86.6,
+    "dailyLoss":  81.71,
+    "totalProfit":  514625092.4486837,
+    "currentSpread":  30,
+    "isKillZone":  true,
+    "useRiskPercentage":  false,
+    "riskPercentage":  0.1,
+    "lastSyncTime":  1774539654231,
+    "operationLog":  [
+                         {
+                             "time":  "12:42:02",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 10% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:42:01",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 10% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:41:02",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 0% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:41:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 0% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:40:56",
+                             "action":  "SYNC",
+                             "details":  "49629 novos trades importados do MT5 (Total: 500)"
+                         },
+                         {
+                             "time":  "12:40:56",
+                             "action":  "DEBUG",
+                             "details":  "🔥 ANTI-MARTINGALE ATIVO: Win Streak = 10 | Multiplicador de Lote Acionado: 3.0x"
+                         },
+                         {
+                             "time":  "12:40:02",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 10% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:40:01",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 10% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:40:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 10% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:39:02",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 10% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:39:01",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 0% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:38:59",
+                             "action":  "SYNC",
+                             "details":  "49629 novos trades importados do MT5 (Total: 500)"
+                         },
+                         {
+                             "time":  "12:38:01",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 10% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:38:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 0% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:37:48",
+                             "action":  "DEBUG",
+                             "details":  "[M5 PRO] Strength: 100% | Gap: $10.35 | Vol: 0.7x"
+                         },
+                         {
+                             "time":  "12:37:01",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 5% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:37:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 5% \u003c 80%."
+                         },
+                         {
+                             "time":  "12:36:55",
+                             "action":  "SYNC",
+                             "details":  "49629 novos trades importados do MT5 (Total: 500)"
+                         },
+                         {
+                             "time":  "12:36:55",
+                             "action":  "DEBUG",
+                             "details":  "🔥 ANTI-MARTINGALE ATIVO: Win Streak = 10 | Multiplicador de Lote Acionado: 3.0x"
+                         },
+                         {
+                             "time":  "12:36:01",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Fixed): Score 5% \u003c 80%."
+                         }
+                     ],
+    "iaScore":  0,
+    "iaLearning":  {
+                       "minScore":  80,
+                       "totalAnalyzed":  500,
+                       "lastOptimized":  1774535468254
+                   }
+}

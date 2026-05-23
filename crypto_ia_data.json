@@ -1,0 +1,772 @@
+{
+  "states": {
+    "BTCUSD": {
+      "lastTick": 0,
+      "atr": 80.50357142857163,
+      "rsi": 50.80176146973624,
+      "ema9": 77927.89311936084,
+      "ema21": 77922.91058019042,
+      "ema55": 77893.62929246871,
+      "ema200": 77902.82160428374,
+      "volumeAvg": 255.85,
+      "currentVolume": 84,
+      "trendM1": "UP",
+      "trendM5": "UP",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0,
+      "price": 75618.9,
+      "wyckoff": {
+        "phase": "MARKUP",
+        "confidence": 35
+      },
+      "vwap": {
+        "vwap": 77018.08344048484,
+        "upper1": 86009.42988731278,
+        "lower1": 68026.7369936569,
+        "upper2": 95000.77633414071,
+        "lower2": 59035.390546828974
+      },
+      "structure": {
+        "trendD1": "FLAT",
+        "trend4H": "BEARISH",
+        "swingHigh4H": 78132.97,
+        "swingLow4H": 75346.57,
+        "lastBOS": null,
+        "bosStrength": 0
+      },
+      "orderBlocks": [
+        {
+          "type": "SUPPLY",
+          "top": 81210.49,
+          "bottom": 80519.14,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 80967.08,
+          "bottom": 80646.4,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 81493.68,
+          "bottom": 80745.78,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 81346.09,
+          "bottom": 80709.17,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 81959.89,
+          "bottom": 81436.01,
+          "strength": 100
+        }
+      ],
+      "rsi14": 40.28661952294875,
+      "atr14": 2257.000714285716,
+      "volumeRatio": 0.1104648233382449,
+      "priceToVwap": -1.8166947007530476,
+      "nearOrderBlock": null,
+      "entryScore": 35,
+      "entrySignal": null
+    },
+    "ETHUSD": {
+      "lastTick": 0,
+      "atr": 3.247857142857161,
+      "rsi": 42.4584001615692,
+      "ema9": 2140.131800918478,
+      "ema21": 2141.2140429189267,
+      "ema55": 2141.3587064402677,
+      "ema200": 2141.5818187140258,
+      "volumeAvg": 110.55,
+      "currentVolume": 35,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0,
+      "price": 2067.19,
+      "wyckoff": {
+        "phase": "MARKDOWN",
+        "confidence": 35
+      },
+      "vwap": {
+        "vwap": 2317.9424981951965,
+        "upper1": 2711.823874599413,
+        "lower1": 1924.06112179098,
+        "upper2": 3105.7052510036297,
+        "lower2": 1530.1797453867634
+      },
+      "structure": {
+        "trendD1": "FLAT",
+        "trend4H": "BEARISH",
+        "swingHigh4H": 2156.3,
+        "swingLow4H": 2051.79,
+        "lastBOS": "BUY",
+        "bosStrength": 50.970191226096816
+      },
+      "orderBlocks": [
+        {
+          "type": "SUPPLY",
+          "top": 2337.12,
+          "bottom": 2314.61,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 2294.69,
+          "bottom": 2267.39,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 2324.14,
+          "bottom": 2297.38,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 2333.47,
+          "bottom": 2317.3,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 2346.01,
+          "bottom": 2328.97,
+          "strength": 100
+        }
+      ],
+      "rsi14": 32.14615095871214,
+      "atr14": 98.24214285714281,
+      "volumeRatio": 0.06489062510640133,
+      "priceToVwap": -10.817891228554554,
+      "nearOrderBlock": null,
+      "entryScore": 35,
+      "entrySignal": "SELL"
+    },
+    "SOLUSD": {
+      "lastTick": 0,
+      "atr": 0.08142857142857148,
+      "rsi": 53.16416926665114,
+      "ema9": 86.34522054698753,
+      "ema21": 86.34696509402202,
+      "ema55": 86.33225377717058,
+      "ema200": 86.3492858013062,
+      "volumeAvg": 29.1,
+      "currentVolume": 10,
+      "trendM1": "DOWN",
+      "trendM5": "UP",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0,
+      "price": 84.46,
+      "wyckoff": {
+        "phase": "MARKDOWN",
+        "confidence": 35
+      },
+      "vwap": {
+        "vwap": 95.8022755627572,
+        "upper1": 114.72945193472616,
+        "lower1": 76.87509919078825,
+        "upper2": 133.65662830669513,
+        "lower2": 57.947922818819286
+      },
+      "structure": {
+        "trendD1": "FLAT",
+        "trend4H": "BEARISH",
+        "swingHigh4H": 87.7,
+        "swingLow4H": 83.18,
+        "lastBOS": "BUY",
+        "bosStrength": 51.028806584362016
+      },
+      "orderBlocks": [
+        {
+          "type": "DEMAND",
+          "top": 88.32,
+          "bottom": 87.41,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 89.9,
+          "bottom": 88.5,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 88.56,
+          "bottom": 87.61,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 89.57,
+          "bottom": 87.27,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 92.51,
+          "bottom": 91.3,
+          "strength": 100
+        }
+      ],
+      "rsi14": 43.57881647101656,
+      "atr14": 5.032857142857146,
+      "volumeRatio": 0.07378248748305957,
+      "priceToVwap": -11.839254857080324,
+      "nearOrderBlock": null,
+      "entryScore": 35,
+      "entrySignal": "SELL"
+    },
+    "BNBUSD": {
+      "lastTick": 0,
+      "atr": 0.4864285714285594,
+      "rsi": 50.69565430868266,
+      "ema9": 652.2912121674317,
+      "ema21": 652.2584937224822,
+      "ema55": 652.1958671615033,
+      "ema200": 652.7226472179337,
+      "volumeAvg": 47.3,
+      "currentVolume": 13,
+      "trendM1": "UP",
+      "trendM5": "UP",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0,
+      "price": 649.48,
+      "wyckoff": {
+        "phase": "MARKUP",
+        "confidence": 35
+      },
+      "vwap": {
+        "vwap": 691.539415985626,
+        "upper1": 799.6634980094855,
+        "lower1": 583.4153339617665,
+        "upper2": 907.787580033345,
+        "lower2": 475.2912519379069
+      },
+      "structure": {
+        "trendD1": "BULLISH",
+        "trend4H": "BEARISH",
+        "swingHigh4H": 662.8,
+        "swingLow4H": 632.95,
+        "lastBOS": "BUY",
+        "bosStrength": 55.140959342442464
+      },
+      "orderBlocks": [
+        {
+          "type": "DEMAND",
+          "top": 644.87,
+          "bottom": 640.83,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 650.58,
+          "bottom": 645.23,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 644.55,
+          "bottom": 638.84,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 640.63,
+          "bottom": 636.47,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 643.38,
+          "bottom": 635.77,
+          "strength": 100
+        }
+      ],
+      "rsi14": 52.0575985108092,
+      "atr14": 24.177857142857135,
+      "volumeRatio": 0.07276309735752434,
+      "priceToVwap": -6.081998366742435,
+      "nearOrderBlock": {
+        "type": "DEMAND",
+        "top": 644.87,
+        "bottom": 640.83,
+        "strength": 100
+      },
+      "entryScore": 35,
+      "entrySignal": null
+    },
+    "XRPUSD": {
+      "lastTick": 0,
+      "atr": 0.001228571428571452,
+      "rsi": 45.57645169482758,
+      "ema9": 1.3730376540589115,
+      "ema21": 1.3733876351282908,
+      "ema55": 1.3740497859176712,
+      "ema200": 1.3764551336437632,
+      "volumeAvg": 38.15,
+      "currentVolume": 17,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0,
+      "price": 1.3335,
+      "wyckoff": {
+        "phase": "MARKDOWN",
+        "confidence": 35
+      },
+      "vwap": {
+        "vwap": 1.5367461214675002,
+        "upper1": 1.7957067537512779,
+        "lower1": 1.2777854891837226,
+        "upper2": 2.0546673860350553,
+        "lower2": 1.0188248568999452
+      },
+      "structure": {
+        "trendD1": "FLAT",
+        "trend4H": "BEARISH",
+        "swingHigh4H": 1.3994,
+        "swingLow4H": 1.3304,
+        "lastBOS": null,
+        "bosStrength": 0
+      },
+      "orderBlocks": [
+        {
+          "type": "SUPPLY",
+          "top": 1.4261,
+          "bottom": 1.4135,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 1.4136,
+          "bottom": 1.4034,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 1.3952,
+          "bottom": 1.3737,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 1.4283000000000001,
+          "bottom": 1.4151,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 1.4612,
+          "bottom": 1.4424000000000001,
+          "strength": 100
+        }
+      ],
+      "rsi14": 39.70267524094738,
+      "atr14": 0.1039428571428571,
+      "volumeRatio": 0.07814375818503363,
+      "priceToVwap": -13.225744879278595,
+      "nearOrderBlock": null,
+      "entryScore": 35,
+      "entrySignal": "SELL"
+    },
+    "ADAUSD": {
+      "lastTick": 0,
+      "atr": 0.0002714285714285653,
+      "rsi": 39.213950333468276,
+      "ema9": 0.2485173244963485,
+      "ema21": 0.24867186405679434,
+      "ema55": 0.24878245951664743,
+      "ema200": 0.24911137330277616,
+      "volumeAvg": 6.85,
+      "currentVolume": 3,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0,
+      "price": 0.242,
+      "wyckoff": {
+        "phase": "MARKDOWN",
+        "confidence": 35
+      },
+      "vwap": {
+        "vwap": 0.29571141897930214,
+        "upper1": 0.34935473802971984,
+        "lower1": 0.24206809992888442,
+        "upper2": 0.4029980570801376,
+        "lower2": 0.1884247808784667
+      },
+      "structure": {
+        "trendD1": "FLAT",
+        "trend4H": "BEARISH",
+        "swingHigh4H": 0.2523,
+        "swingLow4H": 0.2401,
+        "lastBOS": "BUY",
+        "bosStrength": 50.793335977786725
+      },
+      "orderBlocks": [
+        {
+          "type": "DEMAND",
+          "top": 0.2716,
+          "bottom": 0.2692,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 0.2714,
+          "bottom": 0.2668,
+          "strength": 91.90423791821547
+        },
+        {
+          "type": "SUPPLY",
+          "top": 0.2682,
+          "bottom": 0.2636,
+          "strength": 89.16023952095814
+        },
+        {
+          "type": "SUPPLY",
+          "top": 0.2741,
+          "bottom": 0.2701,
+          "strength": 83.08171995589845
+        },
+        {
+          "type": "SUPPLY",
+          "top": 0.2521,
+          "bottom": 0.2484,
+          "strength": 77.88730158730164
+        }
+      ],
+      "rsi14": 39.70153056006979,
+      "atr14": 0.02395714285714286,
+      "volumeRatio": 0.06209018128451414,
+      "priceToVwap": -18.163457861957504,
+      "nearOrderBlock": null,
+      "entryScore": 20,
+      "entrySignal": "SELL"
+    },
+    "AVAXUSD": {
+      "lastTick": 0,
+      "atr": 0.008285714285714134,
+      "rsi": 48.70889521473964,
+      "ema9": 9.321017671656378,
+      "ema21": 9.321527782511401,
+      "ema55": 9.3209094782621,
+      "ema200": 9.330249796086141,
+      "volumeAvg": 19.35,
+      "currentVolume": 7,
+      "trendM1": "DOWN",
+      "trendM5": "UP",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0
+    },
+    "DOTUSD": {
+      "lastTick": 0,
+      "atr": 0.0014999999999999617,
+      "rsi": 46.64159595507424,
+      "ema9": 1.2440745256318113,
+      "ema21": 1.2443802004610114,
+      "ema55": 1.2448157288508734,
+      "ema200": 1.2469476416998129,
+      "volumeAvg": 4.15,
+      "currentVolume": 5,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0
+    },
+    "LINKUSD": {
+      "lastTick": 0,
+      "atr": 0.008785714285714492,
+      "rsi": 49.02330544847558,
+      "ema9": 9.679116734122742,
+      "ema21": 9.680003585736406,
+      "ema55": 9.682256430604758,
+      "ema200": 9.696820613711985,
+      "volumeAvg": 25.25,
+      "currentVolume": 4,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0,
+      "price": 9.461,
+      "wyckoff": {
+        "phase": "MARKUP",
+        "confidence": 35
+      },
+      "vwap": {
+        "vwap": 10.126232690641089,
+        "upper1": 11.843085728804368,
+        "lower1": 8.40937965247781,
+        "upper2": 13.559938766967647,
+        "lower2": 6.692526614314531
+      },
+      "structure": {
+        "trendD1": "FLAT",
+        "trend4H": "BEARISH",
+        "swingHigh4H": 10.007,
+        "swingLow4H": 9.287,
+        "lastBOS": "BUY",
+        "bosStrength": 53.61047036405572
+      },
+      "orderBlocks": [
+        {
+          "type": "DEMAND",
+          "top": 9.936,
+          "bottom": 9.83,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 10.061,
+          "bottom": 9.935,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 9.878,
+          "bottom": 9.748,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 9.952,
+          "bottom": 9.82,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 10.083,
+          "bottom": 9.866,
+          "strength": 100
+        }
+      ],
+      "rsi14": 45.16728493235232,
+      "atr14": 0.5339285714285712,
+      "volumeRatio": 0.05744254305490347,
+      "priceToVwap": -6.569399607574819,
+      "nearOrderBlock": null,
+      "entryScore": 35,
+      "entrySignal": null
+    },
+    "TRXUSD": {
+      "lastTick": 0,
+      "atr": 0.00015714285714284775,
+      "rsi": 43.88840848625162,
+      "ema9": 0.3580784010851866,
+      "ema21": 0.35811350384284557,
+      "ema55": 0.3580914466906081,
+      "ema200": 0.35828079402087015,
+      "volumeAvg": 2.8,
+      "currentVolume": 1,
+      "trendM1": "DOWN",
+      "trendM5": "UP",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0
+    },
+    "LTCUSD": {
+      "lastTick": 0,
+      "atr": 0.048571428571428044,
+      "rsi": 45.67121576860885,
+      "ema9": 53.953256131724736,
+      "ema21": 53.967839288841645,
+      "ema55": 53.99732981810656,
+      "ema200": 54.101870935566055,
+      "volumeAvg": 15.3,
+      "currentVolume": 9,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0
+    },
+    "SHIBUSD": {
+      "lastTick": 0,
+      "atr": 0.00000857142857142847,
+      "rsi": 44.55216982923295,
+      "ema9": 0.005699050777174221,
+      "ema21": 0.00570351216011343,
+      "ema55": 0.0057139581811109594,
+      "ema200": 0.0057320206367118,
+      "volumeAvg": 2.35,
+      "currentVolume": 4,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0
+    },
+    "BCHUSD": {
+      "lastTick": 0,
+      "atr": 0.47857142857143586,
+      "rsi": 50.2933834491543,
+      "ema9": 374.90002069847594,
+      "ema21": 374.998350850409,
+      "ema55": 375.5056020348009,
+      "ema200": 376.8489580541105,
+      "volumeAvg": 94.25,
+      "currentVolume": 33,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0
+    },
+    "ETCUSD": {
+      "lastTick": 0,
+      "atr": 0.011571428571428248,
+      "rsi": 40.90839929113887,
+      "ema9": 8.933544155366935,
+      "ema21": 8.939225786762453,
+      "ema55": 8.953490882615698,
+      "ema200": 8.978540707329108,
+      "volumeAvg": 4.45,
+      "currentVolume": 6,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0
+    },
+    "XLMUSD": {
+      "lastTick": 0,
+      "atr": 0.0001785714285714307,
+      "rsi": 37.60893627262893,
+      "ema9": 0.14412543236776326,
+      "ema21": 0.14420509853374686,
+      "ema55": 0.14436958690556362,
+      "ema200": 0.14496550132474215,
+      "volumeAvg": 7.15,
+      "currentVolume": 7,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0
+    },
+    "DOGEUSD": {
+      "lastTick": 0,
+      "atr": 0.00011357142857142717,
+      "rsi": 50.993259324884136,
+      "ema9": 0.10385018775985778,
+      "ema21": 0.10385841946630604,
+      "ema55": 0.10390724205090147,
+      "ema200": 0.104111653990533,
+      "volumeAvg": 38.15,
+      "currentVolume": 12,
+      "trendM1": "DOWN",
+      "trendM5": "DOWN",
+      "trendH1": "DOWN",
+      "gridLevel": 0,
+      "basketWatermark": 0,
+      "isBlocked": false,
+      "lastSignalTime": 0,
+      "price": 0.10239,
+      "wyckoff": {
+        "phase": "MARKUP",
+        "confidence": 35
+      },
+      "vwap": {
+        "vwap": 0.10570689862043897,
+        "upper1": 0.12187060922890237,
+        "lower1": 0.08954318801197557,
+        "upper2": 0.13803431983736578,
+        "lower2": 0.07337947740351217
+      },
+      "structure": {
+        "trendD1": "FLAT",
+        "trend4H": "BEARISH",
+        "swingHigh4H": 0.10651,
+        "swingLow4H": 0.10121,
+        "lastBOS": "BUY",
+        "bosStrength": 55.97552878687286
+      },
+      "orderBlocks": [
+        {
+          "type": "SUPPLY",
+          "top": 0.1125,
+          "bottom": 0.11067,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 0.11122,
+          "bottom": 0.11012,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 0.10797,
+          "bottom": 0.10645,
+          "strength": 100
+        },
+        {
+          "type": "SUPPLY",
+          "top": 0.10754,
+          "bottom": 0.10614,
+          "strength": 100
+        },
+        {
+          "type": "DEMAND",
+          "top": 0.10758,
+          "bottom": 0.10564,
+          "strength": 100
+        }
+      ],
+      "rsi14": 44.27279606826502,
+      "atr14": 0.008047142857142859,
+      "volumeRatio": 0.06036195232993689,
+      "priceToVwap": -3.137826067860473,
+      "nearOrderBlock": null,
+      "entryScore": 35,
+      "entrySignal": null
+    }
+  },
+  "dailyProfit": 0,
+  "dailyLoss": 0,
+  "timestamp": 1779493234861
+}

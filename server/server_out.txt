@@ -1,0 +1,83 @@
+📡 AlertEngine: Alert added [GUARDIAN] - Sistema Radar-FX Online
+📡 AlertEngine: Alert added [MARKET] - Sincronização em Tempo Real Ativa
+Server v1.1 [CLEAN] running at http://0.0.0.0:3015
+✅ Bridge MT5 conectada: Pepperstone-Demo (conta 61527033, saldo $166.32)
+🚀 Iniciando motores de trading...
+🛡️ Guardian: Persisted settings loaded
+🛡️ Alpha Guardian: Scalper Grid & Protection service ACTIVE
+🤖 Alpha Robot: Settings loaded
+🤖 Alpha Robot: History loaded (200 trades)
+🤖 Alpha Robot v2: Institutional Engine ACTIVE
+📡 CopyTrader Engine: Institutional Replication ACTIVE
+👑 Alpha Supreme: Persisted settings loaded
+👑 Alpha Supreme: History loaded (299 trades)
+👑 Alpha Supreme Brain: INICIALIZADO
+🚀 Gold Scalper Engine: Iniciando...
+₿ BitcoinPro: Iniciando robô estratégia 50/200 + RSI...
+🏦 CryptoIA Institutional: Iniciando motor com análise Wyckoff + VWAP + Order Blocks...
+⚡ Titan Micro-Sniper: Engine v2.0 ONLINE (Bridge :5555 | 1s Cycle)
+📈 Swing Trader IA v1.0 ONLINE (60s Cycle) | Symbols: GOLD, BTCUSD
+⚡ Speed Scalper Engine ONLINE | Magic: 777111
+[20:40:49] 🌌 Omni [SUCCESS]: Omni Engine: Serviço Probabilístico Universal INICIADO
+📱 TradeNotificationBot: Iniciado
+📱 TradeNotificationBot: Resumo diário agendado para 23/05/2026, 18:00:00
+⚡ Todos os motores iniciados com sucesso!
+🔍 CryptoIA: Resolvendo símbolos no broker...
+✅ CryptoIA: SHIBUSD -> SHBUSD
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+⚠️ Gold Scalper: Robô está DESATIVADO nas configurações.
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310694778 para 4501.36
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+🛡️ [BREAK-EVEN] Protegendo #310795998 para 4505.3099999999995
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado

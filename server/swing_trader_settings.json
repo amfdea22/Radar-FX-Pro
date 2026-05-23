@@ -1,0 +1,19 @@
+{
+  "enabled": false,
+  "symbols": [
+    "GOLD",
+    "BTCUSD"
+  ],
+  "lotSize": 0.01,
+  "useRiskPercentage": true,
+  "riskPercentage": 1,
+  "minSwingScore": 70,
+  "atrSlMultiplier": 1.5,
+  "atrTpMultiplier": 3,
+  "trailingActivation": 1.5,
+  "maxPositionsPerSymbol": 2,
+  "maxDailyLoss": 50,
+  "maxDailyProfit": 200,
+  "cooldownMinutes": 15,
+  "magic": 777222
+}

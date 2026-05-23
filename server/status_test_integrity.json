@@ -1,0 +1,111 @@
+﻿{
+    "enabled":  true,
+    "settings":  {
+                     "enabled":  true,
+                     "lotSize":  0.01,
+                     "gridLevels":  3,
+                     "gridDistance":  3,
+                     "gridMultiplier":  1,
+                     "trailingStart":  0.5,
+                     "trailingStep":  0.5,
+                     "breakEvenTrigger":  1.5,
+                     "breakEvenOffset":  0.3,
+                     "takeProfitUSD":  2.5,
+                     "stopLossUSD":  20,
+                     "basketTP":  4,
+                     "basketSL":  -15,
+                     "maxDailyLoss":  20,
+                     "maxDailyProfit":  10,
+                     "sessionFilter":  false,
+                     "direction":  "BOTH",
+                     "cooldownSeconds":  30,
+                     "maxSpreadPoints":  50,
+                     "newsGuardEnabled":  false,
+                     "strategyMode":  "AGGRESSIVE",
+                     "swingTrendFilter":  false,
+                     "dynamicATRMode":  true,
+                     "antiMartingale":  true,
+                     "orderBlockFilter":  false,
+                     "smartGridIA":  false,
+                     "smartTargeting":  true,
+                     "smartTrailing":  true,
+                     "smartBreakeven":  true,
+                     "dxyFilter":  false,
+                     "sentimentFilter":  true,
+                     "rsiFilter":  false,
+                     "volumeFilter":  false,
+                     "trendFiltroM5":  false,
+                     "trendFiltroM1":  false,
+                     "useRiskPercentage":  false,
+                     "riskPercentage":  0.1,
+                     "smartNeuroIA":  true,
+                     "smartAdaptiveIA":  true
+                 },
+    "resolvedSymbol":  "GOLD",
+    "microTrend":  "UP",
+    "swingTrend":  "OFF",
+    "currentATR":  0,
+    "volMultiplier":  1,
+    "winStreak":  10,
+    "lotMultiplier":  3,
+    "supplyZone":  null,
+    "demandZone":  null,
+    "dxyTrend":  "OFF",
+    "sentiment":  {
+                      "long":  50,
+                      "short":  50
+                  },
+    "rsi":  null,
+    "volume":  null,
+    "m1Trend":  "OFF",
+    "m5Trend":  "OFF",
+    "m5Strength":  0,
+    "m5Gap":  0,
+    "m5Vol":  1,
+    "dailyProfit":  86.6,
+    "dailyLoss":  81.71,
+    "totalProfit":  507145968.9985802,
+    "currentSpread":  31,
+    "isKillZone":  true,
+    "useRiskPercentage":  false,
+    "riskPercentage":  0.1,
+    "lastSyncTime":  1774535458494,
+    "operationLog":  [
+                         {
+                             "time":  "11:31:08",
+                             "action":  "LEARNING",
+                             "details":  "Iniciando análise de performance (Win Rate Recente: 84.0%)"
+                         },
+                         {
+                             "time":  "11:31:02",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Adaptive): Score 50% \u003c 80%."
+                         },
+                         {
+                             "time":  "11:31:00",
+                             "action":  "BLOQUEIO",
+                             "details":  "IA v3.2 (Adaptive): Score 50% \u003c 80%."
+                         },
+                         {
+                             "time":  "11:31:00",
+                             "action":  "SYNC",
+                             "details":  "49639 novos trades importados do MT5 (Total: 500)"
+                         },
+                         {
+                             "time":  "11:31:00",
+                             "action":  "DEBUG",
+                             "details":  "🔥 ANTI-MARTINGALE ATIVO: Win Streak = 10 | Multiplicador de Lote Acionado: 3.0x"
+                         },
+                         {
+                             "time":  "11:30:58",
+                             "action":  "RESET",
+                             "details":  "Contadores diários resetados"
+                         }
+                     ],
+    "iaScore":  50,
+    "iaLearning":  {
+                       "minScore":  80,
+                       "totalAnalyzed":  500,
+                       "lastOptimized":  1774535468254
+                   }
+}

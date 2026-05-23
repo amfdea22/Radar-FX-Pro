@@ -1,0 +1,120 @@
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4763.21, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4766.01, 'tp': 4759.01}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4761.79, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4764.91, 'tp': 4757.91}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4761.86, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4764.74, 'tp': 4757.74}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4758.51, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4761.72, 'tp': 4754.72}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4758.32, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4760.05, 'tp': 4753.05}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4757.98, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4760.84, 'tp': 4753.84}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4756.88, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4759.68, 'tp': 4752.68}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4755.94, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4759.01, 'tp': 4752.01}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4756.4, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4759.29, 'tp': 4752.29}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4760.09, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4763.03, 'tp': 4756.03}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4759.12, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4762.28, 'tp': 4755.28}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.1, 'type': 1, 'price': 4758.38, 'magic': 123456, 'comment': 'Rapid Analysis Entry (H1)', 'type_time': 0, 'type_filling': 1, 'sl': 4760.38, 'tp': 4754.38}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4758.99, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4762.0, 'tp': 4755.0}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 1, 'price': 4759.18, 'magic': 9999, 'comment': 'GS | L1', 'type_time': 0, 'type_filling': 1, 'sl': 4762.05, 'tp': 4755.05}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 0, 'price': 4842.65, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4839.04, 'tp': 4846.04}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 0, 'price': 4844.09, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4840.57, 'tp': 4847.57}
+ORDER_REQUEST: {'action': 1, 'symbol': 'GOLD', 'volume': 0.01, 'type': 0, 'price': 4839.23, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4836.3, 'tp': 4843.3}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4534.33, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 3370.5, 'tp': 3350.5}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4535.16, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4535.35, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4547.12, 'tp': 4510.13}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4533.81, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4521.48, 'tp': 4558.47}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4536.13, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4523.8, 'tp': 4560.79}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4534.65, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4522.32, 'tp': 4559.31}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4534.9, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4522.32, 'tp': 4560.05}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4534.66, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4522.08, 'tp': 4559.81}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4536.62, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4524.04, 'tp': 4561.77}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4531.55, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4518.97, 'tp': 4556.7}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4531.86, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4519.28, 'tp': 4557.01}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4531.57, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4518.49, 'tp': 4557.73}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4530.23, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4517.15, 'tp': 4556.39}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4536.15, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4523.07, 'tp': 4562.31}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4534.66, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4520.52, 'tp': 4562.93}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4534.54, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4528.0, 'tp': 4535.86}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4533.6, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4528.0, 'tp': 4535.37}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4532.69, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4527.98, 'tp': 4535.37}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4532.9, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4527.98, 'tp': 4535.37}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4533.55, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4527.98, 'tp': 4535.37}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4532.41, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4528.26, 'tp': 4535.37}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4536.86, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.32, 'tp': 4537.96}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4542.41, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.31, 'tp': 4556.63}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4543.24, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.31, 'tp': 4544.31}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4543.66, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.31, 'tp': 4545.15}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4544.34, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.36, 'tp': 4545.41}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4543.96, 'magic': 9999, 'comment': 'GSL1M', 'type_time': 0, 'type_filling': 1, 'sl': 4528.43, 'tp': 4545.15}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4544.93, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.41, 'tp': 4545.98}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4546.31, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.54, 'tp': 4564.08}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4547.13, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.5, 'tp': 4552.82}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4548.23, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.43, 'tp': 4552.82}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4548.14, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4528.72, 'tp': 4550.16}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4543.3, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4528.68, 'tp': 4544.18}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4543.34, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4528.82, 'tp': 4544.05}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4543.09, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4528.77, 'tp': 4543.94}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4543.12, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4528.82, 'tp': 4544.16}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4542.94, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4528.77, 'tp': 4543.96}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4538.37, 'magic': 9999, 'comment': 'GSL3', 'type_time': 0, 'type_filling': 1, 'sl': 4528.55, 'tp': 4538.91}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4563.55, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4553.91, 'tp': 4573.57}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4563.54, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4553.91, 'tp': 4573.15}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4561.84, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4563.49, 'tp': 4543.06}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4560.05, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4562.0, 'tp': 4543.06}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4564.86, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4566.71, 'tp': 4562.91}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4558.0, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4559.99, 'tp': 4543.06}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4558.07, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4560.03, 'tp': 4543.06}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4557.26, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4559.44, 'tp': 4543.06}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4555.34, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4557.18, 'tp': 4543.06}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4555.0, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4556.85, 'tp': 4543.06}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4552.54, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4554.41, 'tp': 4550.59}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4552.46, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4554.37, 'tp': 4550.55}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4552.51, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4554.39, 'tp': 4550.57}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4552.35, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4554.27, 'tp': 4550.41}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4551.01, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4552.78, 'tp': 4549.24}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4551.84, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4553.41, 'tp': 4549.87}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4551.82, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4553.59, 'tp': 4550.05}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4549.63, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4551.82, 'tp': 4547.44}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4534.56, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4549.09, 'tp': 4532.88}
+Health check received
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4533.26, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4549.09, 'tp': 4531.61}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4533.33, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4549.16, 'tp': 4531.63}
+Health check received
+Health check received
+Health check received
+Health check received
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4533.22, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4549.09, 'tp': 4516.63}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4533.8, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4549.1, 'tp': 4518.44}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4533.15, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4549.14, 'tp': 4517.12}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4537.32, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4534.23, 'tp': 4539.89}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4537.93, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4534.96, 'tp': 4540.86}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4538.0, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4535.07, 'tp': 4540.93}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 0, 'price': 4535.67, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4532.61, 'tp': 4538.71}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4534.75, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.84, 'tp': 4520.66}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4534.16, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.89, 'tp': 4519.43}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4534.22, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.89, 'tp': 4519.55}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4539.04, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4548.83, 'tp': 4529.33}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4532.36, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.35, 'tp': 4516.37}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.02, 'type': 0, 'price': 4534.17, 'magic': 202605, 'comment': 'IA FVG Mitigao', 'type_time': 0, 'type_filling': 1, 'sl': 4533.82, 'tp': 4538.34}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.02, 'type': 0, 'price': 4534.26, 'magic': 202605, 'comment': 'IA FVG Mitigao', 'type_time': 0, 'type_filling': 1, 'sl': 4533.82, 'tp': 4538.34}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4531.74, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.39, 'tp': 4515.09}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4530.86, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.25, 'tp': 4513.53}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4530.52, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.26, 'tp': 4512.78}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4530.41, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.26, 'tp': 4512.56}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4530.05, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.32, 'tp': 4511.7}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4529.13, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.32, 'tp': 4509.46}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4528.42, 'magic': 9999, 'comment': 'GSL1', 'type_time': 0, 'type_filling': 1, 'sl': 4548.2, 'tp': 4508.64}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4533.39, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4548.25, 'tp': 4518.05}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4532.88, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4548.19, 'tp': 4517.91}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4538.04, 'magic': 9999, 'comment': 'GSL3', 'type_time': 0, 'type_filling': 1, 'sl': 4548.14, 'tp': 4527.78}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4537.81, 'magic': 9999, 'comment': 'GSL3', 'type_time': 0, 'type_filling': 1, 'sl': 4548.04, 'tp': 4527.56}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4538.09, 'magic': 9999, 'comment': 'GSL3', 'type_time': 0, 'type_filling': 1, 'sl': 4547.97, 'tp': 4528.17}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4537.82, 'magic': 9999, 'comment': 'GSL3', 'type_time': 0, 'type_filling': 1, 'sl': 4547.98, 'tp': 4527.74}
+Health check received
+Health check received
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4505.29, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4525.29, 'tp': 4497.79}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4505.25, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4525.3, 'tp': 4497.8}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4505.41, 'magic': 9999, 'comment': 'GSL2', 'type_time': 0, 'type_filling': 1, 'sl': 4525.41, 'tp': 4498.01}
+ORDER_REQUEST: {'action': 1, 'symbol': 'XAUUSD', 'volume': 0.01, 'type': 1, 'price': 4509.5, 'magic': 9999, 'comment': 'GSL3', 'type_time': 0, 'type_filling': 1, 'sl': 4529.51, 'tp': 4506.17}
+ORDER_REQUEST: {'action': 1, 'symbol': 'BTCUSD', 'volume': 0.01, 'type': 0, 'price': 75862.04, 'magic': 123456, 'comment': 'MatrixBTCUSDBUY', 'type_time': 0, 'type_filling': 1, 'sl': 75812.04, 'tp': 75892.04}
+ORDER_REQUEST: {'action': 1, 'symbol': 'BTCUSD', 'volume': 0.01, 'type': 0, 'price': 75862.04, 'magic': 123456, 'comment': 'MatrixBTCUSDBUY', 'type_time': 0, 'type_filling': 1, 'sl': 75812.04, 'tp': 75892.04}
+ORDER_REQUEST: {'action': 1, 'symbol': 'BTCUSD', 'volume': 0.01, 'type': 0, 'price': 75862.04, 'magic': 123456, 'comment': 'MatrixBTCUSDBUY', 'type_time': 0, 'type_filling': 1, 'sl': 75812.04, 'tp': 75892.04}
+Health check received
+ORDER_REQUEST: {'action': 1, 'symbol': 'BTCUSD', 'volume': 0.01, 'type': 0, 'price': 75862.04, 'magic': 123456, 'comment': 'MatrixBTCUSDBUY', 'type_time': 0, 'type_filling': 1, 'sl': 75812.04, 'tp': 75892.04}
+ORDER_REQUEST: {'action': 1, 'symbol': 'BTCUSD', 'volume': 0.01, 'type': 0, 'price': 75862.04, 'magic': 123456, 'comment': 'MatrixBTCUSDBUY', 'type_time': 0, 'type_filling': 1, 'sl': 75812.04, 'tp': 75892.04}

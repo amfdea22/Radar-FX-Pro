@@ -1,0 +1,20 @@
+{
+  "enabled": false,
+  "symbols": [
+    "BTCUSD",
+    "ETHUSD",
+    "SOLUSD",
+    "BNBUSD",
+    "XRPUSD",
+    "ADAUSD",
+    "DOGEUSD",
+    "LINKUSD"
+  ],
+  "lotSize": 0.01,
+  "maxDailyLoss": 500,
+  "maxDailyProfit": 1000,
+  "riskProfile": "moderado",
+  "basketTP": 3,
+  "basketSL": -1,
+  "maxPositions": 2
+}

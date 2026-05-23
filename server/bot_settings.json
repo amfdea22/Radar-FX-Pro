@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "notifyTradeOpen": true,
+  "notifyTradeClose": true,
+  "notifyDailySummary": true,
+  "notifyRiskAlerts": true,
+  "dailySummaryHour": 18,
+  "dailySummaryMinute": 0
+}

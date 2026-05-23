@@ -1,0 +1,36 @@
+
+???? INICIANDO SIMULA????O HFT INSTITUCIONAL...
+-------------------------------------------
+??? Configura????es do Rob?? carreadas.
+???? Buscando 200 velas de M15 (XAUUSD)...
+???? Dados obtidos: 200 velas.
+???? Processando sinais Institucionais...
+
+[24/03/2026, 03:30:00] [WIN] Trade #1 | Lote: 0.01 | P&L: +$26.41 | Saldo: $126.41 ???
+[24/03/2026, 03:45:00] [LOSS] Trade #2 | Lote: 0.01 | P&L: $-7.27 | Saldo: $119.14 ???
+[24/03/2026, 04:00:00] [WIN] Trade #3 | Lote: 0.01 | P&L: +$10.69 | Saldo: $129.83 ???
+[24/03/2026, 04:15:00] [WIN] Trade #4 | Lote: 0.01 | P&L: +$23.82 | Saldo: $153.65 ???
+[24/03/2026, 04:30:00] [LOSS] Trade #5 | Lote: 0.01 | P&L: $-6.03 | Saldo: $147.62 ???
+[24/03/2026, 04:45:00] [WIN] Trade #6 | Lote: 0.01 | P&L: +$17.48 | Saldo: $165.10 ???
+[24/03/2026, 05:00:00] [WIN] Trade #7 | Lote: 0.01 | P&L: +$25.69 | Saldo: $190.79 ???
+[24/03/2026, 05:15:00] [WIN] Trade #8 | Lote: 0.01 | P&L: +$12.88 | Saldo: $203.67 ???
+[24/03/2026, 05:30:00] [WIN] Trade #9 | Lote: 0.01 | P&L: +$52.90 | Saldo: $256.57 ???
+[24/03/2026, 05:45:00] [WIN] Trade #10 | Lote: 0.02 | P&L: +$50.72 | Saldo: $307.29 ???
+[24/03/2026, 06:00:00] [WIN] Trade #11 | Lote: 0.02 | P&L: +$65.46 | Saldo: $372.75 ???
+[24/03/2026, 06:15:00] [WIN] Trade #12 | Lote: 0.03 | P&L: +$113.19 | Saldo: $485.94 ???
+[24/03/2026, 06:30:00] [LOSS] Trade #13 | Lote: 0.03 | P&L: $-33.53 | Saldo: $452.42 ???
+[24/03/2026, 06:45:00] [LOSS] Trade #14 | Lote: 0.01 | P&L: $-15.97 | Saldo: $436.45 ???
+[24/03/2026, 07:00:00] [WIN] Trade #15 | Lote: 0.01 | P&L: +$25.69 | Saldo: $462.14 ???
+[24/03/2026, 07:15:00] [WIN] Trade #16 | Lote: 0.01 | P&L: +$19.13 | Saldo: $481.27 ???
+[24/03/2026, 07:30:00] [WIN] Trade #17 | Lote: 0.01 | P&L: +$12.44 | Saldo: $493.71 ???
+[24/03/2026, 07:45:00] [LOSS] Trade #18 | Lote: 0.01 | P&L: $-15.61 | Saldo: $478.10 ???
+[24/03/2026, 08:00:00] [WIN] Trade #19 | Lote: 0.01 | P&L: +$18.62 | Saldo: $496.72 ???
+[24/03/2026, 08:15:00] [WIN] Trade #20 | Lote: 0.01 | P&L: +$26.41 | Saldo: $523.13 ???
+
+-------------------------------------------
+???? RESULTADO DA SIMULA????O HFT ($100 INITIAL)
+???? Saldo Final: $523.13
+???? Assertividade: 75.0%
+???? Crescimento: 423.13%
+-------------------------------------------
+??? Modo Simula????o Finalizado com Sucesso.

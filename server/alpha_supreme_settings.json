@@ -1,0 +1,8 @@
+{
+  "nakamotoActive": false,
+  "intelligence7Active": false,
+  "confluenceMode": true,
+  "capitalAllocation": 50,
+  "maxLoss": 100,
+  "dailyTarget": 500
+}

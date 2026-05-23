@@ -1,0 +1,3 @@
+﻿MT5 Connected and ready for login
+ * Serving Flask app 'mt5_bridge'
+ * Debug mode: off
