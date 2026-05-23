@@ -42,6 +42,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, isTablet, onOverrideDevice }) => {
     const [isBitcoinProActive, setIsBitcoinProActive] = React.useState(false);
+    const [isSharkActive, setIsSharkActive] = React.useState(false);
     const [isRobotActive, setIsRobotActive] = React.useState(false);
     const [isCryptoActive, setIsCryptoActive] = React.useState(false);
     const [isGoldActive, setIsGoldActive] = React.useState(false);
@@ -56,8 +57,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     React.useEffect(() => {
         const checkStatus = async () => {
             try {
-                const [btcPro, robot, crypto, gold, titan, swing, copy, speed, supreme] = await Promise.all([
+                const [btcPro, shark, robot, crypto, gold, titan, swing, copy, speed, supreme] = await Promise.all([
                     axios.get('/api/mt5/bitcoin-pro/status').catch(() => ({ data: { settings: { enabled: false } } })),
+                    axios.get('/api/mt5/shark-bot/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/robot/status').catch(() => ({ data: { enabled: false } })),
                     axios.get('/api/mt5/crypto-ia/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/gold-scalper/status').catch(() => ({ data: { settings: { enabled: false } } })),
@@ -68,6 +70,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                     axios.get('/api/mt5/supreme/status').catch(() => ({ data: { settings: { enabled: false } } }))
                 ]);
                 setIsBitcoinProActive(btcPro.data?.settings?.enabled || false);
+                setIsSharkActive(shark.data?.settings?.enabled || false);
                 setIsRobotActive(robot.data?.enabled || false);
                 setIsCryptoActive(crypto.data?.settings?.enabled || false);
                 setIsGoldActive(gold.data?.settings?.enabled || false);
@@ -99,6 +102,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             items: [
                 { id: 'robot', icon: Cpu, label: 'Alpha Robot' },
                 { id: 'bitcoin_pro', icon: Bitcoin, label: 'Bitcoin Pro' },
+                { id: 'shark_bot', icon: Zap, label: 'Shark Bot' },
                 { id: 'crypto', icon: Bitcoin, label: 'Alpha Cripto' },
                 { id: 'gold_scalper', icon: Target, label: 'Gold Scalper' },
                 { id: 'micro_sniper', icon: Zap, label: 'Micro Sniper' },
@@ -181,6 +185,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 )}
                                 {item.id === 'bitcoin_pro' && isBitcoinProActive && (
                                     <div className={`w-1.5 h-1.5 rounded-full bg-green-600 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '22, 163, 74' } as any}></div>
+                                )}
+                                {item.id === 'shark_bot' && isSharkActive && (
+                                    <div className={`w-1.5 h-1.5 rounded-full bg-cyan-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '6, 182, 212' } as any}></div>
                                 )}
                                 {item.id === 'crypto' && isCryptoActive && (
                                     <div className={`w-1.5 h-1.5 rounded-full bg-orange-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '249, 115, 22' } as any}></div>
@@ -279,6 +286,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-600/10 border border-green-600/20 rounded-full">
                                     <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-pulse" />
                                     <span className="text-[8px] font-black text-green-400 uppercase italic hidden sm:inline">BTC Pro</span>
+                                </div>
+                            )}
+                            {isSharkActive && (
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-cyan-600/10 border border-cyan-600/20 rounded-full">
+                                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse" />
+                                    <span className="text-[8px] font-black text-cyan-400 uppercase italic hidden sm:inline">Shark</span>
                                 </div>
                             )}
                             {isRobotActive && (
@@ -407,6 +420,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                             <div className="flex items-center gap-2 px-3 py-1 bg-green-600/10 border border-green-600/20 rounded-full">
                                 <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-pulse"></div>
                                 <span className="text-[9px] font-black text-green-400 uppercase italic">BTC Pro</span>
+                            </div>
+                        )}
+                        {isSharkActive && (
+                            <div className="flex items-center gap-2 px-3 py-1 bg-cyan-600/10 border border-cyan-600/20 rounded-full">
+                                <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse"></div>
+                                <span className="text-[9px] font-black text-cyan-400 uppercase italic">Shark</span>
                             </div>
                         )}
                         {isRobotActive && (

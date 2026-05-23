@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
     Bot, Power, Zap, ShieldCheck, Target,
-    BarChart3, Settings2, Fingerprint, Activity,
-    BrainCircuit, Cpu, Trophy, RefreshCw, Percent,
-    TrendingUp, Flame, DollarSign, XCircle, AlertTriangle,
-    Eye, Layers, TrendingDown, Waves, Gauge, ArrowUpDown
+    BarChart3, Settings2, Activity, BrainCircuit, Cpu,
+    Trophy, RefreshCw, Percent, TrendingUp, Flame, DollarSign,
+    Eye, Layers, TrendingDown, Gauge, ArrowUpDown, Crosshair,
+    Shield, CircleDot
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -71,6 +71,47 @@ interface InstitutionalAnalysis {
     trendAlignment: string;
     volumeRatio: number;
 }
+
+function AlphaLogo() {
+    return (
+        <svg width="44" height="44" viewBox="0 0 44 44" className="drop-shadow-xl">
+            <defs>
+                <linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#a78bfa" />
+                    <stop offset="100%" stopColor="#7c3aed" />
+                </linearGradient>
+                <filter id="aglow">
+                    <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#a78bfa" floodOpacity="0.4" />
+                </filter>
+            </defs>
+            <circle cx="22" cy="22" r="18" fill="none" stroke="url(#ag)" strokeWidth="2" filter="url(#aglow)" />
+            <text x="22" y="30" textAnchor="middle" fill="url(#ag)" fontSize="26" fontWeight="900" fontStyle="italic" filter="url(#aglow)">A</text>
+            <circle cx="22" cy="22" r="18" fill="none" stroke="url(#ag)" strokeWidth="1" opacity="0.3" strokeDasharray="4 3" />
+        </svg>
+    );
+}
+
+function GaugeChart({ value, max, label, color }: { value: number; max: number; label: string; color: string }) {
+    const pct = Math.min(100, (value / max) * 100);
+    const angle = (pct / 100) * 180;
+    const rad = (angle - 90) * Math.PI / 180;
+    const r = 28;
+    const cx = 36, cy = 40;
+    const x = cx + r * Math.cos(rad);
+    const y = cy + r * Math.sin(rad);
+    return (
+        <svg width="72" height="52" viewBox="0 0 72 52" className="overflow-visible">
+            <path d="M6 40 A28 28 0 0 1 66 40" fill="none" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+            <path d="M6 40 A28 28 0 0 1 66 40" fill="none" stroke={color} strokeWidth="4" strokeLinecap="round"
+                strokeDasharray={`${pct * 0.52} 200`} />
+            <circle cx={x} cy={y} r={3} fill={color} stroke="white" strokeWidth="1" />
+            <line x1={cx} y1={cy} x2={x} y2={y} stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+            <text x={cx} y={cy + 6} textAnchor="middle" fill="white" fontSize="9" fontWeight="700">{value}</text>
+        </svg>
+    );
+}
+
+const SYMBOLS = ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD'];
 
 export const RobotControlPanel: React.FC = () => {
     const [settings, setSettings] = useState<RobotSettings | null>(null);
@@ -147,7 +188,6 @@ export const RobotControlPanel: React.FC = () => {
     const handleSync = async () => {
         setSyncing(true);
         try {
-            await axios.post('/api/mt5/robot/sync');
             const [statusResp, reportResp] = await Promise.all([
                 axios.get('/api/mt5/robot/status'),
                 axios.get('/api/mt5/robot/report')
@@ -164,572 +204,643 @@ export const RobotControlPanel: React.FC = () => {
     if (loading || !settings) {
         return (
             <div className="flex flex-col items-center justify-center p-20 space-y-4">
-                <div className="w-12 h-12 border-4 border-trader-cyan/20 border-t-trader-cyan rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-violet-500/20 border-t-violet-500 rounded-full animate-spin"></div>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Sincronizando I.A. Alpha...</p>
             </div>
         );
     }
 
-    return (
-        <div className="p-6 space-y-6 max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header Section */}
-            <div className="flex items-center justify-between bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 shadow-2xl overflow-hidden relative group">
-                {/* Background Glows */}
-                <div className={`absolute top-0 right-0 w-64 h-64 blur-[80px] -mr-32 -mt-32 transition-colors duration-1000 ${settings.enabled ? 'bg-trader-green/20' : 'bg-trader-red/10'}`}></div>
+    const isActive = settings.enabled;
 
-                <div className="flex items-center gap-5 relative z-10">
-                    <div className={`p-4 rounded-2xl border transition-all duration-500 ${settings.enabled
-                        ? 'bg-trader-green/10 border-trader-green/30 text-trader-green shadow-[0_0_20px_rgba(22,163,74,0.3)]'
-                        : 'bg-slate-800/50 border-slate-700 text-slate-500'
-                        }`}>
-                        <Bot size={32} strokeWidth={2.5} className={settings.enabled ? 'animate-pulse' : ''} />
+    return (
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/20 shadow-[0_0_50px_rgba(139,92,246,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-violet-500/10 rounded-3xl border border-violet-500/20 shadow-xl shadow-violet-500/10">
+                        <AlphaLogo />
                     </div>
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">Alpha Robot v2.0</h1>
-                            <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter ${settings.enabled ? 'bg-trader-green text-black' : 'bg-slate-800 text-slate-500'
-                                }`}>AI ENGINE ONLINE</span>
-                        </div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Automação Institucional de Alta Frequência</p>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-500">Alpha</span> Robot
+                            <span className={`px-2 py-1 rounded-lg text-xs tracking-widest uppercase ${isActive ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 border border-slate-500/20 text-slate-500'}`}>
+                                {isActive ? 'Ativo' : 'Inativo'}
+                            </span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Cpu size={12} className="text-violet-500" /> Análise Institucional Wyckoff + VWAP + Order Blocks
+                        </p>
                     </div>
                 </div>
-
-                <div className="flex items-center gap-4 relative z-10">
-                    {/* Botão Glass Luminoso */}
-                    <button
-                        onClick={toggleRobot}
-                        disabled={saving}
-                        className={`relative group flex items-center gap-3 px-8 py-4 rounded-[1.5rem] font-black uppercase text-xs tracking-[0.2em] transition-all duration-500 ${settings.enabled
-                            ? 'bg-trader-green/20 border border-trader-green/40 text-trader-green shadow-[0_0_30px_rgba(22,163,74,0.4)] hover:scale-105 active:scale-95'
-                            : 'bg-slate-800/50 border border-slate-700 text-slate-400 hover:bg-slate-800 hover:border-slate-600'
-                            }`}
-                    >
-                        <Power size={18} className={settings.enabled ? 'animate-pulse' : ''} />
-                        {settings.enabled ? 'Robô Ativo' : 'Robô Em Espera'}
-
-                        {/* Glow effect overlay */}
-                        {settings.enabled && (
-                            <span className="absolute inset-0 rounded-[1.5rem] bg-trader-green/10 animate-ping pointer-events-none"></span>
-                        )}
-                    </button>
+                <div className="flex gap-4 relative z-10 items-center">
+                    <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{settings.symbols.length} Símbolos</span>
+                        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${isActive ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 border-slate-500/20 text-slate-500'}`}>
+                            <div className={`w-2 h-2 rounded-full animate-pulse ${isActive ? 'bg-emerald-500' : 'bg-slate-500'}`} />
+                            <span className="text-[10px] font-black uppercase">{isActive ? 'Live' : 'Offline'}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Parâmetros de Filtro (I.A. Decision) */}
-                <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-8 relative overflow-hidden">
-                    <div className="flex items-center gap-3 mb-2">
-                        <BrainCircuit className="text-trader-cyan" size={20} />
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest">Inteligência & Filtros</h2>
+            {/* ALPHA INSTITUTIONAL ENGINE */}
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-violet-500/50 to-transparent"></div>
+
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter flex items-center gap-3">
+                            <Cpu className="text-violet-500 animate-pulse" /> Institutional <span className="text-violet-500">Engine</span>
+                            <span className={`px-2 py-0.5 rounded text-[10px] tracking-widest uppercase animate-pulse ${analysisData.some(a => a.direction !== 'NEUTRAL' && a.score >= (settings?.entryScoreThreshold || 70)) ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-violet-500/20 text-violet-500 border border-violet-500/30'}`}>
+                                {analysisData.some(a => a.direction !== 'NEUTRAL') ? `${analysisData.filter(a => a.direction !== 'NEUTRAL').length} Sinal(is)` : 'Scanning'}
+                            </span>
+                        </h3>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Wyckoff Phase Detection & Market Structure Analysis em Tempo Real</p>
                     </div>
+                    <button
+                        onClick={toggleRobot}
+                        disabled={saving}
+                        className={`px-5 py-2 rounded-2xl border font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${
+                            isActive
+                                ? 'bg-trader-red/10 border-trader-red/30 text-trader-red hover:bg-trader-red/20'
+                                : 'bg-violet-500/10 border-violet-500/30 text-violet-500 hover:bg-violet-500/20'
+                        }`}
+                    >
+                        {saving ? (
+                            <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-current"></span>
+                        ) : isActive ? (
+                            <><Zap size={12} /> Desligar Alpha</>
+                        ) : (
+                            <><Zap size={12} /> Ligar Alpha</>
+                        )}
+                    </button>
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Confiança Mínima */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Confiança I.A. Mínima</label>
-                                <span className="text-lg font-black text-slate-400 italic">{settings.minConfidence}%</span>
-                            </div>
-                            <input
-                                type="range"
-                                min="70"
-                                max="99"
-                                value={settings.minConfidence}
-                                onChange={(e) => updateSettings({ minConfidence: parseInt(e.target.value) })}
-                                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-trader-green"
-                            />
-                            <div className="flex justify-between text-[8px] font-black text-slate-600 uppercase">
-                                <span>70% (Scalp)</span>
-                                <span>99% (Elite)</span>
-                            </div>
+                {/* STATS GRID */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                        <div className="p-3 bg-violet-500/20 text-violet-500 rounded-xl">
+                            <Activity size={20} />
                         </div>
-
-                        {/* Lote Padrão */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Volume por Operação (Lot)</label>
-                                <span className="text-lg font-black text-white italic">{settings.defaultLot.toFixed(2)}</span>
-                            </div>
-                            <div className="grid grid-cols-4 gap-2">
-                                {[0.01, 0.1, 0.5, 1.0].map(lot => (
-                                    <button
-                                        key={lot}
-                                        onClick={() => updateSettings({ defaultLot: lot })}
-                                        className={`py-2 rounded-xl border font-black text-[10px] transition-all ${settings.defaultLot === lot
-                                            ? 'bg-trader-green/20 border-trader-green/40 text-slate-300 shadow-[0_0_15px_rgba(34,197,94,0.4)]'
-                                            : 'bg-slate-950/50 border-slate-800 text-slate-500 hover:border-slate-700'
-                                            }`}
-                                    >
-                                        {lot}
-                                    </button>
-                                ))}
-                            </div>
+                        <div>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Sinais Processados</p>
+                            <p className="text-xl font-black text-white italic">{stats.processedCount}</p>
                         </div>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-                        {/* Toggles */}
-                        <button
-                            onClick={() => updateSettings({ onlyInstitutional: !settings.onlyInstitutional })}
-                            className={`p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all ${settings.onlyInstitutional
-                                ? 'bg-trader-green/10 border-trader-green/40 text-slate-300 shadow-[0_0_20px_rgba(34,197,94,0.4)]'
-                                : 'bg-slate-950/50 border-slate-800 text-slate-600'
-                                }`}
-                        >
-                            <ShieldCheck size={24} className={settings.onlyInstitutional ? 'animate-pulse text-slate-300' : ''} />
-                            <span className={`text-[9px] font-black uppercase tracking-widest text-center ${settings.onlyInstitutional ? 'text-slate-300' : ''}`}>Somente Institucional</span>
-                        </button>
-
-                        <button
-                            onClick={() => updateSettings({ autoBreakEven: !settings.autoBreakEven })}
-                            className={`p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all ${settings.autoBreakEven
-                                ? 'bg-trader-green/20 border-trader-green/40 text-trader-green shadow-[0_0_20px_rgba(34,197,94,0.3)]'
-                                : 'bg-slate-950/50 border-slate-800 text-slate-600'
-                                }`}
-                        >
-                            <Target size={24} className={settings.autoBreakEven ? 'animate-pulse text-trader-green' : ''} />
-                            <span className={`text-[9px] font-black uppercase tracking-widest text-center ${settings.autoBreakEven ? 'text-slate-300' : ''}`}>Break-Even Auto</span>
-                        </button>
-
-                        <button
-                            onClick={() => updateSettings({ autoTrailing: !settings.autoTrailing })}
-                            className={`p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all ${settings.autoTrailing
-                                ? 'bg-trader-amber/20 border-trader-amber/40 text-trader-amber shadow-[0_0_20px_rgba(245,158,11,0.3)]'
-                                : 'bg-slate-950/50 border-slate-800 text-slate-600'
-                                }`}
-                        >
-                            <Zap size={24} className={settings.autoTrailing ? 'animate-pulse text-trader-green' : ''} />
-                            <span className={`text-[9px] font-black uppercase tracking-widest text-center ${settings.autoTrailing ? 'text-slate-300' : ''}`}>Trailing Stop Auto</span>
-                        </button>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                        <div className="p-3 bg-indigo-500/20 text-indigo-500 rounded-xl">
+                            <ArrowUpDown size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Posições Abertas</p>
+                            <p className={`text-xl font-black italic ${stats.openPositions > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>{stats.openPositions}</p>
+                        </div>
+                    </div>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                        <div className="p-3 bg-amber-500/20 text-amber-500 rounded-xl">
+                            <Settings2 size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Limite Diário</p>
+                            <p className="text-xl font-black text-white italic">{settings.maxTradesPerDay}</p>
+                        </div>
+                    </div>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                        <div className="p-3 bg-emerald-500/20 text-emerald-500 rounded-xl">
+                            <BrainCircuit size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Score Mín</p>
+                            <p className="text-xl font-black text-white italic">{settings.entryScoreThreshold}</p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Performance & Status Stat Cards */}
-                <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/5 shadow-2xl flex flex-col gap-6">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Activity className="text-trader-cyan" size={20} />
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest">Performance Hoje</h2>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div className="p-5 bg-slate-950/50 border border-white/5 rounded-3xl flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <Cpu size={18} className="text-slate-500" />
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sinais Processados</span>
-                            </div>
-                            <span className="text-xl font-black text-white">{stats.processedCount}</span>
-                        </div>
-
-                        <div className="p-5 bg-slate-950/50 border border-white/5 rounded-3xl flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <ArrowUpDown size={18} className="text-slate-500" />
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Posições Abertas</span>
-                            </div>
-                            <span className={`text-xl font-black ${stats.openPositions > 0 ? 'text-trader-green' : 'text-slate-500'}`}>{stats.openPositions}</span>
-                        </div>
-
-                        <div className="p-5 bg-slate-950/50 border border-white/5 rounded-3xl flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <Settings2 size={18} className="text-slate-500" />
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Limite Diário (Trades)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => updateSettings({ maxTradesPerDay: settings.maxTradesPerDay - 1 })}
-                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-white font-black hover:bg-slate-700 transition-colors"
-                                >-</button>
-                                <span className="w-8 text-center text-sm font-black text-white">{settings.maxTradesPerDay}</span>
-                                <button
-                                    onClick={() => updateSettings({ maxTradesPerDay: settings.maxTradesPerDay + 1 })}
-                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-white font-black hover:bg-slate-700 transition-colors"
-                                >+</button>
-                            </div>
-                        </div>
-
-                        <div className="p-5 bg-slate-950/50 border border-white/5 rounded-3xl flex flex-col gap-4">
-                            <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-3">
-                                    <Activity size={18} className="text-slate-500" />
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Limite de Trades</span>
-                                        <span className="text-[8px] font-black text-trader-cyan uppercase">Janela ({stats.currentInterval}): {stats.tradesThisWindow}</span>
+                {/* SYMBOL ANALYSIS CARDS */}
+                {analysisData.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {analysisData.map((a) => {
+                            const isBullish = a.direction === 'BUY';
+                            const isReady = a.direction !== 'NEUTRAL' && a.score >= (settings?.entryScoreThreshold || 70);
+                            const color = isBullish ? 'emerald' : isReady || a.direction === 'SELL' ? 'red' : 'violet';
+                            return (
+                                <motion.div key={a.symbol} whileHover={{ y: -5 }} className={`bg-slate-950/40 p-5 rounded-3xl border transition-all ${isReady ? 'border-emerald-500/30 shadow-[0_0_20px_rgba(52,211,153,0.15)]' : 'border-white/5 hover:border-violet-500/20'}`}>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <span className="text-lg font-black text-white italic">{a.symbol}</span>
+                                        <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
+                                            a.direction === 'NEUTRAL' ? 'bg-slate-500/10 text-slate-500 border border-slate-500/20' :
+                                            isBullish ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-red-500/20 text-red-500 border border-red-500/30'
+                                        }`}>
+                                            {a.direction === 'NEUTRAL' ? 'NEUTRO' : a.direction}
+                                        </div>
                                     </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-end">
+                                            <div>
+                                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Score</p>
+                                                <p className={`text-xl font-black italic ${isBullish ? 'text-emerald-400' : a.direction === 'SELL' ? 'text-red-400' : 'text-slate-400'}`}>
+                                                    {a.score}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Wyckoff</p>
+                                                <p className="text-sm font-bold text-white">{a.wyckoffPhase}</p>
+                                            </div>
+                                        </div>
+                                        <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${a.score}%` }}
+                                                className={`h-full bg-gradient-to-r ${isBullish ? 'from-emerald-500 to-trader-green' : a.direction === 'SELL' ? 'from-red-500 to-red-400' : 'from-slate-500 to-slate-400'}`}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
+                                            <div>
+                                                <p className="text-[7px] font-black text-slate-600 uppercase tracking-widest">RSI</p>
+                                                <p className="text-xs font-black text-white">{a.rsi.toFixed(1)}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[7px] font-black text-slate-600 uppercase tracking-widest">VWAP</p>
+                                                <p className={`text-xs font-black ${a.vwapDistance > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{a.vwapDistance > 0 ? '+' : ''}{a.vwapDistance}%</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                {/* CONFIG LEFT */}
+                <div className="xl:col-span-2 space-y-6">
+
+                    {/* FILTERS & INTELLIGENCE */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                            <BrainCircuit className="text-violet-500" size={18} /> Inteligência & Filtros
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Confiança I.A. Mínima</span>
+                                    <span className="text-sm font-black text-violet-400">{settings.minConfidence}%</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => updateSettings({ tradesPer15Min: Math.max(0, settings.tradesPer15Min - 1) })}
-                                        className="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-white font-black hover:bg-slate-700 transition-colors"
-                                    >-</button>
-                                    <span className="w-8 text-center text-sm font-black text-white">{settings.tradesPer15Min}</span>
-                                    <button
-                                        onClick={() => updateSettings({ tradesPer15Min: settings.tradesPer15Min + 1 })}
-                                        className="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-white font-black hover:bg-slate-700 transition-colors"
-                                    >+</button>
+                                <input type="range" min={70} max={99} value={settings.minConfidence}
+                                    onChange={(e) => updateSettings({ minConfidence: parseInt(e.target.value) })}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-violet-500" />
+                                <div className="flex justify-between text-[7px] font-black text-slate-600 uppercase mt-1">
+                                    <span>70%</span>
+                                    <span>99%</span>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-4 md:grid-cols-7 gap-1.5 pt-2 border-t border-white/5">
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Volume (Lot)</span>
+                                    <span className="text-sm font-black text-white">{settings.defaultLot.toFixed(2)}</span>
+                                </div>
+                                <div className="grid grid-cols-4 gap-2">
+                                    {[0.01, 0.1, 0.5, 1.0].map(lot => (
+                                        <button key={lot}
+                                            onClick={() => updateSettings({ defaultLot: lot })}
+                                            className={`py-2 rounded-xl border font-black text-[10px] transition-all ${settings.defaultLot === lot
+                                                ? 'bg-violet-500/20 border-violet-500/30 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                                                : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
+                                            {lot}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <button
+                                onClick={() => updateSettings({ onlyInstitutional: !settings.onlyInstitutional })}
+                                className={`p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all ${settings.onlyInstitutional
+                                    ? 'bg-violet-500/10 border-violet-500/30 text-violet-400 shadow-[0_0_20px_rgba(139,92,246,0.3)]'
+                                    : 'bg-slate-950/40 border-white/5 text-slate-600'}`}>
+                                <ShieldCheck size={22} className={settings.onlyInstitutional ? 'text-violet-400' : ''} />
+                                <span className="text-[8px] font-black uppercase tracking-widest text-center">Somente Institucional</span>
+                            </button>
+                            <button
+                                onClick={() => updateSettings({ autoBreakEven: !settings.autoBreakEven })}
+                                className={`p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all ${settings.autoBreakEven
+                                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
+                                    : 'bg-slate-950/40 border-white/5 text-slate-600'}`}>
+                                <Target size={22} className={settings.autoBreakEven ? 'text-amber-400' : ''} />
+                                <span className="text-[8px] font-black uppercase tracking-widest text-center">Break-Even Auto</span>
+                            </button>
+                            <button
+                                onClick={() => updateSettings({ autoTrailing: !settings.autoTrailing })}
+                                className={`p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all ${settings.autoTrailing
+                                    ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]'
+                                    : 'bg-slate-950/40 border-white/5 text-slate-600'}`}>
+                                <Zap size={22} className={settings.autoTrailing ? 'text-cyan-400' : ''} />
+                                <span className="text-[8px] font-black uppercase tracking-widest text-center">Trailing Stop Auto</span>
+                            </button>
+                        </div>
+
+                        <div className="mt-6 bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Limite de Trades</span>
+                                <span className="text-[8px] font-black text-violet-400 uppercase">Janela ({stats.currentInterval}): {stats.tradesThisWindow}</span>
+                            </div>
+                            <div className="flex items-center justify-between mb-3">
+                                <button onClick={() => updateSettings({ maxTradesPerDay: settings.maxTradesPerDay - 1 })}
+                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-white font-black hover:bg-slate-700">-</button>
+                                <span className="text-2xl font-black text-white">{settings.maxTradesPerDay}</span>
+                                <button onClick={() => updateSettings({ maxTradesPerDay: settings.maxTradesPerDay + 1 })}
+                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-white font-black hover:bg-slate-700">+</button>
+                            </div>
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-[8px] font-black text-slate-500 uppercase">Trades/{settings.tradeLimitInterval}</span>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={() => updateSettings({ tradesPer15Min: Math.max(0, settings.tradesPer15Min - 1) })}
+                                        className="w-7 h-7 flex items-center justify-center bg-slate-800 rounded-lg text-white font-black hover:bg-slate-700">-</button>
+                                    <span className="text-sm font-black text-white">{settings.tradesPer15Min}</span>
+                                    <button onClick={() => updateSettings({ tradesPer15Min: settings.tradesPer15Min + 1 })}
+                                        className="w-7 h-7 flex items-center justify-center bg-slate-800 rounded-lg text-white font-black hover:bg-slate-700">+</button>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-7 gap-1.5">
                                 {['1m', '15m', '30m', '1h', '1d', '1w', '1mo'].map(interval => (
-                                    <button
-                                        key={interval}
+                                    <button key={interval}
                                         onClick={() => updateSettings({ tradeLimitInterval: interval as any })}
                                         className={`py-1.5 rounded-lg border font-black text-[8px] uppercase transition-all ${settings.tradeLimitInterval === interval
-                                            ? 'bg-trader-green/20 border-trader-green/40 text-slate-300 shadow-[0_0_15px_rgba(34,197,94,0.5)]'
-                                            : 'bg-slate-900/50 border-slate-800 text-slate-600 hover:border-slate-700'
-                                            }`}
-                                    >
+                                            ? 'bg-violet-500/20 border-violet-500/30 text-white'
+                                            : 'bg-slate-800/50 border-white/5 text-slate-600 hover:bg-slate-700/50'}`}>
                                         {interval}
                                     </button>
                                 ))}
                             </div>
                         </div>
+                    </div>
 
-                        {/* Robot Sensing Visualization */}
-                        <div className="mt-4 p-6 bg-trader-green/5 border border-trader-green/20 rounded-[2rem] relative overflow-hidden">
-                            <div className="flex items-center gap-4 relative z-10">
-                                <div className="relative">
-                                    <Fingerprint size={32} className={`text-trader-green transition-all duration-1000 ${settings.enabled ? 'animate-pulse scale-110' : 'opacity-60'}`} />
-                                    {settings.enabled && (
-                                        <div className="absolute inset-0 bg-trader-green/20 blur-xl animate-pulse"></div>
-                                    )}
+                    {/* INSTITUTIONAL PARAMETERS */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                            <Gauge className="text-violet-500" size={18} /> Parâmetros Institucionais
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Score Mínimo</span>
+                                    <span className="text-sm font-black text-violet-400">{settings.entryScoreThreshold}</span>
                                 </div>
-                                <div>
-                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Status do Sensor</p>
-                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">
-                                        {settings.enabled ? 'Analisando Volume Institucional...' : 'Sensor Em Espera'}
-                                    </p>
-                                </div>
+                                <input type="range" min={40} max={95} value={settings.entryScoreThreshold}
+                                    onChange={(e) => updateSettings({ entryScoreThreshold: parseInt(e.target.value) })}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-violet-500" />
                             </div>
-
-                            {/* Scanning line animation */}
-                            {settings.enabled && (
-                                <motion.div
-                                    animate={{ top: ['0%', '100%', '0%'] }}
-                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                    className="absolute left-0 right-0 h-px bg-trader-green/20 shadow-[0_0_10px_rgba(22,163,74,0.5)] z-0"
-                                />
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Institutional Analysis Cards */}
-                {analysisData.length > 0 && (
-                    <div className="lg:col-span-3 bg-slate-900/60 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <Layers className="text-trader-cyan" size={20} />
-                            <h2 className="text-sm font-black text-white uppercase tracking-widest">Análise Institucional</h2>
-                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest ml-auto">
-                                {stats.openPositions} posições abertas
-                            </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                            {analysisData.map((a) => {
-                                const isBullish = a.direction === 'BUY';
-                                const isReady = a.direction !== 'NEUTRAL' && a.score >= (settings?.entryScoreThreshold || 70);
-                                return (
-                                    <div key={a.symbol} className={`bg-slate-950/60 p-4 rounded-2xl border transition-all ${isReady
-                                        ? 'border-trader-green/40 shadow-[0_0_15px_rgba(34,197,94,0.2)]'
-                                        : 'border-white/5'
-                                        }`}>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-xs font-black text-white">{a.symbol}</span>
-                                            <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-tighter border ${isReady
-                                                ? 'bg-trader-green/20 border-trader-green/30 text-trader-green'
-                                                : a.direction === 'NEUTRAL'
-                                                    ? 'bg-slate-800 border-slate-700 text-slate-500'
-                                                    : 'bg-trader-red/20 border-trader-red/30 text-trader-red'
-                                                }`}>
-                                                {a.direction === 'NEUTRAL' ? 'NEUTRO' : a.direction}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-baseline gap-1 mb-2">
-                                            <span className={`text-lg font-black italic ${isBullish ? 'text-trader-green' : 'text-trader-red'}`}>
-                                                {a.score}
-                                            </span>
-                                            <span className="text-[8px] font-black text-slate-600 uppercase">/ {settings?.entryScoreThreshold || 70}</span>
-                                        </div>
-                                        <div className="flex flex-wrap gap-1">
-                                            <span className="px-1.5 py-0.5 bg-slate-800 rounded text-[7px] font-black text-slate-400 uppercase">
-                                                {a.wyckoffPhase}
-                                            </span>
-                                            <span className="px-1.5 py-0.5 bg-slate-800 rounded text-[7px] font-black text-slate-400">
-                                                RSI {a.rsi}
-                                            </span>
-                                            <span className="px-1.5 py-0.5 bg-slate-800 rounded text-[7px] font-black text-slate-400">
-                                                VWAP {a.vwapDistance > 0 ? '+' : ''}{a.vwapDistance}%
-                                            </span>
-                                        </div>
-                                        <p className="text-[7px] font-black text-slate-600 uppercase tracking-tighter mt-2 truncate">{a.details}</p>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
-                {/* Institutional Settings */}
-                <div className="lg:col-span-3 bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-6">
-                    <div className="flex items-center gap-3">
-                        <Gauge className="text-trader-cyan" size={20} />
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest">Parâmetros Institucionais</h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {/* Score Threshold */}
-                        <div className="space-y-2">
-                            <label className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Score Mínimo</label>
-                            <input
-                                type="range"
-                                min="40"
-                                max="95"
-                                value={settings.entryScoreThreshold}
-                                onChange={(e) => updateSettings({ entryScoreThreshold: parseInt(e.target.value) })}
-                                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-trader-cyan"
-                            />
-                            <span className="text-xs font-black text-white">{settings.entryScoreThreshold}</span>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Risco por Trade</span>
+                                    <span className="text-sm font-black text-red-400">{settings.maxRiskPerTrade}%</span>
+                                </div>
+                                <input type="range" min={0.1} max={5} step={0.1} value={settings.maxRiskPerTrade}
+                                    onChange={(e) => updateSettings({ maxRiskPerTrade: parseFloat(e.target.value) })}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-red-500" />
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">ATR Multiplicador SL</span>
+                                    <span className="text-sm font-black text-red-400">{settings.atrMultiplierSL}x</span>
+                                </div>
+                                <input type="range" min={0.5} max={4} step={0.1} value={settings.atrMultiplierSL}
+                                    onChange={(e) => updateSettings({ atrMultiplierSL: parseFloat(e.target.value) })}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-red-500" />
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">ATR Multiplicador TP</span>
+                                    <span className="text-sm font-black text-emerald-400">{settings.atrMultiplierTP}x</span>
+                                </div>
+                                <input type="range" min={1} max={8} step={0.1} value={settings.atrMultiplierTP}
+                                    onChange={(e) => updateSettings({ atrMultiplierTP: parseFloat(e.target.value) })}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-emerald-500" />
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Trailing Ativa</span>
+                                    <span className="text-sm font-black text-cyan-400">{settings.trailingActivation * 100}% do TP</span>
+                                </div>
+                                <input type="range" min={10} max={80} step={5} value={settings.trailingActivation * 100}
+                                    onChange={(e) => updateSettings({ trailingActivation: parseInt(e.target.value) / 100 })}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-cyan-500" />
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Break-Even Ativa</span>
+                                    <span className="text-sm font-black text-amber-400">{settings.breakevenActivation * 100}% do TP</span>
+                                </div>
+                                <input type="range" min={5} max={60} step={5} value={settings.breakevenActivation * 100}
+                                    onChange={(e) => updateSettings({ breakevenActivation: parseInt(e.target.value) / 100 })}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-amber-500" />
+                            </div>
                         </div>
 
-                        {/* Risk % */}
-                        <div className="space-y-2">
-                            <label className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Risco por Trade (%)</label>
-                            <input
-                                type="range"
-                                min="0.1"
-                                max="5"
-                                step="0.1"
-                                value={settings.maxRiskPerTrade}
-                                onChange={(e) => updateSettings({ maxRiskPerTrade: parseFloat(e.target.value) })}
-                                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-trader-red"
-                            />
-                            <span className="text-xs font-black text-white">{settings.maxRiskPerTrade}%</span>
-                        </div>
-
-                        {/* ATR SL */}
-                        <div className="space-y-2">
-                            <label className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">ATR Multiplicador SL</label>
-                            <input
-                                type="range"
-                                min="0.5"
-                                max="4"
-                                step="0.1"
-                                value={settings.atrMultiplierSL}
-                                onChange={(e) => updateSettings({ atrMultiplierSL: parseFloat(e.target.value) })}
-                                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-trader-red"
-                            />
-                            <span className="text-xs font-black text-white">{settings.atrMultiplierSL}x</span>
-                        </div>
-
-                        {/* ATR TP */}
-                        <div className="space-y-2">
-                            <label className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">ATR Multiplicador TP</label>
-                            <input
-                                type="range"
-                                min="1"
-                                max="8"
-                                step="0.1"
-                                value={settings.atrMultiplierTP}
-                                onChange={(e) => updateSettings({ atrMultiplierTP: parseFloat(e.target.value) })}
-                                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-trader-green"
-                            />
-                            <span className="text-xs font-black text-white">{settings.atrMultiplierTP}x</span>
+                        <div className="mt-6 bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Eye size={16} className={settings.useInstitutionalAnalysis ? 'text-emerald-400' : 'text-slate-500'} />
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Análise Institucional</span>
+                                </div>
+                                <button
+                                    onClick={() => updateSettings({ useInstitutionalAnalysis: !settings.useInstitutionalAnalysis })}
+                                    className={`w-10 h-5 rounded-full relative transition-all ${settings.useInstitutionalAnalysis ? 'bg-emerald-500' : 'bg-slate-700'}`}>
+                                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${settings.useInstitutionalAnalysis ? 'right-1' : 'left-1'}`} />
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                        {/* Trailing Activation */}
-                        <div className="space-y-2">
-                            <label className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Trailing Ativa em (%)</label>
-                            <input
-                                type="range"
-                                min="10"
-                                max="80"
-                                step="5"
-                                value={settings.trailingActivation * 100}
-                                onChange={(e) => updateSettings({ trailingActivation: parseInt(e.target.value) / 100 })}
-                                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-trader-amber"
-                            />
-                            <span className="text-xs font-black text-white">{settings.trailingActivation * 100}% do TP</span>
+                    {/* TIMEFRAME */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                            <Activity className="text-violet-500" size={18} /> Timeframe de Operação
+                        </h3>
+                        <div className="grid grid-cols-3 md:grid-cols-9 gap-3">
+                            {['ALL', 'M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1'].map(tf => (
+                                <button key={tf}
+                                    onClick={() => updateSettings({ preferredTimeframe: tf })}
+                                    className={`py-3 rounded-2xl border font-black text-[10px] transition-all ${settings.preferredTimeframe === tf
+                                        ? 'bg-violet-500/20 border-violet-500/30 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)] scale-105'
+                                        : 'bg-slate-950/40 border-white/5 text-slate-500 hover:border-slate-700'}`}>
+                                    {tf === 'ALL' ? 'TODOS' : tf}
+                                </button>
+                            ))}
                         </div>
+                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center mt-4">
+                            O robô executará apenas sinais confirmados no timeframe selecionado.
+                        </p>
+                    </div>
 
-                        {/* Breakeven Activation */}
-                        <div className="space-y-2">
-                            <label className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Breakeven Ativa em (%)</label>
-                            <input
-                                type="range"
-                                min="5"
-                                max="60"
-                                step="5"
-                                value={settings.breakevenActivation * 100}
-                                onChange={(e) => updateSettings({ breakevenActivation: parseInt(e.target.value) / 100 })}
-                                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-trader-cyan"
-                            />
-                            <span className="text-xs font-black text-white">{settings.breakevenActivation * 100}% do TP</span>
+                    {/* SYMBOLS */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                            <CircleDot className="text-violet-500" size={18} /> Símbolos Monitorados
+                        </h3>
+                        <div className="flex gap-2 flex-wrap">
+                            {SYMBOLS.map(s => (
+                                <button key={s}
+                                    onClick={() => {
+                                        const current = settings.symbols;
+                                        const updated = current.includes(s) ? current.filter(x => x !== s) : [...current, s];
+                                        if (updated.length > 0) updateSettings({ symbols: updated });
+                                    }}
+                                    className={`px-3 py-2 rounded-xl border text-[10px] font-black tracking-wide transition-all ${settings.symbols.includes(s)
+                                        ? 'bg-violet-500/20 border-violet-500/30 text-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.2)]'
+                                        : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
+                                    {s}
+                                </button>
+                            ))}
                         </div>
+                    </div>
 
-                        {/* Toggle Institutional Analysis */}
-                        <div className="flex items-center">
-                            <button
-                                onClick={() => updateSettings({ useInstitutionalAnalysis: !settings.useInstitutionalAnalysis })}
-                                className={`p-4 rounded-2xl border flex flex-col items-center gap-2 transition-all w-full ${settings.useInstitutionalAnalysis
-                                    ? 'bg-trader-green/10 border-trader-green/40 text-slate-300 shadow-[0_0_20px_rgba(34,197,94,0.4)]'
-                                    : 'bg-slate-950/50 border-slate-800 text-slate-600'
-                                    }`}
-                            >
-                                <Eye size={22} className={settings.useInstitutionalAnalysis ? 'text-trader-green' : ''} />
-                                <span className={`text-[8px] font-black uppercase tracking-widest text-center ${settings.useInstitutionalAnalysis ? 'text-trader-green' : ''}`}>
-                                    Análise Institucional {settings.useInstitutionalAnalysis ? 'ATIVA' : 'INATIVA'}
-                                </span>
+                    {/* TRADE REPORT */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
+                                <Trophy className="text-violet-500" size={18} /> Relatório de Performance I.A.
+                            </h3>
+                            <button onClick={handleSync} disabled={syncing}
+                                className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${syncing
+                                    ? 'bg-violet-500/20 border-violet-500/30 text-violet-500 cursor-wait'
+                                    : 'bg-slate-800/50 border-white/5 text-slate-300 hover:bg-violet-500/10 hover:border-violet-500/30 hover:text-violet-400'}`}>
+                                <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
+                                {syncing ? 'Sincronizando...' : 'Sincronizar'}
                             </button>
                         </div>
-                    </div>
-                </div>
 
-                {/* Timeframe Selection */}
-                <div className="lg:col-span-3 bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-6">
-                    <div className="flex items-center gap-3">
-                        <Activity className="text-trader-cyan" size={20} />
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest">Timeframe de Operação</h2>
-                    </div>
-
-                    <div className="grid grid-cols-3 md:grid-cols-9 gap-3">
-                        {['ALL', 'M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1'].map(tf => (
-                            <button
-                                key={tf}
-                                onClick={() => updateSettings({ preferredTimeframe: tf })}
-                                className={`py-3 rounded-2xl border font-black text-[10px] transition-all ${settings.preferredTimeframe === tf
-                                    ? 'bg-trader-green/20 border-trader-green/40 text-slate-300 shadow-[0_0_20px_rgba(34,197,94,0.5)] scale-105'
-                                    : 'bg-slate-950/50 border-slate-800 text-slate-500 hover:border-slate-700'
-                                    }`}
-                            >
-                                {tf === 'ALL' ? 'TODOS' : tf}
-                            </button>
-                        ))}
-                    </div>
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center mt-2">
-                        O robô executará apenas sinais confirmados no timeframe selecionado.
-                    </p>
-                </div>
-
-                {/* ==================== TRADE REPORT AREA ==================== */}
-                <div className="lg:col-span-3 bg-slate-900/60 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-8">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <Trophy className="text-trader-green" size={24} />
-                            <div>
-                                <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Relatório de Performance I.A.</h2>
-                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Análise de Win/Loss e Assertividade Alpha</p>
+                        {/* KPI GRID */}
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 text-center">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center justify-center gap-1.5">
+                                    <BarChart3 size={12} /> Total Trades
+                                </p>
+                                <p className="text-2xl font-black text-white italic">{report?.summary.totalTrades || 0}</p>
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 text-center">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center justify-center gap-1.5">
+                                    <Percent size={12} /> % Acerto
+                                </p>
+                                <p className={`text-2xl font-black italic ${(report?.summary.winRate || 0) >= 60 ? 'text-emerald-400' : (report?.summary.winRate || 0) >= 40 ? 'text-amber-400' : 'text-red-400'}`}>
+                                    {report?.summary.winRate || 0}%
+                                </p>
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 text-center">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center justify-center gap-1.5">
+                                    <DollarSign size={12} /> Lucro Total
+                                </p>
+                                <p className={`text-2xl font-black italic ${(report?.summary.totalProfit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                    ${(report?.summary.totalProfit || 0).toFixed(2)}
+                                </p>
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 text-center">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center justify-center gap-1.5">
+                                    <TrendingUp size={12} /> Profit Factor
+                                </p>
+                                <p className={`text-2xl font-black italic ${(report?.summary.profitFactor || 0) >= 1.5 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                    {report?.summary.profitFactor?.toFixed(2) || '0.00'}
+                                </p>
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 text-center">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center justify-center gap-1.5">
+                                    <Flame size={12} /> Streak
+                                </p>
+                                <p className="text-2xl font-black text-amber-400 italic">{report?.summary.currentStreak || 0}x</p>
                             </div>
                         </div>
 
-                        <button
-                            onClick={handleSync}
-                            disabled={syncing}
-                            className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${syncing
-                                ? 'bg-trader-green/20 border-trader-green/40 text-trader-green cursor-wait'
-                                : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-trader-green/10 hover:border-trader-green/30 hover:text-trader-green'
-                                }`}
-                        >
-                            <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
-                            {syncing ? 'Sincronizando...' : 'Sincronizar Trades'}
-                        </button>
-                    </div>
-
-                    {/* Report KPIs */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        {[
-                            { label: 'Total Trades', value: report?.summary.totalTrades || 0, color: 'text-white', icon: <BarChart3 size={18} /> },
-                            { label: '% Acerto', value: `${report?.summary.winRate || 0}%`, color: (report?.summary.winRate || 0) >= 60 ? 'text-trader-green' : 'text-trader-red', icon: <Percent size={18} /> },
-                            { label: 'Lucro Total', value: `$${(report?.summary.totalProfit || 0).toFixed(2)}`, color: (report?.summary.totalProfit || 0) >= 0 ? 'text-trader-green' : 'text-trader-red', icon: <DollarSign size={18} /> },
-                            { label: 'Profit Factor', value: report?.summary.profitFactor || 0, color: (report?.summary.profitFactor || 0) >= 1.5 ? 'text-trader-green' : 'text-trader-red', icon: <TrendingUp size={18} /> },
-                            { label: 'Streak Atual', value: `${report?.summary.currentStreak || 0}x`, color: 'text-amber-400', icon: <Flame size={18} /> }
-                        ].map((kpi, i) => (
-                            <div key={i} className="bg-slate-950/40 p-5 rounded-3xl border border-white/5 group hover:border-trader-green/30 transition-all">
-                                <div className="flex items-center gap-2 mb-2" title={kpi.label === 'Profit Factor' ? 'Fator de Lucro: Ganho Bruto / Perda Bruta (Ideal > 1.5)' : undefined}>
-                                    <span className="text-slate-600 group-hover:text-trader-green transition-colors">{kpi.icon}</span>
-                                    <span className={`text-[8px] font-black uppercase tracking-widest ${kpi.label === 'Profit Factor' ? 'cursor-help border-b border-slate-600 border-dotted text-slate-400' : 'text-slate-500'}`}>{kpi.label}</span>
+                        {/* WIN/LOSS BAR */}
+                        {report && report.summary.totalTrades > 0 && (
+                            <div className="space-y-3 mb-6">
+                                <div className="flex items-center justify-between px-1">
+                                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{report.summary.wins} Vitórias</span>
+                                    <span className="text-[10px] font-black text-red-400 uppercase tracking-widest">{report.summary.losses} Derrotas</span>
                                 </div>
-                                <span className={`text-2xl font-black italic tracking-tighter ${kpi.color}`}>{kpi.value}</span>
+                                <div className="h-4 bg-slate-950 rounded-full overflow-hidden flex border border-white/5">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${report.summary.winRate}%` }}
+                                        className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full"
+                                    />
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${100 - report.summary.winRate}%` }}
+                                        className="bg-gradient-to-r from-red-500 to-red-400 h-full"
+                                    />
+                                </div>
                             </div>
-                        ))}
+                        )}
+
+                        {/* TABLE */}
+                        <div className="bg-slate-950/60 rounded-[2rem] border border-white/5 overflow-hidden">
+                            <div className="max-h-72 overflow-x-auto overflow-y-auto custom-scrollbar">
+                                <table className="w-full text-left min-w-[500px]">
+                                    <thead className="sticky top-0 bg-slate-900 border-b border-white/5">
+                                        <tr className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                                            <th className="px-6 py-4">Status</th>
+                                            <th className="px-6 py-4">Ativo</th>
+                                            <th className="px-6 py-4">Tipo</th>
+                                            <th className="px-6 py-4">Setup</th>
+                                            <th className="px-6 py-4 text-right">P&L ($)</th>
+                                            <th className="px-6 py-4 text-right">Data/Hora</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {report?.recentTrades && report.recentTrades.length > 0 ? (
+                                            report.recentTrades.map((trade) => (
+                                                <tr key={trade.id} className="group hover:bg-white/5 transition-all">
+                                                    <td className="px-6 py-4">
+                                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border ${trade.result === 'WIN'
+                                                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                                            : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
+                                                            {trade.result}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 font-black text-white text-xs italic">XAUUSD</td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`text-[10px] font-black ${trade.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                            {trade.type}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-[10px] font-bold text-slate-400">{trade.setup}</td>
+                                                    <td className={`px-6 py-4 text-right text-xs font-black italic ${trade.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                        {trade.profit >= 0 ? '+' : ''}${trade.profit.toFixed(2)}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right text-[10px] text-slate-500 font-mono">
+                                                        {new Date(trade.closeTime).toLocaleDateString()} {new Date(trade.closeTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={6} className="px-6 py-12 text-center">
+                                                    <div className="flex flex-col items-center gap-3 opacity-30">
+                                                        <Bot size={40} />
+                                                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Sincronize para visualizar o histórico neural</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* RIGHT SIDEBAR */}
+                <div className="space-y-6">
+                    {/* ACTIVE POSITIONS */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                            <Target className="text-violet-500" size={18} /> Posições
+                        </h3>
+                        <div className="text-center py-8">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-950/60 border border-white/5 flex items-center justify-center">
+                                <Target size={28} className="text-slate-600" />
+                            </div>
+                            <p className="text-base font-black text-slate-400">
+                                {stats.openPositions > 0 ? `${stats.openPositions} posição(ões) aberta(s)` : 'Nenhuma posição ativa'}
+                            </p>
+                            <p className="text-[10px] text-slate-600 mt-1">Gerenciado pelo Trade Guardian</p>
+                        </div>
                     </div>
 
-                    {/* Asset / Trace Chart Placeholder or Summary */}
-                    {report && report.summary.totalTrades > 0 && (
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between px-2">
-                                <span className="text-[10px] font-black text-trader-green uppercase tracking-widest">{report.summary.wins} Vitórias</span>
-                                <span className="text-[10px] font-black text-trader-red uppercase tracking-widest">{report.summary.losses} Derrotas</span>
-                            </div>
-                            <div className="h-4 bg-slate-950 rounded-full overflow-hidden flex border border-white/5">
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${report.summary.winRate}%` }}
-                                    className="bg-gradient-to-r from-trader-green to-emerald-400 h-full"
-                                />
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${100 - report.summary.winRate}%` }}
-                                    className="bg-gradient-to-r from-red-500 to-trader-red h-full"
-                                />
+                    {/* INSTITUTIONAL ANALYSIS MINI */}
+                    {analysisData.length > 0 && (
+                        <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
+                            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                                <Layers className="text-violet-500" size={18} /> Scores em Tempo Real
+                            </h3>
+                            <div className="space-y-4">
+                                {analysisData.map(a => {
+                                    const isBullish = a.direction === 'BUY';
+                                    const scoreColor = isBullish ? 'text-emerald-400' : a.direction === 'SELL' ? 'text-red-400' : 'text-slate-400';
+                                    return (
+                                        <div key={a.symbol} className="bg-slate-950/40 p-3 rounded-2xl border border-white/5">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-xs font-black text-white">{a.symbol}</span>
+                                                <span className={`text-xs font-black italic ${scoreColor}`}>{a.score}</span>
+                                            </div>
+                                            <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${a.score}%` }}
+                                                    className={`h-full ${isBullish ? 'bg-emerald-500' : a.direction === 'SELL' ? 'bg-red-500' : 'bg-slate-500'}`}
+                                                />
+                                            </div>
+                                            <div className="flex justify-between mt-1">
+                                                <span className="text-[7px] font-black text-slate-600 uppercase">{a.wyckoffPhase}</span>
+                                                <span className={`text-[7px] font-black uppercase ${a.trendAlignment === 'ALIGNED' || a.trendAlignment === 'BULLISH' ? 'text-emerald-400' : a.trendAlignment === 'BEARISH' ? 'text-red-400' : 'text-slate-500'}`}>
+                                                    {a.trendAlignment}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
 
-                    {/* Recent Trades Table */}
-                    <div className="bg-slate-950/60 rounded-[2rem] border border-white/5 overflow-hidden">
-                        <div className="max-h-72 overflow-x-auto overflow-y-auto custom-scrollbar">
-                            <table className="w-full text-left min-w-[500px]">
-                                <thead className="sticky top-0 bg-slate-900 border-b border-white/5">
-                                    <tr className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                                        <th className="px-6 py-4">Status</th>
-                                        <th className="px-6 py-4">Ativo</th>
-                                        <th className="px-6 py-4">Tipo</th>
-                                        <th className="px-6 py-4">Setup</th>
-                                        <th className="px-6 py-4 text-right">P&L ($)</th>
-                                        <th className="px-6 py-4 text-right">Data/Hora</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5">
-                                    {report?.recentTrades && report.recentTrades.length > 0 ? (
-                                        report.recentTrades.map((trade) => (
-                                            <tr key={trade.id} className="group hover:bg-white/5 transition-all">
-                                                <td className="px-6 py-4">
-                                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border ${trade.result === 'WIN'
-                                                        ? 'bg-trader-green/10 border-trader-green/30 text-trader-green'
-                                                        : 'bg-trader-red/10 border-trader-red/30 text-trader-red'
-                                                        }`}>
-                                                        {trade.result}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 font-black text-white text-xs italic">XAUUSD</td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`text-[10px] font-black ${trade.type === 'BUY' ? 'text-trader-green' : 'text-trader-red'}`}>
-                                                        {trade.type}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-[10px] font-bold text-slate-400">{trade.setup}</td>
-                                                <td className={`px-6 py-4 text-right text-xs font-black italic ${trade.profit >= 0 ? 'text-trader-green' : 'text-trader-red'}`}>
-                                                    {trade.profit >= 0 ? '+' : ''}${trade.profit.toFixed(2)}
-                                                </td>
-                                                <td className="px-6 py-4 text-right text-[10px] text-slate-500 font-mono">
-                                                    {new Date(trade.closeTime).toLocaleDateString()} {new Date(trade.closeTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={6} className="px-6 py-12 text-center">
-                                                <div className="flex flex-col items-center gap-3 opacity-30">
-                                                    <Bot size={40} />
-                                                    <p className="text-[10px] font-black uppercase tracking-[0.2em]">Sincronize para visualizar o histórico neural</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                    {/* USE ML SIGNALS TOGGLE */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                            <BrainCircuit className="text-violet-500" size={18} /> Integração ML
+                        </h3>
+                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Zap size={16} className={settings.useMLSignals ? 'text-violet-400' : 'text-slate-600'} />
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Usar Sinais ML</span>
+                                </div>
+                                <button
+                                    onClick={() => updateSettings({ useMLSignals: !(settings as any).useMLSignals })}
+                                    className={`w-10 h-5 rounded-full relative transition-all ${(settings as any).useMLSignals ? 'bg-violet-500' : 'bg-slate-700'}`}>
+                                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${(settings as any).useMLSignals ? 'right-1' : 'left-1'}`} />
+                                </button>
+                            </div>
+                            {(settings as any).useMLSignals && (
+                                <div className="mt-3 pt-3 border-t border-white/5">
+                                    <p className="text-[8px] font-black text-violet-400/60 uppercase tracking-widest">
+                                        Sinais ALTA do ML Insights serão convertidos em ordens Alpha Robot
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* ROBOT STATUS */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
+                        <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent ${isActive ? 'via-emerald-500/50' : 'via-slate-500/30'} to-transparent`}></div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                            <Shield className="text-violet-500" size={18} /> Status Alpha Robot
+                        </h3>
+                        <div className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 text-center">
+                            <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center border-2 ${isActive ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-slate-700 bg-slate-800/50'}`}>
+                                <Bot size={32} className={isActive ? 'text-emerald-400 animate-pulse' : 'text-slate-600'} />
+                            </div>
+                            <p className="text-base font-black text-white italic">{isActive ? 'Alpha Robot Ativo' : 'Alpha Robot Inativo'}</p>
+                            <p className="text-[10px] text-slate-500 mt-1">
+                                {isActive
+                                    ? `Analisando ${settings.symbols.length} símbolos • Score mínimo: ${settings.entryScoreThreshold}`
+                                    : 'Ative o robô para iniciar trading institucional'}
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -1486,5 +1486,113 @@
     "candleTime": 193,
     "id": "AUDIT-1778514107446-3e0t6",
     "timestamp": 1778514107446
+  },
+  {
+    "symbol": "BTCUSD",
+    "type": "SELL",
+    "price": 75528.4,
+    "microTrend": "up",
+    "macroTrend": "up",
+    "sentimentScore": 30.719933534285783,
+    "sentimentEmotion": "FEAR",
+    "candleTime": 248,
+    "id": "AUDIT-1779502552486-5yjr5",
+    "timestamp": 1779502552486
+  },
+  {
+    "symbol": "BTCUSD",
+    "type": "BUY",
+    "price": 75551.07,
+    "microTrend": "up",
+    "macroTrend": "up",
+    "sentimentScore": 27.60896057691621,
+    "sentimentEmotion": "FEAR",
+    "candleTime": 155,
+    "id": "AUDIT-1779502645857-oxm2c",
+    "timestamp": 1779502645857
+  },
+  {
+    "symbol": "BTCUSD",
+    "type": "BUY",
+    "price": 75578.67,
+    "microTrend": "up",
+    "macroTrend": "up",
+    "sentimentScore": 7.950789547105996,
+    "sentimentEmotion": "EXTREME_FEAR",
+    "candleTime": 10,
+    "id": "AUDIT-1779504890651-k75g3",
+    "timestamp": 1779504890651
+  },
+  {
+    "symbol": "BTCUSD",
+    "type": "BUY",
+    "price": 75594.74,
+    "microTrend": "up",
+    "macroTrend": "up",
+    "sentimentScore": 25.62193926359153,
+    "sentimentEmotion": "FEAR",
+    "candleTime": 4,
+    "id": "AUDIT-1779505196946-um45y",
+    "timestamp": 1779505196946
+  },
+  {
+    "symbol": "BTCUSD",
+    "type": "BUY",
+    "price": 75609.28,
+    "microTrend": "up",
+    "macroTrend": "up",
+    "sentimentScore": 35.59353278496382,
+    "sentimentEmotion": "FEAR",
+    "candleTime": 78,
+    "id": "AUDIT-1779505422776-4jx0n",
+    "timestamp": 1779505422776
+  },
+  {
+    "symbol": "BTCUSD",
+    "type": "BUY",
+    "price": 75609.28,
+    "microTrend": "up",
+    "macroTrend": "up",
+    "sentimentScore": 31.962147040916008,
+    "sentimentEmotion": "FEAR",
+    "candleTime": 78,
+    "id": "AUDIT-1779505422953-zpda9",
+    "timestamp": 1779505422953
+  },
+  {
+    "symbol": "BTCUSD",
+    "type": "BUY",
+    "price": 75673.25,
+    "microTrend": "up",
+    "macroTrend": "up",
+    "sentimentScore": 33.673407324938026,
+    "sentimentEmotion": "FEAR",
+    "candleTime": 82,
+    "id": "AUDIT-1779507218719-evl87",
+    "timestamp": 1779507218719
+  },
+  {
+    "symbol": "BTCUSD",
+    "type": "BUY",
+    "price": 75673.25,
+    "microTrend": "up",
+    "macroTrend": "up",
+    "sentimentScore": 25.350680881526465,
+    "sentimentEmotion": "FEAR",
+    "candleTime": 82,
+    "id": "AUDIT-1779507218907-09np2",
+    "timestamp": 1779507218907
+  },
+  {
+    "symbol": "BTCUSD",
+    "type": "BUY",
+    "price": 75530.51,
+    "microTrend": "up",
+    "macroTrend": "up",
+    "sentimentScore": 19.61562599213174,
+    "sentimentEmotion": "EXTREME_FEAR",
+    "candleTime": 230,
+    "id": "AUDIT-1779557470093-bdpfz",
+    "timestamp": 1779557470093
   }
 ]

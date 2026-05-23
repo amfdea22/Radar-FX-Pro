@@ -156,40 +156,56 @@ export const AgentIAPanel: React.FC = () => {
   const hitRate = totalClosed > 0 ? ((wins / totalClosed) * 100).toFixed(1) : '-';
 
   return (
-    <div className="p-4 lg:p-6 space-y-4 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <Brain size={20} className="text-purple-400" /> Agente IA v2
-          {isLive && <span className="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/40 animate-pulse font-mono">AO VIVO</span>}
-          {status?.running && status?.dryRun && <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/40 font-mono">DRY-RUN</span>}
-        </h2>
-        <div className="flex gap-2">
+    <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+      {/* HEADLINE */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-pink-500/20 shadow-[0_0_50px_rgba(236,72,153,0.1)] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+
+        <div className="relative z-10 flex items-center gap-6">
+          <div className="p-4 bg-pink-500/10 rounded-3xl border border-pink-500/20 shadow-xl shadow-pink-500/10">
+            <Brain size={40} className="text-pink-400" />
+          </div>
+          <div>
+            <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3 flex-wrap">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-600">Agente</span>
+              IA
+              <span className="px-2 py-1 rounded-lg text-xs tracking-widest uppercase bg-pink-500/10 border border-pink-500/20 text-pink-500">
+                v2 {isLive ? '• AO VIVO' : status?.running ? '• DRY-RUN' : '• PARADO'}
+              </span>
+            </h2>
+            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+              <Zap size={12} className="text-pink-400" /> Análise FVG com execução inteligente
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
           <button onClick={() => action('/api/agent-ia/analyze')} disabled={loading}
-            className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700">
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-950/50 rounded-xl border border-white/5 text-slate-400 hover:text-pink-400 hover:border-pink-500/20 transition-all text-[10px] font-black uppercase tracking-widest">
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Analisar
           </button>
           <button onClick={async () => { await axios.post('/api/agent-ia/dry-run', { dryRun: !status?.dryRun }); await fetchAll(); }}
-            className={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 border ${
-              status?.dryRun ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' : 'bg-green-500/20 border-green-500/50 text-green-400'
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+              status?.dryRun ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
             }`}>
             {status?.dryRun ? <EyeOff size={14} /> : <Eye size={14} />} {status?.dryRun ? 'Dry-Run' : 'Ao Vivo'}
           </button>
           {!status?.running ? (
             <button onClick={() => action('/api/agent-ia/start')} disabled={loading}
-              className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white text-xs font-bold transition-all flex items-center gap-1.5">
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-pink-500/20 border border-pink-500/30 text-pink-400 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-pink-500/30">
               <Play size={14} /> Iniciar
             </button>
           ) : (
             <button onClick={() => action('/api/agent-ia/stop')} disabled={loading}
-              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-all flex items-center gap-1.5">
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-500/30">
               <Square size={14} /> Parar
             </button>
           )}
         </div>
       </div>
 
-      {/* Live/Dry-run Banner */}
+      {/* Banners */}
       {isLive && (
         <div className="bg-red-600/20 border-2 border-red-500/60 rounded-xl p-4 flex items-center gap-3 animate-pulse">
           <Radio size={20} className="text-red-400 shrink-0" />
@@ -215,34 +231,34 @@ export const AgentIAPanel: React.FC = () => {
         <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-xs">{status.error}</div>
       )}
 
-      {/* Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        <div className={`bg-slate-900/60 backdrop-blur-2xl p-4 rounded-xl border ${isLive ? 'border-red-500/40' : 'border-white/5'}`}>
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Status</p>
-          <p className={`text-lg font-bold mt-1 flex items-center gap-2 ${status?.running ? 'text-green-400' : 'text-slate-400'}`}>
+      {/* STATUS CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className={`bg-slate-950/40 p-4 rounded-2xl border ${isLive ? 'border-red-500/40' : 'border-white/5'} hover:border-pink-500/20 transition-all`}>
+          <p className="text-[9px] uppercase tracking-widest text-slate-500 font-black">Status</p>
+          <p className={`text-lg font-black mt-1 flex items-center gap-2 ${status?.running ? 'text-green-400' : 'text-slate-400'}`}>
             <span className={`w-2 h-2 rounded-full ${status?.running ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`} />
             {status?.running ? 'Ativo' : 'Parado'}
           </p>
         </div>
-        <div className="bg-slate-900/60 backdrop-blur-2xl p-4 rounded-xl border border-white/5">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Preço Atual</p>
-          <p className="text-lg font-bold mt-1 text-white">{status?.lastPrice ? `$${status.lastPrice.toFixed(2)}` : '-'}</p>
+        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 hover:border-pink-500/20 transition-all">
+          <p className="text-[9px] uppercase tracking-widest text-slate-500 font-black">Preço Atual</p>
+          <p className="text-lg font-black mt-1 text-white">{status?.lastPrice ? `$${status.lastPrice.toFixed(2)}` : '-'}</p>
         </div>
-        <div className="bg-slate-900/60 backdrop-blur-2xl p-4 rounded-xl border border-white/5">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">ATR / Spread</p>
-          <p className="text-lg font-bold mt-1 text-cyan-400">${status?.atr.toFixed(2) ?? '-'}</p>
+        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 hover:border-pink-500/20 transition-all">
+          <p className="text-[9px] uppercase tracking-widest text-slate-500 font-black">ATR / Spread</p>
+          <p className="text-lg font-black mt-1 text-cyan-400">${status?.atr.toFixed(2) ?? '-'}</p>
           <p className="text-[10px] text-slate-600">Spread: {status?.spread ?? '-'} pts</p>
         </div>
-        <div className="bg-slate-900/60 backdrop-blur-2xl p-4 rounded-xl border border-white/5">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Tendências</p>
+        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 hover:border-pink-500/20 transition-all">
+          <p className="text-[9px] uppercase tracking-widest text-slate-500 font-black">Tendências</p>
           <p className="mt-1 flex gap-2 text-xs">
             <TrendBadge trend={status?.trendM5 || 'NEUTRAL'} /> <TrendBadge trend={status?.trendH1 || 'NEUTRAL'} />
           </p>
           <p className="text-[9px] text-slate-600 mt-0.5">M5 / H1</p>
         </div>
-        <div className="bg-slate-900/60 backdrop-blur-2xl p-4 rounded-xl border border-white/5">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">P&L Diário</p>
-          <p className={`text-lg font-bold mt-1 ${(status?.dailyPnl ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 hover:border-pink-500/20 transition-all">
+          <p className="text-[9px] uppercase tracking-widest text-slate-500 font-black">P&L Diário</p>
+          <p className={`text-lg font-black mt-1 ${(status?.dailyPnl ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             ${status?.dailyPnl?.toFixed(2) ?? '0.00'}
           </p>
           <p className={`text-[10px] ${status?.consecutiveLosses ? 'text-red-400' : 'text-slate-600'}`}>
@@ -251,10 +267,11 @@ export const AgentIAPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Sinal Detalhado */}
+      {/* SIGNAL DETAIL */}
       {sig && sig.direction !== 'AGUARDAR' && sig.direction !== 'BLOQUEADO' && (
-        <div className={`bg-slate-900/60 backdrop-blur-2xl p-5 rounded-2xl border space-y-3 ${sig.direction === 'COMPRA' ? 'border-green-500/30' : 'border-red-500/30'}`}>
-          <div className="flex justify-between items-center">
+        <div className={`bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden ${sig.direction === 'COMPRA' ? 'border-l-green-500/30' : 'border-l-red-500/30'}`}>
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-pink-500/40 to-transparent"></div>
+          <div className="flex justify-between items-center mb-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               {sig.direction === 'COMPRA' ? <TrendingUp size={16} className="text-green-400" /> : <TrendingDown size={16} className="text-red-400" />}
               Sinal: {sig.direction} <span className="text-[10px] text-slate-500 font-mono">Confiança: {status?.confidence ?? 0}%</span>
@@ -270,14 +287,16 @@ export const AgentIAPanel: React.FC = () => {
         </div>
       )}
 
-      {/* Painel Inferior: Tabs */}
-      <div className="bg-slate-900/60 backdrop-blur-2xl rounded-2xl border border-white/5 overflow-hidden">
-        <div className="flex items-center justify-between px-5 pt-4 pb-2 border-b border-slate-800 overflow-x-auto">
+      {/* BOTTOM TABS PANEL */}
+      <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-pink-500/40 to-transparent"></div>
+
+        <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-white/5 overflow-x-auto">
           <div className="flex gap-2">
             {(['chart', 'signals', 'logs', 'config'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                  tab === t ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40' : 'text-slate-500 hover:text-slate-300'
+                  tab === t ? 'bg-pink-500/20 text-pink-400 border border-pink-500/30' : 'text-slate-500 hover:text-slate-300'
                 }`}>
                 {t === 'chart' ? '📊 Mapa FVG' : t === 'signals' ? '📈 Sinais' : t === 'logs' ? '📋 Terminal' : '⚙ Config'}
               </button>
@@ -286,15 +305,15 @@ export const AgentIAPanel: React.FC = () => {
           {tab === 'logs' && (
             <div className="flex gap-2">
               <button onClick={() => setAutoScroll(!autoScroll)}
-                className={`text-[10px] font-bold uppercase px-2 py-1 rounded ${autoScroll ? 'text-cyan-400' : 'text-slate-600'}`}>Auto {autoScroll ? 'ON' : 'OFF'}</button>
+                className={`text-[10px] font-bold uppercase px-2 py-1 rounded ${autoScroll ? 'text-pink-400' : 'text-slate-600'}`}>Auto {autoScroll ? 'ON' : 'OFF'}</button>
               <button onClick={() => action('/api/agent-ia/logs/clear')} className="text-[10px] text-slate-500 hover:text-red-400 flex items-center gap-1"><Trash2 size={12} /> Limpar</button>
             </div>
           )}
         </div>
 
-        {/* Tab: Mapa FVG */}
+        {/* TAB: MAPA FVG */}
         {tab === 'chart' && (
-          <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
               <h4 className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-2">▲ FVGs Bullish ({bullishFvgs.length})</h4>
               {bullishFvgs.length === 0 && <p className="text-slate-600 text-[11px]">Nenhum</p>}
@@ -323,7 +342,7 @@ export const AgentIAPanel: React.FC = () => {
                 ))}
               </div>
             </div>
-            <div className="lg:col-span-2 bg-slate-950/60 rounded-xl p-4 border border-slate-800">
+            <div className="lg:col-span-2 bg-slate-950/60 rounded-xl p-4 border border-white/5">
               <p className="text-[10px] text-slate-500 mb-2">Filtros ativos:</p>
               <div className="flex flex-wrap gap-2 text-[10px]">
                 <span className="px-2 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">✓ Mín FVG ≥ {status?.config.minFvgAtrRatio}×ATR</span>
@@ -336,9 +355,9 @@ export const AgentIAPanel: React.FC = () => {
           </div>
         )}
 
-        {/* Tab: Sinais */}
+        {/* TAB: SINAIS */}
         {tab === 'signals' && (
-          <div className="p-5">
+          <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex gap-4 text-xs">
                 <span className="text-slate-400">Sinais: <strong className="text-white">{signals.length}</strong></span>
@@ -364,7 +383,7 @@ export const AgentIAPanel: React.FC = () => {
             <div className="overflow-x-auto max-h-64 overflow-y-auto">
               {signals.length > 0 && (
               <table className="w-full text-xs text-slate-300">
-                <thead><tr className="text-[10px] uppercase text-slate-500 border-b border-slate-800">
+                <thead><tr className="text-[10px] uppercase text-slate-500 border-b border-white/5">
                   <th className="text-left py-2 px-2">Hora</th><th className="text-left py-2 px-2">Dir</th>
                   <th className="text-right py-2 px-2">Entry</th><th className="text-right py-2 px-2">SL</th>
                   <th className="text-right py-2 px-2">TP</th><th className="text-right py-2 px-2">R:R</th>
@@ -372,7 +391,7 @@ export const AgentIAPanel: React.FC = () => {
                 </tr></thead>
                 <tbody>
                     {signals.slice().reverse().map((s, i) => (
-                    <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-800/30">
+                    <tr key={i} className="border-b border-white/5 hover:bg-white/5">
                       <td className="py-1.5 px-2 text-slate-400">{s.time.slice(11, 19)}</td>
                       <td className={`py-1.5 px-2 font-bold ${s.direction === 'COMPRA' ? 'text-green-400' : s.direction === 'VENDA' ? 'text-red-400' : 'text-slate-500'}`}>
                         {s.direction === 'AGUARDAR' ? '⏸︎' : s.direction}
@@ -397,7 +416,7 @@ export const AgentIAPanel: React.FC = () => {
           </div>
         )}
 
-        {/* Tab: Terminal */}
+        {/* TAB: TERMINAL */}
         {tab === 'logs' && (
           <div ref={terminalRef} className="h-80 overflow-y-auto p-4 font-mono text-[11px] leading-relaxed bg-slate-950/80" style={{ scrollBehavior: 'smooth' }}>
             {logs.length === 0 && (
@@ -407,7 +426,7 @@ export const AgentIAPanel: React.FC = () => {
               </div>
             )}
             {logs.map((entry, i) => (
-              <div key={i} className="flex gap-3 hover:bg-slate-800/30 px-2 py-0.5 rounded transition-colors">
+              <div key={i} className="flex gap-3 hover:bg-white/5 px-2 py-0.5 rounded transition-colors">
                 <span className="text-slate-700 w-14 shrink-0">{entry.time.slice(11, 19)}</span>
                 <span className={`w-4 shrink-0 ${logColors[entry.type]}`}>{logPrefix[entry.type]}</span>
                 <span className={logColors[entry.type]}>{entry.message}</span>
@@ -416,9 +435,9 @@ export const AgentIAPanel: React.FC = () => {
           </div>
         )}
 
-        {/* Tab: Config */}
+        {/* TAB: CONFIG */}
         {tab === 'config' && (
-          <div className="p-5">
+          <div className="p-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { key: 'dailyLossLimit', label: 'Limite Perda Dia', suffix: '$', min: 1, max: 100 },

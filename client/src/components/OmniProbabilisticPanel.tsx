@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Zap, Shield, Settings, Activity, 
     RefreshCw, Play, Pause, ChevronRight,
-    Target, BarChart3, Globe, Layers, AlertTriangle, Plus, Terminal, History, Clock, ArrowUpRight, ArrowDownRight, Trophy, Star, Crown, MousePointer2, Check, Minus, ShieldAlert, DollarSign, TrendingDown
+    Target, BarChart3, Globe, Layers, AlertTriangle, Plus, Terminal, History, Clock, ArrowUpRight, ArrowDownRight, Trophy, Star, Crown, MousePointer2, Check, Minus, ShieldAlert, DollarSign, TrendingDown, Cpu
 } from 'lucide-react';
 import { OmniHistoryHub } from './OmniHistoryHub';
 
@@ -93,68 +93,74 @@ export const OmniProbabilisticPanel: React.FC = () => {
 
     if (loading || !status) return (
         <div className="flex justify-center p-20">
-            <div className="w-8 h-8 border-4 border-trader-blue/20 border-t-trader-blue rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
         </div>
     );
 
     return (
-        <div className="space-y-8 pb-20">
-            {/* Header com Status e Cronômetro */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                    <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase flex items-center gap-3">
-                        <Globe className="text-trader-blue animate-pulse" size={32} />
-                        Omni Probabilistic <span className="text-trader-blue">Engine</span>
-                    </h2>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mt-1 flex items-center gap-2">
-                        <Activity size={12} className={status.enabled ? "text-trader-green" : "text-slate-700"} />
-                        Motor Universal de Ciclos de Variação | v1.1 [LIVE TERMINAL]
-                    </p>
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-cyan-500/20 shadow-[0_0_50px_rgba(6,182,212,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-cyan-500/10 rounded-3xl border border-cyan-500/20 shadow-xl shadow-cyan-500/10">
+                        <Globe size={40} className="text-cyan-400" />
+                    </div>
+                    <div>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-500">Omni</span> Probabilistic
+                            <span className={`px-2 py-1 rounded-lg text-xs tracking-widest uppercase ${status.enabled ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 border border-slate-500/20 text-slate-500'}`}>
+                                {status.enabled ? 'Ativo' : 'Inativo'}
+                            </span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Cpu size={12} className="text-cyan-400" /> Motor Universal de Ciclos de Variação | v1.1
+                        </p>
+                    </div>
                 </div>
-
-                <div className="flex items-center gap-4">
-                    <div className="bg-slate-900/80 border border-white/5 px-6 py-3 rounded-2xl flex items-center gap-4 shadow-xl">
+                <div className="flex gap-4 relative z-10 items-center">
+                    <div className="bg-slate-950/50 px-5 py-2.5 rounded-2xl border border-white/5 flex items-center gap-4">
                         <div className="text-right">
                             <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Próximo Quadrante</p>
                             <p className="text-xl font-black text-white italic tabular-nums">
                                 {Math.floor(timeToNext / 60)}:{(timeToNext % 60).toString().padStart(2, '0')}
                             </p>
                         </div>
-                        <div className="w-10 h-10 rounded-full border-2 border-trader-blue/20 flex items-center justify-center relative overflow-hidden">
+                        <div className="w-10 h-10 rounded-full border-2 border-cyan-500/20 flex items-center justify-center relative overflow-hidden">
                             <motion.div 
-                                className="absolute bottom-0 left-0 right-0 bg-trader-blue/20"
+                                className="absolute bottom-0 left-0 right-0 bg-cyan-500/20"
                                 initial={{ height: 0 }}
                                 animate={{ height: `${(timeToNext / 300) * 100}%` }}
                             />
-                            <RefreshCw size={18} className="text-trader-blue animate-spin-slow" />
+                            <RefreshCw size={18} className="text-cyan-400 animate-spin-slow" />
                         </div>
                     </div>
 
                     <button 
                         onClick={toggleEngine}
-                        className={`px-8 py-3 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all flex items-center gap-3 shadow-lg ${
+                        className={`px-6 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-tighter transition-all border flex items-center gap-2 ${
                             status.enabled 
-                            ? 'bg-trader-red/10 border border-trader-red/30 text-trader-red hover:bg-trader-red/20' 
-                            : 'bg-trader-green/10 border border-trader-green/30 text-trader-green hover:bg-trader-green/20 shadow-trader-green/20'
+                            ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' 
+                            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
                         }`}
                     >
-                        {status.enabled ? <Pause size={18} /> : <Play size={18} />}
+                        {status.enabled ? <Pause size={14} /> : <Play size={14} />}
                         {status.enabled ? 'Pausar Motor' : 'Ativar Omni'}
                     </button>
                 </div>
             </div>
 
-            {/* OMNI LIVE CYCLE HUD - MONITORAMENTO DE QUADRANTES */}
-            <div className="bg-slate-900/60 p-8 rounded-[2.5rem] border border-trader-blue/30 shadow-2xl relative overflow-hidden backdrop-blur-xl">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-trader-blue/50 to-transparent"></div>
+            {/* OMNI LIVE CYCLE HUD */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
                 
                 <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                     <div className="flex items-center gap-6">
                         <div className="relative">
-                            <div className="w-16 h-16 rounded-full bg-trader-blue/10 border-2 border-trader-blue/40 flex items-center justify-center animate-pulse">
-                                <Zap className="text-trader-blue" size={32} />
+                            <div className="w-16 h-16 rounded-full bg-cyan-500/10 border-2 border-cyan-500/40 flex items-center justify-center animate-pulse">
+                                <Zap className="text-cyan-400" size={32} />
                             </div>
-                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-trader-green rounded-full border-4 border-slate-900 flex items-center justify-center">
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-4 border-slate-900 flex items-center justify-center">
                                 <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
                             </div>
                         </div>
@@ -164,12 +170,12 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                 <h4 className="text-xl font-black text-white italic tracking-tighter uppercase">
                                     {status.telemetry?.robotVersion || 'OMNI CORE v1.5'}
                                 </h4>
-                                <span className="px-3 py-1 bg-trader-blue/20 text-trader-blue text-[8px] font-black rounded-full uppercase tracking-widest border border-trader-blue/30">
+                                <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 text-[8px] font-black rounded-full uppercase tracking-widest border border-cyan-500/30">
                                     PROBABILISTIC
                                 </span>
                             </div>
                             <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
-                                Análise Ativa: <span className="text-trader-blue">{status.telemetry?.activeStrategy || status.settings.strategy}</span>
+                                Análise Ativa: <span className="text-cyan-400">{status.telemetry?.activeStrategy || status.settings.strategy}</span>
                             </p>
                         </div>
                     </div>
@@ -177,18 +183,18 @@ export const OmniProbabilisticPanel: React.FC = () => {
                     <div className="flex-1 max-w-md w-full">
                         <div className="flex justify-between items-center mb-3">
                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Análise de Quadrante (M5)</span>
-                            <span className="text-[10px] font-black text-trader-blue animate-pulse uppercase tracking-widest">{status.telemetry?.actionMsg || 'Sincronizando...'}</span>
+                            <span className="text-[10px] font-black text-cyan-400 animate-pulse uppercase tracking-widest">{status.telemetry?.actionMsg || 'Sincronizando...'}</span>
                         </div>
                         <div className="grid grid-cols-5 gap-3">
                             {[1, 2, 3, 4, 5].map((v) => (
                                 <div key={v} className="relative">
                                     <div className={`h-3 rounded-full transition-all duration-1000 ${
                                         (status.telemetry?.currentVela || 0) >= v 
-                                        ? 'bg-trader-blue shadow-[0_0_15px_rgba(6,182,212,0.5)]' 
+                                        ? 'bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]' 
                                         : 'bg-slate-800'
                                     }`} />
                                     <span className={`absolute -bottom-5 left-1/2 -translate-x-1/2 text-[8px] font-black ${
-                                        (status.telemetry?.currentVela || 0) === v ? 'text-trader-blue' : 'text-slate-700'
+                                        (status.telemetry?.currentVela || 0) === v ? 'text-cyan-400' : 'text-slate-700'
                                     }`}>V{v}</span>
                                 </div>
                             ))}
@@ -200,7 +206,7 @@ export const OmniProbabilisticPanel: React.FC = () => {
                         <div className="flex items-center gap-3 justify-end">
                             <div className="h-10 w-1 bg-slate-800 rounded-full overflow-hidden">
                                 <motion.div 
-                                    className="w-full bg-trader-green"
+                                    className="w-full bg-emerald-500"
                                     animate={{ height: ['80%', '95%', '85%', '100%', '90%'] }}
                                     transition={{ duration: 1.5, repeat: Infinity }}
                                 />
@@ -212,14 +218,15 @@ export const OmniProbabilisticPanel: React.FC = () => {
             </div>
 
             {/* OMNI SCOREBOARD HUB */}
-            <div className="bg-slate-900/40 p-1 rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden">
-                <div className="flex bg-slate-950/60 p-2 rounded-[2.2rem] gap-2 mb-1">
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
+                <div className="flex bg-slate-950/60 p-2 rounded-[2.2rem] gap-2 mb-6">
                     {(['daily', 'weekly', 'monthly'] as const).map(p => (
                         <button
                             key={p}
                             onClick={() => setScorePeriod(p)}
                             className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                                scorePeriod === p ? 'bg-trader-blue text-white' : 'text-slate-500 hover:text-white'
+                                scorePeriod === p ? 'bg-cyan-500 text-white' : 'text-slate-500 hover:text-white'
                             }`}
                         >
                             {p === 'daily' ? 'Hoje' : p === 'weekly' ? 'Semana' : 'Mês'}
@@ -227,33 +234,24 @@ export const OmniProbabilisticPanel: React.FC = () => {
                     ))}
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
-                    <div className="bg-slate-950/80 p-6 rounded-3xl border border-trader-green/20 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
-                            <Trophy className="text-trader-green" size={40} />
-                        </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 relative overflow-hidden group">
                         <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Total Ganhos</p>
                         <div className="flex items-end gap-2">
-                            <span className="text-4xl font-black text-trader-green italic">{status.scoreboard?.[scorePeriod]?.wins || 0}</span>
+                            <span className="text-4xl font-black text-emerald-500 italic">{status.scoreboard?.[scorePeriod]?.wins || 0}</span>
                             <span className="text-[10px] text-slate-700 font-bold uppercase mb-1">Ciclos</span>
                         </div>
                     </div>
 
-                    <div className="bg-slate-950/80 p-6 rounded-3xl border border-trader-blue/20 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
-                            <Zap className="text-trader-blue" size={40} />
-                        </div>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 relative overflow-hidden group">
                         <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">G0 (Direto)</p>
                         <div className="flex items-end gap-2">
                             <span className="text-4xl font-black text-white italic">{status.scoreboard?.[scorePeriod]?.directWins || 0}</span>
-                            <div className="px-2 py-0.5 bg-trader-blue/20 rounded-md text-[8px] text-trader-blue font-black mb-1">SNIPER</div>
+                            <div className="px-2 py-0.5 bg-cyan-500/20 rounded-md text-[8px] text-cyan-400 font-black mb-1">SNIPER</div>
                         </div>
                     </div>
 
-                    <div className="bg-slate-950/80 p-6 rounded-3xl border border-amber-500/20 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
-                            <ShieldAlert className="text-amber-500" size={40} />
-                        </div>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 relative overflow-hidden group">
                         <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Martingales</p>
                         <div className="flex items-end gap-2">
                             <span className="text-4xl font-black text-amber-500 italic">{status.scoreboard?.[scorePeriod]?.gales || 0}</span>
@@ -264,47 +262,47 @@ export const OmniProbabilisticPanel: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="bg-slate-950/80 p-6 rounded-3xl border-trader-red/20 border relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
-                            <AlertTriangle className="text-trader-red" size={40} />
-                        </div>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 relative overflow-hidden group">
                         <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Stop Loss</p>
                         <div className="flex items-end gap-2">
-                            <span className="text-4xl font-black text-trader-red italic">{status.scoreboard?.[scorePeriod]?.stops || 0}</span>
-                            <div className="px-2 py-0.5 bg-trader-red/20 rounded-md text-[8px] text-trader-red font-black mb-1">STOP</div>
+                            <span className="text-4xl font-black text-rose-500 italic">{status.scoreboard?.[scorePeriod]?.stops || 0}</span>
+                            <div className="px-2 py-0.5 bg-rose-500/20 rounded-md text-[8px] text-rose-500 font-black mb-1">STOP</div>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-1 px-6 pb-6 mt-[-1rem]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex flex-col justify-center">
                         <p className="text-[7px] font-black text-slate-600 uppercase tracking-widest mb-1">Lucro Bruto</p>
-                        <p className="text-xl font-black text-trader-green italic">+${status.scoreboard?.[scorePeriod]?.grossProfit || '0.00'}</p>
+                        <p className="text-xl font-black text-emerald-500 italic">+${status.scoreboard?.[scorePeriod]?.grossProfit || '0.00'}</p>
                     </div>
                     <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex flex-col justify-center">
                         <p className="text-[7px] font-black text-slate-600 uppercase tracking-widest mb-1">Perda Bruta</p>
-                        <p className="text-xl font-black text-trader-red italic">-${status.scoreboard?.[scorePeriod]?.grossLoss || '0.00'}</p>
+                        <p className="text-xl font-black text-rose-500 italic">-${status.scoreboard?.[scorePeriod]?.grossLoss || '0.00'}</p>
                     </div>
-                    <div className="bg-trader-blue/5 p-4 rounded-2xl border border-trader-blue/20 flex flex-col justify-center relative overflow-hidden">
+                    <div className="bg-cyan-500/5 p-4 rounded-2xl border border-cyan-500/20 flex flex-col justify-center relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-2 opacity-10">
-                            <DollarSign size={24} className="text-trader-blue" />
+                            <DollarSign size={24} className="text-cyan-400" />
                         </div>
-                        <p className="text-[7px] font-black text-trader-blue uppercase tracking-widest mb-1">Saldo Líquido</p>
-                        <p className={`text-xl font-black italic ${(status.scoreboard?.[scorePeriod]?.netProfit || 0) >= 0 ? 'text-white' : 'text-trader-red'}`}>
+                        <p className="text-[7px] font-black text-cyan-400 uppercase tracking-widest mb-1">Saldo Líquido</p>
+                        <p className={`text-xl font-black italic ${(status.scoreboard?.[scorePeriod]?.netProfit || 0) >= 0 ? 'text-white' : 'text-rose-500'}`}>
                             ${status.scoreboard?.[scorePeriod]?.netProfit || '0.00'}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* MAIN GRID */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-gradient-to-br from-slate-900/80 to-slate-950/80 p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden">
+                    {/* Settings */}
+                    <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
                         <div className="absolute top-0 right-0 p-8 opacity-5">
                             <Layers size={120} className="text-white" />
                         </div>
 
-                        <h3 className="text-xs font-black text-trader-blue uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+                        <h3 className="text-xs font-black text-cyan-400 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
                              <Zap size={16} /> Configurações de Operação
                         </h3>
 
@@ -319,7 +317,7 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                                 onClick={() => updateStrategy(strat)}
                                                 className={`py-3 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${
                                                     status.settings.strategy === strat 
-                                                    ? 'bg-trader-blue border-trader-blue text-white shadow-lg shadow-trader-blue/30' 
+                                                    ? 'bg-cyan-500 border-cyan-500 text-white shadow-lg shadow-cyan-500/30' 
                                                     : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'
                                                 }`}
                                             >
@@ -409,7 +407,7 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                             </div>
                                             <button 
                                                 onClick={() => updateSync({ useTrendFilter: !status.settings.useTrendFilter })}
-                                                className={`w-8 h-4 rounded-full relative flex items-center px-1 transition-all ${status.settings.useTrendFilter ? 'bg-trader-blue' : 'bg-slate-800'}`}
+                                                className={`w-8 h-4 rounded-full relative flex items-center px-1 transition-all ${status.settings.useTrendFilter ? 'bg-cyan-500' : 'bg-slate-800'}`}
                                             >
                                                 <div className={`w-2 h-2 bg-white rounded-full transition-all ${status.settings.useTrendFilter ? 'ml-auto' : ''}`} />
                                             </button>
@@ -419,7 +417,7 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                                 <BarChart3 size={16} className="text-purple-500" />
                                                 <span className="text-[10px] font-black text-white uppercase tracking-widest">Elephant Candle</span>
                                             </div>
-                                            <div className="w-8 h-4 bg-trader-blue rounded-full relative flex items-center px-1">
+                                            <div className="w-8 h-4 bg-cyan-500 rounded-full relative flex items-center px-1">
                                                 <div className="w-2 h-2 bg-white rounded-full ml-auto" />
                                             </div>
                                         </div>
@@ -429,7 +427,8 @@ export const OmniProbabilisticPanel: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Symbol List */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <AnimatePresence>
                             {status.settings.symbols.map((symbol: string) => (
                                 <motion.div 
@@ -437,10 +436,11 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
-                                    className="bg-slate-900/60 p-6 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-trader-blue/30 transition-all cursor-pointer relative overflow-hidden"
+                                    className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[2rem] border border-white/5 flex items-center justify-between group hover:border-cyan-500/30 transition-all relative overflow-hidden"
                                 >
+                                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
                                     <div className="flex items-center gap-4 relative z-10">
-                                        <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center font-black text-xs italic group-hover:bg-trader-blue group-hover:text-white transition-colors uppercase">
+                                        <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center font-black text-xs italic group-hover:bg-cyan-500 group-hover:text-white transition-colors uppercase">
                                             {symbol.substring(0, 3)}
                                         </div>
                                         <div>
@@ -450,13 +450,13 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                     </div>
                                     <div className="flex items-center gap-4 relative z-10">
                                         <div className="text-right">
-                                            <div className="text-xs font-black text-trader-green italic text-right flex items-center gap-1">
+                                            <div className="text-xs font-black text-emerald-500 italic text-right flex items-center gap-1">
                                                 <Activity size={10} /> LIVE
                                             </div>
                                         </div>
                                         <button 
                                             onClick={(e) => { e.stopPropagation(); removeSymbol(symbol); }}
-                                            className="w-8 h-8 rounded-lg bg-trader-red/10 text-trader-red opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-trader-red hover:text-white"
+                                            className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-rose-500 hover:text-white"
                                         >
                                             <Pause size={14} className="rotate-45" />
                                         </button>
@@ -465,7 +465,7 @@ export const OmniProbabilisticPanel: React.FC = () => {
                             ))}
                         </AnimatePresence>
                         
-                        <div className="bg-slate-950 border border-dashed border-slate-800 p-6 rounded-3xl flex items-center gap-3 group focus-within:border-trader-blue/50 transition-all">
+                        <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[2rem] border border-dashed border-white/10 flex items-center gap-3 group focus-within:border-cyan-500/50 transition-all">
                              <input 
                                 type="text"
                                 value={newSymbol}
@@ -476,24 +476,26 @@ export const OmniProbabilisticPanel: React.FC = () => {
                              />
                              <button 
                                 onClick={addSymbol}
-                                className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-slate-500 hover:bg-trader-blue hover:text-white transition-all shadow-xl"
+                                className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-slate-500 hover:bg-cyan-500 hover:text-white transition-all shadow-xl"
                              >
                                 <Plus size={18} />
                              </button>
                         </div>
                     </div>
 
-                    <div className="bg-slate-900/40 rounded-[2.5rem] border border-white/5 overflow-hidden flex flex-col h-[500px] shadow-2xl">
+                    {/* Terminal / History */}
+                    <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col h-[500px]">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
                         <div className="flex border-b border-white/5 bg-slate-950/40">
                             <button 
                                 onClick={() => setActiveView('terminal')}
-                                className={`flex-1 py-4 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'terminal' ? 'text-white border-b-2 border-trader-blue bg-white/5' : 'text-slate-500 hover:text-white'}`}
+                                className={`flex-1 py-4 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'terminal' ? 'text-white border-b-2 border-cyan-500 bg-white/5' : 'text-slate-500 hover:text-white'}`}
                             >
                                 <Terminal size={14} /> Terminal Logs
                             </button>
                             <button 
                                 onClick={() => setActiveView('history')}
-                                className={`flex-1 py-4 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'history' ? 'text-white border-b-2 border-trader-blue bg-white/5' : 'text-slate-500 hover:text-white'}`}
+                                className={`flex-1 py-4 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'history' ? 'text-white border-b-2 border-cyan-500 bg-white/5' : 'text-slate-500 hover:text-white'}`}
                             >
                                 <History size={14} /> Omni Trade Explorer
                             </button>
@@ -514,8 +516,8 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                                 <div key={i} className="flex gap-4 group">
                                                     <span className="text-slate-600 shrink-0">{log.time}</span>
                                                     <span className={
-                                                        log.type === 'SUCCESS' ? 'text-trader-green' :
-                                                        log.type === 'ERROR' ? 'text-trader-red' :
+                                                        log.type === 'SUCCESS' ? 'text-emerald-500' :
+                                                        log.type === 'ERROR' ? 'text-rose-500' :
                                                         log.type === 'WARN' ? 'text-amber-500' : 'text-emerald-500/70'
                                                     }>{log.msg}</span>
                                                 </div>
@@ -542,12 +544,11 @@ export const OmniProbabilisticPanel: React.FC = () => {
                     </div>
                 </div>
 
+                {/* SIDEBAR */}
                 <div className="space-y-6">
-                    <div className="bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-8 rounded-[2.5rem] border border-trader-blue/20 shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-5">
-                            <Trophy size={100} className="text-amber-500" />
-                        </div>
-                        
+                    {/* Ranking */}
+                    <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
                         <div className="flex justify-between items-center mb-8 relative z-10">
                             <div>
                                 <h3 className="text-xs font-black text-amber-500 uppercase tracking-[0.3em] flex items-center gap-2">
@@ -566,7 +567,7 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                     transition={{ delay: index * 0.1 }}
                                     className={`p-4 rounded-2xl border flex items-center justify-between group transition-all ${
                                         status.settings.strategy === strat.name 
-                                        ? 'bg-trader-blue/10 border-trader-blue shadow-lg shadow-trader-blue/10' 
+                                        ? 'bg-cyan-500/10 border-cyan-500 shadow-lg shadow-cyan-500/10' 
                                         : 'bg-slate-950/40 border-slate-800/50 hover:border-slate-700'
                                     }`}
                                 >
@@ -587,7 +588,7 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                             <div className="flex items-center gap-2 mt-0.5">
                                                 <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">{strat.trades} Trades</span>
                                                 <div className="w-1 h-1 rounded-full bg-slate-700" />
-                                                <span className={`text-[7px] font-black uppercase ${strat.winRate >= 80 ? 'text-trader-green' : 'text-amber-500'}`}>
+                                                <span className={`text-[7px] font-black uppercase ${strat.winRate >= 80 ? 'text-emerald-500' : 'text-amber-500'}`}>
                                                     {strat.winRate}% Assertividade
                                                 </span>
                                             </div>
@@ -596,7 +597,7 @@ export const OmniProbabilisticPanel: React.FC = () => {
 
                                     <div className="flex items-center gap-4">
                                         <div className="text-right">
-                                            <p className={`text-xs font-black italic ${strat.profit >= 0 ? 'text-trader-green' : 'text-trader-red'}`}>
+                                            <p className={`text-xs font-black italic ${strat.profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                                 {strat.profit >= 0 ? '+' : ''}${strat.profit}
                                             </p>
                                             <p className="text-[7px] text-slate-600 font-black uppercase">Result</p>
@@ -605,13 +606,13 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                         {status.settings.strategy !== strat.name ? (
                                             <button 
                                                 onClick={() => updateStrategy(strat.name)}
-                                                className="p-2 bg-trader-blue/10 text-trader-blue rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-trader-blue hover:text-white"
+                                                className="p-2 bg-cyan-500/10 text-cyan-400 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-cyan-500 hover:text-white"
                                                 title="Ativar Estratégia"
                                             >
                                                 <MousePointer2 size={14} />
                                             </button>
                                         ) : (
-                                            <div className="p-2 bg-trader-green/20 text-trader-green rounded-lg">
+                                            <div className="p-2 bg-emerald-500/20 text-emerald-500 rounded-lg">
                                                 <Check size={14} />
                                             </div>
                                         )}
@@ -621,11 +622,13 @@ export const OmniProbabilisticPanel: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="bg-slate-900/80 p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden flex flex-col h-full shadow-2xl">
+                    {/* Vital Status */}
+                    <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col h-full">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
                         <div className="flex justify-between items-center mb-10">
-                            <h3 className="text-xs font-black text-trader-green uppercase tracking-[0.3em]">Status Vital</h3>
-                            <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${status.enabled ? 'bg-trader-green/20 text-trader-green' : 'bg-slate-800 text-slate-500'}`}>
-                                <div className={`w-1.5 h-1.5 rounded-full ${status.enabled ? 'bg-trader-green animate-pulse' : 'bg-slate-600'}`}></div>
+                            <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.3em]">Status Vital</h3>
+                            <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${status.enabled ? 'bg-emerald-500/20 text-emerald-500' : 'bg-slate-800 text-slate-500'}`}>
+                                <div className={`w-1.5 h-1.5 rounded-full ${status.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`}></div>
                                 {status.enabled ? 'EM EXECUÇÃO' : 'STBY'}
                             </div>
                         </div>
@@ -640,28 +643,28 @@ export const OmniProbabilisticPanel: React.FC = () => {
                             </div>
 
                             <div className="grid grid-cols-1 gap-4">
-                                <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800 flex justify-between items-center group hover:border-trader-green/30 transition-all">
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex justify-between items-center group hover:border-emerald-500/30 transition-all">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-trader-green/10 rounded-lg text-trader-green"><ArrowUpRight size={16} /></div>
+                                        <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><ArrowUpRight size={16} /></div>
                                         <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Assertividade</span>
                                     </div>
-                                    <span className="text-xl font-black text-trader-green italic">88.4%</span>
+                                    <span className="text-xl font-black text-emerald-500 italic">88.4%</span>
                                 </div>
-                                <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800 flex justify-between items-center group hover:border-trader-blue/30 transition-all">
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex justify-between items-center group hover:border-cyan-500/30 transition-all">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-trader-blue/10 rounded-lg text-trader-blue"><Activity size={16} /></div>
+                                        <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400"><Activity size={16} /></div>
                                         <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Trades Hoje</span>
                                     </div>
                                     <span className="text-xl font-black text-white italic">{status.history?.length || 0}</span>
                                 </div>
                             </div>
 
-                            <div className="p-6 bg-trader-blue/5 border border-trader-blue/10 rounded-3xl relative overflow-hidden group">
+                            <div className="p-6 bg-cyan-500/5 border border-cyan-500/10 rounded-3xl relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
                                     <Shield size={60} className="text-white" />
                                 </div>
                                 <div className="flex items-center gap-2 mb-3 relative z-10">
-                                    <Shield size={14} className="text-trader-blue" />
+                                    <Shield size={14} className="text-cyan-400" />
                                     <span className="text-[8px] font-black text-white uppercase tracking-widest">Disciplina Alpha</span>
                                 </div>
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider italic leading-relaxed relative z-10">
@@ -673,11 +676,11 @@ export const OmniProbabilisticPanel: React.FC = () => {
                         <div className="mt-8 pt-8 border-t border-white/5">
                             <div className="flex justify-between items-center mb-4">
                                 <span className="text-[9px] font-bold text-slate-600 uppercase">Engine Latency</span>
-                                <span className="text-[9px] font-black text-trader-green">14ms</span>
+                                <span className="text-[9px] font-black text-emerald-500">14ms</span>
                             </div>
                             <div className="h-1 bg-slate-900 rounded-full overflow-hidden">
                                 <motion.div 
-                                    className="h-full bg-trader-blue"
+                                    className="h-full bg-cyan-500"
                                     animate={{ width: ['20%', '25%', '22%', '28%', '20%'] }}
                                     transition={{ duration: 2, repeat: Infinity }}
                                 />

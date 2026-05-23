@@ -36,7 +36,7 @@ export const CryptoReport: React.FC = () => {
     if (isLoading) return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">Carregando Cripto Analytics...</div>;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 mt-12">
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between">
                 <h3 className="text-xl font-black text-white italic uppercase tracking-tighter flex items-center gap-3">
                     <BarChart3 className="text-amber-500" /> Cripto <span className="text-amber-400">Analytics & Report</span>

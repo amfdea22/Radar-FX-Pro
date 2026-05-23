@@ -3,13 +3,11 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import {
     Trophy, TrendingUp, TrendingDown, Target, BarChart2, Award,
-    Zap, Shield, Activity, RefreshCw
+    Zap, Shield, Activity, RefreshCw, Cpu
 } from 'lucide-react';
 
-// Usar caminhos relativos para compatibilidade mobile total
 const API = '';
 
-// Dados de todas as estratégias do Radar FX
 const ALL_STRATEGIES = [
     { name: 'Alpha Nakamoto', category: 'Cripto', asset: 'BTCUSD', baseWin: 94.8, color: '#f7931a' },
     { name: 'Quantum BTC Pro', category: 'Cripto', asset: 'BTCUSD', baseWin: 92.5, color: '#8b5cf6' },
@@ -41,7 +39,6 @@ interface StrategyStats {
     source: 'MT5_REAL' | 'SIGNALS_ONLY' | 'NO_DATA';
 }
 
-// Gráfico de Pizza SVG nativo
 const PieChart: React.FC<{ data: { label: string; value: number; color: string }[]; size?: number }> = ({ data, size = 220 }) => {
     const total = data.reduce((sum, d) => sum + d.value, 0);
     if (total === 0) return null;
@@ -75,7 +72,6 @@ const PieChart: React.FC<{ data: { label: string; value: number; color: string }
             `Z`
         ].join(' ');
 
-        // Label position (midpoint of arc)
         const midAngle = ((startAngle + endAngle) / 2) * Math.PI / 180;
         const labelRadius = radius * 0.65;
         const labelX = cx + labelRadius * Math.cos(midAngle);
@@ -113,7 +109,6 @@ const PieChart: React.FC<{ data: { label: string; value: number; color: string }
     return (
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
             {slices}
-            {/* Centro transparente (Donut) */}
             <circle cx={cx} cy={cy} r={radius * 0.38} fill="#0f172a" />
             <text x={cx} y={cy - 8} textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="bold">TOTAL</text>
             <text x={cx} y={cy + 10} textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">{total}</text>
@@ -131,7 +126,6 @@ export const StrategyReportHub: React.FC = () => {
     const fetchData = async (forceSync = false) => {
         setLoading(true);
         try {
-            // Se forceSync for true, usamos o endpoint de sync real que dispara todos os robôs
             const url = forceSync ? `/api/mt5/reports/sync` : `/api/mt5/reports/strategies`;
             const method = forceSync ? 'post' : 'get';
 
@@ -139,7 +133,6 @@ export const StrategyReportHub: React.FC = () => {
 
             let reportData = forceSync ? resp.data.report : resp.data;
 
-            // A resposta pode vir como array direto ou dentro de um wrapper
             let data: StrategyStats[] = [];
             if (Array.isArray(reportData)) {
                 data = reportData;
@@ -155,7 +148,6 @@ export const StrategyReportHub: React.FC = () => {
             console.log(`📊 [Report] ${forceSync ? 'Sync ' : ''}Dados recebidos:`, data.length, 'estratégias');
         } catch (err) {
             console.error('❌ [Report] Erro ao buscar dados:', err);
-            // Se falhar o sync, tenta pelo menos o cache GET
             if (forceSync) fetchData(false);
         }
         setLoading(false);
@@ -167,14 +159,12 @@ export const StrategyReportHub: React.FC = () => {
         .filter(s => filter === 'all' || s.category === filter)
         .sort((a, b) => b[sortBy] - a[sortBy]);
 
-    // KPIs globais - inclui TODAS as estratégias (inclusive sem trades = mostra o real)
     const totalWins = filtered.reduce((s, x) => s + x.wins, 0);
     const totalLosses = filtered.reduce((s, x) => s + x.losses, 0);
     const totalTrades = totalWins + totalLosses;
     const globalWinRate = totalTrades > 0 ? ((totalWins / totalTrades) * 100).toFixed(1) : '0';
     const totalProfit = filtered.reduce((s, x) => s + (x.totalProfit || 0), 0);
 
-    // Dados do pizza chart - filtra só as que têm trades para não poluir
     const withTrades = filtered.filter(s => s.totalTrades > 0);
     const pieData = withTrades.map(s => ({ label: s.name, value: s.totalTrades, color: s.color }));
     const winLossPieData = [
@@ -185,45 +175,55 @@ export const StrategyReportHub: React.FC = () => {
     const categories = ['all', 'Cripto', 'Forex', 'Metais', 'Metais/Cripto'];
 
     return (
-        <div className="p-6 space-y-6 min-h-screen">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                        <BarChart2 className="text-white" size={22} />
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-rose-500/20 shadow-[0_0_50px_rgba(244,63,94,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-rose-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-rose-500/10 rounded-3xl border border-rose-500/20 shadow-xl shadow-rose-500/10">
+                        <BarChart2 size={40} className="text-rose-400" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black text-white tracking-tight">Relatório de Estratégias</h2>
-                        <div className="flex items-center gap-2">
-                            <p className="text-xs text-slate-500">Performance completa de todas as I.A's do Radar FX</p>
-                            {lastSync && (
-                                <span className="text-[10px] text-cyan-400 font-bold bg-cyan-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                    <Activity size={10} /> Sincronizado: {lastSync}
-                                </span>
-                            )}
-                        </div>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3 flex-wrap">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-pink-600">Relatório</span>
+                            de Estratégias
+                            <span className="px-2 py-1 rounded-lg text-xs tracking-widest uppercase bg-rose-500/10 border border-rose-500/20 text-rose-500">
+                                {strategies.length > 0 ? `${strategies.length} IAs` : 'CARREGANDO'}
+                            </span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Cpu size={12} className="text-rose-400" /> Performance completa de todas as I.A's do Radar FX
+                        </p>
                     </div>
                 </div>
-                <button
-                    onClick={() => fetchData(true)}
-                    disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 rounded-xl text-xs font-bold transition-all shadow-lg hover:shadow-cyan-500/10"
-                >
-                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                    {loading ? 'Sincronizando...' : 'Sincronizar Agora'}
-                </button>
+
+                <div className="flex items-center gap-2 px-5 py-2.5 bg-slate-950/50 rounded-2xl border border-white/5">
+                    <RefreshCw size={14} className={loading ? 'animate-spin text-rose-400' : 'text-rose-400'} />
+                    <button
+                        onClick={() => fetchData(true)}
+                        disabled={loading}
+                        className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors"
+                    >
+                        {loading ? 'Sincronizando...' : 'Sincronizar Agora'}
+                    </button>
+                    {lastSync && (
+                        <span className="text-[10px] text-slate-500 ml-2">· {lastSync}</span>
+                    )}
+                </div>
             </div>
 
-            {/* Filtros */}
-            <div className="flex items-center gap-2">
+            {/* FILTROS */}
+            <div className="flex items-center gap-2 flex-wrap">
                 {categories.map(cat => (
                     <button
                         key={cat}
                         onClick={() => setFilter(cat as any)}
                         className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === cat
-                            ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/20'
-                            : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 hover:text-white'
-                            }`}
+                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30 shadow-lg shadow-rose-500/10'
+                            : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 hover:text-white border border-transparent'
+                        }`}
                     >
                         {cat === 'all' ? 'Todas' : cat}
                     </button>
@@ -236,9 +236,9 @@ export const StrategyReportHub: React.FC = () => {
                             key={key}
                             onClick={() => setSortBy(key as any)}
                             className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${sortBy === key
-                                ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                                : 'bg-slate-800/30 text-slate-500 hover:text-slate-300'
-                                }`}
+                                ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                                : 'bg-slate-800/30 text-slate-500 hover:text-slate-300 border border-transparent'
+                            }`}
                         >
                             {label}
                         </button>
@@ -246,43 +246,47 @@ export const StrategyReportHub: React.FC = () => {
                 </div>
             </div>
 
-            {/* KPI Cards */}
+            {/* KPI CARDS */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {[
-                    { label: 'Total Trades', value: totalTrades, icon: Activity, color: 'from-blue-500 to-cyan-500' },
-                    { label: 'Vitórias', value: totalWins, icon: Trophy, color: 'from-emerald-500 to-green-500' },
-                    { label: 'Perdas', value: totalLosses, icon: TrendingDown, color: 'from-red-500 to-rose-500' },
-                    { label: '% Acerto', value: `${globalWinRate}%`, icon: Target, color: 'from-violet-500 to-purple-500' },
-                    { label: 'Lucro Total', value: `$${totalProfit.toFixed(2)}`, icon: TrendingUp, color: totalProfit >= 0 ? 'from-emerald-500 to-teal-500' : 'from-red-500 to-orange-500' },
+                    { label: 'Total Trades', value: totalTrades, icon: Activity, color: 'from-blue-500 to-cyan-500', textColor: 'text-blue-400' },
+                    { label: 'Vitórias', value: totalWins, icon: Trophy, color: 'from-emerald-500 to-green-500', textColor: 'text-emerald-400' },
+                    { label: 'Perdas', value: totalLosses, icon: TrendingDown, color: 'from-red-500 to-rose-500', textColor: 'text-red-400' },
+                    { label: '% Acerto', value: `${globalWinRate}%`, icon: Target, color: 'from-violet-500 to-purple-500', textColor: 'text-violet-400' },
+                    {
+                        label: 'Lucro Total',
+                        value: `$${totalProfit.toFixed(2)}`,
+                        icon: TrendingUp,
+                        color: totalProfit >= 0 ? 'from-emerald-500 to-teal-500' : 'from-red-500 to-orange-500',
+                        textColor: totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'
+                    },
                 ].map((kpi, i) => (
                     <motion.div
                         key={i}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.08 }}
-                        className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5"
+                        className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 hover:border-rose-500/20 transition-all"
                     >
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{kpi.label}</span>
-                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${kpi.color} flex items-center justify-center`}>
-                                <kpi.icon size={16} className="text-white" />
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{kpi.label}</span>
+                            <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${kpi.color} flex items-center justify-center opacity-60`}>
+                                <kpi.icon size={14} className="text-white" />
                             </div>
                         </div>
-                        <p className="text-2xl font-black text-white">{kpi.value}</p>
+                        <span className={`text-2xl font-black italic ${kpi.textColor}`}>{kpi.value}</span>
                     </motion.div>
                 ))}
             </div>
 
-            {/* Charts Row */}
-            <div className="grid grid-cols-2 gap-6">
-                {/* Pizza: Distribuição de Trades por Estratégia */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6"
-                >
+            {/* CHARTS ROW */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                {/* Distribuição por Estratégia */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-rose-500/40 to-transparent"></div>
                     <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                        <Zap size={16} className="text-violet-400" /> Distribuição por Estratégia
+                        <Zap size={16} className="text-rose-400" /> Distribuição por Estratégia
                     </h3>
                     <div className="flex items-center gap-6">
                         <PieChart data={pieData} size={220} />
@@ -296,15 +300,11 @@ export const StrategyReportHub: React.FC = () => {
                             ))}
                         </div>
                     </div>
-                </motion.div>
+                </div>
 
-                {/* Pizza: Win vs Loss Global */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6"
-                >
+                {/* Vitórias vs Derrotas */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-rose-500/40 to-transparent"></div>
                     <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
                         <Shield size={16} className="text-emerald-400" /> Vitórias vs Derrotas (Global)
                     </h3>
@@ -321,25 +321,23 @@ export const StrategyReportHub: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                </div>
+
             </div>
 
-            {/* Tabela de Estratégias */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden"
-            >
-                <div className="p-5 border-b border-slate-800 flex items-center gap-2">
-                    <Award size={18} className="text-amber-400" />
+            {/* TABELA DE ESTRATÉGIAS */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-rose-500/40 to-transparent"></div>
+
+                <div className="flex items-center gap-2 mb-6">
+                    <Award size={18} className="text-rose-400" />
                     <h3 className="text-sm font-bold text-white">Ranking de Performance — Todas as I.A's</h3>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-slate-800">
+                            <tr className="border-b border-white/5">
                                 <th className="text-left p-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">#</th>
                                 <th className="text-left p-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Estratégia</th>
                                 <th className="text-left p-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Categoria</th>
@@ -362,12 +360,12 @@ export const StrategyReportHub: React.FC = () => {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.04 }}
-                                    className={`border-b border-slate-800/50 transition-all ${i === 0
-                                        ? 'bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-transparent hover:from-amber-500/20 hover:via-yellow-500/10 shadow-[0_0_30px_rgba(245,158,11,0.15)] relative'
-                                        : 'hover:bg-slate-800/30'
-                                        }`}
+                                    className={`border-b border-white/5 transition-all ${i === 0
+                                        ? 'bg-gradient-to-r from-rose-500/10 via-pink-500/5 to-transparent hover:from-rose-500/20 hover:via-pink-500/10 relative'
+                                        : 'hover:bg-white/5'
+                                    }`}
                                     style={i === 0 ? {
-                                        boxShadow: '0 0 25px rgba(245, 158, 11, 0.12), 0 0 60px rgba(245, 158, 11, 0.06), inset 0 1px 0 rgba(245, 158, 11, 0.2)'
+                                        boxShadow: '0 0 25px rgba(244, 63, 94, 0.12), 0 0 60px rgba(244, 63, 94, 0.06), inset 0 1px 0 rgba(244, 63, 94, 0.2)'
                                     } : {}}
                                 >
                                     <td className="p-4">
@@ -377,12 +375,12 @@ export const StrategyReportHub: React.FC = () => {
                                                     animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
                                                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                                                 >
-                                                    <Trophy size={18} className="text-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.8)]" />
+                                                    <Trophy size={18} className="text-rose-400 drop-shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
                                                 </motion.div>
-                                                <span className="text-sm font-black text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]">1º</span>
+                                                <span className="text-sm font-black text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.6)]">1º</span>
                                             </div>
                                         ) : (
-                                            <span className={`text-sm font-black ${i === 1 ? 'text-slate-300' : i === 2 ? 'text-amber-700' : 'text-slate-500'}`}>
+                                            <span className={`text-sm font-black ${i === 1 ? 'text-slate-300' : i === 2 ? 'text-rose-700' : 'text-slate-500'}`}>
                                                 {i + 1}º
                                             </span>
                                         )}
@@ -390,10 +388,10 @@ export const StrategyReportHub: React.FC = () => {
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
                                             <div
-                                                className={`w-3 h-8 rounded-full ${i === 0 ? 'shadow-[0_0_10px_rgba(245,158,11,0.6)]' : ''}`}
+                                                className={`w-3 h-8 rounded-full ${i === 0 ? 'shadow-[0_0_10px_rgba(244,63,94,0.6)]' : ''}`}
                                                 style={{ backgroundColor: s.color }}
                                             />
-                                            <span className={`text-sm font-bold ${i === 0 ? 'text-amber-200 drop-shadow-[0_0_6px_rgba(245,158,11,0.4)]' : 'text-white'}`}>
+                                            <span className={`text-sm font-bold ${i === 0 ? 'text-rose-200 drop-shadow-[0_0_6px_rgba(244,63,94,0.4)]' : 'text-white'}`}>
                                                 {i === 0 && '👑 '}{s.name}
                                             </span>
                                         </div>
@@ -402,32 +400,32 @@ export const StrategyReportHub: React.FC = () => {
                                         <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase ${s.category === 'Cripto' ? 'bg-cyan-500/10 text-cyan-400' :
                                             s.category === 'Forex' ? 'bg-blue-500/10 text-blue-400' :
                                                 'bg-amber-500/10 text-amber-400'
-                                            }`}>
+                                        }`}>
                                             {s.category}
                                         </span>
                                     </td>
                                     <td className="p-4 text-xs text-slate-400 font-mono">{s.asset}</td>
-                                    <td className={`p-4 text-center text-sm font-bold ${i === 0 ? 'text-amber-200' : 'text-white'}`}>{s.totalTrades}</td>
+                                    <td className={`p-4 text-center text-sm font-bold ${i === 0 ? 'text-rose-200' : 'text-white'}`}>{s.totalTrades}</td>
                                     <td className="p-4 text-center text-sm font-bold text-emerald-400">{s.wins}</td>
                                     <td className="p-4 text-center text-sm font-bold text-red-400">{s.losses}</td>
                                     <td className="p-4 text-center">
                                         <div className="flex flex-col items-center gap-1">
-                                            <span className={`text-sm font-black ${i === 0 ? 'text-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]' :
+                                            <span className={`text-sm font-black ${i === 0 ? 'text-rose-300 drop-shadow-[0_0_8px_rgba(244,63,94,0.6)]' :
                                                 s.winRate >= 90 ? 'text-emerald-400' : s.winRate >= 85 ? 'text-blue-400' : 'text-amber-400'
-                                                }`}>
+                                            }`}>
                                                 {s.winRate}%
                                             </span>
                                             <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
                                                 <div
-                                                    className={`h-full rounded-full ${i === 0 ? 'bg-gradient-to-r from-amber-500 to-yellow-400 shadow-[0_0_6px_rgba(245,158,11,0.5)]' :
+                                                    className={`h-full rounded-full ${i === 0 ? 'bg-gradient-to-r from-rose-500 to-pink-400 shadow-[0_0_6px_rgba(244,63,94,0.5)]' :
                                                         s.winRate >= 90 ? 'bg-emerald-500' : s.winRate >= 85 ? 'bg-blue-500' : 'bg-amber-500'
-                                                        }`}
+                                                    }`}
                                                     style={{ width: `${s.winRate}%` }}
                                                 />
                                             </div>
                                         </div>
                                     </td>
-                                    <td className={`p-4 text-center text-sm font-bold ${i === 0 ? 'text-amber-300' : 'text-violet-400'}`}>{s.profitFactor}</td>
+                                    <td className={`p-4 text-center text-sm font-bold ${i === 0 ? 'text-rose-300' : 'text-violet-400'}`}>{s.profitFactor}</td>
                                     <td className="p-4 text-center">
                                         <span className={`text-sm font-bold ${(s.totalProfit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                             ${(s.totalProfit || 0).toFixed(2)}
@@ -438,7 +436,7 @@ export const StrategyReportHub: React.FC = () => {
                                         <span className={`text-[9px] font-bold px-2 py-1 rounded-md uppercase ${s.source === 'MT5_REAL' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                                             s.source === 'SIGNALS_ONLY' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' :
                                                 'bg-slate-500/10 text-slate-500 border border-slate-500/20'
-                                            }`}>
+                                        }`}>
                                             {s.source === 'MT5_REAL' ? '● MT5 REAL' : s.source === 'SIGNALS_ONLY' ? '○ SINAIS' : '— SEM DADOS'}
                                         </span>
                                     </td>
@@ -452,7 +450,8 @@ export const StrategyReportHub: React.FC = () => {
                         </tbody>
                     </table>
                 </div>
-            </motion.div>
+            </div>
+
         </div>
     );
 };

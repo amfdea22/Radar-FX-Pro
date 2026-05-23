@@ -78,8 +78,10 @@ interface GoldScalperStatus {
     m5Gap?: number;
     m5Vol?: number;
     predictions?: {
+        m1: { direction: 'UP' | 'DOWN' | 'FLAT', confidence: number };
         m5: { direction: 'UP' | 'DOWN' | 'FLAT', confidence: number };
         m15: { direction: 'UP' | 'DOWN' | 'FLAT', confidence: number };
+        h1: { direction: 'UP' | 'DOWN' | 'FLAT', confidence: number };
     };
     dxyTrend?: string;
     sentiment?: { long: number, short: number };
@@ -811,10 +813,81 @@ export const GoldScalperPanel: React.FC = () => {
                 )}
             </AnimatePresence>
 
+            {/* GOLD SCALPER TITLE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/20 shadow-[0_0_50px_rgba(245,158,11,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-amber-500/10 rounded-3xl border border-amber-500/20 shadow-xl shadow-amber-500/10">
+                        <TrendingUp size={40} className="text-amber-500" />
+                    </div>
+                    <div>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Gold</span> Scalper
+                            <span className={`px-2 py-1 rounded-lg text-xs tracking-widest uppercase ${s.enabled ? 'bg-amber-500/10 border border-amber-500/20 text-amber-500' : 'bg-slate-500/10 border border-slate-500/20 text-slate-500'}`}>
+                                {s.enabled ? 'Ativo' : 'Inativo'}
+                            </span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Zap size={12} className="text-amber-500" /> Scalping Inteligente | Neuro Core IA | Sniper Entry
+                        </p>
+                    </div>
+                </div>
+                <div className="flex gap-4 relative z-10 items-center">
+                    <div className="flex items-center gap-3 px-4 py-2 bg-black/40 rounded-2xl border border-white/5 shadow-[0_0_15px_rgba(245,158,11,0.05)]">
+                        <span className={`text-[8px] font-black tracking-[0.2em] uppercase transition-colors duration-500 ${s.enabled ? 'text-emerald-400' : 'text-slate-600'}`}>
+                            {s.enabled ? 'ON' : 'OFF'}
+                        </span>
+                        <button
+                            onClick={toggleEnabled}
+                            className={`relative w-12 h-6 flex items-center rounded-full transition-all duration-500 px-1 ${s.enabled ? 'bg-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)]' : 'bg-slate-800 hover:shadow-[0_0_15px_rgba(245,158,11,0.2)]'}`}
+                        >
+                            <div className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-500 ${s.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleSync}
+                            disabled={syncing}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-tighter transition-all border ${
+                                syncing
+                                ? 'bg-slate-900 border-slate-800 text-slate-600'
+                                : 'bg-slate-950 text-slate-300 hover:text-amber-400 hover:bg-slate-900 border-white/10 hover:border-amber-500/30 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]'
+                                } `}
+                        >
+                            <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
+                            {syncing ? 'Sincronizando...' : 'Sincronizar'}
+                        </button>
+
+                        <button
+                            onClick={handleManualLockToggle}
+                            className={`group relative flex items-center justify-center w-11 h-11 rounded-2xl border transition-all duration-300 active:scale-95 overflow-hidden ${
+                                status.isCoolingOff
+                                    ? 'bg-rose-500/10 border-rose-500/50 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)] hover:shadow-[0_0_30px_rgba(244,63,94,0.5)]'
+                                    : 'bg-slate-900/40 border-white/5 text-slate-500 hover:text-amber-500 hover:border-amber-500/30 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]'
+                            }`}
+                            title={status.isCoolingOff ? `Desbloquear (${Math.ceil(status.coolOffRemainingMs / 60000)}m)` : 'Trava Manual'}
+                        >
+                            {status.isCoolingOff && <div className="absolute inset-0 bg-rose-500/20 animate-pulse pointer-events-none" />}
+                            {status.isCoolingOff ? <ShieldAlert size={16} className="relative z-10 animate-bounce" /> : <Shield size={16} className="relative z-10 group-hover:scale-110 transition-transform" />}
+                        </button>
+
+                        <button
+                            onClick={handleReset}
+                            className="group relative flex items-center justify-center w-11 h-11 rounded-2xl bg-slate-900/40 border border-white/5 text-slate-500 hover:text-rose-400 hover:border-rose-500/30 hover:shadow-[0_0_20px_rgba(239,68,68,0.15)] transition-all duration-300 active:scale-95 overflow-hidden"
+                            title="Reset Diário"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <Power size={16} className="relative z-10 group-hover:rotate-180 transition-transform duration-500" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* NOVO Header Premium */}
             <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
                 <div className="flex items-center justify-between cursor-pointer select-none" onClick={() => toggleSection('header')}>
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Cockpit Principal</span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Cockpit Principal</span>
                     <button className="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center justify-center transition-all">
                         {collapsedSections['header'] ? <Plus size={14} /> : <Minus size={14} />}
                     </button>
@@ -871,6 +944,43 @@ export const GoldScalperPanel: React.FC = () => {
                             <div className="flex flex-col gap-1 px-4 justify-center">
                                 <span className="text-[7px] font-black uppercase text-slate-500 tracking-[0.3em] mb-1 text-center">Previsão Neural</span>
                                 <div className="flex items-center gap-5">
+                                    {/* 1M Prediction */}
+                                    <div className="flex flex-col items-center gap-2 group cursor-help">
+                                        <span className="text-[6px] font-black text-slate-500 tracking-widest leading-none">1M</span>
+                                        <motion.div 
+                                            animate={status.predictions?.m1?.direction !== 'FLAT' ? { 
+                                                scale: [1, 1.05, 1],
+                                                boxShadow: status.predictions.m1.direction === 'UP' 
+                                                    ? ['0 0 10px rgba(16,185,129,0.2)', '0 0 20px rgba(16,185,129,0.4)', '0 0 10px rgba(16,185,129,0.2)']
+                                                    : ['0 0 10px rgba(244,63,94,0.2)', '0 0 20px rgba(244,63,94,0.4)', '0 0 10px rgba(244,63,94,0.2)']
+                                            } : {}}
+                                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                            className={`relative w-8 h-12 rounded-lg flex items-center justify-center border-2 overflow-hidden transition-all duration-700 ${
+                                            status.predictions.m1.direction === 'UP' 
+                                                ? 'bg-emerald-500/10 border-emerald-400/50' 
+                                                : status.predictions.m1.direction === 'DOWN'
+                                                ? 'bg-rose-500/10 border-rose-400/50'
+                                                : 'bg-slate-800/40 border-slate-700/50'
+                                        }`}>
+                                            {status.predictions.m1.direction !== 'FLAT' && (
+                                                <motion.div 
+                                                    animate={{ y: ['150%', '-150%'] }}
+                                                    transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                                                    className={`absolute left-0 w-full h-full bg-gradient-to-t ${status.predictions.m1.direction === 'UP' ? 'from-transparent via-emerald-400/30 to-transparent' : 'from-transparent via-rose-400/30 to-transparent'}`}
+                                                />
+                                            )}
+
+                                            <div className={`absolute inset-0 opacity-20 bg-gradient-to-tr ${status.predictions.m1.direction === 'UP' ? 'from-emerald-400 to-transparent' : 'from-rose-400 to-transparent'}`} />
+                                            <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+                                            <div className={`w-1 h-10 rounded-full relative z-10 transition-all duration-700 ${
+                                                status.predictions.m1.direction === 'UP' ? 'bg-emerald-400 shadow-[0_0_10px_#10b981]' : status.predictions.m1.direction === 'DOWN' ? 'bg-rose-400 shadow-[0_0_10px_#f43f5e]' : 'bg-slate-600'
+                                            }`} />
+                                        </motion.div>
+                                        <span className={`text-[9px] font-black tracking-tighter leading-none ${status.predictions.m1.direction === 'UP' ? 'text-emerald-400' : status.predictions.m1.direction === 'DOWN' ? 'text-rose-400' : 'text-slate-500'}`}>
+                                            {status.predictions.m1.confidence}%
+                                        </span>
+                                        <CandleCountdown tf="M1" />
+                                    </div>
                                     {/* 5M Prediction */}
                                     <div className="flex flex-col items-center gap-2 group cursor-help">
                                         <span className="text-[6px] font-black text-slate-500 tracking-widest leading-none">5M</span>
@@ -990,59 +1100,87 @@ export const GoldScalperPanel: React.FC = () => {
                                 <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest animate-pulse">Carregando IA...</span>
                             </div>
                         )}
+
+                        {/* MATRIZ DE COGNIÇÃO IA */}
+                        {status.iaLearning && (
+                            <div className="flex-1 min-w-0 md:min-w-[360px] max-w-lg bg-slate-950/40 p-5 rounded-2xl border border-amber-500/20 flex flex-col gap-4 shadow-lg mx-2">
+                                <div className="flex items-center justify-between">
+                                    <InfoTooltip 
+                                        header="Guia do Córtex IA v3.2"
+                                        content={
+                                            <div className="flex flex-col gap-2">
+                                                <p><strong className="text-blue-400">Matriz de Cognição:</strong> Card que indica o processamento ativo do core v3.2.</p>
+                                                <p><strong className="text-blue-400">Maturidade Neural:</strong> Evolui conforme os trades (100 trades = 100% de maturidade).</p>
+                                                <p><strong className="text-blue-400">Rigor Estratégico:</strong> Confiança mínima exigida para autorizar o trade.</p>
+                                                <p><strong className="text-blue-400">Base de Conhecimento:</strong> Ciclos de mercado analisados e aprendidos.</p>
+                                            </div>
+                                        }
+                                    >
+                                        <div className="flex items-center gap-2 cursor-help">
+                                            <div className="relative">
+                                                <Cpu size={18} className="text-blue-400 animate-pulse" />
+                                                <div className="absolute inset-0 bg-blue-400/20 blur-md rounded-full animate-ping"></div>
+                                            </div>
+                                            <span className="text-[11px] font-black text-white uppercase tracking-tighter">Matriz de Cognição IA</span>
+                                        </div>
+                                    </InfoTooltip>
+                                    <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border transition-colors ${
+                                        status.cortexHumor === 'PROTEÇÃO' ? 'bg-rose-500/10 border-rose-500/40 text-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.2)]' :
+                                        status.cortexHumor === 'CAUTELOSO' ? 'bg-amber-500/10 border-amber-500/40 text-amber-400' :
+                                        status.cortexHumor === 'AGRESSIVO' ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 animate-pulse' :
+                                        'bg-blue-500/10 border-blue-500/40 text-blue-400'
+                                    }`}>
+                                        {status.cortexHumor || 'ANALÍTICO'}
+                                    </div>
+                                </div>
+                                
+                                {/* Pilares de Decisão */}
+                                {status.decisionPillars && (
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 border-y border-white/5 py-3">
+                                        {[
+                                            { label: 'TREND', val: status.decisionPillars.trend },
+                                            { label: 'DXY', val: status.decisionPillars.dxy },
+                                            { label: 'RSI', val: status.decisionPillars.rsi },
+                                            { label: 'VSA', val: status.decisionPillars.volume }
+                                        ].map(p => (
+                                            <div key={p.label} className="flex flex-col gap-1.5 items-center">
+                                                <div className="relative w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                                    <div 
+                                                        className={`h-full transition-all duration-1000 ${p.val >= 70 ? 'bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.5)]' : p.val >= 40 ? 'bg-amber-400' : 'bg-rose-500'}`} 
+                                                        style={{ width: `${p.val}%` }} 
+                                                    />
+                                                </div>
+                                                <span className="text-[8px] font-black text-slate-500 tracking-widest">{p.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
+                                }
+
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center justify-between text-[10px] font-black uppercase">
+                                        <span className="text-slate-400">Maturidade Neural</span>
+                                        <span className="text-blue-400">{Math.min(100, Math.round((status.iaLearning.totalAnalyzed / 100) * 100))}%</span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                        <div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-1000" style={{ width: `${Math.min(100, (status.iaLearning.totalAnalyzed / 100) * 100)}%` }} />
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Rigor IA</span>
+                                        <span className="text-[12px] font-black text-white italic tracking-tighter">{status.iaLearning.minScore}% Confiança</span>
+                                    </div>
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Aprendizado</span>
+                                        <span className="text-lg font-black text-white italic tracking-tighter">{status.iaLearning.totalAnalyzed} Ciclos</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* RIGHT ZONE: COMMAND CENTER (ACTIONS) */}
-                    <div className="flex flex-wrap items-center lg:justify-end gap-3 bg-slate-950/20 p-2.5 rounded-[2.5rem] border border-white/5 backdrop-blur-md">
-                         <div className="flex items-center gap-3 px-4 py-2 bg-black/40 rounded-2xl border border-white/5">
-                            <span className={`text-[8px] font-black tracking-[0.2em] uppercase transition-colors duration-500 ${s.enabled ? 'text-emerald-400' : 'text-slate-600'}`}>
-                                {s.enabled ? 'ON' : 'OFF'}
-                            </span>
-                            <button
-                                onClick={toggleEnabled}
-                                className={`relative w-12 h-6 flex items-center rounded-full transition-all duration-500 px-1 ${s.enabled ? 'bg-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800'}`}
-                            >
-                                <div className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-500 ${s.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
-                            </button>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                             <button
-                                onClick={handleSync}
-                                disabled={syncing}
-                                className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-tighter transition-all border ${
-                                    syncing
-                                    ? 'bg-slate-900 border-slate-800 text-slate-600'
-                                    : 'bg-slate-950 text-slate-300 hover:text-amber-400 hover:bg-slate-900 border-white/10 hover:border-amber-500/30'
-                                    } `}
-                            >
-                                <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
-                                {syncing ? 'Sincronizando...' : 'Sincronizar'}
-                            </button>
-
-                            <button
-                                onClick={handleManualLockToggle}
-                                className={`group relative flex items-center justify-center w-11 h-11 rounded-2xl border transition-all duration-300 active:scale-95 overflow-hidden ${
-                                    status.isCoolingOff
-                                        ? 'bg-rose-500/10 border-rose-500/50 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)]'
-                                        : 'bg-slate-900/40 border-white/5 text-slate-500 hover:text-amber-500 hover:border-amber-500/30'
-                                }`}
-                                title={status.isCoolingOff ? `Desbloquear (${Math.ceil(status.coolOffRemainingMs / 60000)}m)` : 'Trava Manual'}
-                            >
-                                {status.isCoolingOff && <div className="absolute inset-0 bg-rose-500/20 animate-pulse pointer-events-none" />}
-                                {status.isCoolingOff ? <ShieldAlert size={16} className="relative z-10 animate-bounce" /> : <Shield size={16} className="relative z-10 group-hover:scale-110 transition-transform" />}
-                            </button>
-
-                            <button
-                                onClick={handleReset}
-                                className="group relative flex items-center justify-center w-11 h-11 rounded-2xl bg-slate-900/40 border border-white/5 text-slate-500 hover:text-rose-400 hover:border-rose-500/30 transition-all duration-300 active:scale-95 overflow-hidden"
-                                title="Reset Diário"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <Power size={16} className="relative z-10 group-hover:rotate-180 transition-transform duration-500" />
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Bottom Row: Telemetry Bar */}
@@ -1226,85 +1364,6 @@ export const GoldScalperPanel: React.FC = () => {
                             </InfoTooltip>
                         )}
                         
-                        {/* MATRIZ DE COGNIÇÃO IA */}
-                        {status.iaLearning && (
-                            <div className="flex-1 min-w-0 md:min-w-[280px] max-w-sm bg-slate-950/40 p-3 rounded-2xl border border-white/5 flex flex-col gap-3 shadow-lg mx-2">
-                                <div className="flex items-center justify-between">
-                                    <InfoTooltip 
-                                        header="Guia do Córtex IA v3.2"
-                                        content={
-                                            <div className="flex flex-col gap-2">
-                                                <p><strong className="text-blue-400">Matriz de Cognição:</strong> Card que indica o processamento ativo do core v3.2.</p>
-                                                <p><strong className="text-blue-400">Maturidade Neural:</strong> Evolui conforme os trades (100 trades = 100% de maturidade).</p>
-                                                <p><strong className="text-blue-400">Rigor Estratégico:</strong> Confiança mínima exigida para autorizar o trade.</p>
-                                                <p><strong className="text-blue-400">Base de Conhecimento:</strong> Ciclos de mercado analisados e aprendidos.</p>
-                                            </div>
-                                        }
-                                    >
-                                        <div className="flex items-center gap-2 cursor-help">
-                                            <div className="relative">
-                                                <Cpu size={14} className="text-blue-400 animate-pulse" />
-                                                <div className="absolute inset-0 bg-blue-400/20 blur-md rounded-full animate-ping"></div>
-                                            </div>
-                                            <span className="text-[9px] font-black text-white uppercase tracking-tighter">Matriz de Cognição IA</span>
-                                        </div>
-                                    </InfoTooltip>
-                                    <div className={`px-2 py-0.5 rounded-full text-[7.5px] font-black uppercase tracking-widest border transition-colors ${
-                                        status.cortexHumor === 'PROTEÇÃO' ? 'bg-rose-500/10 border-rose-500/40 text-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.2)]' :
-                                        status.cortexHumor === 'CAUTELOSO' ? 'bg-amber-500/10 border-amber-500/40 text-amber-400' :
-                                        status.cortexHumor === 'AGRESSIVO' ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 animate-pulse' :
-                                        'bg-blue-500/10 border-blue-500/40 text-blue-400'
-                                    }`}>
-                                        {status.cortexHumor || 'ANALÍTICO'}
-                                    </div>
-                                </div>
-                                
-                                {/* Pilares de Decisão */}
-                                {status.decisionPillars && (
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 border-y border-white/5 py-2">
-                                        {[
-                                            { label: 'TREND', val: status.decisionPillars.trend },
-                                            { label: 'DXY', val: status.decisionPillars.dxy },
-                                            { label: 'RSI', val: status.decisionPillars.rsi },
-                                            { label: 'VSA', val: status.decisionPillars.volume }
-                                        ].map(p => (
-                                            <div key={p.label} className="flex flex-col gap-1 items-center">
-                                                <div className="relative w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-                                                    <div 
-                                                        className={`h-full transition-all duration-1000 ${p.val >= 70 ? 'bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.5)]' : p.val >= 40 ? 'bg-amber-400' : 'bg-rose-500'}`} 
-                                                        style={{ width: `${p.val}%` }} 
-                                                    />
-                                                </div>
-                                                <span className="text-[6.5px] font-black text-slate-500 tracking-widest">{p.label}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )
-                                }
-
-                                <div className="space-y-1">
-                                    <div className="flex items-center justify-between text-[8px] font-black uppercase">
-                                        <span className="text-slate-400">Maturidade Neural</span>
-                                        <span className="text-blue-400">{Math.min(100, Math.round((status.iaLearning.totalAnalyzed / 100) * 100))}%</span>
-                                    </div>
-                                    <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
-                                        <div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-1000" style={{ width: `${Math.min(100, (status.iaLearning.totalAnalyzed / 100) * 100)}%` }} />
-                                    </div>
-                                </div>
-                                
-                                <div className="flex items-center justify-between">
-                                    <div className="flex flex-col">
-                                        <span className="text-[7px] text-slate-500 font-bold uppercase tracking-widest">Rigor IA</span>
-                                        <span className="text-[10px] font-black text-white italic tracking-tighter">{status.iaLearning.minScore}% Confiança</span>
-                                    </div>
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-[7px] text-slate-500 font-bold uppercase tracking-widest">Aprendizado</span>
-                                        <span className="text-base font-black text-white italic tracking-tighter">{status.iaLearning.totalAnalyzed} Ciclos</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
                         <button
                             onClick={() => window.dispatchEvent(new CustomEvent('switchTab', { detail: 'financial' }))}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-black uppercase tracking-widest text-[9px] transition-all bg-slate-800/40 text-slate-400 border border-white/5 hover:bg-slate-700 hover:text-white shrink-0"

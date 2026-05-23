@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     Calculator, TrendingUp, TrendingDown, DollarSign, Calendar, Target,
     Download, RefreshCw, BarChart2, ShieldAlert, ArrowUpRight, ArrowDownRight,
-    Wallet, Save, Plus, Trash2, Edit3, PieChart, ChevronRight
+    Wallet, Save, Plus, Trash2, Edit3, PieChart, ChevronRight, Cpu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -111,7 +111,7 @@ export const FinancialControl: React.FC = () => {
         if (saved) return JSON.parse(saved);
         return {
             initial: 500.00,
-            rate: 5.0 // Meta de 5% recomendada pelo Gold Scalper
+            rate: 5.0
         };
     });
 
@@ -198,26 +198,37 @@ export const FinancialControl: React.FC = () => {
     const formatCurrency = (val: number) => `$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     return (
-        <div className="p-6 space-y-6 text-white min-h-screen bg-slate-950 font-sans selection:bg-emerald-500/30">
-            {/* Header / Nav */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/50 p-4 rounded-3xl border border-white/5 backdrop-blur-md">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg shadow-emerald-500/20">
-                        <Calculator size={24} className="text-white" />
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 shadow-xl shadow-emerald-500/10">
+                        <Calculator size={40} className="text-emerald-400" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-black uppercase tracking-tighter text-white">Controle Financeiro <span className="text-emerald-500">VIP</span></h1>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Gestão de Banca & Projeção HFT</p>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">Controle</span> Financeiro
+                            <span className="px-2 py-1 rounded-lg text-xs tracking-widest uppercase bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
+                                VIP
+                            </span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Cpu size={12} className="text-emerald-400" /> Gestão de Banca & Projeção HFT
+                        </p>
                         {serverData && (
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-2 mt-1.5">
                                 <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
                                 <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Sincronizado c/ Radar FX</span>
                             </div>
                         )}
                     </div>
                 </div>
+            </div>
 
-                <div className="flex bg-slate-950/80 p-1 rounded-xl border border-slate-800 self-stretch md:self-auto">
+            {/* NAV TABS */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-2 rounded-[2rem] border border-white/5 shadow-2xl">
+                <div className="flex items-center gap-1">
                     {[
                         { id: 'daily', label: 'Dados Diários', icon: Calendar },
                         { id: 'monthly', label: 'Mês a Mês', icon: BarChart2 },
@@ -226,10 +237,12 @@ export const FinancialControl: React.FC = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-white'}`}
+                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                                activeTab === tab.id ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-500 hover:text-white'
+                            }`}
                         >
                             <tab.icon size={14} />
-                            <span className="hidden sm:inline">{tab.label}</span>
+                            <span>{tab.label}</span>
                         </button>
                     ))}
                 </div>
@@ -244,7 +257,7 @@ export const FinancialControl: React.FC = () => {
                         exit={{ opacity: 0, y: -10 }}
                         className="space-y-6"
                     >
-                        {/* Summary Tiles (Replica Excel) */}
+                        {/* Summary Tiles */}
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                             {[
                                 { label: 'Banca Inicial', val: formatCurrency(config.initialBalance), color: 'text-amber-400', key: 'initialBalance' },
@@ -254,7 +267,7 @@ export const FinancialControl: React.FC = () => {
                                 { label: 'Dólar (BRL)', val: `R$ ${config.dolarRate.toFixed(2)}`, color: 'text-trader-blue', key: 'dolarRate' },
                                 { label: 'Lucro Total', val: serverData ? formatCurrency(realTotalProfit) : formatCurrency(dailyAnalytics.totalPnl), color: realTotalProfit >= 0 ? 'text-emerald-400' : 'text-trader-red' },
                             ].map((tile, i) => (
-                                <div key={i} className="bg-slate-900/80 border border-white/5 p-4 rounded-2xl relative group overflow-hidden">
+                                <div key={i} className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 relative group overflow-hidden">
                                     <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         {tile.key && (
                                             <Edit3 size={10} className="text-slate-500 cursor-pointer hover:text-white"
@@ -280,7 +293,8 @@ export const FinancialControl: React.FC = () => {
                         </div>
 
                         {/* Chart Area */}
-                        <div className="bg-slate-900/50 border border-white/5 p-6 rounded-3xl backdrop-blur-sm h-[300px]">
+                        <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden h-[300px]">
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={dailyAnalytics.processed.filter((r, i) => i < 10)}>
                                     <defs>
@@ -301,8 +315,9 @@ export const FinancialControl: React.FC = () => {
                             </ResponsiveContainer>
                         </div>
 
-                        {/* Editable Table */}
-                        <div className="bg-slate-900 border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+                        {/* Daily Table */}
+                        <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
                             <div className="overflow-x-auto max-h-[500px]">
                                 <table className="w-full text-left border-collapse">
                                     <thead className="sticky top-0 bg-slate-900 z-10">
@@ -363,42 +378,46 @@ export const FinancialControl: React.FC = () => {
                         className="space-y-6"
                     >
                         {/* Calculator Header */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900/50 p-6 rounded-3xl border border-white/5">
-                            <div className="space-y-4">
-                                <h2 className="text-xl font-black uppercase text-white flex items-center gap-3">
-                                    <TrendingUp className="text-emerald-500" /> Simulador de Juros Compostos
-                                </h2>
-                                <p className="text-xs text-slate-400">Projeção recomendada: 3% a 5% ao dia.</p>
-                                <div className="flex gap-4">
-                                    <div className="flex-1">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Investimento Inicial ($)</label>
-                                        <input
-                                            type="number"
-                                            value={compoundConfig.initial}
-                                            onChange={(e) => setCompoundConfig({ ...compoundConfig, initial: parseFloat(e.target.value) || 0 })}
-                                            className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white font-mono w-full text-sm"
-                                        />
-                                    </div>
-                                    <div className="w-32">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Retorno (%)</label>
-                                        <input
-                                            type="number"
-                                            value={compoundConfig.rate}
-                                            onChange={(e) => setCompoundConfig({ ...compoundConfig, rate: parseFloat(e.target.value) || 0 })}
-                                            className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-trader-green font-mono w-full text-sm"
-                                        />
+                        <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <h2 className="text-xl font-black uppercase text-white flex items-center gap-3">
+                                        <TrendingUp className="text-emerald-500" /> Simulador de Juros Compostos
+                                    </h2>
+                                    <p className="text-xs text-slate-400">Projeção recomendada: 3% a 5% ao dia.</p>
+                                    <div className="flex gap-4">
+                                        <div className="flex-1">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Investimento Inicial ($)</label>
+                                            <input
+                                                type="number"
+                                                value={compoundConfig.initial}
+                                                onChange={(e) => setCompoundConfig({ ...compoundConfig, initial: parseFloat(e.target.value) || 0 })}
+                                                className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white font-mono w-full text-sm"
+                                            />
+                                        </div>
+                                        <div className="w-32">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Retorno (%)</label>
+                                            <input
+                                                type="number"
+                                                value={compoundConfig.rate}
+                                                onChange={(e) => setCompoundConfig({ ...compoundConfig, rate: parseFloat(e.target.value) || 0 })}
+                                                className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-emerald-500 font-mono w-full text-sm"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl flex flex-col justify-center">
-                                <p className="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest mb-1">Previsão Acumulada (60 dias)</p>
-                                <h3 className="text-4xl font-black text-white">$ {compoundData[59].forecast.toLocaleString(undefined, { maximumFractionDigits: 0 })}</h3>
-                                <p className="text-[10px] text-slate-500 font-bold mt-2 uppercase">Meta de Multiplicação: {(compoundData[59].forecast / compoundConfig.initial).toFixed(0)}x</p>
+                                <div className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl flex flex-col justify-center">
+                                    <p className="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest mb-1">Previsão Acumulada (60 dias)</p>
+                                    <h3 className="text-4xl font-black text-white">$ {compoundData[59].forecast.toLocaleString(undefined, { maximumFractionDigits: 0 })}</h3>
+                                    <p className="text-[10px] text-slate-500 font-bold mt-2 uppercase">Meta de Multiplicação: {(compoundData[59].forecast / compoundConfig.initial).toFixed(0)}x</p>
+                                </div>
                             </div>
                         </div>
 
                         {/* Compound Table */}
-                        <div className="bg-slate-900 border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+                        <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
                             <div className="overflow-x-auto max-h-[600px]">
                                 <table className="w-full text-left border-collapse">
                                     <thead className="sticky top-0 bg-slate-900 z-10 shadow-lg border-b border-white/5">
@@ -449,8 +468,9 @@ export const FinancialControl: React.FC = () => {
                         exit={{ opacity: 0, x: -20 }}
                         className="space-y-6"
                     >
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-2 bg-slate-900/50 border border-white/5 p-8 rounded-3xl backdrop-blur-md h-[500px]">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden h-[500px]">
+                                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
                                 <h2 className="text-xl font-black uppercase text-white mb-8">Evolução Mensal (Performance)</h2>
                                 <ResponsiveContainer width="100%" height="80%">
                                     <BarChart data={[
@@ -477,12 +497,13 @@ export const FinancialControl: React.FC = () => {
                                 </ResponsiveContainer>
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="bg-slate-900 border border-white/5 p-6 rounded-3xl">
+                            <div className="space-y-6">
+                                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
                                     <h3 className="text-xs font-black text-slate-500 uppercase mb-4 tracking-tighter">Histórico de Fechamento</h3>
                                     <div className="space-y-3">
                                         {['JAN', 'FEV', 'MAR'].map(m => (
-                                            <div key={m} className="flex justify-between items-center p-3 bg-slate-950/50 rounded-xl border border-slate-800">
+                                            <div key={m} className="flex justify-between items-center p-3 bg-slate-950/40 rounded-xl border border-white/5">
                                                 <span className="text-[10px] font-black text-slate-400 uppercase">{m}</span>
                                                 <span className={`text-sm font-mono font-bold ${m === 'MAR' ? (dailyAnalytics.totalPnl >= 0 ? 'text-emerald-400' : 'text-trader-red') : 'text-emerald-400'}`}>
                                                     {m === 'MAR' ? formatCurrency(dailyAnalytics.totalPnl) : formatCurrency(m === 'JAN' ? 450 : 820)}
@@ -491,7 +512,8 @@ export const FinancialControl: React.FC = () => {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="p-6 bg-gradient-to-br from-trader-blue/20 to-indigo-500/20 border border-trader-blue/30 rounded-3xl">
+                                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-trader-blue/20 shadow-2xl relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"></div>
                                     <Target className="text-trader-blue mb-4" size={32} />
                                     <h4 className="font-black text-white uppercase text-[10px] mb-2 tracking-widest">Meta Anual</h4>
                                     <p className="text-[11px] text-slate-400 leading-relaxed italic">"A consistência mora nos detalhes. O controle mensal permite ajustar o gerenciamento antes que o drawdown se torne irreversível."</p>

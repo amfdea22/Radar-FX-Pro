@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     BarChart2, TrendingUp, TrendingDown, Activity, PieChart as PieIcon,
-    Calendar, DollarSign, Target, Layers, Percent
+    Calendar, DollarSign, Target, Layers, Percent, Cpu
 } from 'lucide-react';
 import {
     LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
@@ -42,7 +42,7 @@ export const Statistics: React.FC = () => {
         return (
             <div className="flex items-center justify-center h-full p-12">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                    <div className="w-12 h-12 border-4 border-sky-500/30 border-t-sky-500 rounded-full animate-spin" />
                     <span className="text-base font-black text-slate-500 uppercase tracking-widest">Carregando estatísticas...</span>
                 </div>
             </div>
@@ -72,28 +72,36 @@ export const Statistics: React.FC = () => {
     const totalTrades = data?.totalTrades || 0;
 
     return (
-        <div className="p-6 space-y-5 max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-blue-500/20 rounded-xl">
-                        <BarChart2 size={22} className="text-blue-400" />
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/20 shadow-[0_0_50px_rgba(14,165,233,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-sky-500/10 rounded-3xl border border-sky-500/20 shadow-xl shadow-sky-500/10">
+                        <BarChart2 size={40} className="text-sky-400" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-white italic uppercase tracking-tighter">Estatísticas</h1>
-                        <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Análise completa de performance</p>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-500">Estatísticas</span>
+                            <span className="px-2 py-1 rounded-lg text-xs tracking-widest uppercase bg-sky-500/10 border border-sky-500/20 text-sky-500">
+                                Analítico
+                            </span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Cpu size={12} className="text-sky-400" /> Análise completa de performance
+                        </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-600 font-bold">
-                    <Activity size={14} />
-                    <span>{totalTrades.toLocaleString()} trades analisados</span>
+                <div className="flex items-center gap-2 px-5 py-2.5 bg-slate-950/50 rounded-2xl border border-white/5">
+                    <Activity size={14} className="text-sky-400" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{totalTrades.toLocaleString()} trades analisados</span>
                 </div>
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
                 {[
-                    { label: 'Total Trades', value: totalTrades.toLocaleString(), color: 'text-blue-400', icon: <Layers size={16} /> },
+                    { label: 'Total Trades', value: totalTrades.toLocaleString(), color: 'text-sky-400', icon: <Layers size={16} /> },
                     { label: 'Ganhos', value: s.wins?.toLocaleString() || '0', color: 'text-trader-green', icon: <TrendingUp size={16} /> },
                     { label: 'Perdas', value: s.losses?.toLocaleString() || '0', color: 'text-trader-red', icon: <TrendingDown size={16} /> },
                     { label: '% Acerto', value: `${s.winRate || 0}%`, color: (s.winRate || 0) >= 50 ? 'text-trader-green' : 'text-trader-red', icon: <Percent size={16} /> },
@@ -101,9 +109,9 @@ export const Statistics: React.FC = () => {
                     { label: 'Total P&L', value: `$${(s.totalProfit || 0).toFixed(2)}`, color: (s.totalProfit || 0) >= 0 ? 'text-trader-green' : 'text-trader-red', icon: <DollarSign size={16} /> },
                     { label: 'Méd Trade', value: totalTrades > 0 ? `$${((s.totalProfit || 0) / totalTrades).toFixed(2)}` : '$0', color: ((s.totalProfit || 0) / totalTrades) >= 0 ? 'text-trader-green' : 'text-trader-red', icon: <BarChart2 size={16} /> }
                 ].map((kpi, i) => (
-                    <div key={i} className="bg-slate-900/60 backdrop-blur-md p-4 rounded-2xl border border-slate-800 hover:border-blue-500/20 transition-all">
+                    <div key={i} className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 hover:border-sky-500/20 transition-all">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-black text-slate-600 uppercase tracking-widest">{kpi.label}</span>
+                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{kpi.label}</span>
                             <span className={`${kpi.color} opacity-60`}>{kpi.icon}</span>
                         </div>
                         <span className={`text-2xl font-black italic ${kpi.color}`}>{kpi.value}</span>
@@ -112,9 +120,10 @@ export const Statistics: React.FC = () => {
             </div>
 
             {/* Charts Row 1: Equity Curve + Win/Loss Pie */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Equity Curve */}
-                <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <TrendingUp size={16} className="text-emerald-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Curva de Equity (últimos 200 trades)</span>
@@ -139,9 +148,10 @@ export const Statistics: React.FC = () => {
                 </div>
 
                 {/* Win/Loss Pie */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
-                        <PieIcon size={16} className="text-blue-400" />
+                        <PieIcon size={16} className="text-sky-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Distribuição Win/Loss</span>
                     </div>
                     <div className="h-64">
@@ -197,9 +207,10 @@ export const Statistics: React.FC = () => {
             </div>
 
             {/* Charts Row 2: Daily P&L + Profit Histogram */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Daily P&L Bars */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <DollarSign size={16} className="text-amber-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">P&L Diário</span>
@@ -222,7 +233,8 @@ export const Statistics: React.FC = () => {
                 </div>
 
                 {/* Profit Histogram */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <BarChart2 size={16} className="text-violet-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Histograma de Resultados</span>
@@ -245,10 +257,11 @@ export const Statistics: React.FC = () => {
                 </div>
             </div>
 
-            {/* Charts Row 3: Day of Week Performance */}
-            <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+            {/* Day of Week Performance */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
                 <div className="flex items-center gap-2 mb-4">
-                    <Calendar size={16} className="text-blue-400" />
+                    <Calendar size={16} className="text-sky-400" />
                     <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Performance por Dia da Semana</span>
                 </div>
                 <div className="h-72">
@@ -267,8 +280,9 @@ export const Statistics: React.FC = () => {
             </div>
 
             {/* Summary Stats Table */}
-            <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
-                <span className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-3">Resumo Geral</span>
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
+                <span className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-4">Resumo Geral</span>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <tbody>

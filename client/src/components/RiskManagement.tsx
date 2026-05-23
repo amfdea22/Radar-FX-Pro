@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Shield, Target, DollarSign, TrendingUp, TrendingDown, Activity,
-    Wallet, BarChart3, Layers, AlertTriangle, Minus, Plus, Brain, Info
+    Wallet, BarChart3, Layers, AlertTriangle, Minus, Plus, Brain, Info, Cpu
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -102,65 +102,79 @@ export const RiskManagement: React.FC = () => {
     const goldReport = data?.robots?.find(r => r.id === 'gold_scalper')?.report;
 
     return (
-        <div className="p-6 space-y-5 max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-emerald-500/20 rounded-xl">
-                        <Shield size={22} className="text-emerald-400" />
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 shadow-xl shadow-emerald-500/10">
+                        <Shield size={40} className="text-emerald-400" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-white italic uppercase tracking-tighter">Gestão de Risco</h1>
-                        <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Visão consolidada de todas as estratégias</p>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">Gestão</span> de Risco
+                            <span className={`px-2 py-1 rounded-lg text-xs tracking-widest uppercase ${data?.discipline?.isSafe ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500' : 'bg-amber-500/10 border border-amber-500/20 text-amber-500'}`}>
+                                {data?.discipline?.isSafe ? 'Seguro' : 'Atenção'}
+                            </span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Cpu size={12} className="text-emerald-400" /> Visão consolidada de todas as estratégias
+                        </p>
                     </div>
                 </div>
-                {data?.account && (
-                    <div className="flex items-center gap-3 text-xs text-slate-600 font-bold uppercase tracking-widest">
-                        <span>{data.account.broker}</span>
-                        <span className="text-slate-700">|</span>
-                        <span>Login: {data.account.login}</span>
-                        <span className="text-slate-700">|</span>
-                        <span>1:{data.account.leverage}</span>
-                    </div>
-                )}
+                <div className="flex gap-4 relative z-10 items-center">
+                    {data?.account && (
+                        <div className="flex items-center gap-3 px-5 py-2.5 bg-slate-950/50 rounded-2xl border border-white/5">
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{data.account.broker}</span>
+                            <span className="text-slate-700">|</span>
+                            <span className="text-[10px] font-black text-slate-400">Login: {data.account.login}</span>
+                            <span className="text-slate-700">|</span>
+                            <span className="text-[10px] font-black text-emerald-400">1:{data.account.leverage}</span>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Account Health */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                {[
-                    { label: 'Saldo', value: `$${data?.account.balance.toFixed(2) || '0'}`, color: 'text-trader-blue', icon: <Wallet size={16} />, tip: 'Saldo total disponível na conta MT5.' },
-                    { label: 'Equity', value: `$${data?.account.equity.toFixed(2) || '0'}`, color: 'text-emerald-400', icon: <TrendingUp size={16} />, tip: 'Saldo + lucro/prejuízo flutuante das posições abertas.' },
-                    { label: 'Margem', value: `${data?.account.marginLevel.toFixed(1) || '0'}%`, color: (data?.account.marginLevel || 0) > 200 ? 'text-trader-green' : 'text-trader-red', icon: <BarChart3 size={16} />, tip: 'Nível de margem (equity / margem). >200% = saudável.' },
-                    { label: 'Flutuante', value: `$${(data?.account.floatingPL || 0).toFixed(2)}`, color: (data?.account.floatingPL || 0) >= 0 ? 'text-trader-green' : 'text-trader-red', icon: <Activity size={16} />, tip: 'Lucro/prejuízo não realizado das posições em aberto.' },
-                    { label: 'Posições', value: `${data?.account.openPositions || 0}`, color: 'text-slate-300', icon: <Layers size={16} />, tip: 'Total de posições abertas em todos os robôs.' },
-                    { label: 'Trades Hoje', value: `${data?.discipline?.tradeCount || 0}`, color: 'text-amber-400', icon: <Target size={16} />, tip: 'Total de trades executados hoje (todos os robôs).' },
-                    { label: 'Consec. Loss', value: `${data?.discipline?.consecutiveLosses || 0}`, color: (data?.discipline?.consecutiveLosses || 0) > 3 ? 'text-trader-red' : 'text-slate-400', icon: <AlertTriangle size={16} />, tip: 'Perdas consecutivas atuais. Limite configuravel no Guardião.' }
-                ].map((kpi, i) => (
-                    <InfoTooltip key={i} header={kpi.label} content={kpi.tip}>
-                        <div className="bg-slate-900/60 backdrop-blur-md p-4 rounded-2xl border border-slate-800 hover:border-emerald-500/20 transition-all cursor-help h-full">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-black text-slate-600 uppercase tracking-widest">{kpi.label}</span>
-                                <span className={`${kpi.color} opacity-60`}>{kpi.icon}</span>
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                    {[
+                        { label: 'Saldo', value: `$${data?.account.balance.toFixed(2) || '0'}`, color: 'text-trader-blue', icon: <Wallet size={16} />, tip: 'Saldo total disponível na conta MT5.' },
+                        { label: 'Equity', value: `$${data?.account.equity.toFixed(2) || '0'}`, color: 'text-emerald-400', icon: <TrendingUp size={16} />, tip: 'Saldo + lucro/prejuízo flutuante das posições abertas.' },
+                        { label: 'Margem', value: `${data?.account.marginLevel.toFixed(1) || '0'}%`, color: (data?.account.marginLevel || 0) > 200 ? 'text-trader-green' : 'text-trader-red', icon: <BarChart3 size={16} />, tip: 'Nível de margem (equity / margem). >200% = saudável.' },
+                        { label: 'Flutuante', value: `$${(data?.account.floatingPL || 0).toFixed(2)}`, color: (data?.account.floatingPL || 0) >= 0 ? 'text-trader-green' : 'text-trader-red', icon: <Activity size={16} />, tip: 'Lucro/prejuízo não realizado das posições em aberto.' },
+                        { label: 'Posições', value: `${data?.account.openPositions || 0}`, color: 'text-slate-300', icon: <Layers size={16} />, tip: 'Total de posições abertas em todos os robôs.' },
+                        { label: 'Trades Hoje', value: `${data?.discipline?.tradeCount || 0}`, color: 'text-amber-400', icon: <Target size={16} />, tip: 'Total de trades executados hoje (todos os robôs).' },
+                        { label: 'Consec. Loss', value: `${data?.discipline?.consecutiveLosses || 0}`, color: (data?.discipline?.consecutiveLosses || 0) > 3 ? 'text-trader-red' : 'text-slate-400', icon: <AlertTriangle size={16} />, tip: 'Perdas consecutivas atuais. Limite configurável no Guardião.' }
+                    ].map((kpi, i) => (
+                        <InfoTooltip key={i} header={kpi.label} content={kpi.tip}>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 hover:border-emerald-500/20 transition-all cursor-help h-full">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{kpi.label}</span>
+                                    <span className={`${kpi.color} opacity-60`}>{kpi.icon}</span>
+                                </div>
+                                <span className={`text-2xl font-black italic ${kpi.color}`}>{kpi.value}</span>
                             </div>
-                            <span className={`text-2xl font-black italic ${kpi.color}`}>{kpi.value}</span>
-                        </div>
-                    </InfoTooltip>
-                ))}
+                        </InfoTooltip>
+                    ))}
+                </div>
             </div>
 
             {/* Risk Limits + Discipline Score row */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
-                {/* Discipline Score (Gold Scalper) */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                {/* Discipline Score */}
                 {goldReport && (
-                    <div className="lg:col-span-1 bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center">
-                        <div className="relative w-24 h-24 mb-2">
+                    <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+                        <div className="relative w-24 h-24 mb-3">
                             <svg className="w-24 h-24 -rotate-90" viewBox="0 0 72 72">
                                 <circle cx="36" cy="36" r="30" fill="none" stroke="#1e293b" strokeWidth="6" />
                                 <circle cx="36" cy="36" r="30" fill="none" stroke={goldReport.discipline.score >= 70 ? '#10b981' : goldReport.discipline.score >= 40 ? '#f59e0b' : '#ef4444'} strokeWidth="6" strokeDasharray={`${(goldReport.discipline.score / 100) * 188.5} 188.5`} strokeLinecap="round" />
                             </svg>
                             <span className={`absolute inset-0 flex items-center justify-center text-4xl font-black italic ${goldReport.discipline.score >= 70 ? 'text-emerald-400' : goldReport.discipline.score >= 40 ? 'text-amber-400' : 'text-red-400'}`}>{goldReport.discipline.score}</span>
                         </div>
-                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Score Gold Scalper</span>
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Score Gold Scalper</span>
                     </div>
                 )}
 
@@ -170,12 +184,13 @@ export const RiskManagement: React.FC = () => {
                     { label: 'Drawdown Atual', value: goldReport ? `${goldReport.risk.drawdown}%` : '-', color: (goldReport?.risk.drawdown || 0) > 15 ? 'text-trader-red' : (goldReport?.risk.drawdown || 0) > 5 ? 'text-amber-400' : 'text-trader-green' },
                     { label: 'Perda Diária', value: goldReport ? `$${goldReport.risk.dailyLossRemaining} restante` : '-', color: (goldReport?.risk.dailyLossRemaining || 0) < 10 ? 'text-trader-red' : 'text-trader-green' }
                 ].map((item, i) => (
-                    <div key={i} className="bg-slate-900/60 backdrop-blur-md p-4 rounded-2xl border border-slate-800 flex flex-col justify-center">
-                        <span className="text-xs font-black text-slate-600 uppercase tracking-widest mb-1">{item.label}</span>
+                    <div key={i} className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col justify-center">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{item.label}</span>
                         <span className={`text-xl font-black italic ${item.color}`}>{item.value}</span>
                         {item.label === 'Perda Diária' && goldReport && (
                             <div className="mt-2 h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                                <div className="h-full rounded-full bg-trader-red" style={{ width: `${Math.min(100, ((goldReport.risk.maxDailyLoss - goldReport.risk.dailyLossRemaining) / goldReport.risk.maxDailyLoss) * 100)}%` }} />
+                                <div className="h-full rounded-full bg-gradient-to-r from-rose-500 to-amber-500" style={{ width: `${Math.min(100, ((goldReport.risk.maxDailyLoss - goldReport.risk.dailyLossRemaining) / goldReport.risk.maxDailyLoss) * 100)}%` }} />
                             </div>
                         )}
                     </div>
@@ -187,18 +202,19 @@ export const RiskManagement: React.FC = () => {
                 const r = robot.report;
                 if (!r) return null;
                 return (
-                    <div key={robot.id} className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className={`w-2.5 h-2.5 rounded-full ${robot.active ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
-                            <span className="text-base font-black text-white uppercase tracking-tighter">{robot.name}</span>
-                            <span className="text-xs text-slate-600 font-bold">Total Trades: {r.risk.totalTrades}</span>
+                    <div key={robot.id} className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className={`w-2.5 h-2.5 rounded-full ${robot.active ? 'bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-slate-600'}`} />
+                            <span className="text-lg font-black text-white uppercase tracking-tighter">{robot.name}</span>
+                            <span className="text-[10px] text-slate-600 font-bold bg-slate-950/40 px-3 py-1 rounded-lg border border-white/5">Total Trades: {r.risk.totalTrades}</span>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Breakdown */}
-                            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">Detalhamento</span>
-                                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                            <div className="bg-slate-950/40 p-5 rounded-2xl border border-white/5">
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-4">Detalhamento</span>
+                                <div className="grid grid-cols-2 gap-y-3 gap-x-6">
                                     {[
                                         { label: '% Acerto', value: `${r.discipline.breakdown.winRate}%`, color: r.discipline.breakdown.winRate >= 50 ? 'text-trader-green' : 'text-trader-red' },
                                         { label: 'Profit Factor', value: r.discipline.breakdown.profitFactor.toFixed(2), color: r.discipline.breakdown.profitFactor >= 1.2 ? 'text-trader-green' : 'text-trader-red' },
@@ -209,32 +225,32 @@ export const RiskManagement: React.FC = () => {
                                         { label: 'Perdas Consec', value: r.risk.consecutiveLosses, color: r.risk.consecutiveLosses > 3 ? 'text-trader-red' : 'text-slate-300' },
                                         { label: 'Seq Vitórias', value: r.risk.winStreak, color: r.risk.winStreak > 3 ? 'text-emerald-400' : 'text-slate-300' }
                                     ].map((d, i) => (
-                                        <div key={i} className="flex items-center justify-between border-b border-slate-800/50 pb-1">
-                                        <span className="text-xs text-slate-500 font-bold">{d.label}</span>
-                                        <span className={`text-sm font-black italic ${d.color}`}>{d.value}</span>
+                                        <div key={i} className="flex items-center justify-between border-b border-slate-800/50 pb-1.5">
+                                            <span className="text-[10px] text-slate-500 font-bold">{d.label}</span>
+                                            <span className={`text-sm font-black italic ${d.color}`}>{d.value}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
                             {/* Position Sizing */}
-                            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">Dimensionamento de Lote</span>
+                            <div className="bg-slate-950/40 p-5 rounded-2xl border border-white/5">
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-4">Dimensionamento de Lote</span>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs">
                                         <thead>
                                             <tr className="text-slate-600 font-black uppercase tracking-widest border-b border-slate-800">
-                                                <th className="text-left pb-1.5 pr-3">Risco</th>
-                                                <th className="text-right pb-1.5 pr-3">USD</th>
-                                                <th className="text-right pb-1.5">Lote</th>
+                                                <th className="text-left pb-2 pr-4">Risco</th>
+                                                <th className="text-right pb-2 pr-4">USD</th>
+                                                <th className="text-right pb-2">Lote</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {r.sizing?.map((s: any, i: number) => (
                                                 <tr key={i} className={`border-b border-slate-800/50 ${s.riskPct === r.risk.riskPerTradePct ? 'bg-emerald-500/5' : ''}`}>
-                                                    <td className={`py-1.5 pr-3 font-black ${s.riskPct === r.risk.riskPerTradePct ? 'text-emerald-400' : 'text-slate-400'}`}>{s.riskPct}%</td>
-                                                    <td className={`text-right py-1.5 pr-3 font-bold ${s.riskPct === r.risk.riskPerTradePct ? 'text-emerald-400' : 'text-slate-400'}`}>${s.riskUSD}</td>
-                                                    <td className={`text-right py-1.5 font-mono font-black ${s.riskPct === r.risk.riskPerTradePct ? 'text-emerald-400' : 'text-slate-400'}`}>{s.lot}</td>
+                                                    <td className={`py-2 pr-4 font-black ${s.riskPct === r.risk.riskPerTradePct ? 'text-emerald-400' : 'text-slate-400'}`}>{s.riskPct}%</td>
+                                                    <td className={`text-right py-2 pr-4 font-bold ${s.riskPct === r.risk.riskPerTradePct ? 'text-emerald-400' : 'text-slate-400'}`}>${s.riskUSD}</td>
+                                                    <td className={`text-right py-2 font-mono font-black ${s.riskPct === r.risk.riskPerTradePct ? 'text-emerald-400' : 'text-slate-400'}`}>{s.lot}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -245,8 +261,8 @@ export const RiskManagement: React.FC = () => {
 
                         {/* Monthly Performance */}
                         {r.monthly && r.monthly.length > 0 && (
-                            <div className="mt-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-2">Performance Mensal</span>
+                            <div className="mt-6 bg-slate-950/40 p-5 rounded-2xl border border-white/5">
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-4">Performance Mensal</span>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs">
                                         <thead>
@@ -280,11 +296,14 @@ export const RiskManagement: React.FC = () => {
             })}
 
             {/* Legend */}
-            <div className="flex items-center gap-4 text-[10px] text-slate-600 font-bold uppercase tracking-widest">
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Disciplina Boa (&ge;70)</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Atenção (40-69)</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Crítico (&lt;40)</span>
-                <span className="flex items-center gap-1 ml-auto"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" /> Robô Ativo</span>
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-5 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+                <div className="flex items-center gap-4 text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Disciplina Boa (&ge;70)</span>
+                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Atenção (40-69)</span>
+                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Crítico (&lt;40)</span>
+                    <span className="flex items-center gap-1 ml-auto"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" /> Robô Ativo</span>
+                </div>
             </div>
         </div>
     );

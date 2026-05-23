@@ -47,6 +47,7 @@ import { ForexScalperPanel } from './ForexScalperPanel';
 import { MicroScalperPanel } from './MicroScalperPanel';
 import { SwingTraderPanel } from './SwingTraderPanel';
 import { BitcoinProPanel } from './BitcoinProPanel';
+import { SharkBotPanel } from './SharkBotPanel';
 import { OmniProbabilisticPanel } from './OmniProbabilisticPanel';
 
 type TabType = 'home' | 'intelligence' | 'robot' | 'trade' | 'management' | 'bitcoin_pro' | 'crypto' | 'gold_scalper' | 'micro_sniper' | 'swing_ia' | 'copy' | 'speed_scalper' | 'supreme' | 'analytics' | 'ml' | 'agent_ia' | 'ai_monitoring' | 'alerts' | 'settings' | 'risk' | 'financial' | 'statistics' | 'strategy_reports' | 'journal' | 'simulator' | 'costs' | 'analysis' | 'omni' | 'ranking';
@@ -58,7 +59,7 @@ interface RadarAppProps {
 export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
     const [activeTab, setActiveTab] = useState<TabType>('home');
     const [intelTab, setIntelTab] = useState<'signals' | 'crypto' | 'ml'>('crypto');
-    const [robotTab, setRobotTab] = useState<'alpha' | 'gold' | 'speed' | 'titan' | 'swing' | 'bitcoin_pro'>('gold');
+    const [robotTab, setRobotTab] = useState<'alpha' | 'gold' | 'speed' | 'titan' | 'swing' | 'bitcoin_pro' | 'shark_bot'>('gold');
     const [manageTab, setManageTab] = useState<'reports' | 'journal' | 'stats' | 'risk' | 'agent'>('reports');
     const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
     const [isConnectivityOpen, setIsConnectivityOpen] = useState(false);
@@ -134,6 +135,7 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
 
     const robotOptions = [
         { id: 'bitcoin_pro', label: 'BTC Pro', icon: Bitcoin },
+        { id: 'shark_bot', label: 'Shark', icon: Zap },
         { id: 'gold', label: 'Gold', icon: Target },
         { id: 'speed', label: 'Speed', icon: Zap },
         { id: 'titan', label: 'Titan', icon: Star },
@@ -165,6 +167,7 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
             {robotTab === 'titan' && <MicroScalperPanel />}
             {robotTab === 'swing' && <SwingTraderPanel />}
             {robotTab === 'bitcoin_pro' && <BitcoinProPanel />}
+            {robotTab === 'shark_bot' && <SharkBotPanel />}
         </div>
     );
 
@@ -256,15 +259,18 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
             {/* Header */}
             <div className="bg-slate-900/60 backdrop-blur-2xl border-b border-white/5 px-4 py-3 flex justify-between items-center z-50">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/5 rounded-2xl flex items-center justify-center p-1 border border-white/10 shadow-2xl">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500/20 to-purple-600/20 rounded-2xl flex items-center justify-center p-1 border border-indigo-500/30 shadow-xl shadow-indigo-500/20">
                         <img
                             src="/radar_fx_super_logo.png"
                             alt="Radar FX"
-                            className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(0,163,255,0.4)]"
+                            className="w-full h-full object-contain filter drop-shadow-[0_0_12px_rgba(99,102,241,0.5)]"
                         />
                     </div>
                     <div>
-                        <h1 className="text-sm font-black text-white uppercase tracking-tighter italic leading-none">Radar Fx</h1>
+                        <h1 className="text-sm font-black uppercase tracking-tighter italic leading-none flex items-center gap-1">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Radar</span>
+                            <span className="text-white">Fx</span>
+                        </h1>
                         <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="text-[7px] font-black bg-trader-blue/20 text-trader-blue px-1 rounded uppercase tracking-[0.1em]">Mobile</span>
                             <span className="w-1 h-1 bg-slate-700 rounded-full" />

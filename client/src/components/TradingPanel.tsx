@@ -3,7 +3,8 @@ import {
     TrendingUp, TrendingDown, Star, DollarSign,
     Bitcoin, Globe, BarChart3, Minus, Plus,
     ArrowUpRight, ArrowDownRight, Activity, Loader2,
-    ArrowUp, ArrowDown, Clock, ShieldAlert, CheckCircle2, AlertCircle
+    ArrowUp, ArrowDown, Clock, ShieldAlert, CheckCircle2, AlertCircle,
+    Zap, Target
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -74,6 +75,25 @@ const getInstrumentIcon = (icon?: string) => {
             return <Globe size={16} className="text-slate-400" />;
     }
 };
+
+function TradeLogo() {
+    return (
+        <svg width="44" height="44" viewBox="0 0 44 44" className="drop-shadow-xl">
+            <defs>
+                <linearGradient id="trg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#34d399" />
+                    <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
+                <filter id="trglow">
+                    <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#34d399" floodOpacity="0.4" />
+                </filter>
+            </defs>
+            <circle cx="22" cy="22" r="18" fill="none" stroke="url(#trg)" strokeWidth="2" filter="url(#trglow)" />
+            <text x="22" y="30" textAnchor="middle" fill="url(#trg)" fontSize="18" fontWeight="900" fontStyle="italic" filter="url(#trglow)">T</text>
+            <circle cx="22" cy="22" r="18" fill="none" stroke="url(#trg)" strokeWidth="1" opacity="0.3" strokeDasharray="4 3" />
+        </svg>
+    );
+}
 
 const CATEGORIES = ['Todos', 'Moedas', 'Metais', 'Criptomoedas', 'Índices'];
 
@@ -265,31 +285,36 @@ export const TradingPanel: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-700">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/5 blur-[100px] -mr-36 -mt-36 pointer-events-none"></div>
-                <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-1">
-                        <div className="p-2 bg-emerald-500/20 rounded-lg">
-                            <BarChart3 className="text-emerald-400" size={20} />
-                        </div>
-                        <h1 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">Instrumentos de Trading</h1>
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 shadow-xl shadow-emerald-500/10">
+                        <TradeLogo />
                     </div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Cotações em tempo real · Execução instantânea</p>
+                    <div>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-500">Operar</span>
+                            <span className="px-2 py-1 rounded-lg text-xs tracking-widest uppercase bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">Ao Vivo</span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Zap size={12} className="text-emerald-500" /> Cotações em tempo real · Execução instantânea
+                        </p>
+                    </div>
                 </div>
-                <div className="flex items-center gap-4 relative z-10">
+                <div className="flex gap-4 relative z-10 items-center">
                     {isDisciplineLocked && (
                         <button
                             onClick={resetDiscipline}
-                            className="px-4 py-2 bg-trader-red/20 border border-trader-red/40 text-trader-red rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-trader-red/30 transition-all animate-pulse"
+                            className="px-5 py-2 rounded-2xl border font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20 animate-pulse"
                         >
-                            Destravar Sistema
+                            <ShieldAlert size={12} /> Destravar Sistema
                         </button>
                     )}
-                    <div className="flex items-center gap-2">
-                        <Activity size={14} className="text-trader-green animate-pulse" />
-                        <span className="text-[9px] font-black text-trader-green uppercase tracking-widest">Mercado ao Vivo</span>
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-500">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[10px] font-black uppercase">Mercado ao Vivo</span>
                     </div>
                 </div>
             </div>
@@ -317,9 +342,9 @@ export const TradingPanel: React.FC = () => {
                     <button
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
-                        className={`px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${activeCategory === cat
-                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
-                            : 'bg-slate-900/50 text-slate-400 hover:text-slate-300 border border-white/5'
+                        className={`px-5 py-2 rounded-2xl border text-[9px] font-black uppercase tracking-widest transition-all ${activeCategory === cat
+                            ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+                            : 'bg-slate-900/40 border-white/5 text-slate-400 hover:text-slate-300'
                             }`}
                     >
                         {cat}
@@ -328,7 +353,8 @@ export const TradingPanel: React.FC = () => {
             </div>
 
             {/* Tabela de Instrumentos */}
-            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2rem] border border-white/5 shadow-2xl overflow-hidden relative">
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/10 p-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
                 {/* Discipline Lock Overlay */}
                 <AnimatePresence>
                     {isDisciplineLocked && (

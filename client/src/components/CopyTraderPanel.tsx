@@ -117,6 +117,25 @@ const MASTERS: MasterTrader[] = [
     }
 ];
 
+function CopyLogo() {
+    return (
+        <svg width="44" height="44" viewBox="0 0 44 44" className="drop-shadow-xl">
+            <defs>
+                <linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#60a5fa" />
+                    <stop offset="100%" stopColor="#3b82f6" />
+                </linearGradient>
+                <filter id="cglow">
+                    <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#60a5fa" floodOpacity="0.4" />
+                </filter>
+            </defs>
+            <circle cx="22" cy="22" r="18" fill="none" stroke="url(#cg)" strokeWidth="2" filter="url(#cglow)" />
+            <text x="22" y="30" textAnchor="middle" fill="url(#cg)" fontSize="20" fontWeight="900" fontStyle="italic" filter="url(#cglow)">C</text>
+            <circle cx="22" cy="22" r="18" fill="none" stroke="url(#cg)" strokeWidth="1" opacity="0.3" strokeDasharray="4 3" />
+        </svg>
+    );
+}
+
 export const CopyTraderPanel: React.FC = () => {
     const [activeMasterId, setActiveMasterId] = useState<string | null>(null);
     const [loadingMaster, setLoadingMaster] = useState<string | null>(null);
@@ -153,26 +172,32 @@ export const CopyTraderPanel: React.FC = () => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
-            {/* Headline Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden relative group">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 blur-[100px] -mr-48 -mt-48 pointer-events-none"></div>
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-                <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-indigo-500/20 rounded-lg">
-                            <Briefcase className="text-indigo-400" size={20} />
-                        </div>
-                        <h1 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">Copy Trader Institucional</h1>
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-blue-500/20 shadow-[0_0_50px_rgba(59,130,246,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-blue-500/10 rounded-3xl border border-blue-500/20 shadow-xl shadow-blue-500/10">
+                        <CopyLogo />
                     </div>
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Replicação de ordens em tempo real de grandes players</p>
+                    <div>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Copy</span> Trader
+                            <span className={`px-2 py-1 rounded-lg text-xs tracking-widest uppercase ${networkStatus === 'connected' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 border border-slate-500/20 text-slate-500'}`}>
+                                {networkStatus === 'connected' ? 'Conectado' : 'Inativo'}
+                            </span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Briefcase size={12} className="text-blue-500" /> Replicação de ordens em tempo real de grandes players
+                        </p>
+                    </div>
                 </div>
-
-                <div className="flex gap-4 relative z-10">
+                <div className="flex gap-4 relative z-10 items-center">
                     <div className="flex flex-col items-end">
                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Status da Rede</span>
-                        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${networkStatus === 'connected' ? 'bg-trader-green/10 border-trader-green/20 text-trader-green' : 'bg-trader-red/10 border-trader-red/20 text-trader-red'}`}>
-                            <div className={`w-2 h-2 rounded-full animate-pulse ${networkStatus === 'connected' ? 'bg-trader-green' : 'bg-trader-red'}`}></div>
+                        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${networkStatus === 'connected' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 border-slate-500/20 text-slate-500'}`}>
+                            <div className={`w-2 h-2 rounded-full animate-pulse ${networkStatus === 'connected' ? 'bg-emerald-500' : 'bg-slate-500'}`} />
                             <span className="text-[10px] font-black uppercase">{networkStatus === 'connected' ? 'Link Institucional Ativo' : 'Aguardando Master'}</span>
                         </div>
                     </div>
@@ -184,163 +209,166 @@ export const CopyTraderPanel: React.FC = () => {
                 {MASTERS.map((master) => (
                     <motion.div
                         key={master.id}
-                        whileHover={{ y: -5 }}
-                        className={`bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border transition-all overflow-hidden relative group ${activeMasterId === master.id ? 'border-trader-blue ring-1 ring-trader-blue/50' : 'border-white/5 hover:border-white/10'}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border p-8 shadow-2xl relative overflow-hidden transition-all ${
+                            activeMasterId === master.id
+                                ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.15)]'
+                                : 'border-blue-500/10'
+                        }`}
                     >
-                        {/* Header card */}
-                        <div className="p-8 pb-4">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-trader-blue to-indigo-600 flex items-center justify-center text-white font-black text-xl italic shadow-lg">
-                                        {master.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <h3 className="text-white font-black uppercase italic tracking-tighter">{master.name}</h3>
-                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{master.institution}</p>
-                                    </div>
+                        <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent ${
+                            activeMasterId === master.id ? 'via-blue-500/70' : 'via-blue-500/40'
+                        } to-transparent`} />
+
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl italic shadow-lg">
+                                    {master.name.charAt(0)}
                                 </div>
-                                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${master.status === 'online' ? 'bg-trader-green/10 text-trader-green' : 'bg-slate-800 text-slate-500'}`}>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${master.status === 'online' ? 'bg-trader-green animate-pulse' : 'bg-slate-500'}`}></div>
-                                    {master.status}
+                                <div>
+                                    <h3 className="text-white font-black uppercase italic tracking-tighter">{master.name}</h3>
+                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{master.institution}</p>
                                 </div>
                             </div>
-
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                                    <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest block mb-1">Acertividade</span>
-                                    <span className="text-lg font-black text-trader-green italic leading-none">{master.winRate}%</span>
-                                </div>
-                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                                    <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest block mb-1">Lucro Hoje</span>
-                                    <span className="text-lg font-black text-white italic leading-none">${master.profitToday.toLocaleString()}</span>
-                                </div>
+                            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                                master.status === 'online'
+                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+                                    : 'bg-slate-800 border-slate-700 text-slate-500'
+                            }`}>
+                                <div className={`w-1.5 h-1.5 rounded-full ${master.status === 'online' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-500'}`} />
+                                {master.status}
                             </div>
-
-                            <div className="grid grid-cols-3 gap-2 mb-4">
-                                <div className="bg-slate-950/20 p-2 rounded-xl border border-white/5 text-center">
-                                    <span className="text-[6px] font-black text-slate-500 uppercase block">Drawdown</span>
-                                    <span className="text-[10px] font-black text-trader-red">{master.drawdown}%</span>
-                                </div>
-                                <div className="bg-slate-950/20 p-2 rounded-xl border border-white/5 text-center">
-                                    <span className="text-[6px] font-black text-slate-500 uppercase block">Sharpe</span>
-                                    <span className="text-[10px] font-black text-trader-blue">{master.sharpeRatio}</span>
-                                </div>
-                                <div className="bg-slate-950/20 p-2 rounded-xl border border-white/5 text-center">
-                                    <span className="text-[6px] font-black text-slate-500 uppercase block">Tempo Médio</span>
-                                    <span className="text-[10px] font-black text-slate-300">{master.avgTradeTime}</span>
-                                </div>
-                            </div>
-
-                            {/* Detalhes de Carreira - NEW */}
-                            <div className="bg-slate-900/40 p-5 rounded-2xl border border-white/5 mb-6">
-                                <h4 className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                                    <Activity size={10} className="text-trader-blue" /> Estatísticas de Carreira
-                                </h4>
-                                <div className="grid grid-cols-2 gap-y-3">
-                                    <div className="flex flex-col">
-                                        <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">Lucro Total</span>
-                                        <span className="text-xs font-black text-white italic tracking-tight">${master.totalProfit.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex flex-col text-right">
-                                        <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">Total Operações</span>
-                                        <span className="text-xs font-black text-white italic tracking-tight">{master.totalTrades.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">Melhor Win</span>
-                                        <span className="text-xs font-black text-trader-green italic tracking-tight">+${master.bestTrade.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex flex-col text-right">
-                                        <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">Maior Loss</span>
-                                        <span className="text-xs font-black text-trader-red italic tracking-tight">${master.worstTrade.toLocaleString()}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3 mb-8">
-                                <div className="flex items-center gap-3">
-                                    <Zap size={14} className="text-trader-amber" />
-                                    <span className="text-[10px] font-bold text-slate-300 italic">{master.strategy}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <Users size={14} className="text-trader-blue" />
-                                    <span className="text-[10px] font-bold text-slate-300">{master.followers.toLocaleString()} Seguidores</span>
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={() => handleFollow(master.id)}
-                                disabled={loadingMaster === master.id}
-                                className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 mb-4 ${activeMasterId === master.id
-                                    ? 'bg-trader-red/20 border border-trader-red/30 text-trader-red hover:bg-trader-red/30'
-                                    : 'bg-trader-blue hover:bg-trader-blue-hover text-white shadow-[0_0_20px_rgba(0,163,255,0.3)]'
-                                    }`}
-                            >
-                                {loadingMaster === master.id ? (
-                                    <Activity size={16} className="animate-spin" />
-                                ) : activeMasterId === master.id ? (
-                                    <>
-                                        <Shield size={16} /> Parar Cópia
-                                    </>
-                                ) : (
-                                    <>
-                                        <Target size={16} /> Copiar Trader
-                                    </>
-                                )}
-                            </button>
-
-                            {/* Today's History Toggle */}
-                            <button
-                                onClick={() => setExpandedHistory(expandedHistory === master.id ? null : master.id)}
-                                className="w-full py-2 flex items-center justify-center gap-2 text-[8px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
-                            >
-                                <History size={12} />
-                                {expandedHistory === master.id ? 'Ocultar Trades de Hoje' : 'Ver Trades de Hoje'}
-                                {expandedHistory === master.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                            </button>
-
-                            {/* Expanded History Section */}
-                            <AnimatePresence>
-                                {expandedHistory === master.id && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        className="overflow-hidden"
-                                    >
-                                        <div className="pt-6 space-y-3">
-                                            {master.tradeHistory.map((trade) => (
-                                                <div key={trade.id} className="bg-slate-950/40 p-3 rounded-xl border border-white/5 flex items-center justify-between">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-1 h-8 rounded-full ${trade.profit > 0 ? 'bg-trader-green' : 'bg-trader-red'}`}></div>
-                                                        <div>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-[10px] font-black text-white italic">{trade.symbol}</span>
-                                                                <span className={`text-[7px] font-black px-1.5 py-0.5 rounded ${trade.type === 'BUY' ? 'bg-trader-green/20 text-trader-green' : 'bg-trader-red/20 text-trader-red'}`}>
-                                                                    {trade.type}
-                                                                </span>
-                                                            </div>
-                                                            <p className="text-[7px] font-bold text-slate-500 mt-1 uppercase tracking-tighter">Entrada: {trade.entry} | Duração: {trade.duration}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className={`text-[10px] font-black italic ${trade.profit > 0 ? 'text-trader-green' : 'text-trader-red'}`}>
-                                                            {trade.profit > 0 ? '+' : ''}${trade.profit.toFixed(2)}
-                                                        </p>
-                                                        <span className="text-[6px] font-black text-slate-600 uppercase tracking-widest">Executado</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {master.tradeHistory.length === 0 && (
-                                                <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest text-center py-4">Nenhuma operação realizada hoje.</p>
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
                         </div>
 
-                        {/* Footer card info */}
-                        <div className="bg-slate-950/40 p-6 border-t border-white/5">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest block mb-1">Acertividade</span>
+                                <span className="text-lg font-black text-emerald-400 italic leading-none">{master.winRate}%</span>
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest block mb-1">Lucro Hoje</span>
+                                <span className="text-lg font-black text-white italic leading-none">${master.profitToday.toLocaleString()}</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 mb-4">
+                            <div className="bg-slate-950/20 p-2 rounded-xl border border-white/5 text-center">
+                                <span className="text-[6px] font-black text-slate-500 uppercase block">Drawdown</span>
+                                <span className="text-[10px] font-black text-rose-400">{master.drawdown}%</span>
+                            </div>
+                            <div className="bg-slate-950/20 p-2 rounded-xl border border-white/5 text-center">
+                                <span className="text-[6px] font-black text-slate-500 uppercase block">Sharpe</span>
+                                <span className="text-[10px] font-black text-blue-400">{master.sharpeRatio}</span>
+                            </div>
+                            <div className="bg-slate-950/20 p-2 rounded-xl border border-white/5 text-center">
+                                <span className="text-[6px] font-black text-slate-500 uppercase block">Tempo Médio</span>
+                                <span className="text-[10px] font-black text-slate-300">{master.avgTradeTime}</span>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-900/40 p-5 rounded-2xl border border-white/5 mb-6">
+                            <h4 className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                <Activity size={10} className="text-blue-400" /> Estatísticas de Carreira
+                            </h4>
+                            <div className="grid grid-cols-2 gap-y-3">
+                                <div className="flex flex-col">
+                                    <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">Lucro Total</span>
+                                    <span className="text-xs font-black text-white italic tracking-tight">${master.totalProfit.toLocaleString()}</span>
+                                </div>
+                                <div className="flex flex-col text-right">
+                                    <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">Total Operações</span>
+                                    <span className="text-xs font-black text-white italic tracking-tight">{master.totalTrades.toLocaleString()}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">Melhor Win</span>
+                                    <span className="text-xs font-black text-emerald-400 italic tracking-tight">+${master.bestTrade.toLocaleString()}</span>
+                                </div>
+                                <div className="flex flex-col text-right">
+                                    <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">Maior Loss</span>
+                                    <span className="text-xs font-black text-rose-400 italic tracking-tight">${master.worstTrade.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 mb-8">
+                            <div className="flex items-center gap-3">
+                                <Zap size={14} className="text-amber-400" />
+                                <span className="text-[10px] font-bold text-slate-300 italic">{master.strategy}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Users size={14} className="text-blue-400" />
+                                <span className="text-[10px] font-bold text-slate-300">{master.followers.toLocaleString()} Seguidores</span>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => handleFollow(master.id)}
+                            disabled={loadingMaster === master.id}
+                            className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 mb-4 ${
+                                activeMasterId === master.id
+                                    ? 'bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
+                                    : 'bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.15)]'
+                            }`}
+                        >
+                            {loadingMaster === master.id ? (
+                                <Activity size={16} className="animate-spin" />
+                            ) : activeMasterId === master.id ? (
+                                <><Shield size={16} /> Parar Cópia</>
+                            ) : (
+                                <><Target size={16} /> Copiar Trader</>
+                            )}
+                        </button>
+
+                        <button
+                            onClick={() => setExpandedHistory(expandedHistory === master.id ? null : master.id)}
+                            className="w-full py-2 flex items-center justify-center gap-2 text-[8px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
+                        >
+                            <History size={12} />
+                            {expandedHistory === master.id ? 'Ocultar Trades de Hoje' : 'Ver Trades de Hoje'}
+                            {expandedHistory === master.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        </button>
+
+                        <AnimatePresence>
+                            {expandedHistory === master.id && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="pt-6 space-y-3">
+                                        {master.tradeHistory.map((trade) => (
+                                            <div key={trade.id} className="bg-slate-950/40 p-3 rounded-xl border border-white/5 flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-1 h-8 rounded-full ${trade.profit > 0 ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-black text-white italic">{trade.symbol}</span>
+                                                            <span className={`text-[7px] font-black px-1.5 py-0.5 rounded ${trade.type === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                                                                {trade.type}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-[7px] font-bold text-slate-500 mt-1 uppercase tracking-tighter">Entrada: {trade.entry} | Duração: {trade.duration}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className={`text-[10px] font-black italic ${trade.profit > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                        {trade.profit > 0 ? '+' : ''}${trade.profit.toFixed(2)}
+                                                    </p>
+                                                    <span className="text-[6px] font-black text-slate-600 uppercase tracking-widest">Executado</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {master.tradeHistory.length === 0 && (
+                                            <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest text-center py-4">Nenhuma operação realizada hoje.</p>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        <div className="mt-6 pt-6 border-t border-white/5">
                             <p className="text-[9px] font-bold text-slate-500 leading-relaxed">
                                 {master.bio}
                             </p>

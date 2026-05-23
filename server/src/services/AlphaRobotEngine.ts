@@ -46,6 +46,7 @@ export interface RobotSettings {
 
     // Institutional analysis settings
     useInstitutionalAnalysis: boolean;
+    useMLSignals: boolean;
     maxRiskPerTrade: number;
     trailingActivation: number;
     breakevenActivation: number;
@@ -112,6 +113,7 @@ export class AlphaRobotEngine {
 
         // Institutional
         useInstitutionalAnalysis: true,
+        useMLSignals: false,
         maxRiskPerTrade: 1.0,
         trailingActivation: 0.5,
         breakevenActivation: 0.3,
@@ -152,6 +154,9 @@ export class AlphaRobotEngine {
 
     // Last analysis cache for UI
     private static lastAnalysis: Record<string, InstitutionalAnalysis> = {};
+
+    // ML Insights integration
+    private static mlSignalsUsed = 0;
 
     // ──────────────────────────────────────────────
     // Lifecycle
@@ -263,6 +268,53 @@ export class AlphaRobotEngine {
                     this.processedSignals.add(signalId);
                     this.tradesThisWindow++;
                     this.dailyTradeCount++;
+                }
+            }
+
+            // Check ML Insights signals if enabled
+            if (this.settings.useMLSignals) {
+                try {
+                    const { MLInsightsService } = require('./MLInsightsService');
+                    const report = await MLInsightsService.getFullReport().catch(() => null);
+                    if (report?.predictions) {
+                        for (const mlPred of report.predictions) {
+                            if (mlPred.direction === 'NEUTRAL' || mlPred.signalStrength !== 'ALTA') continue;
+                            if (!this.settings.symbols.includes(mlPred.symbol)) continue;
+
+                            const signalId = `ml_${mlPred.symbol}_${mlPred.direction}_${Date.now()}`;
+                            if (this.processedSignals.has(signalId)) continue;
+
+                            const isCrypto = mlPred.symbol.includes('BTC') || mlPred.symbol.includes('ETH') || mlPred.symbol.includes('SOL');
+                            if (isCrypto && !CryptoRiskEngine.canOpenCryptoTrade()) continue;
+
+                            if (this.tradesThisWindow >= this.settings.tradesPer15Min) break;
+
+                            const analysis: InstitutionalAnalysis = {
+                                symbol: mlPred.symbol,
+                                direction: mlPred.direction === 'UP' ? 'BUY' : 'SELL',
+                                score: mlPred.confidence,
+                                wyckoffPhase: 'ML_SIGNAL',
+                                vwapDistance: 0,
+                                trendAlignment: mlPred.timeframes?.[0]?.trend === 'BULLISH' ? 'BULLISH' : mlPred.timeframes?.[0]?.trend === 'BEARISH' ? 'BEARISH' : 'NEUTRAL',
+                                nearestOB: null,
+                                rsi: mlPred.timeframes?.[0]?.rsi || 50,
+                                volumeRatio: 1,
+                                entryPrice: mlPred.entryPrice,
+                                sl: mlPred.stopPrice,
+                                tp: mlPred.targetPrice,
+                                confidence: mlPred.confidence,
+                                details: `ML Signal: ${mlPred.signalStrength} R:R ${mlPred.rewardRisk}:1`
+                            };
+
+                            await this.executeInstitutionalTrade(analysis);
+                            this.processedSignals.add(signalId);
+                            this.mlSignalsUsed++;
+                            this.tradesThisWindow++;
+                            this.dailyTradeCount++;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Alpha Robot: ML Insights check failed', e);
                 }
             }
 
@@ -1146,6 +1198,7 @@ export class AlphaRobotEngine {
             totalLosses: this.totalLosses,
             totalProfitAllTime: Number(this.totalProfitAllTime.toFixed(2)),
             openPositions: this.openPositions.size,
+            mlSignalsUsed: this.mlSignalsUsed,
             institutionalAnalysis: analysisSummary,
             lastAnalysis: this.lastAnalysis
         };

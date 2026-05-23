@@ -55,6 +55,25 @@ interface SwingStatus {
     logs: { time: string; msg: string; type: string }[];
 }
 
+function SwingLogo() {
+    return (
+        <svg width="44" height="44" viewBox="0 0 44 44" className="drop-shadow-xl">
+            <defs>
+                <linearGradient id="swg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#f59e0b" />
+                    <stop offset="100%" stopColor="#ea580c" />
+                </linearGradient>
+                <filter id="swglow">
+                    <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#f59e0b" floodOpacity="0.4" />
+                </filter>
+            </defs>
+            <circle cx="22" cy="22" r="18" fill="none" stroke="url(#swg)" strokeWidth="2" filter="url(#swglow)" />
+            <text x="22" y="30" textAnchor="middle" fill="url(#swg)" fontSize="20" fontWeight="900" fontStyle="italic" filter="url(#swglow)">S</text>
+            <circle cx="22" cy="22" r="18" fill="none" stroke="url(#swg)" strokeWidth="1" opacity="0.3" strokeDasharray="4 3" />
+        </svg>
+    );
+}
+
 export const SwingTraderPanel: React.FC = () => {
     const [status, setStatus] = useState<SwingStatus | null>(null);
     const [loading, setLoading] = useState(true);
@@ -108,8 +127,9 @@ export const SwingTraderPanel: React.FC = () => {
 
     if (loading || !status) {
         return (
-            <div className="flex items-center justify-center p-20">
-                <RefreshCw className="animate-spin text-amber-500" size={32} />
+            <div className="flex flex-col items-center justify-center p-20 space-y-4">
+                <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Sincronizando Swing IA...</p>
             </div>
         );
     }
@@ -133,30 +153,68 @@ export const SwingTraderPanel: React.FC = () => {
             score >= 60 ? 'from-amber-500 to-orange-500' :
                 score >= 40 ? 'from-orange-500 to-red-500' : 'from-slate-600 to-slate-700';
 
+    const isActive = s.enabled;
+
     return (
         <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-            {/* Simulador de Assertividade (Backtest) */}
-            <div className="bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-amber-500/20 shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-50" />
-                <div className="relative flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div className="flex-1">
-                        <h2 className="text-xl font-black italic text-white uppercase tracking-tighter flex items-center gap-3">
-                            <Activity className="text-amber-500" size={24} /> Simulador de Assertividade
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/20 shadow-[0_0_50px_rgba(245,158,11,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-amber-500/10 rounded-3xl border border-amber-500/20 shadow-xl shadow-amber-500/10">
+                        <SwingLogo />
+                    </div>
+                    <div>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Swing</span> IA
+                            <span className={`px-2 py-1 rounded-lg text-xs tracking-widest uppercase ${isActive ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 border border-slate-500/20 text-slate-500'}`}>
+                                {isActive ? 'Ativo' : 'Inativo'}
+                            </span>
                         </h2>
-                        <p className="text-xs text-slate-400 mt-2 max-w-lg">
-                            Valide a estratégia da IA contra os últimos 60 dias de movimentação real do mercado.
-                            O motor testará o <span className="text-amber-500 font-bold">SwingScore™</span> vela por vela.
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <TrendingUp size={12} className="text-amber-500" /> Multi-Asset | MTF Score | SwingScore™ v1.0
                         </p>
                     </div>
+                </div>
+                <div className="flex gap-4 relative z-10 items-center">
+                    <button
+                        onClick={() => updateSetting('enabled', !s.enabled)}
+                        className={`px-5 py-2 rounded-2xl border font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${
+                            isActive
+                                ? 'bg-trader-red/10 border-trader-red/30 text-trader-red hover:bg-trader-red/20'
+                                : 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20'
+                        }`}
+                    >
+                        {updating ? (
+                            <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-current"></span>
+                        ) : isActive ? (
+                            <><Power size={12} /> Desligar Swing</>
+                        ) : (
+                            <><Power size={12} /> Ligar Swing</>
+                        )}
+                    </button>
+                </div>
+            </div>
 
-                    <div className="flex gap-4">
+            {/* SWING ENGINE + BACKTEST */}
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 p-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
+
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter flex items-center gap-3">
+                            <Activity className="text-amber-500 animate-pulse" /> Simulador de <span className="text-amber-500">Assertividade</span>
+                        </h3>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Valide a estratégia contra os últimos 60 dias de mercado real</p>
+                    </div>
+                    <div className="flex gap-3">
                         {s.symbols.map(sym => (
                             <button
                                 key={sym}
                                 onClick={() => runBacktest(sym)}
                                 disabled={isBacktesting}
-                                className={`px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all border ${isBacktesting
+                                className={`px-5 py-2.5 rounded-2xl border font-black text-[10px] uppercase tracking-widest transition-all ${isBacktesting
                                     ? 'bg-slate-800 text-slate-500 border-slate-700'
                                     : 'bg-amber-500/10 text-amber-500 border-amber-500/30 hover:bg-amber-500 hover:text-black'}`}
                             >
@@ -166,14 +224,13 @@ export const SwingTraderPanel: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Backtest Results Display */}
                 <AnimatePresence>
                     {backtestResult && (
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mt-8 pt-8 border-t border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10"
+                            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
                         >
                             {[
                                 { label: 'Assertividade', value: `${backtestResult.winRate.toFixed(1)}%`, sub: `de ${backtestResult.totalTrades} trades`, color: 'text-emerald-400' },
@@ -181,82 +238,66 @@ export const SwingTraderPanel: React.FC = () => {
                                 { label: 'Profit Factor', value: backtestResult.profitFactor.toFixed(2), sub: 'Eficiência', color: 'text-trader-blue' },
                                 { label: 'Drawdown Máx', value: `$${backtestResult.maxDrawdown.toFixed(2)}`, sub: 'Risco Histórico', color: 'text-rose-400' },
                             ].map((res, i) => (
-                                <div key={i} className="bg-slate-950/50 p-6 rounded-3xl border border-slate-800">
-                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 block">{res.label}</span>
-                                    <span className={`text-2xl font-black italic tracking-tighter ${res.color} block`}>{res.value}</span>
-                                    <span className="text-[10px] text-slate-500">{res.sub}</span>
+                                <div key={i} className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">{res.label}</p>
+                                    <p className={`text-xl font-black italic ${res.color}`}>{res.value}</p>
+                                    <p className="text-[9px] text-slate-500">{res.sub}</p>
                                 </div>
                             ))}
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
 
-            {/* Header */}
-            <div className="bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 p-8 rounded-[2.5rem] border border-amber-500/20 shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-                <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <TrendingUp size={120} className="text-amber-400" />
-                </div>
-
-                <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div className="flex items-center gap-6">
-                        <div className="p-4 bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl shadow-[0_0_30px_rgba(245,158,11,0.4)]">
-                            <Crosshair className="text-white animate-pulse" size={28} />
+                {/* STATS GRID */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                        <div className="p-3 bg-amber-500/20 text-amber-500 rounded-xl">
+                            <Layers size={20} />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter flex items-center gap-3">
-                                Swing Trader IA <span className="text-[10px] bg-amber-500 px-2 py-0.5 rounded italic not-italic font-black text-black">Multi-Asset v1.0</span>
-                            </h2>
-                            <div className="flex items-center gap-3 mt-1">
-                                <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Estratégia: MTF Score</span>
-                                <div className="h-1 w-1 rounded-full bg-slate-700" />
-                                <span className={`text-[10px] font-black uppercase tracking-widest ${s.enabled ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}`}>
-                                    {s.enabled ? '⚡ Analisando' : 'Offline'}
-                                </span>
-                            </div>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Posições Ativas</p>
+                            <p className="text-xl font-black text-white italic">{status.activePositions}</p>
                         </div>
                     </div>
-
-                    <button
-                        onClick={() => updateSetting('enabled', !s.enabled)}
-                        className={`flex items-center gap-4 px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm transition-all shadow-xl border ${s.enabled
-                            ? 'bg-amber-500 text-black border-white/20 shadow-amber-500/30'
-                            : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
-                            }`}
-                    >
-                        <Power size={18} />
-                        {s.enabled ? 'swing active' : 'engage swing'}
-                    </button>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                        <div className="p-3 bg-emerald-500/20 text-emerald-500 rounded-xl">
+                            <DollarSign size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Lucro do Dia</p>
+                            <p className={`text-xl font-black italic ${status.dailyProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                ${status.dailyProfit.toFixed(2)}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                        <div className="p-3 bg-amber-500/20 text-amber-500 rounded-xl">
+                            <Gauge size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Score Mínimo</p>
+                            <p className="text-xl font-black text-white italic">{s.minSwingScore}/100</p>
+                        </div>
+                    </div>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                        <div className="p-3 bg-slate-500/20 text-slate-500 rounded-xl">
+                            <Clock size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Cooldown</p>
+                            <p className="text-xl font-black text-white italic">{s.cooldownMinutes} min</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Resumo Global */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                    { label: 'Posições Ativas', value: `${status.activePositions}`, icon: <Layers size={16} />, color: 'text-amber-400' },
-                    { label: 'Lucro do Dia', value: `$${status.dailyProfit.toFixed(2)}`, icon: <DollarSign size={16} />, color: status.dailyProfit >= 0 ? 'text-emerald-400' : 'text-rose-400' },
-                    { label: 'Score Mínimo', value: `${s.minSwingScore}/100`, icon: <Gauge size={16} />, color: 'text-amber-400' },
-                    { label: 'Cooldown', value: `${s.cooldownMinutes} min`, icon: <Clock size={16} />, color: 'text-slate-400' },
-                ].map((item, i) => (
-                    <div key={i} className="bg-slate-900/80 backdrop-blur-xl p-5 rounded-3xl border border-slate-800 flex items-center justify-between group hover:border-amber-500/30 transition-all">
-                        <div>
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 block">{item.label}</span>
-                            <span className={`text-lg font-black italic tracking-tighter ${item.color}`}>{item.value}</span>
-                        </div>
-                        <div className="p-2.5 bg-slate-800 rounded-xl group-hover:bg-amber-500/10 transition-colors">
-                            <span className={item.color}>{item.icon}</span>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Análise por Ativo */}
+            {/* ANÁLISE POR ATIVO */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {s.symbols.map(sym => {
                     const a = status.analyses[sym];
                     if (!a) return (
-                        <div key={sym} className="bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-800">
+                        <div key={sym} className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-amber-500/10 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
                             <h3 className="text-white font-black italic uppercase tracking-tighter">{sym}</h3>
                             <p className="text-slate-500 text-sm mt-4">Aguardando primeira análise...</p>
                         </div>
@@ -267,9 +308,10 @@ export const SwingTraderPanel: React.FC = () => {
                             key={sym}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2.5rem] border border-slate-800 shadow-xl space-y-5"
+                            className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 p-8 shadow-2xl relative overflow-hidden space-y-5"
                         >
-                            {/* Symbol Header + SwingScore */}
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
+
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-white font-black italic uppercase tracking-tighter text-lg flex items-center gap-3">
@@ -285,8 +327,7 @@ export const SwingTraderPanel: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Score Bar */}
-                            <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                            <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
                                 <motion.div
                                     className={`h-full rounded-full bg-gradient-to-r ${scoreGradient(a.swingScore)}`}
                                     initial={{ width: 0 }}
@@ -295,7 +336,6 @@ export const SwingTraderPanel: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Trend Badges */}
                             <div className="grid grid-cols-3 gap-2">
                                 {[
                                     { label: 'D1', value: a.trendD1 },
@@ -309,27 +349,25 @@ export const SwingTraderPanel: React.FC = () => {
                                 ))}
                             </div>
 
-                            {/* Indicadores */}
                             <div className="grid grid-cols-2 gap-2">
-                                <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-800">
+                                <div className="p-3 bg-slate-950/40 rounded-xl border border-white/5">
                                     <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">RSI 14</span>
                                     <span className={`text-sm font-black ${a.rsi14 > 70 ? 'text-rose-400' : a.rsi14 < 30 ? 'text-emerald-400' : 'text-slate-300'}`}>{a.rsi14}</span>
                                 </div>
-                                <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-800">
+                                <div className="p-3 bg-slate-950/40 rounded-xl border border-white/5">
                                     <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">ATR H4</span>
                                     <span className="text-sm font-black text-amber-400">{a.atrH4}</span>
                                 </div>
-                                <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-800">
+                                <div className="p-3 bg-slate-950/40 rounded-xl border border-white/5">
                                     <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">MACD</span>
                                     <span className={`text-sm font-black ${a.macdSignal === 'BUY' ? 'text-emerald-400' : a.macdSignal === 'SELL' ? 'text-rose-400' : 'text-slate-500'}`}>{a.macdSignal}</span>
                                 </div>
-                                <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-800">
+                                <div className="p-3 bg-slate-950/40 rounded-xl border border-white/5">
                                     <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Volume</span>
                                     <span className={`text-sm font-black ${a.volumeRatio >= 1.2 ? 'text-emerald-400' : 'text-slate-400'}`}>{a.volumeRatio}x</span>
                                 </div>
                             </div>
 
-                            {/* Score Breakdown */}
                             <div className="space-y-1.5">
                                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Score Breakdown</span>
                                 {[
@@ -338,21 +376,20 @@ export const SwingTraderPanel: React.FC = () => {
                                     { label: 'Pattern', val: a.scores.patternTrigger, max: 25 },
                                     { label: 'Volume', val: a.scores.volumeConfirm, max: 10 },
                                     { label: 'Momentum', val: a.scores.momentum, max: 10 },
-                                ].map((s, i) => (
+                                ].map((sc, i) => (
                                     <div key={i} className="flex items-center gap-2">
-                                        <span className="text-[9px] font-bold text-slate-500 w-16">{s.label}</span>
+                                        <span className="text-[9px] font-bold text-slate-500 w-16">{sc.label}</span>
                                         <div className="flex-1 bg-slate-800 rounded-full h-1.5 overflow-hidden">
                                             <div
                                                 className="h-full rounded-full bg-amber-500"
-                                                style={{ width: `${(s.val / s.max) * 100}%` }}
+                                                style={{ width: `${(sc.val / sc.max) * 100}%` }}
                                             />
                                         </div>
-                                        <span className="text-[10px] font-black text-slate-400 w-8 text-right">{s.val}/{s.max}</span>
+                                        <span className="text-[10px] font-black text-slate-400 w-8 text-right">{sc.val}/{sc.max}</span>
                                     </div>
                                 ))}
                             </div>
 
-                            {/* Sinal */}
                             {a.direction && a.swingScore >= 70 && (
                                 <div className={`p-4 rounded-2xl border text-center ${a.direction === 'BUY' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'}`}>
                                     <span className={`text-sm font-black uppercase ${a.direction === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -365,17 +402,15 @@ export const SwingTraderPanel: React.FC = () => {
                 })}
             </div>
 
-            {/* Watchlist IA: Sinais Futuros */}
-            <div className="bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-amber-500/10 shadow-xl overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                    <Timer size={80} className="text-amber-500" />
-                </div>
+            {/* WATCHLIST IA */}
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 p-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
 
-                <h3 className="text-white font-black italic uppercase tracking-tighter flex items-center gap-3 mb-6 relative z-10">
-                    <Timer className="text-amber-500" size={24} /> Watchlist IA — Próximos Sinais
+                <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                    <Timer className="text-amber-500" size={18} /> Watchlist IA — Próximos Sinais
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {Object.entries(status.watchlist).length === 0 ? (
                         <div className="col-span-full py-10 text-center border-2 border-dashed border-slate-800 rounded-3xl">
                             <p className="text-slate-600 font-bold uppercase text-[10px] tracking-widest italic">Nenhum sinal futuro em formação no momento...</p>
@@ -385,7 +420,7 @@ export const SwingTraderPanel: React.FC = () => {
                             key={sym}
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-slate-950/50 p-5 rounded-3xl border border-slate-800 hover:border-amber-500/30 transition-all group"
+                            className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 hover:border-amber-500/30 transition-all group"
                         >
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-3">
@@ -420,87 +455,103 @@ export const SwingTraderPanel: React.FC = () => {
                     ))}
                 </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Posições */}
-                <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2.5rem] border border-slate-800 shadow-xl">
-                    <h3 className="text-white font-black italic uppercase tracking-tighter flex items-center gap-3 mb-4">
-                        <Layers className="text-amber-500" size={20} /> Posições Swing
-                    </h3>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="border-b border-slate-800">
-                                    <th className="py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Ticket</th>
-                                    <th className="py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Ativo</th>
-                                    <th className="py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipo</th>
-                                    <th className="py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Lote</th>
-                                    <th className="py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Lucro</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {status.positions.length === 0 ? (
-                                    <tr><td colSpan={5} className="py-8 text-center text-[10px] font-bold text-slate-600 uppercase tracking-widest italic">Aguardando setup com SwingScore ≥ {s.minSwingScore}...</td></tr>
-                                ) : status.positions.map((pos: any) => (
-                                    <motion.tr key={pos.ticket} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-b border-slate-800/50 hover:bg-white/5 transition-colors">
-                                        <td className="py-3 text-xs font-mono text-slate-400">#{pos.ticket}</td>
-                                        <td className="py-3 text-xs font-bold text-white">{pos.symbol}</td>
-                                        <td className="py-3">
-                                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${pos.type === 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                                                {pos.type === 0 ? 'BUY' : 'SELL'}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 text-xs font-bold text-white">{pos.volume}</td>
-                                        <td className={`py-3 text-xs font-black text-right ${pos.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                            ${pos.profit?.toFixed(2)}
-                                        </td>
-                                    </motion.tr>
-                                ))}
-                            </tbody>
-                        </table>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                {/* POSIÇÕES */}
+                <div className="xl:col-span-2 space-y-6">
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                            <Layers className="text-amber-500" size={18} /> Posições Swing
+                        </h3>
+                        <div className="bg-slate-950/60 rounded-[2rem] border border-white/5 overflow-hidden">
+                            <div className="max-h-72 overflow-x-auto overflow-y-auto custom-scrollbar">
+                                <table className="w-full text-left min-w-[500px]">
+                                    <thead className="sticky top-0 bg-slate-900 border-b border-white/5">
+                                        <tr className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                                            <th className="px-6 py-4">Ticket</th>
+                                            <th className="px-6 py-4">Ativo</th>
+                                            <th className="px-6 py-4">Tipo</th>
+                                            <th className="px-6 py-4">Lote</th>
+                                            <th className="px-6 py-4 text-right">Lucro</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {status.positions.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5} className="py-12 text-center">
+                                                    <div className="flex flex-col items-center gap-3 opacity-30">
+                                                        <Target size={40} />
+                                                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Aguardando setup com SwingScore ≥ {s.minSwingScore}...</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : status.positions.map((pos: any, i: number) => (
+                                            <motion.tr key={pos.ticket || i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="group hover:bg-white/5 transition-all">
+                                                <td className="px-6 py-4 text-xs font-mono text-slate-400">#{pos.ticket}</td>
+                                                <td className="px-6 py-4 font-black text-white text-xs italic">{pos.symbol}</td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`text-[10px] font-black px-3 py-1 rounded-full border ${pos.type === 0
+                                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                                        : 'bg-rose-500/10 border-rose-500/30 text-rose-400'}`}>
+                                                        {pos.type === 0 ? 'BUY' : 'SELL'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-xs font-black text-white">{pos.volume}</td>
+                                                <td className={`px-6 py-4 text-xs font-black italic text-right ${pos.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                    ${pos.profit?.toFixed(2)}
+                                                </td>
+                                            </motion.tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Terminal de Logs */}
-                <div className="bg-slate-900/90 backdrop-blur-xl p-6 rounded-[2.5rem] border border-slate-800 shadow-xl flex flex-col">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-white font-black italic uppercase tracking-tighter flex items-center gap-3">
+                {/* TERMINAL IA */}
+                <div className="space-y-6">
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 p-8 relative overflow-hidden h-full flex flex-col">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
                             <Timer className="text-amber-500" size={18} /> Terminal IA
                         </h3>
-                        <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                    </div>
 
-                    <div className="flex-1 bg-black/40 rounded-2xl p-4 font-mono text-[10px] overflow-y-auto space-y-2 relative border border-white/5 max-h-64">
-                        {status.logs.length === 0 ? (
-                            <p className="text-slate-700 italic">Iniciando Swing Analysis...</p>
-                        ) : status.logs.map((log, i) => (
-                            <div key={i} className="flex gap-3 opacity-90">
-                                <span className="text-slate-600 shrink-0">[{log.time}]</span>
-                                <span className={
-                                    log.type === 'TRADE' ? 'text-amber-400 font-bold' :
-                                        log.type === 'SCORE' ? 'text-emerald-400 font-bold' :
-                                            log.type === 'WARN' ? 'text-rose-500' : 'text-slate-400'
-                                }>
-                                    {log.msg}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+                        <div className="flex-1 bg-black/40 rounded-2xl p-4 font-mono text-[10px] overflow-y-auto space-y-2 relative border border-white/5 min-h-[200px]">
+                            {status.logs.length === 0 ? (
+                                <p className="text-slate-700 italic">Iniciando Swing Analysis...</p>
+                            ) : status.logs.map((log, i) => (
+                                <div key={i} className="flex gap-3 opacity-90">
+                                    <span className="text-slate-600 shrink-0">[{log.time}]</span>
+                                    <span className={
+                                        log.type === 'TRADE' ? 'text-amber-400 font-bold' :
+                                            log.type === 'SCORE' ? 'text-emerald-400 font-bold' :
+                                                log.type === 'WARN' ? 'text-rose-500' : 'text-slate-400'
+                                    }>
+                                        {log.msg}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
 
-                    <div className="mt-4 flex gap-2">
-                        <button onClick={handleReset} className="flex-1 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/30 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                            Reset Dia
-                        </button>
-                        <button onClick={fetchStatus} className="p-3 bg-slate-800 text-slate-400 rounded-xl border border-slate-700">
-                            <RefreshCw size={14} className={updating ? 'animate-spin' : ''} />
-                        </button>
+                        <div className="mt-4 flex gap-2">
+                            <button onClick={handleReset} className="flex-1 py-3 rounded-xl border font-black text-[10px] uppercase tracking-widest transition-all bg-rose-500/10 border-rose-500/30 text-rose-500 hover:bg-rose-500/20">
+                                Reset Dia
+                            </button>
+                            <button onClick={fetchStatus} className="p-3 bg-slate-800 text-slate-400 rounded-xl border border-slate-700 hover:bg-amber-500/10 hover:border-amber-500/30 hover:text-amber-400 transition-all">
+                                <RefreshCw size={14} className={updating ? 'animate-spin' : ''} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Settings Row */}
-            <div className="bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2.5rem] border border-slate-800 shadow-xl">
-                <h3 className="text-white font-black italic uppercase tracking-tighter flex items-center gap-3 mb-5">
-                    <Settings className="text-amber-500" size={20} /> Parâmetros da IA
+            {/* PARÂMETROS DA IA */}
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 p-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
+                <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                    <Settings className="text-amber-500" size={18} /> Parâmetros da IA
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[
@@ -509,20 +560,26 @@ export const SwingTraderPanel: React.FC = () => {
                         { label: 'TP (ATR x)', key: 'atrTpMultiplier', value: s.atrTpMultiplier, min: 1, max: 6, step: 0.5 },
                         { label: 'Cooldown (min)', key: 'cooldownMinutes', value: s.cooldownMinutes, min: 5, max: 120, step: 5 },
                     ].map((param, i) => (
-                        <div key={i} className="p-4 bg-slate-950/50 rounded-2xl border border-slate-800 flex flex-col gap-2">
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{param.label}</span>
-                            <div className="flex items-center justify-between">
-                                <button onClick={() => updateSetting(param.key, Math.max(param.min, Number((param.value - param.step).toFixed(2))))} className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">-</button>
+                        <div key={i} className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{param.label}</span>
                                 <span className="text-sm font-black text-amber-400">{param.value}</span>
-                                <button onClick={() => updateSetting(param.key, Math.min(param.max, Number((param.value + param.step).toFixed(2))))} className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">+</button>
+                            </div>
+                            <div className="flex items-center justify-between mt-2">
+                                <button onClick={() => updateSetting(param.key, Math.max(param.min, Number((param.value - param.step).toFixed(2))))}
+                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">-</button>
+                                <span className="text-lg font-black text-white">{param.value}</span>
+                                <button onClick={() => updateSetting(param.key, Math.min(param.max, Number((param.value + param.step).toFixed(2))))}
+                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">+</button>
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="bg-slate-950 p-6 rounded-[2rem] border border-slate-800 text-center">
+            {/* FOOTER */}
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 p-6 relative overflow-hidden text-center">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
                 <p className="text-[10px] text-amber-500/60 font-bold uppercase tracking-widest">
                     Swing Trader IA <span className="mx-2">|</span> Multi-Timeframe D1→H4→H1 <span className="mx-2">|</span> SwingScore™ Engine v1.0
                 </p>

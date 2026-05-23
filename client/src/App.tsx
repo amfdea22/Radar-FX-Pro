@@ -19,6 +19,7 @@ import { SwingTraderPanel } from './components/SwingTraderPanel';
 import { ForexScalperPanel } from './components/ForexScalperPanel';
 import { RadarApp } from './components/RadarApp';
 import { BitcoinProPanel } from './components/BitcoinProPanel';
+import { SharkBotPanel } from './components/SharkBotPanel';
 import { AgentIAPanel } from './components/AgentIAPanel';
 import { AnimatePresence, motion } from 'framer-motion';
 import { RobotControlPanel } from './components/RobotControlPanel';
@@ -115,6 +116,7 @@ function App() {
                         {activeTab === 'ml' && <MLInsightsPanel />}
                         {activeTab === 'robot' && <RobotControlPanel />}
                         {activeTab === 'bitcoin_pro' && <BitcoinProPanel />}
+                        {activeTab === 'shark_bot' && <SharkBotPanel />}
                         {activeTab === 'crypto' && <CryptoIntelligenceHub />}
                         {activeTab === 'gold_scalper' && <GoldScalperPanel />}
                         {activeTab === 'micro_sniper' && <MicroScalperPanel />}

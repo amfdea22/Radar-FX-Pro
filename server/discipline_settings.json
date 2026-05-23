@@ -3,7 +3,7 @@
   "dailyTakeProfit": 2000,
   "maxTradesPerDay": 10,
   "maxConsecutiveLosses": 3,
-  "resetTimestamp": 1779496607,
+  "resetTimestamp": 1779566708,
   "manualStopLossUSD": 5,
   "manualTakeProfitUSD": 10
 }

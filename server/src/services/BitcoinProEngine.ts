@@ -60,6 +60,7 @@ interface DailyAnalysis {
     pullbackToEma: boolean;
     rsiSignal: boolean;
     entryScore: number;
+    direction: 'BUY' | 'SELL';
     swingLow: number;
     swingHigh: number;
 }
@@ -270,13 +271,23 @@ export class BitcoinProEngine {
             const swingLow = Math.min(...lowPrices.slice(-lookback));
             const swingHigh = Math.max(...highPrices.slice(-lookback));
 
-            let entryScore = 0;
-            if (trend === 'BULLISH') entryScore += 30;
-            if (ema50Slope === 'UP') entryScore += 15;
-            if (pullbackToEma) entryScore += 25;
-            else if (nearPullback) entryScore += 10;
-            if (rsiSignal) entryScore += 20;
-            else if (rsi > 40 && rsi < 60) entryScore += 10;
+            const rsiBullSignal = rsi > 40 && rsi < 60 && rsi > rsiPrev;
+            const rsiBearSignal = rsi > 40 && rsi < 60 && rsi < rsiPrev;
+
+            let bullScore = 0, bearScore = 0;
+            if (trend === 'BULLISH') bullScore += 30;
+            if (trend === 'BEARISH') bearScore += 30;
+            if (ema50Slope === 'UP') bullScore += 15;
+            if (ema50Slope === 'DOWN') bearScore += 15;
+            if (pullbackToEma) { bullScore += 25; bearScore += 25; }
+            else if (nearPullback) { bullScore += 10; bearScore += 10; }
+            if (rsiBullSignal) bullScore += 20;
+            else if (rsi > 40 && rsi < 60) bullScore += 10;
+            if (rsiBearSignal) bearScore += 20;
+            else if (rsi > 40 && rsi < 60) bearScore += 10;
+
+            const entryScore = Math.max(bullScore, bearScore);
+            const direction: 'BUY' | 'SELL' = bullScore >= bearScore ? 'BUY' : 'SELL';
 
             return {
                 price,
@@ -289,6 +300,7 @@ export class BitcoinProEngine {
                 pullbackToEma,
                 rsiSignal,
                 entryScore,
+                direction,
                 swingLow,
                 swingHigh,
             };
@@ -310,37 +322,46 @@ export class BitcoinProEngine {
 
     private static async evaluateEntry(analysis: DailyAnalysis) {
         if (analysis.entryScore < 60) return;
-        if (analysis.trend !== 'BULLISH') return;
 
         const currentPrice = await this.getCurrentPrice();
         if (!currentPrice) { console.log('₿ BitcoinPro: No current price'); return; }
 
-        console.log(`₿ BitcoinPro: currentPrice=${currentPrice}, ema50=${analysis.ema50}, ema50*1.08=${analysis.ema50 * 1.08}`);
-        if (currentPrice > analysis.ema50 * 1.08) { console.log('₿ BitcoinPro: Price too far from EMA'); return; }
-
-        let sl: number;
-        const swingRange = analysis.swingHigh - analysis.swingLow;
-        console.log(`₿ BitcoinPro: swingLow=${analysis.swingLow}, swingHigh=${analysis.swingHigh}, range=${swingRange}`);
-
-        if (currentPrice > analysis.swingLow) {
-            const atrBuffer = swingRange * 0.15;
-            sl = analysis.swingLow - atrBuffer;
-            console.log(`₿ BitcoinPro: SL via swing: ${sl} (atrBuffer=${atrBuffer})`);
-        } else {
-            sl = currentPrice * 0.93;
-            console.log(`₿ BitcoinPro: SL via pct: ${sl} (price below swingLow)`);
+        if (analysis.direction === 'BUY' && currentPrice > analysis.ema50 * 1.08) {
+            console.log('₿ BitcoinPro: Price too far from EMA for BUY'); return;
+        }
+        if (analysis.direction === 'SELL' && currentPrice < analysis.ema50 * 0.92) {
+            console.log('₿ BitcoinPro: Price too far from EMA for SELL'); return;
         }
 
-        const risk = currentPrice - sl;
-        console.log(`₿ BitcoinPro: risk=${risk}, minRisk=${currentPrice * 0.005}`);
-        if (risk < currentPrice * 0.005) { console.log('₿ BitcoinPro: Risk too small'); return; }
-        const tp = currentPrice + (Math.max(risk, currentPrice * 0.02) * 2);
-        console.log(`₿ BitcoinPro: Proceeding with order: price=${currentPrice}, sl=${sl}, tp=${tp}`);
+        let sl: number, tp: number;
+        const swingRange = analysis.swingHigh - analysis.swingLow;
+
+        if (analysis.direction === 'BUY') {
+            if (currentPrice > analysis.swingLow) {
+                sl = analysis.swingLow - swingRange * 0.15;
+            } else {
+                sl = currentPrice * 0.93;
+            }
+            const risk = currentPrice - sl;
+            if (risk < currentPrice * 0.005) { console.log('₿ BitcoinPro: Risk too small for BUY'); return; }
+            tp = currentPrice + Math.max(risk, currentPrice * 0.02) * 2;
+        } else {
+            if (currentPrice < analysis.swingHigh) {
+                sl = analysis.swingHigh + swingRange * 0.15;
+            } else {
+                sl = currentPrice * 1.07;
+            }
+            const risk = sl - currentPrice;
+            if (risk < currentPrice * 0.005) { console.log('₿ BitcoinPro: Risk too small for SELL'); return; }
+            tp = currentPrice - Math.max(risk, currentPrice * 0.02) * 2;
+        }
+
+        const action = analysis.direction === 'BUY' ? 'BUY' : 'SELL';
 
         try {
             const resp = await axios.post(`${this.BRIDGE_URL}/order`, {
                 symbol: this.settings.symbol,
-                action: 'BUY',
+                action,
                 lot: this.settings.lotSize,
                 magic: this.MAGIC,
                 comment: 'BitcoinPro',
@@ -350,7 +371,7 @@ export class BitcoinProEngine {
             if (ticket) {
                 this.state.position = {
                     ticket,
-                    type: 'BUY',
+                    type: analysis.direction,
                     price: currentPrice,
                     sl,
                     tp,
@@ -362,7 +383,7 @@ export class BitcoinProEngine {
                     exitTime: 0,
                     entryPrice: currentPrice,
                     exitPrice: 0,
-                    direction: 'BUY',
+                    direction: analysis.direction,
                     result: 'WIN',
                     profit: 0,
                     conditions: {
@@ -376,14 +397,18 @@ export class BitcoinProEngine {
                 };
                 this.trades.push(tradeRec);
 
-                AlertEngine.addAlert('GUARDIAN', 'INFO', 'BitcoinPro', `ENTRADA BTC: ${currentPrice} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)} | Score: ${analysis.entryScore}`);
+                AlertEngine.addAlert('GUARDIAN', 'INFO', 'BitcoinPro', `${action} BTC: ${currentPrice} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)} | Score: ${analysis.entryScore}`);
 
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 await this.syncPosition();
 
                 if (this.state.position) {
-                    const realSl = Math.min(this.state.position.sl || Infinity, Math.round(sl * 100) / 100);
-                    const realTp = Math.max(this.state.position.tp || 0, Math.round(tp * 100) / 100);
+                    const realSl = analysis.direction === 'BUY'
+                        ? Math.min(this.state.position.sl || Infinity, Math.round(sl * 100) / 100)
+                        : Math.max(this.state.position.sl || 0, Math.round(sl * 100) / 100);
+                    const realTp = analysis.direction === 'BUY'
+                        ? Math.max(this.state.position.tp || 0, Math.round(tp * 100) / 100)
+                        : Math.min(this.state.position.tp || Infinity, Math.round(tp * 100) / 100);
                     try {
                         await axios.post(`${this.BRIDGE_URL}/update_order`, {
                             ticket,
@@ -415,7 +440,11 @@ export class BitcoinProEngine {
                 let profit = -this.settings.maxDailyLoss * 0.3;
 
                 const lastTrade = this.trades.find(t => t.entryTime === this.state.position!.time);
-                if (this.state.position.tp <= currentPrice) {
+                const hitTp = this.state.position.type === 'BUY'
+                    ? this.state.position.tp <= currentPrice
+                    : this.state.position.tp >= currentPrice;
+
+                if (hitTp) {
                     result = 'WIN';
                     profit = this.settings.maxDailyProfit * 0.5;
                 }
@@ -434,16 +463,32 @@ export class BitcoinProEngine {
             }
 
             const priceNow = pos.price_current || currentPrice;
-            const trailActivation = this.state.position.price + (priceNow - this.state.position.price) * 0.4;
-            if (priceNow > trailActivation && priceNow > this.state.position.price) {
-                const newSl = this.state.position.price + (priceNow - this.state.position.price) * 0.25;
-                if (newSl > this.state.position.sl) {
-                    await axios.post(`${this.BRIDGE_URL}/update_order`, {
-                        ticket: this.state.position.ticket,
-                        sl: Math.round(newSl * 100) / 100,
-                        magic: this.MAGIC
-                    });
-                    this.state.position.sl = newSl;
+
+            if (this.state.position.type === 'BUY') {
+                const trailActivation = this.state.position.price + (priceNow - this.state.position.price) * 0.4;
+                if (priceNow > trailActivation && priceNow > this.state.position.price) {
+                    const newSl = this.state.position.price + (priceNow - this.state.position.price) * 0.25;
+                    if (newSl > this.state.position.sl) {
+                        await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                            ticket: this.state.position.ticket,
+                            sl: Math.round(newSl * 100) / 100,
+                            magic: this.MAGIC
+                        });
+                        this.state.position.sl = newSl;
+                    }
+                }
+            } else {
+                const trailActivation = this.state.position.price - (this.state.position.price - priceNow) * 0.4;
+                if (priceNow < trailActivation && priceNow < this.state.position.price) {
+                    const newSl = this.state.position.price - (this.state.position.price - priceNow) * 0.25;
+                    if (newSl < this.state.position.sl) {
+                        await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                            ticket: this.state.position.ticket,
+                            sl: Math.round(newSl * 100) / 100,
+                            magic: this.MAGIC
+                        });
+                        this.state.position.sl = newSl;
+                    }
                 }
             }
         } catch (e) {

@@ -22,6 +22,7 @@ import { MarketService } from './services/MarketService';
 import { GoldScalperEngine } from './services/GoldScalperEngine';
 import { BitcoinProEngine } from './services/BitcoinProEngine';
 import { CryptoIAEngine } from './services/CryptoIAEngine';
+import { SharkBotEngine } from './services/SharkBotEngine';
 import { MicroScalperEngine } from './services/MicroScalperEngine';
 import { SwingTraderEngine } from './services/SwingTraderEngine';
 import { SwingTraderSimulator } from './services/SwingTraderSimulator';
@@ -380,6 +381,16 @@ app.post('/api/mt5/bitcoin-pro/settings', (req, res) => {
     res.json({ status: 'success', statusData: BitcoinProEngine.getStatus() });
 });
 
+// --- SHARK BOT ENGINE ---
+app.get('/api/mt5/shark-bot/status', (req, res) => {
+    res.json(SharkBotEngine.getStatus());
+});
+
+app.post('/api/mt5/shark-bot/settings', (req, res) => {
+    SharkBotEngine.updateSettings(req.body);
+    res.json({ status: 'success', statusData: SharkBotEngine.getStatus() });
+});
+
 // --- FINANCEIRO & REPORTING & DIÁRIO ---
 
 app.get('/api/mt5/reports', async (req, res) => {
@@ -507,12 +518,38 @@ app.get('/api/mt5/ml-insights/full-report', async (req, res) => {
     }
 });
 
+app.get('/api/mt5/ml-insights/history', async (req, res) => {
+    try {
+        const result = await MLInsightsService.getHistory();
+        res.json(result);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/mt5/ml-insights/settings', (req, res) => {
+    res.json(MLInsightsService.getSettings());
+});
+
+app.post('/api/mt5/ml-insights/settings', (req, res) => {
+    MLInsightsService.saveSettings(req.body);
+    res.json({ status: 'success', settings: MLInsightsService.getSettings() });
+});
+
+app.get('/api/mt5/ml-insights/performance', async (req, res) => {
+    try {
+        const perf = await MLInsightsService.getPerformance();
+        res.json(perf);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Keep old predictions and regime endpoints for backward compatibility
 app.get('/api/mt5/ml-insights/prediction', async (req, res) => {
     try {
-        const symbol = await MLInsightsService.resolveSymbol();
-        const candles = await MLInsightsService.fetchCandles(symbol, 'M15', 200);
-        const prediction = await MLInsightsService.predictPrice(symbol, candles);
-        res.json(prediction);
+        const report = await MLInsightsService.getFullReport();
+        res.json(report.predictions?.[0] || { direction: 'NEUTRAL' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
@@ -520,10 +557,8 @@ app.get('/api/mt5/ml-insights/prediction', async (req, res) => {
 
 app.get('/api/mt5/ml-insights/regime', async (req, res) => {
     try {
-        const symbol = await MLInsightsService.resolveSymbol();
-        const candles = await MLInsightsService.fetchCandles(symbol, 'M15', 200);
-        const regime = MLInsightsService.detectRegime(candles);
-        res.json(regime);
+        const report = await MLInsightsService.getFullReport();
+        res.json(report.regime || { regime: 'SILENT' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
@@ -986,6 +1021,7 @@ app.listen(Number(port), '0.0.0.0', async () => {
     SwingTraderEngine.init();
     ForexScalperEngine.init();
     OmniProbabilisticEngine.start();
+    SharkBotEngine.init();
     TradeNotificationBot.start();
     console.log('⚡ Todos os motores iniciados com sucesso!');
 });

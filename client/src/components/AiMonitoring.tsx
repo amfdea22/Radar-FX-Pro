@@ -95,7 +95,7 @@ export const AiMonitoring: React.FC = () => {
         return (
             <div className="flex items-center justify-center h-full p-12">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
+                    <div className="w-12 h-12 border-4 border-fuchsia-500/30 border-t-fuchsia-500 rounded-full animate-spin" />
                     <span className="text-base font-black text-slate-500 uppercase tracking-widest">Carregando monitoramento IA...</span>
                 </div>
             </div>
@@ -126,32 +126,44 @@ export const AiMonitoring: React.FC = () => {
     const logs: any[] = g.operationLog ? [...g.operationLog].filter((l: any) => l.action?.startsWith('IA_') || l.action === 'WARN' || l.action === 'NEURO') : [];
 
     return (
-        <div className="p-6 space-y-5 max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-violet-500/20 rounded-xl">
-                        <Cpu size={22} className="text-violet-400" />
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+            {/* HEADLINE */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-fuchsia-500/20 shadow-[0_0_50px_rgba(217,70,239,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+
+                <div className="relative z-10 flex items-center gap-6">
+                    <div className="p-4 bg-fuchsia-500/10 rounded-3xl border border-fuchsia-500/20 shadow-xl shadow-fuchsia-500/10">
+                        <Cpu size={40} className="text-fuchsia-400" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-white italic uppercase tracking-tighter">Monitoramento IA</h1>
-                        <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Métricas em tempo real dos softwares e modelos de IA</p>
+                        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3 flex-wrap">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-600">Monitoramento</span>
+                            IA
+                            <span className="px-2 py-1 rounded-lg text-xs tracking-widest uppercase bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-500">
+                                AO VIVO
+                            </span>
+                        </h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                            <Brain size={12} className="text-fuchsia-400" /> Métricas em tempo real dos softwares e modelos de IA
+                        </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-slate-600 font-bold">
-                    <Server size={14} />
-                    <span>Status Live</span>
+
+                <div className="flex items-center gap-2 px-5 py-2.5 bg-slate-950/50 rounded-2xl border border-white/5">
+                    <Server size={14} className="text-fuchsia-400" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status Live</span>
                     <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                 </div>
             </div>
 
-            {/* Model Status Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {/* MODEL STATUS CARDS */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {engines.map(eng => {
                     const Icon = eng.icon;
                     const extra = eng.id === 'supreme' ? `${sc.confluencePower || 0}%` : eng.id === 'robot' ? `${rc.stats?.totalTrades || 0}t` : '';
                     return (
-                        <div key={eng.id} className="bg-slate-900/60 backdrop-blur-md p-4 rounded-2xl border border-slate-800 hover:border-violet-500/20 transition-all">
+                        <div key={eng.id} className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 hover:border-fuchsia-500/20 transition-all">
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                     <div className="p-1.5 rounded-lg" style={{ backgroundColor: `${eng.color}20` }}>
@@ -169,12 +181,14 @@ export const AiMonitoring: React.FC = () => {
                 })}
             </div>
 
-            {/* Row: Neuro Score + Cortex + Pillars */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Neuro Score Gauge */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+            {/* ROW: NEURO SCORE + CORTEX + PILLARS */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                {/* Neuro Score */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
-                        <Brain size={16} className="text-violet-400" />
+                        <Brain size={16} className="text-fuchsia-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Neuro Score</span>
                         <span className="text-[10px] text-slate-700 font-mono ml-auto">
                             {iaLearn.totalAnalyzed || 0} trades analisados
@@ -195,8 +209,9 @@ export const AiMonitoring: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Cortex Humor + Status */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                {/* Cortex */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <Activity size={16} className="text-cyan-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Córtex & Estado</span>
@@ -228,7 +243,8 @@ export const AiMonitoring: React.FC = () => {
                 </div>
 
                 {/* Decision Pillars */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <PieChart size={16} className="text-emerald-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Pilares de Decisão</span>
@@ -242,10 +258,12 @@ export const AiMonitoring: React.FC = () => {
                 </div>
             </div>
 
-            {/* Row: Predictions + Sentiment + Drawdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Live Predictions */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+            {/* ROW: PREDICTIONS + SENTIMENT + DRAWDOWN */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                {/* Predictions */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <Eye size={16} className="text-amber-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Predições da IA</span>
@@ -282,7 +300,8 @@ export const AiMonitoring: React.FC = () => {
                 </div>
 
                 {/* Market Sentiment */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <Activity size={16} className="text-rose-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Sentimento de Mercado</span>
@@ -299,8 +318,9 @@ export const AiMonitoring: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Drawdown Heatmap + Divergence */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                {/* Risk & Divergence */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <AlertTriangle size={16} className="text-orange-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Risco & Divergência</span>
@@ -323,10 +343,12 @@ export const AiMonitoring: React.FC = () => {
                 </div>
             </div>
 
-            {/* Row: Discipline + Omni Ranking + Engines Stats */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Discipline Status */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+            {/* ROW: DISCIPLINE + OMNI RANKING + ENGINES STATS */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                {/* Discipline */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <Shield size={16} className="text-emerald-400" />
@@ -383,7 +405,8 @@ export const AiMonitoring: React.FC = () => {
                 </div>
 
                 {/* Omni Ranking */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <Layers size={16} className="text-pink-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Ranking Omni</span>
@@ -410,7 +433,8 @@ export const AiMonitoring: React.FC = () => {
                 </div>
 
                 {/* Engines Stats */}
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-4">
                         <BarChart2 size={16} className="text-blue-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Performance dos Motores</span>
@@ -442,17 +466,18 @@ export const AiMonitoring: React.FC = () => {
                 </div>
             </div>
 
-            {/* AI Insights */}
+            {/* AI INSIGHTS */}
             {aiInsights.length > 0 && (
-                <div className="bg-gradient-to-r from-violet-500/5 via-transparent to-cyan-500/5 backdrop-blur-md p-5 rounded-2xl border border-violet-500/10">
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                     <div className="flex items-center gap-2 mb-3">
-                        <Brain size={16} className="text-violet-400" />
+                        <Brain size={16} className="text-fuchsia-400" />
                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Insights da IA</span>
                     </div>
                     <div className="space-y-2">
                         {aiInsights.map((insight: string, i: number) => (
                             <div key={i} className="flex items-start gap-2 text-sm text-slate-300">
-                                <span className="text-violet-400 mt-0.5">◆</span>
+                                <span className="text-fuchsia-400 mt-0.5">◆</span>
                                 <span>{insight}</span>
                             </div>
                         ))}
@@ -460,16 +485,17 @@ export const AiMonitoring: React.FC = () => {
                 </div>
             )}
 
-            {/* AI Operation Log */}
-            <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800">
+            {/* AI OPERATION LOG */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
                 <div className="flex items-center gap-2 mb-4">
-                    <Clock size={16} className="text-slate-400" />
+                    <Clock size={16} className="text-fuchsia-400" />
                     <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Log de Eventos IA</span>
                 </div>
                 <div className="space-y-1 max-h-64 overflow-y-auto">
                     {logs.length === 0 && g.operationLog?.length > 0 ? (
                         (g.operationLog || []).slice(0, 30).map((log: any, i: number) => (
-                            <div key={i} className={`flex items-center gap-3 p-3 rounded-lg text-xs transition-colors ${hoveredLog === `${i}` ? 'bg-slate-700/40' : 'bg-slate-800/20'}`}
+                            <div key={i} className={`flex items-center gap-3 p-3 rounded-lg text-xs transition-colors ${hoveredLog === `${i}` ? 'bg-white/5' : 'bg-slate-800/20'}`}
                                 onMouseEnter={() => setHoveredLog(`${i}`)} onMouseLeave={() => setHoveredLog(null)}>
                                 <span className="text-[10px] font-mono text-slate-600 w-16 shrink-0">{log.time}</span>
                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${log.action === 'IA_GUARD' ? 'bg-violet-500/20 text-violet-400' : log.action === 'IA_LEARNING' ? 'bg-blue-500/20 text-blue-400' : log.action === 'WARN' ? 'bg-amber-500/20 text-amber-400' : log.action === 'NEURO' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-700/50 text-slate-400'}`}>
@@ -480,7 +506,7 @@ export const AiMonitoring: React.FC = () => {
                         ))
                     ) : (
                         logs.slice(0, 30).map((log: any, i: number) => (
-                            <div key={i} className={`flex items-center gap-3 p-3 rounded-lg text-xs transition-colors ${hoveredLog === `l_${i}` ? 'bg-slate-700/40' : 'bg-slate-800/20'}`}
+                            <div key={i} className={`flex items-center gap-3 p-3 rounded-lg text-xs transition-colors ${hoveredLog === `l_${i}` ? 'bg-white/5' : 'bg-slate-800/20'}`}
                                 onMouseEnter={() => setHoveredLog(`l_${i}`)} onMouseLeave={() => setHoveredLog(null)}>
                                 <span className="text-[10px] font-mono text-slate-600 w-16 shrink-0">{log.time}</span>
                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${log.action === 'IA_GUARD' ? 'bg-violet-500/20 text-violet-400' : log.action === 'IA_LEARNING' ? 'bg-blue-500/20 text-blue-400' : log.action === 'WARN' ? 'bg-amber-500/20 text-amber-400' : log.action === 'NEURO' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-700/50 text-slate-400'}`}>
@@ -495,6 +521,7 @@ export const AiMonitoring: React.FC = () => {
                     )}
                 </div>
             </div>
+
         </div>
     );
 };

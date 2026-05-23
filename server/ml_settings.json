@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "symbols": [
+    "BTCUSD",
+    "EURUSD",
+    "GBPUSD",
+    "ETHUSD",
+    "XAGUSD",
+    "WTI",
+    "SP500"
+  ],
+  "confidenceThresholdAlta": 70,
+  "confidenceThresholdModerada": 50,
+  "minRewardRiskAlta": 2,
+  "minRewardRiskModerada": 1.5,
+  "autoTradeEnabled": false,
+  "autoTradeMaxRisk": 1,
+  "autoTradeDefaultLot": 0.01,
+  "telegramAlerts": true
+}
