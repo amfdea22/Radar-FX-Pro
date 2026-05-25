@@ -94,17 +94,6 @@ export class TelegramService {
         }
     }
 
-    static async sendAnimation(gifUrl: string): Promise<boolean> {
-        if (!this.settings.enabled || !this.settings.botToken || !this.settings.chatId) return false;
-        try {
-            const url = `https://api.telegram.org/bot${this.settings.botToken}/sendAnimation`;
-            await axios.post(url, { chat_id: this.settings.chatId, animation: gifUrl });
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
     static async sendDice(emoji: string): Promise<boolean> {
         if (!this.settings.enabled || !this.settings.botToken || !this.settings.chatId) return false;
         try {
@@ -123,12 +112,17 @@ export class TelegramService {
             const commands = [
                 { command: 'start', description: 'Iniciar bot e ver menu' },
                 { command: 'menu', description: 'Exibir lista de comandos' },
-                { command: 'status', description: 'Status do Gold Scalper' },
+                { command: 'status', description: 'Status geral de todos os robos' },
                 { command: 'positions', description: 'Posicoes abertas' },
                 { command: 'summary', description: 'Resumo diario de performance' },
-                { command: 'stats', description: 'Estatisticas completas' },
+                { command: 'stats', description: 'Estatisticas por robo' },
+                { command: 'relatorio', description: 'Relatorio detalhado de desempenho' },
+                { command: 'comprar', description: 'Abrir COMPRA manual: /comprar SYMBOL LOT' },
+                { command: 'vender', description: 'Abrir VENDA manual: /vender SYMBOL LOT' },
+                { command: 'fechar', description: 'Fechar trade por ticket: /fechar TICKET' },
+                { command: 'fechartudo', description: 'Fechar todas as posicoes' },
                 { command: 'alerts', description: 'Ultimos alertas' },
-                { command: 'trades', description: 'Historico WIN/LOSS com data/hora' },
+                { command: 'trades', description: 'Historico WIN/LOSS de todos robos' },
             ];
             await axios.post(url, { commands });
             return true;

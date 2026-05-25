@@ -141,6 +141,8 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
         { id: 'titan', label: 'Titan', icon: Star },
         { id: 'swing', label: 'Swing', icon: TrendingUp },
         { id: 'alpha', label: 'Alpha', icon: Bot },
+        { id: 'supreme', label: 'Supreme', icon: Crown },
+        { id: 'omni', label: 'Omni', icon: Sigma },
     ];
 
     const renderRobots = () => (

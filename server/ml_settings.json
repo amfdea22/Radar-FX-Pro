@@ -1,12 +1,11 @@
 {
   "enabled": true,
   "symbols": [
+    "XAUUSD",
     "BTCUSD",
     "EURUSD",
     "GBPUSD",
     "ETHUSD",
-    "XAGUSD",
-    "WTI",
     "SP500"
   ],
   "confidenceThresholdAlta": 70,

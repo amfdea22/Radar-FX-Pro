@@ -108,7 +108,7 @@ export interface MLSettings {
     telegramAlerts: boolean;
 }
 
-const DEFAULT_SYMBOLS = ['XAUUSD', 'BTCUSD', 'EURUSD', 'GBPUSD', 'ETHUSD', 'XAGUSD', 'WTI', 'SP500'];
+const DEFAULT_SYMBOLS = ['XAUUSD', 'BTCUSD', 'EURUSD', 'GBPUSD', 'ETHUSD', 'SP500'];
 const HISTORY_PATH = path.resolve(process.cwd(), 'ml_prediction_history.json');
 const SETTINGS_PATH = path.resolve(process.cwd(), 'ml_settings.json');
 

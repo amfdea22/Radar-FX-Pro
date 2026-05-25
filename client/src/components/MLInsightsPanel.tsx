@@ -749,7 +749,7 @@ export default function MLInsightsPanel() {
                     <CircleDot className="text-emerald-500" size={18} /> Símbolos Ativos
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                    {['XAUUSD', 'BTCUSD', 'EURUSD', 'GBPUSD', 'ETHUSD', 'XAGUSD', 'WTI', 'SP500'].map(s => {
+                    {['XAUUSD', 'BTCUSD', 'EURUSD', 'GBPUSD', 'ETHUSD', 'SP500'].map(s => {
                         const active = settings.symbols.includes(s);
                         return (
                             <button key={s} onClick={() => {

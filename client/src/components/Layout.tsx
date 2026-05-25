@@ -51,13 +51,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     const [isCopyActive, setIsCopyActive] = React.useState(false);
     const [isSpeedActive, setIsSpeedActive] = React.useState(false);
     const [isSupremeActive, setIsSupremeActive] = React.useState(false);
+    const [isOmniActive, setIsOmniActive] = React.useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
     React.useEffect(() => {
         const checkStatus = async () => {
             try {
-                const [btcPro, shark, robot, crypto, gold, titan, swing, copy, speed, supreme] = await Promise.all([
+                const [btcPro, shark, robot, crypto, gold, titan, swing, copy, speed, supreme, omni] = await Promise.all([
                     axios.get('/api/mt5/bitcoin-pro/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/shark-bot/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/robot/status').catch(() => ({ data: { enabled: false } })),
@@ -67,7 +68,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                     axios.get('/api/mt5/swing-trader/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/copy-trader/status').catch(() => ({ data: { activeMasterId: null } })),
                     axios.get('/api/mt5/forex-scalper/status').catch(() => ({ data: { settings: { enabled: false } } })),
-                    axios.get('/api/mt5/supreme/status').catch(() => ({ data: { settings: { enabled: false } } }))
+                    axios.get('/api/mt5/supreme/status').catch(() => ({ data: { settings: { enabled: false } } })),
+                    axios.get('/api/mt5/omni/status').catch(() => ({ data: { settings: { enabled: false } } }))
                 ]);
                 setIsBitcoinProActive(btcPro.data?.settings?.enabled || false);
                 setIsSharkActive(shark.data?.settings?.enabled || false);
@@ -79,6 +81,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 setIsCopyActive(!!copy.data?.activeMasterId);
                 setIsSpeedActive(speed.data?.settings?.enabled || false);
                 setIsSupremeActive(supreme.data?.settings?.enabled || false);
+                setIsOmniActive(omni.data?.settings?.enabled || false);
             } catch (error) {
                 console.error('Failed to fetch robotic statuses');
             }
@@ -107,17 +110,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 { id: 'gold_scalper', icon: Target, label: 'Gold Scalper' },
                 { id: 'micro_sniper', icon: Zap, label: 'Micro Sniper' },
                 { id: 'swing_ia', icon: TrendingUp, label: 'Swing IA' },
-                { id: 'copy', icon: Copy, label: 'Copy Trader' },
                 { id: 'speed_scalper', icon: Zap, label: 'Speed Scalper' },
+                { id: 'supreme', icon: Crown, label: 'Supreme AI' },
+                { id: 'omni', icon: Sigma, label: 'Omni Prob' },
             ]
         },
         {
             label: 'TRADING',
             items: [
                 { id: 'trade', icon: Send, label: 'Operar' },
-                { id: 'supreme', icon: Crown, label: 'Supreme AI' },
+                { id: 'copy', icon: Copy, label: 'Copy Trader' },
                 { id: 'analysis', icon: LineChart, label: 'Análise Técnica' },
-                { id: 'omni', icon: Sigma, label: 'Omni Prob' },
                 { id: 'ranking', icon: PieChart, label: 'Ranking' },
             ]
         },
@@ -209,6 +212,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 )}
                                 {item.id === 'supreme' && isSupremeActive && (
                                     <div className={`w-1.5 h-1.5 rounded-full bg-emerald-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '16, 185, 129' } as any}></div>
+                                )}
+                                {item.id === 'omni' && isOmniActive && (
+                                    <div className={`w-1.5 h-1.5 rounded-full bg-purple-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '168, 85, 247' } as any}></div>
                                 )}
                             </button>
                         ))}
@@ -340,6 +346,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                                     <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                                     <span className="text-[8px] font-black text-emerald-400 uppercase italic hidden sm:inline">Supreme</span>
+                                </div>
+                            )}
+                            {isOmniActive && (
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full">
+                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+                                    <span className="text-[8px] font-black text-purple-400 uppercase italic hidden sm:inline">Omni</span>
                                 </div>
                             )}
                             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-trader-green/10 border border-trader-green/20 rounded-full">
