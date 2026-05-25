@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Alpha Station v1.1 - Emergency Reset Engine Active
+// Radar Station v1.1 - Emergency Reset Engine Active
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';

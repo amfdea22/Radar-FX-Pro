@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./radar_fx.db"
+}
+
+model Trade {
+  id        Int      @id @default(autoincrement())
+  ticket    Int      @unique
+  symbol    String
+  direction String
+  volume    Float
+  priceOpen Float
+  priceClose Float?
+  sl        Float?
+  tp        Float?
+  profit    Float?
+  magic     Int
+  comment   String?
+  strategy  String?
+  engine    String?
+  openTime  DateTime
+  closeTime DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Signal {
+  id         Int      @id @default(autoincrement())
+  symbol     String
+  setup      String
+  type       String
+  confidence Float
+  entryPrice Float?
+  sl         Float?
+  tp         Float?
+  status     String   @default("active")
+  strategy   String?
+  engine     String?
+  createdAt  DateTime @default(now())
+  closedAt   DateTime?
+}
+
+model StrategyStats {
+  id           Int     @id @default(autoincrement())
+  name         String  @unique
+  category     String?
+  winRate      Float   @default(0)
+  totalTrades  Int     @default(0)
+  wins         Int     @default(0)
+  losses       Int     @default(0)
+  grossProfit  Float   @default(0)
+  grossLoss    Float   @default(0)
+  netProfit    Float   @default(0)
+  profitFactor Float   @default(0)
+  maxDrawdown  Float   @default(0)
+  updatedAt    DateTime @default(now()) @updatedAt
+}
+
+model Alert {
+  id        Int      @id @default(autoincrement())
+  type      String
+  severity  String
+  source    String
+  message   String
+  symbol    String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}
+
+model JournalEntry {
+  id        Int      @id @default(autoincrement())
+  symbol    String?
+  direction String?
+  setup     String?
+  result    String?
+  profit    Float?
+  emotion   String?
+  notes     String?
+  createdAt DateTime @default(now())
+}

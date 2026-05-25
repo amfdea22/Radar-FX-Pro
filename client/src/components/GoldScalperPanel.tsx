@@ -3,11 +3,13 @@ import {
     Power, Settings, TrendingUp, TrendingDown, Minus, Plus, Activity,
     Shield, Target, Layers, Clock, AlertTriangle, RefreshCw,
     Zap, CalendarDays, BarChart3, ArrowUpDown, DollarSign, Trophy, XCircle, Percent, Flame,
-    Wallet, ShieldAlert, Calculator, Cpu, Brain, Crosshair
+    Wallet, ShieldAlert, Calculator, Cpu, Brain, Crosshair, Printer
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 interface GoldScalperStatus {
     enabled: boolean;
     settings: {
@@ -706,6 +708,124 @@ export const GoldScalperPanel: React.FC = () => {
         } finally {
             setSyncing(false);
         }
+    };
+
+    const printTradeReport = () => {
+        if (!report || !robot || report.trades.length === 0) return;
+
+        const doc = new jsPDF();
+        const now = new Date().toLocaleString('pt-BR');
+
+        // Title
+        doc.setFontSize(18);
+        doc.setTextColor(245, 158, 11);
+        doc.text('RADAR-FX: GOLD SCALPER - RELATÓRIO DE TRADES', 14, 22);
+
+        // Date/time
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Gerado em: ${now}`, 14, 30);
+
+        // Summary section
+        doc.setFontSize(11);
+        doc.setTextColor(15, 23, 42);
+        doc.text('RESUMO DO ROBÔ', 14, 40);
+
+        const summaryHeaders = [['Indicador', 'Valor']];
+        const summaryData = [
+            ['Total de Trades', String(robot.totalTrades)],
+            ['% Acerto', `${robot.winRate}%`],
+            ['Lucro Total', `$${robot.totalProfit.toFixed(2)}`],
+            ['Profit Factor', String(robot.profitFactor)],
+            ['Média Win', `$${robot.avgWin.toFixed(2)}`],
+            ['Média Loss', `$${robot.avgLoss.toFixed(2)}`],
+            ['Melhor Trade', `$${robot.bestTrade.toFixed(2)}`],
+            ['Pior Trade', `$${robot.worstTrade.toFixed(2)}`],
+            ['Streak Atual', `${robot.currentStreak}x ${robot.streakType}`]
+        ];
+
+        autoTable(doc, {
+            head: summaryHeaders,
+            body: summaryData,
+            startY: 44,
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 2 },
+            headStyles: { fillColor: [245, 158, 11], textColor: [255, 255, 255], fontStyle: 'bold' },
+            columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 40, halign: 'right' } }
+        });
+
+        // Trade History Table
+        const finalY = (doc as any).lastAutoTable.finalY || 44;
+        doc.setFontSize(11);
+        doc.text('HISTÓRICO DE TRADES', 14, finalY + 12);
+
+        const tradeHeaders = [['Resultado', 'Ticket', 'Tipo', 'Lote', 'Entrada', 'Saída', 'P&L', 'Motivo', 'Grid', 'Data/Hora']];
+        const tradeData = report.trades.map(t => [
+            t.result,
+            `#${t.ticket}`,
+            t.type,
+            String(t.lot),
+            t.entryPrice?.toFixed(2) || '-',
+            t.exitPrice?.toFixed(2) || '-',
+            `${t.profit >= 0 ? '+' : ''}$${t.profit?.toFixed(2)}`,
+            t.closeReason || '-',
+            `L${t.gridLevel}`,
+            t.closeTime ? new Date(t.closeTime).toLocaleString('pt-BR') : '-'
+        ]);
+
+        autoTable(doc, {
+            head: tradeHeaders,
+            body: tradeData,
+            startY: finalY + 16,
+            theme: 'striped',
+            styles: { fontSize: 7, cellPadding: 1.5 },
+            headStyles: { fillColor: [245, 158, 11], textColor: [255, 255, 255], fontStyle: 'bold' },
+            columnStyles: {
+                0: { cellWidth: 18 },
+                1: { cellWidth: 18 },
+                2: { cellWidth: 12 },
+                3: { cellWidth: 10 },
+                4: { cellWidth: 20 },
+                5: { cellWidth: 20 },
+                6: { cellWidth: 22 },
+                7: { cellWidth: 25 },
+                8: { cellWidth: 10 },
+                9: { cellWidth: 35 }
+            },
+            didDrawCell: (data: any) => {
+                if (data.section === 'body' && data.column.index === 0) {
+                    const val = String(data.cell.raw);
+                    if (val === 'WIN') {
+                        data.cell.styles.textColor = [52, 211, 153];
+                        data.cell.styles.fontStyle = 'bold';
+                    } else if (val === 'LOSS') {
+                        data.cell.styles.textColor = [251, 113, 133];
+                        data.cell.styles.fontStyle = 'bold';
+                    }
+                }
+                if (data.section === 'body' && data.column.index === 6) {
+                    const val = String(data.cell.raw);
+                    if (val.startsWith('+')) {
+                        data.cell.styles.textColor = [52, 211, 153];
+                        data.cell.styles.fontStyle = 'bold';
+                    } else if (val.startsWith('-')) {
+                        data.cell.styles.textColor = [251, 113, 133];
+                        data.cell.styles.fontStyle = 'bold';
+                    }
+                }
+            }
+        });
+
+        // Footer
+        const pageCount = doc.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(7);
+            doc.setTextColor(148, 163, 184);
+            doc.text(`Radar-FX Gold Scalper | Relatório de Trades | Página ${i} de ${pageCount}`, 14, doc.internal.pageSize.height - 10);
+        }
+
+        doc.save(`Gold_Scalper_Trades_${new Date().toISOString().slice(0, 10)}.pdf`);
     };
 
     const handleOpenCalendar = async () => {
@@ -1407,15 +1527,19 @@ export const GoldScalperPanel: React.FC = () => {
             </div>
 
             {/* KPI Cards Header */}
-            <div className="bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5">
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
                 <div className="flex items-center justify-between cursor-pointer select-none" onClick={() => toggleSection('monitoramento')}>
-                    <h3 className="text-white font-black italic uppercase tracking-tighter flex items-center gap-2 text-sm">
-                        <Activity className="text-amber-500" size={14} /> Monitoramento Rápido
-                    </h3>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                            <Activity size={18} className="text-amber-400" />
+                        </div>
+                        <h3 className="text-sm font-black italic text-white uppercase tracking-tighter">Monitoramento Rápido</h3>
+                    </div>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={(e) => { e.stopPropagation(); handleReset(); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border bg-slate-800 text-slate-400 hover:text-emerald-400 hover:bg-slate-700 border-slate-700"
+                            className="flex items-center gap-2 px-4 py-2 bg-slate-950/50 rounded-2xl border border-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/20 transition-all text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-emerald-400"
                             title="Zera o lucro/perda do dia para o robô"
                         >
                             <RefreshCw size={12} /> Reset Meta
@@ -1423,23 +1547,23 @@ export const GoldScalperPanel: React.FC = () => {
                         <button
                             onClick={(e) => { e.stopPropagation(); handleSync(); }}
                             disabled={syncing}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${syncing
-                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-wait'
-                                : 'bg-slate-800 text-slate-400 hover:text-amber-400 hover:bg-slate-700 border-slate-700'
+                            className={`flex items-center gap-2 px-4 py-2 bg-slate-950/50 rounded-2xl border transition-all text-[9px] font-black uppercase tracking-widest ${syncing
+                                ? 'border-amber-500/30 text-amber-400 cursor-wait bg-amber-500/10'
+                                : 'border-white/5 text-slate-400 hover:bg-amber-500/10 hover:border-amber-500/20 hover:text-amber-400'
                                 } `}
                             title="Sincronizar relatório de trades"
                         >
-                            <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Sincronizando...' : 'Sincronizar Histórico'}
+                            <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Sincronizando...' : 'Sincronizar'}
                         </button>
                         <button
                             onClick={(e) => { e.stopPropagation(); handleOpenCalendar(); }}
                             disabled={loadingCalendar}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border bg-slate-800 text-slate-400 hover:text-blue-400 hover:bg-slate-700 border-slate-700"
+                            className="flex items-center gap-2 px-4 py-2 bg-slate-950/50 rounded-2xl border border-white/5 hover:bg-blue-500/10 hover:border-blue-500/20 transition-all text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-400"
                             title="Abrir calendário econômico"
                         >
                             <CalendarDays size={12} /> Calendário
                         </button>
-                        <button className="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center justify-center transition-all">
+                        <button className="w-8 h-8 flex items-center justify-center bg-slate-950/50 rounded-2xl border border-white/5 hover:bg-amber-500/10 hover:border-amber-500/20 transition-all text-slate-400 hover:text-amber-400">
                             {collapsedSections['monitoramento'] ? <Plus size={14} /> : <Minus size={14} />}
                         </button>
                     </div>
@@ -1459,7 +1583,7 @@ export const GoldScalperPanel: React.FC = () => {
                     { label: 'Níveis Grid', value: `${s.gridLevels} x`, color: 'text-trader-blue', icon: <BarChart3 size={16} />, tooltip: 'Número máximo de ordens simultâneas permitidas pela estratégia de grade.' }
                 ].map((kpi, i) => (
                     <InfoTooltip key={i} header={kpi.label} content={kpi.tooltip}>
-                        <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-800 hover:border-amber-500/20 transition-all cursor-help h-full">
+                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 hover:border-amber-500/20 transition-all cursor-help h-full">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{kpi.label}</span>
                                 <span className={`${kpi.color} opacity-60`}>{kpi.icon}</span>
@@ -1642,6 +1766,18 @@ export const GoldScalperPanel: React.FC = () => {
                             title="Sincronizar relatório de trades"
                         >
                             <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Sincronizando...' : 'Sincronizar Histórico'}
+                        </button>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); printTradeReport(); }}
+                            disabled={!report?.trades || report.trades.length === 0}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${
+                                report?.trades && report.trades.length > 0
+                                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+                                    : 'bg-slate-800/50 border-slate-700 text-slate-600 cursor-not-allowed'
+                            }`}
+                            title="Imprimir relatório de trades em PDF"
+                        >
+                            <Printer size={12} /> PDF
                         </button>
                         <button className="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center justify-center transition-all">
                             {collapsedSections['trades'] ? <Plus size={14} /> : <Minus size={14} />}

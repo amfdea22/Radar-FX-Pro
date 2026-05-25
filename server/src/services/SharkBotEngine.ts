@@ -1,6 +1,9 @@
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 import { MarketDataService } from './MarketDataService';
 import { AlertEngine } from './AlertEngine';
+import { SymbolLockService } from './SymbolLockService';
 
 interface SharkBotSettings {
     enabled: boolean;
@@ -17,7 +20,7 @@ interface SharkBotState {
     lastBarTime: number;
     position: {
         ticket: number;
-        type: 'BUY';
+        type: 'BUY' | 'SELL';
         price: number;
         sl: number;
         tp: number;
@@ -41,7 +44,7 @@ interface TradeRecord {
     exitTime: number;
     entryPrice: number;
     exitPrice: number;
-    direction: 'BUY';
+    direction: 'BUY' | 'SELL';
     result: 'WIN' | 'LOSS';
     profit: number;
     fvgSize: number;
@@ -73,11 +76,13 @@ interface DailyAnalysis {
     bos: boolean;
     setupCount: number;
     setups: FVGSignal[];
+    setupsSell: FVGSignal[];
 }
 
 export class SharkBotEngine {
     private static BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
     private static MAGIC = 9876;
+    private static SETTINGS_PATH = path.resolve(process.cwd(), 'shark_bot_settings.json');
 
     private static settings: SharkBotSettings = {
         enabled: false,
@@ -132,13 +137,34 @@ export class SharkBotEngine {
 
     static updateSettings(partial: Partial<SharkBotSettings>) {
         this.settings = { ...this.settings, ...partial };
+        this.saveSettings();
     }
 
     static async init() {
         if (this.isRunning) return;
+        this.loadSettings();
         this.isRunning = true;
         console.log('🦈 SharkBot: Robô SMC Institucional iniciado...');
         this.loop();
+    }
+
+    private static loadSettings() {
+        try {
+            if (fs.existsSync(this.SETTINGS_PATH)) {
+                const data = JSON.parse(fs.readFileSync(this.SETTINGS_PATH, 'utf-8'));
+                this.settings = { ...this.settings, ...data };
+            }
+        } catch (e) {
+            console.warn('🦈 SharkBot: Erro ao carregar configurações', e);
+        }
+    }
+
+    private static saveSettings() {
+        try {
+            fs.writeFileSync(this.SETTINGS_PATH, JSON.stringify(this.settings, null, 2));
+        } catch (e) {
+            console.warn('🦈 SharkBot: Erro ao salvar configurações', e);
+        }
     }
 
     static stop() {
@@ -224,6 +250,7 @@ export class SharkBotEngine {
 
             const sma50 = this.calcSMA(closePrices, 50);
             const setups: FVGSignal[] = [];
+            const setupsSell: FVGSignal[] = [];
             let fvgCount = 0;
             let setupCount = 0;
 
@@ -234,23 +261,37 @@ export class SharkBotEngine {
                 const boS = bars[i].c > swingHigh20;
                 const nivel50 = swingLow20 + (swingHigh20 - swingLow20) * 0.5;
 
-                const gapExists = lowPrices[i - 2] > highPrices[i];
-                const gapSize = lowPrices[i - 2] - highPrices[i];
-                const gapRelevant = gapSize > this.settings.fvgMinAtrRatio * atr;
+                // Bearish FVG (gap down) -> BUY opportunity
+                const gapBearExists = lowPrices[i - 2] > highPrices[i];
+                const gapBearSize = gapBearExists ? lowPrices[i - 2] - highPrices[i] : 0;
+                const gapBearRelevant = gapBearSize > this.settings.fvgMinAtrRatio * atr;
+                const fvgBear = gapBearExists && gapBearRelevant;
+                const buyEntry = lowPrices[i - 2];
+                const buyArmed = fvgBear && buyEntry <= nivel50 && bars[i].c > sma50;
 
-                const fvgValido = gapExists && gapRelevant;
-                const entradaLimit = lowPrices[i - 2];
+                // Bullish FVG (gap up) -> SELL opportunity
+                const gapBullExists = highPrices[i - 2] < lowPrices[i];
+                const gapBullSize = gapBullExists ? lowPrices[i] - highPrices[i - 2] : 0;
+                const gapBullRelevant = gapBullSize > this.settings.fvgMinAtrRatio * atr;
+                const fvgBull = gapBullExists && gapBullRelevant;
+                const sellEntry = highPrices[i - 2];
+                const sellArmed = fvgBull && sellEntry >= nivel50 && bars[i].c < sma50;
 
-                const setupArmado = fvgValido && entradaLimit <= nivel50 && bars[i].c > sma50;
-
-                if (fvgValido) fvgCount++;
-                if (setupArmado) {
+                if (fvgBear || fvgBull) fvgCount++;
+                if (buyArmed) {
                     setupCount++;
-                    setups.push({ entradaLimit, stopLoss: swingLow20, gapSize, barIndex: i, swingLow: swingLow20, nivel50 });
+                    setups.push({ entradaLimit: buyEntry, stopLoss: swingLow20, gapSize: gapBearSize, barIndex: i, swingLow: swingLow20, nivel50 });
+                }
+                if (sellArmed) {
+                    setupCount++;
+                    setupsSell.push({ entradaLimit: sellEntry, stopLoss: swingHigh20, gapSize: gapBullSize, barIndex: i, swingLow: swingLow20, nivel50 });
                 }
 
-                if (setupArmado && i === bars.length - 1) {
-                    console.log(`🦈 SharkBot: FVG detectado na vela atual! Entrada: ${entradaLimit.toFixed(2)}, SL: ${swingLow20.toFixed(2)}, Gap: ${gapSize.toFixed(2)}`);
+                if (buyArmed && i === bars.length - 1) {
+                    console.log(`🦈 SharkBot: BUY FVG na vela atual! Entrada: ${buyEntry.toFixed(2)}, SL: ${swingLow20.toFixed(2)}, Gap: ${gapBearSize.toFixed(2)}`);
+                }
+                if (sellArmed && i === bars.length - 1) {
+                    console.log(`🦈 SharkBot: SELL FVG na vela atual! Entrada: ${sellEntry.toFixed(2)}, SL: ${swingHigh20.toFixed(2)}, Gap: ${gapBullSize.toFixed(2)}`);
                 }
             }
 
@@ -259,7 +300,7 @@ export class SharkBotEngine {
             const lastNivel50 = lastSwingLow + (lastSwingHigh - lastSwingLow) * 0.5;
             const lastBos = price > lastSwingHigh;
 
-            this.activeFvgLevels = setups.filter(s => s.entradaLimit >= price * 0.95 && s.entradaLimit <= price * 1.05);
+            this.activeFvgLevels = [...setups, ...setupsSell].filter(s => s.entradaLimit >= price * 0.95 && s.entradaLimit <= price * 1.05);
 
             this.lastBarClose = lastBar.c;
 
@@ -274,6 +315,7 @@ export class SharkBotEngine {
                 bos: lastBos,
                 setupCount,
                 setups,
+                setupsSell,
             };
         } catch (e) {
             return null;
@@ -295,47 +337,74 @@ export class SharkBotEngine {
     private static async evaluateEntry(analysis: DailyAnalysis) {
         if (analysis.setupCount === 0) return;
 
-        const latestSetup = analysis.setups[analysis.setups.length - 1];
-        if (!latestSetup) return;
-
         const currentPrice = await this.getCurrentPrice();
         if (!currentPrice) return;
 
-        if (currentPrice > latestSetup.entradaLimit * 1.02) {
-            console.log(`🦈 SharkBot: Preço ${currentPrice.toFixed(2)} acima do FVG ${latestSetup.entradaLimit.toFixed(2)}, aguardando recuo`);
-            return;
+        // BUY: find the most recent BUY setup where price is within range
+        const latestBuy = analysis.setups.length > 0 ? analysis.setups[analysis.setups.length - 1] : null;
+        if (latestBuy && currentPrice <= latestBuy.entradaLimit * 1.02) {
+            const sl = latestBuy.stopLoss;
+            const risk = currentPrice - sl;
+            if (risk >= currentPrice * 0.002) {
+                const tp = currentPrice + risk * 2;
+                await this.placeTrade('BUY', currentPrice, sl, tp, latestBuy);
+                return;
+            } else {
+                console.log('🦈 SharkBot: Risco muito pequeno para BUY');
+            }
+        } else if (latestBuy) {
+            console.log(`🦈 SharkBot: Preço ${currentPrice.toFixed(2)} acima do FVG BUY ${latestBuy.entradaLimit.toFixed(2)}, aguardando recuo`);
         }
 
-        const sl = latestSetup.stopLoss;
-        const risk = currentPrice - sl;
-        if (risk < currentPrice * 0.002) { console.log('🦈 SharkBot: Risco muito pequeno'); return; }
-        const tp = currentPrice + risk * 2;
+        // SELL: find the most recent SELL setup where price is within range
+        const latestSell = analysis.setupsSell.length > 0 ? analysis.setupsSell[analysis.setupsSell.length - 1] : null;
+        if (latestSell && currentPrice >= latestSell.entradaLimit * 0.98) {
+            const sl = latestSell.stopLoss;
+            const risk = sl - currentPrice;
+            if (risk >= currentPrice * 0.002) {
+                const tp = currentPrice - risk * 2;
+                await this.placeTrade('SELL', currentPrice, sl, tp, latestSell);
+                return;
+            } else {
+                console.log('🦈 SharkBot: Risco muito pequeno para SELL');
+            }
+        } else if (latestSell) {
+            console.log(`🦈 SharkBot: Preço ${currentPrice.toFixed(2)} abaixo do FVG SELL ${latestSell.entradaLimit.toFixed(2)}, aguardando subida`);
+        }
+    }
 
-        console.log(`🦈 SharkBot: ENTRADA ${this.settings.symbol} | Preço: ${currentPrice.toFixed(2)} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)} | Gap: ${latestSetup.gapSize.toFixed(2)}`);
+    private static async placeTrade(direction: 'BUY' | 'SELL', currentPrice: number, sl: number, tp: number, setup: FVGSignal) {
+        console.log(`🦈 SharkBot: ENTRADA ${direction} ${this.settings.symbol} | Preço: ${currentPrice.toFixed(2)} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)} | Gap: ${setup.gapSize.toFixed(2)}`);
 
         try {
             const resp = await axios.post(`${this.BRIDGE_URL}/order`, {
                 symbol: this.settings.symbol,
-                action: 'BUY',
+                action: direction,
                 lot: this.settings.lotSize,
                 magic: this.MAGIC,
-                comment: 'SharkBot',
+                comment: `SharkBot ${direction}`,
             });
 
             const ticket = resp.data?.order_id || resp.data?.ticket;
             if (ticket) {
+                SymbolLockService.acquire(this.settings.symbol, 'Shark Bot', ticket, direction);
                 this.state.position = {
-                    ticket, type: 'BUY', price: currentPrice, sl, tp, time: Date.now(),
+                    ticket, type: direction, price: currentPrice, sl, tp, time: Date.now(),
                 };
+
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeOpened('Shark Bot', this.settings.symbol, direction, this.settings.lotSize, currentPrice, sl, tp);
+                } catch (e) { /* notif fail */ }
 
                 this.trades.push({
                     entryTime: Date.now(), exitTime: 0, entryPrice: currentPrice,
-                    exitPrice: 0, direction: 'BUY', result: 'WIN', profit: 0,
-                    fvgSize: latestSetup.entradaLimit - latestSetup.stopLoss,
-                    gapSize: latestSetup.gapSize,
+                    exitPrice: 0, direction, result: 'WIN', profit: 0,
+                    fvgSize: setup.entradaLimit - setup.stopLoss,
+                    gapSize: setup.gapSize,
                 });
 
-                AlertEngine.addAlert('GUARDIAN', 'INFO', 'SharkBot', `ENTRADA ${this.settings.symbol}: ${currentPrice.toFixed(2)} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)}`);
+                AlertEngine.addAlert('GUARDIAN', 'INFO', 'SharkBot', `${direction} ${this.settings.symbol}: ${currentPrice.toFixed(2)} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)}`);
 
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 await this.syncPosition();
@@ -365,7 +434,8 @@ export class SharkBotEngine {
             const pos = positions.find((p: any) => p.ticket === this.state.position!.ticket);
 
             if (!pos) {
-                const hitTp = this.state.position.tp <= currentPrice;
+                const isBuy = this.state.position.type === 'BUY';
+                const hitTp = isBuy ? this.state.position.tp <= currentPrice : this.state.position.tp >= currentPrice;
                 const lastTrade = this.trades.find(t => t.entryTime === this.state.position!.time);
                 if (lastTrade) {
                     lastTrade.result = hitTp ? 'WIN' : 'LOSS';
@@ -375,12 +445,19 @@ export class SharkBotEngine {
                 }
                 if (hitTp) this.state.dailyProfit += this.settings.maxDailyProfit * 0.5;
                 else this.state.dailyLoss += this.settings.maxDailyLoss * 0.3;
+
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeClosed('Shark Bot', this.settings.symbol, this.state.position.type, lastTrade?.profit || 0, hitTp ? 'WIN' : 'LOSS', hitTp ? 'Take Profit' : 'Stop Loss', this.settings.lotSize);
+                } catch (e) { /* notif fail */ }
+
                 this.state.position = null;
                 return;
             }
 
             const priceNow = pos.price_current || currentPrice;
-            if (priceNow > this.state.position.price + (this.state.position.tp - this.state.position.price) * 0.5) {
+            // Breakeven: for BUY move SL up, for SELL move SL down
+            if (this.state.position.type === 'BUY' && priceNow > this.state.position.price + (this.state.position.tp - this.state.position.price) * 0.5) {
                 const breakeven = this.state.position.price + 1;
                 if (this.state.position.sl < breakeven) {
                     await axios.post(`${this.BRIDGE_URL}/update_order`, {
@@ -390,6 +467,17 @@ export class SharkBotEngine {
                     });
                     this.state.position.sl = breakeven;
                     console.log('🦈 SharkBot: Stop ajustado para breakeven');
+                }
+            } else if (this.state.position.type === 'SELL' && priceNow < this.state.position.price - (this.state.position.price - this.state.position.tp) * 0.5) {
+                const breakeven = this.state.position.price - 1;
+                if (this.state.position.sl > breakeven) {
+                    await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                        ticket: this.state.position.ticket,
+                        sl: Math.round(breakeven * 100) / 100,
+                        magic: this.MAGIC
+                    });
+                    this.state.position.sl = breakeven;
+                    console.log('🦈 SharkBot: Stop ajustado para breakeven (SELL)');
                 }
             }
         } catch (e) {
@@ -407,7 +495,7 @@ export class SharkBotEngine {
             } else if (!this.state.position || this.state.position.ticket !== pos.ticket) {
                 this.state.position = {
                     ticket: pos.ticket,
-                    type: 'BUY',
+                    type: pos.type === 'sell' || pos.type === 'SELL' ? 'SELL' : 'BUY',
                     price: pos.price_open,
                     sl: pos.sl,
                     tp: pos.tp,
@@ -419,13 +507,15 @@ export class SharkBotEngine {
         }
     }
 
-    private static async getCurrentPrice(): Promise<number | null> {
+    private static async getCurrentPrice(side?: 'BUY' | 'SELL'): Promise<number | null> {
         try {
             const resp = await axios.post(`${this.BRIDGE_URL}/ticks`, {
                 symbols: [this.settings.symbol],
             });
             const data = resp.data || {};
             const tick = data[this.settings.symbol] || data;
+            if (side === 'BUY') return tick?.ask || tick?.last || null;
+            if (side === 'SELL') return tick?.bid || tick?.last || null;
             return tick?.ask || tick?.bid || tick?.last || null;
         } catch { return null; }
     }

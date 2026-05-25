@@ -172,7 +172,7 @@ export const SignalScanner: React.FC = () => {
                         <Radar size={20} className="animate-pulse" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black text-white italic tracking-tighter uppercase">Alpha Station</h2>
+                        <h2 className="text-xl font-black text-white italic tracking-tighter uppercase">Radar Station</h2>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-trader-green animate-ping"></div>
                             <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Scanner VSA Ativo</span>

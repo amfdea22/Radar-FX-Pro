@@ -4,6 +4,7 @@ import { MarketService } from './MarketService';
 import { DisciplineEngine } from './DisciplineEngine';
 import { AlphaAuditService } from './AlphaAuditService';
 import { TradeNotificationBot } from './TradeNotificationBot';
+import { SymbolLockService } from './SymbolLockService';
 import fs from 'fs';
 import path from 'path';
 
@@ -92,6 +93,7 @@ interface GoldPosition {
 export interface TradeRecord {
     id: string;
     ticket: number;
+    symbol?: string;
     type: 'BUY' | 'SELL';
     lot: number;
     entryPrice: number;
@@ -451,7 +453,7 @@ export class GoldScalperEngine {
             const pr = await axios.get(`${this.BRIDGE_URL}/positions`);
             const pos = (pr.data || []).filter((p: any) =>
                 this.GOLD_SYMBOLS.some(gs => p.symbol.toUpperCase().includes(gs.toUpperCase())) &&
-                (p.magic === this.MAGIC || !p.magic)
+                (p.magic === this.MAGIC)
             );
             const tr = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.resolvedSymbol] });
             const tick = tr.data[this.resolvedSymbol];
@@ -830,6 +832,7 @@ export class GoldScalperEngine {
             if (r.data?.ticket || r.data?.status === 'success') { 
                 this.lastTradeTime = Date.now(); 
                 const ticket = r.data.order_id || r.data.ticket || 0;
+                SymbolLockService.acquire(this.resolvedSymbol, 'Gold Scalper', ticket, dir);
                 if (smcData) {
                     this.smcPositionData.set(ticket, {
                         tp1: smcData.partial_level || tp,
@@ -1214,6 +1217,11 @@ export class GoldScalperEngine {
             const seen = new Set(this.tradeHistory.map(x => x.ticket));
             let added = 0;
             for (const t of h) {
+                // Filtra apenas símbolos XAUUSD/GOLD — ignorar trades de outros ativos
+                const sym = (t.symbol || '').toUpperCase();
+                const isGold = this.GOLD_SYMBOLS.some(gs => sym.includes(gs.toUpperCase()));
+                if (!isGold) continue;
+
                 if (!seen.has(t.ticket)) {
                     const isRobot = t.magic === this.MAGIC || (t.comment || '').includes('GSL');
                     // Sincronizamos TUDO para o histórico da conta, preservando horários originais do MT5
@@ -1222,7 +1230,7 @@ export class GoldScalperEngine {
                     const netProfit = (t.profit || 0) + (t.commission || 0) + (t.swap || 0);
 
                     const trade: TradeRecord = {
-                        id: `mt5_${t.ticket}`, ticket: t.ticket, type: t.type === 0 ? 'BUY' : 'SELL',
+                        id: `mt5_${t.ticket}`, ticket: t.ticket, symbol: t.symbol, type: t.type === 0 ? 'BUY' : 'SELL',
                         lot: t.volume, entryPrice: t.price_open, exitPrice: t.price_current, profit: Number(netProfit.toFixed(2)),
                         result: netProfit > 0.01 ? 'WIN' : (netProfit < -0.01 ? 'LOSS' : 'TIE'), gridLevel: 1, closeReason: 'TP',
                         openTime, closeTime, duration: '-', magic: t.magic, comment: t.comment
@@ -1258,7 +1266,13 @@ export class GoldScalperEngine {
         if (fs.existsSync(this.HISTORY_PATH)) {
             try {
                 const d = JSON.parse(fs.readFileSync(this.HISTORY_PATH, 'utf-8'));
-                this.tradeHistory = d.trades || [];
+                this.tradeHistory = (d.trades || []).filter((t: TradeRecord) => {
+                    if (t.symbol) {
+                        const sym = t.symbol.toUpperCase();
+                        return this.GOLD_SYMBOLS.some(gs => sym.includes(gs.toUpperCase()));
+                    }
+                    return t.magic === this.MAGIC;
+                });
                 this.totalProfitAllTime = d.totalProfitAllTime || 0;
             } catch (e) { }
         }
@@ -1302,7 +1316,7 @@ export class GoldScalperEngine {
     }
 
     private static async analyzeAndOptimizeIA() {
-        if (this.tradeHistory.length < 10) return;
+        if (!this.settings.smartAdaptiveIA || this.tradeHistory.length < 10) return;
         
         const recentTrades = this.tradeHistory.slice(0, 50);
         const winRate = (recentTrades.filter(t => t.result === 'WIN').length / recentTrades.length) * 100;
@@ -1465,7 +1479,7 @@ export class GoldScalperEngine {
 
     static async getStatus() {
         await this.recalculateDailyStats();
-        if (this.tradeHistory.length > this.learningState.totalTradesAnalyzed + 10) await this.analyzeAndOptimizeIA();
+        if (this.settings.smartAdaptiveIA && this.tradeHistory.length > this.learningState.totalTradesAnalyzed + 10) await this.analyzeAndOptimizeIA();
         
         let pos: GoldPosition[] = [];
         let accountData: any = null;
@@ -1476,7 +1490,7 @@ export class GoldScalperEngine {
             ]);
             pos = (posRes.data || []).filter((p: any) =>
                 this.GOLD_SYMBOLS.some(gs => p.symbol.toUpperCase().includes(gs.toUpperCase())) &&
-                (p.magic === this.MAGIC || !p.magic)
+                (p.magic === this.MAGIC)
             );
             accountData = accRes.data;
         } catch (e) { }
@@ -1491,7 +1505,7 @@ export class GoldScalperEngine {
         // Determinar Humor do Córtex
         let cortexHumor = 'ANALÍTICO';
         if (isCoolingOff || this.isKillZone) cortexHumor = 'PROTEÇÃO';
-        else if (this.currentSpread > this.settings.maxSpreadPoints || iaScore < this.learningState.minScoreThreshold) cortexHumor = 'CAUTELOSO';
+        else if (this.currentSpread > this.settings.maxSpreadPoints || (this.settings.smartNeuroIA && iaScore < this.learningState.minScoreThreshold)) cortexHumor = 'CAUTELOSO';
         else if (iaScore > 85) cortexHumor = 'AGRESSIVO';
 
         // Detalhamento dos Pilares (Decisão)

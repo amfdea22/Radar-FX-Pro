@@ -14,13 +14,27 @@ export class TelegramService {
 
     private static loadSettings(): TelegramSettings {
         const defaults = { enabled: false, botToken: '', chatId: '' };
+        const envToken = process.env.TELEGRAM_BOT_TOKEN;
+        const envChatId = process.env.TELEGRAM_CHAT_ID;
         if (fs.existsSync(this.SETTINGS_PATH)) {
             try {
-                return { ...defaults, ...JSON.parse(fs.readFileSync(this.SETTINGS_PATH, 'utf-8')) };
+                const fileSettings = JSON.parse(fs.readFileSync(this.SETTINGS_PATH, 'utf-8'));
+                const merged = { ...defaults, ...fileSettings };
+                if (envToken) { merged.botToken = envToken; }
+                if (envChatId) { merged.chatId = envChatId; }
+                if (envToken || envChatId) {
+                    const toSave = { ...merged };
+                    delete (toSave as any).botToken;
+                    delete (toSave as any).chatId;
+                    fs.writeFileSync(this.SETTINGS_PATH, JSON.stringify({ ...fileSettings, _tokenFromEnv: true }, null, 2));
+                }
+                return merged;
             } catch (e) {
                 console.error('TelegramService: Erro ao carregar configurações');
             }
         }
+        if (envToken) defaults.botToken = envToken;
+        if (envChatId) defaults.chatId = envChatId;
         return defaults;
     }
 
@@ -91,17 +105,6 @@ export class TelegramService {
             return resp.data?.result || [];
         } catch (e) {
             return [];
-        }
-    }
-
-    static async sendDice(emoji: string): Promise<boolean> {
-        if (!this.settings.enabled || !this.settings.botToken || !this.settings.chatId) return false;
-        try {
-            const url = `https://api.telegram.org/bot${this.settings.botToken}/sendDice`;
-            await axios.post(url, { chat_id: this.settings.chatId, emoji });
-            return true;
-        } catch (e) {
-            return false;
         }
     }
 

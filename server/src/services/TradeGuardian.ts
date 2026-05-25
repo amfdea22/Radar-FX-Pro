@@ -3,6 +3,7 @@ import { AlertEngine } from './AlertEngine';
 import { MarketService } from './MarketService';
 import { DisciplineEngine } from './DisciplineEngine';
 import { GoldScalperEngine } from './GoldScalperEngine';
+import { SymbolLockService } from './SymbolLockService';
 import fs from 'fs';
 import path from 'path';
 
@@ -204,6 +205,8 @@ export class TradeGuardian {
             });
 
             if (orderResult && (orderResult.status === 'success' || orderResult.order_id)) {
+                const ticket = orderResult.ticket || orderResult.order_id || 0;
+                SymbolLockService.acquire(symbol, 'Guardian', ticket, type);
                 AlertEngine.addAlert('GUARDIAN', 'INFO', 'DCA Executado', `${symbol}: Ordem de Grid/DCA aberta para equilibrar cesta.`);
             }
         }

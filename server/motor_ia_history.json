@@ -1,0 +1,18 @@
+{
+  "executions": [],
+  "state": {
+    "isReady": false,
+    "marketRegime": "NEUTRAL",
+    "dailyTrades": 0,
+    "dailyPnl": 0,
+    "consecutiveWins": 0,
+    "consecutiveLosses": 0,
+    "activePositions": 0,
+    "totalTrades": 0,
+    "totalWins": 0,
+    "totalLosses": 0,
+    "totalProfit": 0,
+    "lastResetDate": "2026-05-25",
+    "lastTradeTime": 0
+  }
+}

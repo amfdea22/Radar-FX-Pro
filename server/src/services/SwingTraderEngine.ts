@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
+import { SymbolLockService } from './SymbolLockService';
 
 // ========== INTERFACES ==========
 interface SwingSettings {
@@ -248,6 +249,8 @@ export class SwingTraderEngine {
 
     // ========== ANÁLISE MULTI-TIMEFRAME ==========
     private static async analyzeSymbol(symbol: string): Promise<SwingAnalysis> {
+        // Normalizar símbolos
+        if (symbol === 'GOLD') symbol = 'XAUUSD';
         // Fetch candles de 3 timeframes (H4 real da Bridge)
         const [d1Candles, h4Candles, h1Candles] = await Promise.all([
             this.fetchCandles(symbol, 'D1', 60),
@@ -449,10 +452,24 @@ export class SwingTraderEngine {
             const sl = side === 'BUY' ? price - slDistance : price + slDistance;
             const tp = side === 'BUY' ? price + tpDistance : price - tpDistance;
 
+            // Calcular lote por % de risco ou usar lote fixo
+            let lot = this.settings.lotSize;
+            if (this.settings.useRiskPercentage && slDistance > 0) {
+                let balance = 1000;
+                try {
+                    const acc = await axios.get(`${this.BRIDGE_URL}/account`, { timeout: 2000 });
+                    if (acc.data?.balance) balance = acc.data.balance;
+                } catch (e) { /* usa saldo padrão */ }
+                const riskUSD = (balance * this.settings.riskPercentage) / 100;
+                const calcLot = riskUSD / (slDistance * 100);
+                lot = Number(Math.max(0.01, Math.min(50, calcLot)).toFixed(2));
+                this.addLog(`📊 Lote calculado por risco: ${lot} (${this.settings.riskPercentage}% de $${balance.toFixed(2)})`, 'INFO');
+            }
+
             const resp = await axios.post(`${this.BRIDGE_URL}/order`, {
                 action: side,
                 symbol: symbol,
-                lot: this.settings.lotSize,
+                lot: lot,
                 sl: sl,
                 tp: tp,
                 magic: this.settings.magic,
@@ -460,8 +477,14 @@ export class SwingTraderEngine {
             }, { timeout: 15000 });
 
             if (resp.data?.status === 'success') {
+                const ticket = resp.data?.ticket || resp.data?.order_id || 0;
+                SymbolLockService.acquire(symbol, 'Swing IA', ticket, side);
                 this.state.lastTradeTime[symbol] = Date.now();
                 this.addLog(`✅ SWING TRADE ABERTO [${symbol}] ${side} @ ${price.toFixed(2)} | SL:${sl.toFixed(2)} TP:${tp.toFixed(2)} | Score:${score}`, 'TRADE');
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeOpened('Swing IA', symbol, side, lot, price, sl, tp);
+                } catch (e) {}
             } else {
                 this.addLog(`❌ Falha ao abrir ordem para ${symbol}: ${resp.data?.error || 'Unknown'}`, 'WARN');
             }
@@ -470,7 +493,7 @@ export class SwingTraderEngine {
         }
     }
 
-    // ========== TRAILING STOP ==========
+    // ========== TRAILING STOP + PROTEÇÃO PARCIAL ==========
     private static async manageTrailing() {
         for (const pos of this.state.positions) {
             try {
@@ -478,9 +501,10 @@ export class SwingTraderEngine {
                 if (!analysis || analysis.atrH4 <= 0) continue;
 
                 const slDist = analysis.atrH4 * this.settings.atrSlMultiplier;
+                const tpDist = analysis.atrH4 * this.settings.atrTpMultiplier;
                 const activationDist = slDist * this.settings.trailingActivation;
+                const partialTPDist = tpDist * 0.5; // 50% do TP
 
-                // Verificar se lucro atingiu limiar de ativação
                 const tickResp = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [pos.symbol] }, { timeout: 5000 });
                 const tick = tickResp.data[pos.symbol];
                 if (!tick) continue;
@@ -490,13 +514,30 @@ export class SwingTraderEngine {
                     ? currentPrice - pos.price_open
                     : pos.price_open - currentPrice;
 
+                // Proteção parcial: mover SL para breakeven ao atingir 50% do TP
+                if (priceMove >= partialTPDist && pos.sl !== pos.price_open) {
+                    const breakevenSl = pos.type === 0
+                        ? pos.price_open + (slDist * 0.1)
+                        : pos.price_open - (slDist * 0.1);
+                    const shouldMoveBE = pos.type === 0
+                        ? breakevenSl > (pos.sl || 0)
+                        : breakevenSl < (pos.sl || 999999);
+                    if (shouldMoveBE) {
+                        await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                            ticket: pos.ticket,
+                            sl: breakevenSl,
+                            magic: this.settings.magic
+                        }, { timeout: 10000 });
+                        this.addLog(`🔒 Proteção parcial #${pos.ticket}: SL movido para breakeven (${breakevenSl.toFixed(2)})`, 'INFO');
+                    }
+                }
+
+                // Trailing stop ativado após 1.5x SL
                 if (priceMove >= activationDist) {
-                    // Calcular novo SL (trailing)
                     const newSl = pos.type === 0
                         ? currentPrice - slDist
                         : currentPrice + slDist;
 
-                    // Só mover SL se for melhor
                     const shouldMove = pos.type === 0
                         ? newSl > (pos.sl || 0)
                         : newSl < (pos.sl || 999999);
@@ -538,23 +579,6 @@ export class SwingTraderEngine {
         }
     }
 
-    // Simular H4 agrupando H1 de 4 em 4
-    private static buildH4FromH1(h1Candles: any[]): any[] {
-        const h4: any[] = [];
-        for (let i = 0; i + 3 < h1Candles.length; i += 4) {
-            const group = h1Candles.slice(i, i + 4);
-            h4.push({
-                time: group[0].time,
-                open: group[0].open,
-                high: Math.max(...group.map(c => c.high)),
-                low: Math.min(...group.map(c => c.low)),
-                close: group[group.length - 1].close,
-                tick_volume: group.reduce((s, c) => s + (c.tick_volume || 0), 0)
-            });
-        }
-        return h4;
-    }
-
     // ========== HELPERS: INDICADORES ==========
     private static calcEMA(data: number[], period: number): number {
         if (data.length < period) return data[data.length - 1] || 0;
@@ -581,20 +605,41 @@ export class SwingTraderEngine {
     }
 
     private static calcMACD(closes: number[]): { signal: 'BUY' | 'SELL' | 'NEUTRAL'; histogram: number } {
-        if (closes.length < 26) return { signal: 'NEUTRAL', histogram: 0 };
-        const ema12 = this.calcEMA(closes, 12);
-        const ema26 = this.calcEMA(closes, 26);
-        const macdLine = ema12 - ema26;
-        // Signal line simplificada (SMA 9 do MACD não disponível com cálculo simples)
-        // Usar direção do MACD line como proxy
-        const prevEma12 = this.calcEMA(closes.slice(0, -1), 12);
-        const prevEma26 = this.calcEMA(closes.slice(0, -1), 26);
-        const prevMacd = prevEma12 - prevEma26;
+        if (closes.length < 35) return { signal: 'NEUTRAL', histogram: 0 };
 
-        const histogram = macdLine - prevMacd; // Aproximação
+        // Calcular EMA12 e EMA26 incrementalmente para todas as barras
+        const k12 = 2 / 13;
+        const k26 = 2 / 27;
+        const macdLine: number[] = [];
+        let ema12 = closes.slice(0, 12).reduce((a, b) => a + b, 0) / 12;
+        let ema26 = closes.slice(0, 26).reduce((a, b) => a + b, 0) / 26;
+
+        for (let i = 0; i < closes.length; i++) {
+            if (i >= 12) ema12 = closes[i] * k12 + ema12 * (1 - k12);
+            if (i >= 26) {
+                ema26 = closes[i] * k26 + ema26 * (1 - k26);
+                macdLine.push(ema12 - ema26);
+            }
+        }
+
+        if (macdLine.length < 2) return { signal: 'NEUTRAL', histogram: 0 };
+
+        const currentMacd = macdLine[macdLine.length - 1];
+        const prevMacd = macdLine[macdLine.length - 2];
+
+        // Signal line = EMA9 da linha MACD
+        const k9 = 2 / 10;
+        let signalLine = macdLine.slice(0, 9).reduce((a, b) => a + b, 0) / 9;
+        for (let i = 9; i < macdLine.length; i++) {
+            signalLine = macdLine[i] * k9 + signalLine * (1 - k9);
+        }
+
+        const histogram = currentMacd - signalLine;
+
+        // Sinal BUY: histograma > 0 e MACD subindo, SELL: histograma < 0 e MACD caindo
         const signal: 'BUY' | 'SELL' | 'NEUTRAL' =
-            macdLine > 0 && macdLine > prevMacd ? 'BUY' :
-                macdLine < 0 && macdLine < prevMacd ? 'SELL' : 'NEUTRAL';
+            histogram > 0 && currentMacd > prevMacd ? 'BUY' :
+                histogram < 0 && currentMacd < prevMacd ? 'SELL' : 'NEUTRAL';
 
         return { signal, histogram };
     }

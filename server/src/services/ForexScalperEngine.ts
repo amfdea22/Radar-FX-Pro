@@ -1,11 +1,14 @@
 import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
+import { SymbolLockService } from './SymbolLockService';
 
 interface ForexScalperSettings {
     enabled: boolean;
     symbols: string[];
     lotSize: number;
+    useRiskPercentage: boolean;
+    riskPercentage: number;
     gridDistancePoints: number;
     maxGridLevels: number;
     maxDailyLossUSD: number;
@@ -19,9 +22,11 @@ interface ForexScalperSettings {
     trailingStopPoints: number;
     basketSize: number;
     basketOffsetPoints: number;
+    basketTPMultiplier: number;
     globalTrailingEnabled: boolean;
     gridMultiplier: number;
     gridDynamicDistance: boolean;
+    trendFilterM5: boolean;
     magic: number;
 }
 
@@ -34,8 +39,10 @@ export class ForexScalperEngine {
         enabled: false,
         symbols: ['EURUSD', 'GBPUSD'],
         lotSize: 0.01,
+        useRiskPercentage: false,
+        riskPercentage: 1.0,
         gridDistancePoints: 25,
-        maxGridLevels: 10,
+        maxGridLevels: 5,
         maxDailyLossUSD: 20,
         dailyTargetUSD: 20,
         smartBreakevenEnabled: true,
@@ -47,9 +54,11 @@ export class ForexScalperEngine {
         trailingStopPoints: 15,
         basketSize: 3,
         basketOffsetPoints: 20,
+        basketTPMultiplier: 3.0,
         globalTrailingEnabled: true,
         gridMultiplier: 1.5,
         gridDynamicDistance: true,
+        trendFilterM5: false,
         magic: 777111
     };
 
@@ -59,7 +68,9 @@ export class ForexScalperEngine {
         isProcessing: false,
         lastResetDay: '',
         activePositions: [] as any[],
-        logs: [] as { time: string; msg: string; type: 'INFO' | 'TRADE' | 'SUCCESS' | 'WARN' }[]
+        logs: [] as { time: string; msg: string; type: 'INFO' | 'TRADE' | 'SUCCESS' | 'WARN' }[],
+        lastTpSync: {} as Record<number, number>, // ticket -> last sync timestamp
+        lastGlobalTrail: 0
     };
 
     static init() {
@@ -177,15 +188,18 @@ export class ForexScalperEngine {
                 ? (currentPrice - pos.price_open) / pointSize
                 : (pos.price_open - currentPrice) / pointSize;
 
-            // SYNC SETTINGS (TP/SL) for existing orders
+            // SYNC SETTINGS (TP/SL) for existing orders (com throttle de 30s)
+            const now = Date.now();
+            const lastSync = this.state.lastTpSync[pos.ticket] || 0;
             const targetTp = pos.type === 0 ? pos.price_open + (this.settings.takeProfitPoints * pointSize) : pos.price_open - (this.settings.takeProfitPoints * pointSize);
             const currentTp = parseFloat(pos.tp);
             const diffTp = Math.abs(currentTp - targetTp) / pointSize;
 
-            if (this.settings.takeProfitPoints > 0 && diffTp > 2) {
+            if (this.settings.takeProfitPoints > 0 && diffTp > 2 && now - lastSync > 30000) {
                 try {
                     await axios.post(`${this.BRIDGE_URL}/update_order`, { ticket: pos.ticket, sl: pos.sl, tp: targetTp, magic: this.settings.magic }, { timeout: 3000 });
-                    this.addLog(`🔄 Sincronizado TP ultra-ágil (${this.settings.takeProfitPoints} pts) p/ ${pos.ticket}`, 'INFO');
+                    this.state.lastTpSync[pos.ticket] = now;
+                    this.addLog(`🔄 Sincronizado TP (${this.settings.takeProfitPoints} pts) p/ #${pos.ticket}`, 'INFO');
                 } catch (e) { }
             }
 
@@ -241,16 +255,40 @@ export class ForexScalperEngine {
             }
         }
 
-        // BASKET TAKE PROFIT (Calculated natively vs bridge)
-        // If the basket for this symbol hits the take profit in total, we close it all
-        // For simplicity, native TP points handles individual orders. But if they want a grid, a basket TP is usually better.
+        // GLOBAL TRAILING: trava lucro da cesta inteira quando ativado
+        if (this.settings.globalTrailingEnabled) {
+            const totalProfitUsd = positions.reduce((sum, p) => sum + (parseFloat(p.profit) || 0), 0);
+            if (totalProfitUsd > 0) {
+                for (const pos of positions) {
+                    const currentSl = pos.sl || 0;
+                    const breakevenSl = pos.type === 0
+                        ? pos.price_open + (pointSize * 2)
+                        : pos.price_open - (pointSize * 2);
+                    const needsMove = pos.type === 0
+                        ? currentSl < breakevenSl - pointSize
+                        : currentSl === 0 || currentSl > breakevenSl + pointSize;
+                    if (needsMove) {
+                        try {
+                            await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                                ticket: pos.ticket, sl: breakevenSl, tp: pos.tp, magic: this.settings.magic
+                            }, { timeout: 3000 });
+                            this.addLog(`🔒 Proteção Global: SL #${pos.ticket} movido p/ breakeven`, 'INFO');
+                        } catch (e) { }
+                    }
+                }
+            }
+        }
+
+        // BASKET TAKE PROFIT
         const totalProfitUsd = positions.reduce((sum, p) => sum + (parseFloat(p.profit) || 0), 0);
 
-        // Approximate TP based on money scaling (if $1 is roughly X points, etc).
-        // Since the user asked for "Take Profit Inteligente", closing the basket in positive is a smart feature.
-        if (totalProfitUsd > (this.settings.lotSize * this.settings.takeProfitPoints * 0.1) && totalProfitUsd > 0.5) { // rough dollar heuristic
-            // Or we can rely on native TP assigned during execution. The instructions said TP inteligente. Let's do Basket TP:
-            this.addLog(`💰 Basket Take Profit atingido em ${symbol}: $${totalProfitUsd.toFixed(2)}`, 'SUCCESS');
+        // Basket TP: fecha cesta quando lucro agregado >= lote * TP pontos * multiplicador configurável
+        const basketTPThreshold = Math.max(
+            this.settings.lotSize * this.settings.takeProfitPoints * this.settings.basketTPMultiplier * 0.01,
+            0.50
+        );
+        if (totalProfitUsd > basketTPThreshold) {
+            this.addLog(`💰 Basket TP (${this.settings.basketTPMultiplier}x) atingido em ${symbol}: $${totalProfitUsd.toFixed(2)}`, 'SUCCESS');
             await this.closePositionsList(positions);
         }
     }
@@ -269,10 +307,26 @@ export class ForexScalperEngine {
                 const closes = candles.map(c => c.close);
                 const rsi = this.calcRSI(closes, 7); // Fast RSI
 
+                // Filtro de tendência M5 (SMA9) — opcional
+                let trendOk = true;
+                if (this.settings.trendFilterM5) {
+                    try {
+                        const m5Resp = await axios.get(`${this.BRIDGE_URL}/candles?symbol=${symbol}&timeframe=M5&count=12`, { timeout: 3000 });
+                        const m5Candles = m5Resp.data;
+                        if (Array.isArray(m5Candles) && m5Candles.length >= 9) {
+                            const m5Closes = m5Candles.map(c => c.close);
+                            const sma9 = m5Closes.reduce((a, b) => a + b, 0) / m5Closes.length;
+                            const lastClose = m5Closes[m5Closes.length - 1];
+                            const m5Trend = lastClose > sma9 * 1.0005 ? 'BULLISH' : lastClose < sma9 * 0.9995 ? 'BEARISH' : 'NEUTRAL';
+                            trendOk = !((rsi < 42 && m5Trend === 'BEARISH') || (rsi > 58 && m5Trend === 'BULLISH'));
+                        }
+                    } catch (e) { /* sem filtro se falhar */ }
+                }
+
                 let side: 'BUY' | 'SELL' | null = null;
                 // High Frequency Triggers (40/60 instead of 30/70)
-                if (rsi < 42) side = 'BUY';
-                else if (rsi > 58) side = 'SELL';
+                if (rsi < 35 && trendOk) side = 'BUY';
+                else if (rsi > 65 && trendOk) side = 'SELL';
 
                 if (side) {
                     const pointSize = tick.point || 0.0001;
@@ -285,7 +339,7 @@ export class ForexScalperEngine {
                             targetPrice = side === 'BUY' ? tick.ask - offset : tick.bid + offset;
                         }
 
-                        await this.executeTrade(symbol, side, comment, targetPrice);
+                        await this.executeTrade(symbol, side, comment, targetPrice, 0, pointSize);
                     }
                 }
             } catch (err) { }
@@ -324,9 +378,35 @@ export class ForexScalperEngine {
         }
     }
 
-    private static async executeTrade(symbol: string, side: 'BUY' | 'SELL', comment: string, price: number = 0, overrideLot: number = 0) {
+    private static async executeTrade(symbol: string, side: 'BUY' | 'SELL', comment: string, price: number = 0, overrideLot: number = 0, pointSize?: number) {
         try {
-            const lot = overrideLot > 0 ? overrideLot : this.settings.lotSize;
+            let lot = overrideLot > 0 ? overrideLot : this.settings.lotSize;
+            // Calcular lote por % de risco se ativado e for primeira entrada
+            if (overrideLot === 0 && this.settings.useRiskPercentage && pointSize && this.settings.stopLossPoints > 0) {
+                let balance = 1000;
+                try {
+                    const acc = await axios.get(`${this.BRIDGE_URL}/account`, { timeout: 2000 });
+                    if (acc.data?.balance) balance = acc.data.balance;
+                } catch (e) { /* usa saldo padrão */ }
+                const riskUSD = (balance * this.settings.riskPercentage) / 100;
+                const slDistPrice = this.settings.stopLossPoints * pointSize;
+                if (slDistPrice > 0) {
+                    const calcLot = riskUSD / (slDistPrice * 100);
+                    lot = Number(Math.max(0.01, Math.min(50, calcLot)).toFixed(2));
+                    this.addLog(`📊 Lote por risco: ${lot} (${this.settings.riskPercentage}% de $${balance.toFixed(2)})`, 'INFO');
+                }
+            }
+
+            // Fetch tick for MARKET orders to compute SL/TP prices
+            let marketPrice = 0;
+            if (price === 0 && pointSize) {
+                try {
+                    const tickRes = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [symbol] }, { timeout: 3000 });
+                    const tick = tickRes.data?.[symbol];
+                    marketPrice = side === 'BUY' ? tick?.ask || 0 : tick?.bid || 0;
+                } catch (e) { /* will skip SL/TP */ }
+            }
+
             const payload: any = {
                 action: side,
                 symbol: symbol,
@@ -342,16 +422,34 @@ export class ForexScalperEngine {
                 payload.price = price;
             }
 
-            if (this.settings.stopLossPoints > 0) payload.sl_points = this.settings.stopLossPoints;
-            if (this.settings.takeProfitPoints > 0) payload.tp_points = this.settings.takeProfitPoints;
+            if (this.settings.stopLossPoints > 0 && pointSize) {
+                const refPrice = price > 0 ? price : marketPrice;
+                if (refPrice > 0) {
+                    const slDist = this.settings.stopLossPoints * pointSize;
+                    payload.sl = side === 'BUY' ? Math.round((refPrice - slDist) * 100000) / 100000 : Math.round((refPrice + slDist) * 100000) / 100000;
+                }
+            }
+            if (this.settings.takeProfitPoints > 0 && pointSize) {
+                const refPrice = price > 0 ? price : marketPrice;
+                if (refPrice > 0) {
+                    const tpDist = this.settings.takeProfitPoints * pointSize;
+                    payload.tp = side === 'BUY' ? Math.round((refPrice + tpDist) * 100000) / 100000 : Math.round((refPrice - tpDist) * 100000) / 100000;
+                }
+            }
 
             const resp = await axios.post(`${this.BRIDGE_URL}/order`, payload, { timeout: 4000 });
             if (resp.data?.status === 'success' || resp.data?.ticket) {
+                SymbolLockService.acquire(symbol, 'Speed Scalper', resp.data?.ticket || resp.data?.order_id || 0, side);
                 const actionDesc = price > 0 ? `LIMIT ${side}` : side;
                 this.addLog(`⚡ Ordem ${actionDesc} em ${symbol} (${comment})`, 'TRADE');
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeOpened('Speed Scalper', symbol, side, lot, resp.data.price || price, 0, 0);
+                } catch (e) {}
             }
         } catch (err: any) {
-            this.addLog(`Falha ao abrir ordem ${side} em ${symbol}`, 'WARN');
+            const msg = err?.response?.data?.message || err?.message || String(err);
+            this.addLog(`Falha ao abrir ordem ${side} em ${symbol}: ${msg}`, 'WARN');
         }
     }
 
@@ -400,14 +498,23 @@ export class ForexScalperEngine {
 
     private static calcRSI(closes: number[], period: number): number {
         if (closes.length < period + 1) return 50;
-        let gains = 0, losses = 0;
+        let avgGain = 0, avgLoss = 0;
+        // Wilder smoothed RSI: primeira média simples, depois suavização
         for (let i = closes.length - period; i < closes.length; i++) {
             const diff = closes[i] - closes[i - 1];
-            if (diff > 0) gains += diff;
-            else losses += Math.abs(diff);
+            if (diff > 0) avgGain += diff;
+            else avgLoss += Math.abs(diff);
         }
-        if (losses === 0) return 100;
-        const rs = (gains / period) / (losses / period);
+        avgGain /= period;
+        avgLoss /= period;
+        // Suavização Wilder: aplicar nos períodos anteriores (se houver dados)
+        for (let i = closes.length - period - 1; i >= 1; i--) {
+            const diff = closes[i] - closes[i - 1];
+            if (diff > 0) { avgGain = (avgGain * (period - 1) + diff) / period; avgLoss = (avgLoss * (period - 1) + 0) / period; }
+            else { avgLoss = (avgLoss * (period - 1) + Math.abs(diff)) / period; avgGain = (avgGain * (period - 1) + 0) / period; }
+        }
+        if (avgLoss === 0) return 100;
+        const rs = avgGain / avgLoss;
         return 100 - (100 / (1 + rs));
     }
 }

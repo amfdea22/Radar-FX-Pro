@@ -2,6 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { AlertEngine } from './AlertEngine';
+import { SymbolLockService } from './SymbolLockService';
 
 interface Candle {
     time: number; open: number; high: number; low: number; close: number; tick_volume: number;
@@ -84,6 +85,7 @@ export class CryptoIAEngine {
     private static _bridgeOk = false;
     private static _loopCount = 0;
     private static _consecutiveBridgeErrors = 0;
+    private static previousTicketSet = new Set<number>();
 
     static async init() {
         if (this.isRunning) return;
@@ -477,19 +479,23 @@ export class CryptoIAEngine {
         try {
             const resp = await axios.post(`${this.BRIDGE_URL}/order`, {
                 symbol: brokerSym,
-                type: direction,
-                volume: this.settings.lotSize,
-                price: state.price,
+                action: state.entrySignal,
+                lot: this.settings.lotSize,
                 sl: slPrice,
                 tp: tpPrice,
                 magic: this.MAGIC,
                 comment: `IA ${state.entrySignal} ${state.wyckoff.phase}`.substring(0, 31),
             });
             if (resp.data?.ticket) {
+                SymbolLockService.acquire(brokerSym, 'Crypto IA', resp.data.ticket, state.entrySignal);
                 state.lastSignalTime = Date.now();
                 const alertMsg = `🏦 CryptoIA: ${state.entrySignal} ${internalSym} | Score:${state.entryScore} | Wyckoff:${state.wyckoff.phase} | R:R 2.5:1`;
                 console.log(alertMsg);
                 AlertEngine.addAlert('GUARDIAN', 'INFO', `CryptoIA ${internalSym}`, alertMsg);
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeOpened('Crypto IA', internalSym, state.entrySignal, this.settings.lotSize, state.price, slPrice, tpPrice);
+                } catch (e) { /* notif fail */ }
             }
         } catch (e) {
             console.error(`🏦 CryptoIA: Order failed ${brokerSym}`, e);
@@ -502,7 +508,29 @@ export class CryptoIAEngine {
     private static async syncPositions() {
         try {
             const resp = await axios.get(`${this.BRIDGE_URL}/positions?magic=${this.MAGIC}`, { timeout: 5000 });
-            this.positions = resp.data || [];
+            const newPositions = resp.data || [];
+
+            // Detect closed positions for notification
+            const newTicketSet = new Set<number>();
+            for (const p of newPositions) {
+                if (p.ticket) newTicketSet.add(p.ticket);
+            }
+            for (const prevTicket of this.previousTicketSet) {
+                if (!newTicketSet.has(prevTicket) && this.previousTicketSet.size > 0) {
+                    try {
+                        const histRes = await axios.get(`${this.BRIDGE_URL}/history`, { timeout: 5000 });
+                        const hist = histRes.data || [];
+                        const closed = hist.find((t: any) => t.ticket === prevTicket || t.order === prevTicket);
+                        const profit = closed?.profit || closed?.pl || 0;
+                        const dir = closed?.type === 0 ? 'BUY' : 'SELL';
+                        const sym = closed?.symbol || 'Unknown';
+                        const { TradeNotificationBot } = require('./TradeNotificationBot');
+                        TradeNotificationBot.notifyTradeClosed('Crypto IA', sym, dir, profit, profit >= 0 ? 'WIN' : 'LOSS', 'Auto', closed?.volume || this.settings.lotSize);
+                    } catch (e) { /* notif fail */ }
+                }
+            }
+            this.previousTicketSet = newTicketSet;
+            this.positions = newPositions;
         } catch { this.positions = []; }
     }
 

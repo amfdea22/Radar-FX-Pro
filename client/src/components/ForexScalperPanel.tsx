@@ -12,6 +12,8 @@ interface ForexScalperSettings {
     enabled: boolean;
     symbols: string[];
     lotSize: number;
+    useRiskPercentage: boolean;
+    riskPercentage: number;
     gridDistancePoints: number;
     maxGridLevels: number;
     maxDailyLossUSD: number;
@@ -25,9 +27,11 @@ interface ForexScalperSettings {
     trailingStopPoints: number;
     basketSize: number;
     basketOffsetPoints: number;
+    basketTPMultiplier: number;
     globalTrailingEnabled: boolean;
     gridMultiplier: number;
     gridDynamicDistance: boolean;
+    trendFilterM5: boolean;
 }
 
 interface ForexState {
@@ -379,10 +383,26 @@ export function ForexScalperPanel() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Lote Agressivo</label>
-                        <input type="number" min="0.01" step="0.01" value={settings.lotSize}
-                            onChange={(e) => updateSetting('lotSize', parseFloat(e.target.value))}
-                            className="w-full bg-slate-800 text-white font-mono rounded-lg px-3 py-2 border border-transparent focus:border-cyan-500 focus:ring-0" />
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Lote</label>
+                            <div onClick={() => updateSetting('useRiskPercentage', !settings.useRiskPercentage)}
+                                className={`w-10 h-5 rounded-full relative transition-all cursor-pointer ${settings.useRiskPercentage ? 'bg-cyan-500' : 'bg-slate-700'}`}>
+                                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${settings.useRiskPercentage ? 'right-1' : 'left-1'}`} />
+                            </div>
+                        </div>
+                        {settings.useRiskPercentage ? (
+                            <div className="flex items-center gap-2">
+                                <input type="number" min="0.1" max="10" step="0.1" value={settings.riskPercentage}
+                                    onChange={(e) => updateSetting('riskPercentage', parseFloat(e.target.value))}
+                                    className="w-full bg-slate-800 text-emerald-400 font-mono font-bold rounded-lg px-3 py-2 border border-transparent focus:border-emerald-500 focus:ring-0" />
+                                <span className="text-[9px] font-black text-slate-500">%</span>
+                            </div>
+                        ) : (
+                            <input type="number" min="0.01" step="0.01" value={settings.lotSize}
+                                onChange={(e) => updateSetting('lotSize', parseFloat(e.target.value))}
+                                className="w-full bg-slate-800 text-white font-mono rounded-lg px-3 py-2 border border-transparent focus:border-cyan-500 focus:ring-0" />
+                        )}
+                        <p className="text-[7px] text-slate-500 mt-1 uppercase tracking-widest">{settings.useRiskPercentage ? `Lote por ${settings.riskPercentage}% da banca` : 'Lote fixo'}</p>
                     </div>
 
                     <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
@@ -434,12 +454,12 @@ export function ForexScalperPanel() {
 
                     <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
                         <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 block flex items-center gap-1">
-                            <Layers size={14} /> Cesta Proteção
+                            <Layers size={14} /> Basket TP Multiplier
                         </label>
-                        <input type="number" min="1" max="10" value={settings.basketSize}
-                            onChange={(e) => updateSetting('basketSize', parseInt(e.target.value))}
-                            className="w-full bg-slate-800 text-amber-400 font-mono font-bold rounded-lg px-3 py-2 border border-transparent focus:border-amber-500 focus:ring-0" />
-                        <p className="text-[7px] text-slate-500 mt-1 uppercase tracking-widest">Número de ordens simultâneas</p>
+                        <input type="number" step="0.5" min="0.5" max="5" value={settings.basketTPMultiplier}
+                            onChange={(e) => updateSetting('basketTPMultiplier', parseFloat(e.target.value))}
+                            className="w-full bg-slate-800 text-emerald-400 font-mono font-bold rounded-lg px-3 py-2 border border-transparent focus:border-emerald-500 focus:ring-0" />
+                        <p className="text-[7px] text-slate-500 mt-1 uppercase tracking-widest">Fecha cesta ao atingir {settings.basketTPMultiplier}x o TP base</p>
                     </div>
 
                     <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
@@ -486,6 +506,18 @@ export function ForexScalperPanel() {
                             {settings.gridDynamicDistance ? 'INTELIGENTE' : 'FIXA'}
                         </button>
                         <p className="text-[7px] text-slate-500 mt-1 uppercase tracking-widest">Aumenta distância em drawdowns</p>
+                    </div>
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex flex-col">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 block flex items-center gap-1">
+                            <Activity size={14} /> Filtro Tendência M5
+                        </label>
+                        <button onClick={() => updateSetting('trendFilterM5', !settings.trendFilterM5)}
+                            className={`w-full py-2 rounded-xl border font-black text-[10px] transition-all ${settings.trendFilterM5
+                                ? 'bg-cyan-500/20 border-cyan-500/30 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
+                                : 'bg-slate-800/50 border-white/5 text-slate-500'}`}>
+                            {settings.trendFilterM5 ? 'ATIVADO' : 'DESATIVADO'}
+                        </button>
+                        <p className="text-[7px] text-slate-500 mt-1 uppercase tracking-widest">Só entra na direção da tendência M5</p>
                     </div>
                 </div>
 

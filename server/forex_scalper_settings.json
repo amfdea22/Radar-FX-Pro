@@ -5,6 +5,8 @@
     "GBPUSD"
   ],
   "lotSize": 0.01,
+  "useRiskPercentage": false,
+  "riskPercentage": 1,
   "gridDistancePoints": 25,
   "maxGridLevels": 10,
   "maxDailyLossUSD": 10,
@@ -18,8 +20,10 @@
   "trailingStopPoints": 15,
   "basketSize": 3,
   "basketOffsetPoints": 20,
+  "basketTPMultiplier": 3,
   "globalTrailingEnabled": true,
   "gridMultiplier": 1.5,
   "gridDynamicDistance": true,
+  "trendFilterM5": false,
   "magic": 777111
 }

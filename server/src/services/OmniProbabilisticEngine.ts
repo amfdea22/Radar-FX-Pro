@@ -2,6 +2,7 @@ import axios from 'axios';
 import { AlertEngine } from './AlertEngine';
 import { MarketService } from './MarketService';
 import { DisciplineEngine } from './DisciplineEngine';
+import { SymbolLockService } from './SymbolLockService';
 import fs from 'fs';
 import path from 'path';
 
@@ -92,6 +93,8 @@ export class OmniProbabilisticEngine {
 
     private static async processCycle() {
         if (!this.settings.enabled) return;
+
+        await this.manageTrailingStops();
 
         // Verificar Disciplina Global
         const discipline = await DisciplineEngine.getDailyStatus();
@@ -192,6 +195,10 @@ export class OmniProbabilisticEngine {
                         currentLevel = activeGale.level + 1;
                         currentLot = Number((activeGale.level === 0 ? this.settings.defaultLot * this.settings.martingaleMultiplier : currentLot * this.settings.martingaleMultiplier).toFixed(2));
                         this.addLog(`[Martingale] Perda detectada em ${symbol}. Aplicando Nível ${currentLevel} (Lote: ${currentLot})`, 'WARN');
+                        try {
+                            const { TradeNotificationBot } = require('./TradeNotificationBot');
+                            TradeNotificationBot.notifyTradeClosed('Omni', symbol, trade.type === 0 ? 'BUY' : 'SELL', trade.profit || 0, 'LOSS', 'Stop Loss / Martingale', trade.volume || currentLot);
+                        } catch (e) { /* notif fail */ }
                     }
                 } catch (e) {
                     this.addLog(`Erro ao verificar histórico de Gale para ${symbol}`, 'ERROR');
@@ -203,6 +210,10 @@ export class OmniProbabilisticEngine {
             
             if (ticket) {
                 this.lastTickets.set(symbol, { ticket, level: currentLevel, action: signal });
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeOpened('Omni', symbol, signal, currentLot, 0, 0, 0);
+                } catch (e) { /* notif fail */ }
             }
             
             this.processedQuadrants.add(quadrantId);
@@ -267,19 +278,67 @@ export class OmniProbabilisticEngine {
     private static async executeTrade(symbol: string, action: 'BUY' | 'SELL', lot: number, level: number = 0): Promise<number | null> {
         try {
             return await MarketService.retryWhenOpen(symbol, async () => {
+                const tickRes = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [symbol] }, { timeout: 5000 });
+                const tick = tickRes.data?.[symbol];
+                const price = action === 'BUY' ? tick?.ask || 0 : tick?.bid || 0;
+                const isForex = ['EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'NZD', 'CAD'].some(p => symbol.startsWith(p));
+                const slPct = isForex ? 0.005 : 0.01;
+                const tpPct = slPct * 2;
+                const sl = action === 'BUY' ? price * (1 - slPct) : price * (1 + slPct);
+                const tp = action === 'BUY' ? price * (1 + tpPct) : price * (1 - tpPct);
+
                 const response = await axios.post(`${this.BRIDGE_URL}/order`, {
                     symbol,
                     action,
                     lot,
+                    sl: Math.round(sl * 100) / 100,
+                    tp: Math.round(tp * 100) / 100,
                     magic: this.settings.magic,
                     comment: `Omni ${this.settings.strategy} G${level}`.substring(0, 31)
                 });
-                return response.data?.ticket || response.data?.deal || null;
+                const ticket = response.data?.ticket || response.data?.deal || null;
+                if (ticket) SymbolLockService.acquire(symbol, 'Omni', ticket, action);
+                return ticket;
             });
         } catch (e: any) {
             this.addLog(`Falha na execução em ${symbol}: ${e.message}`, 'ERROR');
             return null;
         }
+    }
+
+    private static async manageTrailingStops() {
+        try {
+            const resp = await axios.get(`${this.BRIDGE_URL}/positions`, { timeout: 5000 });
+            const positions: any[] = resp.data || [];
+            for (const pos of positions) {
+                if (!pos.ticket || !pos.price_open || !pos.symbol) continue;
+                const isBuy = pos.type === 0;
+                const entry = pos.price_open;
+                const current = pos.price_current;
+                const profitPct = isBuy ? (current - entry) / entry : (entry - current) / entry;
+
+                // Breakeven at 2% profit
+                if (profitPct >= 0.02) {
+                    const bePrice = isBuy ? entry + 0.0001 : entry - 0.0001;
+                    if ((isBuy && (pos.sl || 0) < entry) || (!isBuy && (pos.sl || 0) > entry)) {
+                        await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                            ticket: pos.ticket, sl: bePrice,
+                        }, { timeout: 3000 });
+                        this.addLog(`🔒 Omni: Breakeven #${pos.ticket}`, 'INFO');
+                    }
+                }
+                // Trailing at 5%+ profit
+                if (profitPct >= 0.05) {
+                    const trailSl = isBuy ? current * 0.98 : current * 1.02;
+                    if ((isBuy && trailSl > (pos.sl || 0)) || (!isBuy && trailSl < (pos.sl || 999))) {
+                        await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                            ticket: pos.ticket, sl: trailSl,
+                        }, { timeout: 3000 });
+                        this.addLog(`📐 Omni: Trailing #${pos.ticket} -> ${trailSl.toFixed(5)}`, 'INFO');
+                    }
+                }
+            }
+        } catch (e) { /* trailing fail */ }
     }
 
     static async getRecentTrades() {

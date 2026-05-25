@@ -1,5 +1,5 @@
 {
-  "enabled": false,
+  "enabled": true,
   "minConfidence": 85,
   "maxTradesPerDay": 10,
   "defaultLot": 0.01,
@@ -8,7 +8,7 @@
   "autoTrailing": true,
   "tradesPer15Min": 3,
   "tradeLimitInterval": "15m",
-  "preferredTimeframe": "ALL",
+  "preferredTimeframe": "M15",
   "useInstitutionalAnalysis": true,
   "useMLSignals": true,
   "maxRiskPerTrade": 1,

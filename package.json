@@ -1,0 +1,24 @@
+{
+  "name": "radar-fx",
+  "version": "1.0.0",
+  "description": "Plataforma de trading automatizado com robôs institucionais, análise Wyckoff/VWAP/Order Blocks, e integração Telegram.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amfdea22/Radar-FX-Pro.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/amfdea22/Radar-FX-Pro/issues"
+  },
+  "homepage": "https://github.com/amfdea22/Radar-FX-Pro#readme",
+  "dependencies": {
+    "markdown-pdf": "^11.0.0"
+  }
+}

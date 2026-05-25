@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
+import { SymbolLockService } from './SymbolLockService';
 
 interface MicroSettings {
     enabled: boolean;
@@ -22,6 +23,19 @@ interface MicroSettings {
 }
 
 const SETTINGS_PATH = path.join(process.cwd(), 'micro_scalper_settings.json');
+
+const SYMBOL_PIP_VALUE: Record<string, number> = {
+    'BTCUSD': 1,      // 1 pip = $1 (digits=1)
+    'ETHUSD': 1,      // 1 pip = $1
+    'SOLUSD': 0.01,   // 1 pip = $0.01
+    'XRPUSD': 0.001,  // 1 pip = $0.001
+    'EURUSD': 0.0001, // 1 pip = 0.0001 (forex standard)
+    'XAUUSD': 0.1,    // 1 pip = $0.10 (digits=2, mini-pip standard)
+};
+
+function getPipValue(symbol: string): number {
+    return SYMBOL_PIP_VALUE[symbol] ?? 0.0001;
+}
 
 export class MicroScalperEngine {
     private static settings: MicroSettings = {
@@ -128,9 +142,21 @@ export class MicroScalperEngine {
                     this.state.isProcessing = false;
                     return;
                 }
+                // Quick TP: fecha antecipadamente em 50% do alvo quando ativado
+                if (this.settings.quickTP && totalProfit >= this.settings.targetProfitUSD * 0.5) {
+                    this.addLog(`⚡ Quick TP: +$${totalProfit.toFixed(2)}. Fechando tudo.`, 'TRADE');
+                    await this.closeAllPositions();
+                    this.state.isProcessing = false;
+                    return;
+                }
             }
 
-            // 3. Trading Logic
+            // 3. Position Management (trailing stop / breakeven)
+            if (this.state.activeOrders.length > 0) {
+                await this.managePositions();
+            }
+
+            // 4. Trading Logic
             if (this.state.activeOrders.length === 0) {
                 await this.checkFirstEntry();
             } else if (this.state.activeOrders.length < this.settings.maxLevels) {
@@ -216,8 +242,8 @@ export class MicroScalperEngine {
         const sma9 = closes.reduce((a, b) => a + b, 0) / closes.length;
         const lastClose = closes[closes.length - 1];
 
-        if (lastClose > sma9 * 1.0005) return 'BULLISH';
-        if (lastClose < sma9 * 0.9995) return 'BEARISH';
+        if (lastClose > sma9 * 1.002) return 'BULLISH';
+        if (lastClose < sma9 * 0.998) return 'BEARISH';
         return 'NEUTRAL';
     }
 
@@ -271,12 +297,12 @@ export class MicroScalperEngine {
         if (sniperMode) {
             if (!sniperTrigger) return; // Sem gatilho = sem entrada
 
-            // Validar confluência RSI + Sniper Trigger
-            if (sniperTrigger === 'BUY' && rsi < rsiOverbought) {
+            // Validar confluência RSI + Sniper Trigger (endurecido para maior assertividade)
+            if (sniperTrigger === 'BUY' && rsi < 40) {
                 if (!trendFilterM5 || trendM5 !== 'BEARISH') {
                     side = 'BUY';
                 }
-            } else if (sniperTrigger === 'SELL' && rsi > rsiOversold) {
+            } else if (sniperTrigger === 'SELL' && rsi > 60) {
                 if (!trendFilterM5 || trendM5 !== 'BULLISH') {
                     side = 'SELL';
                 }
@@ -314,19 +340,31 @@ export class MicroScalperEngine {
             const currentPrice = lastOrder.type === 0 ? tickData.ask : tickData.bid;
             const openPrice = lastOrder.price_open || lastOrder.open_price;
 
-            const diffPips = Math.abs(currentPrice - openPrice);
-            const gridDist = this.settings.gridStepPips;
+            const diffRaw = Math.abs(currentPrice - openPrice);
+            const pipValue = getPipValue(this.settings.symbol);
+            const diffPips = diffRaw / pipValue;
+            const gridDistPips = this.settings.gridStepPips;
 
-            // Se o preço se moveu contra a ordem além do grid step
+            // Se o preço se moveu contra a ordem além do grid step (em pips reais)
             const isAgainst = lastOrder.type === 0
                 ? currentPrice < openPrice
                 : currentPrice > openPrice;
 
-            if (isAgainst && diffPips >= gridDist) {
-                const nextLot = Number((lastOrder.volume * this.settings.lotMultiplier).toFixed(2));
+            if (isAgainst && diffPips >= gridDistPips) {
+                // Filtro de RSI para grid: não adicionar nível se momentum estiver muito forte contra
+                const { rsi } = this.state;
                 const side: 'BUY' | 'SELL' = lastOrder.type === 0 ? 'BUY' : 'SELL';
+                if (side === 'BUY' && rsi < 20) {
+                    this.addLog(`⏸️ Grid nível ${this.state.activeOrders.length + 1} bloqueado. RSI muito baixo (${rsi.toFixed(1)})`, 'INFO');
+                    return;
+                }
+                if (side === 'SELL' && rsi > 80) {
+                    this.addLog(`⏸️ Grid nível ${this.state.activeOrders.length + 1} bloqueado. RSI muito alto (${rsi.toFixed(1)})`, 'INFO');
+                    return;
+                }
 
-                this.addLog(`⛓️ Grid nível ${this.state.activeOrders.length + 1}. Lote: ${nextLot}`, 'INFO');
+                const nextLot = Number((lastOrder.volume * this.settings.lotMultiplier).toFixed(2));
+                this.addLog(`⛓️ Grid nível ${this.state.activeOrders.length + 1} (${diffPips.toFixed(0)}/${gridDistPips} pips). Lote: ${nextLot}`, 'INFO');
                 await this.placeOrder(side, nextLot);
             }
         } catch (err) {
@@ -334,19 +372,79 @@ export class MicroScalperEngine {
         }
     }
 
+    // ========== GERENCIAMENTO DE POSIÇÃO (trailing + breakeven) ==========
+    private static async managePositions() {
+        try {
+            const tickResp = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.settings.symbol] }, { timeout: 5000 });
+            const tick = tickResp.data?.[this.settings.symbol];
+            if (!tick) return;
+            for (const order of this.state.activeOrders) {
+                const entryPrice = order.price_open || 0;
+                if (!entryPrice || !order.ticket) continue;
+                const isBuy = order.type === 0;
+                const currentPrice = isBuy ? tick.bid : tick.ask;
+                const profitPct = isBuy ? (currentPrice - entryPrice) / entryPrice : (entryPrice - currentPrice) / entryPrice;
+                const sl = order.sl || 0;
+                const tpTarget = this.settings.targetProfitUSD * 0.01; // ~1% do alvo como referência
+
+                // Breakeven: se atingiu 50% do TP, move SL para entrada
+                if (profitPct > 0 && profitPct >= tpTarget * 0.5) {
+                    const bePrice = isBuy ? entryPrice + 0.01 : entryPrice - 0.01;
+                    if ((isBuy && sl < entryPrice) || (!isBuy && sl > entryPrice)) {
+                        await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                            ticket: order.ticket,
+                            sl: Math.round(bePrice * 100) / 100,
+                        }, { timeout: 3000 });
+                        this.addLog(`🔒 Breakeven ativado ticket #${order.ticket} (${(profitPct * 100).toFixed(2)}%)`, 'TRADE');
+                    }
+                }
+                // Trailing: após 100% do TP, trail a 25% do movimento
+                if (profitPct > 0 && profitPct >= tpTarget) {
+                    const trailDist = profitPct * 0.25;
+                    const newSl = isBuy ? currentPrice * (1 - trailDist) : currentPrice * (1 + trailDist);
+                    if ((isBuy && newSl > sl) || (!isBuy && (sl === 0 || newSl < sl))) {
+                        await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                            ticket: order.ticket,
+                            sl: Math.round(newSl * 100) / 100,
+                        }, { timeout: 3000 });
+                        this.addLog(`📐 Trailing atualizado ticket #${order.ticket} — SL: ${Math.round(newSl * 100) / 100}`, 'TRADE');
+                    }
+                }
+            }
+        } catch (e) { /* manage fail */ }
+    }
+
     // ========== ABRIR ORDEM (endpoint /order) ==========
     private static async placeOrder(side: 'BUY' | 'SELL', lot: number) {
         try {
+            const tickResp = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.settings.symbol] }, { timeout: 5000 });
+            const tick = tickResp.data?.[this.settings.symbol];
+            const price = side === 'BUY' ? tick?.ask || 0 : tick?.bid || 0;
+
+            const symbolUpper = this.settings.symbol.toUpperCase();
+            const isCrypto = symbolUpper.includes('BTC') || symbolUpper.includes('ETH') || symbolUpper.includes('SOL') || symbolUpper.includes('XRP');
+            const slPct = isCrypto ? 0.03 : 0.005;
+            const sl = side === 'BUY' ? price * (1 - slPct) : price * (1 + slPct);
+
             const resp = await axios.post(`${this.BRIDGE_URL}/order`, {
                 action: side,
                 symbol: this.settings.symbol,
                 lot: lot,
+                sl: Math.round(sl * 100) / 100,
                 magic: this.settings.magic,
                 comment: 'Titan_Sniper'
             }, { timeout: 15000 });
 
             if (resp.data?.status === 'success') {
+                SymbolLockService.acquire(this.settings.symbol, 'Micro Sniper', resp.data.order_id || 0, side);
                 this.addLog(`✅ Ordem ${side} aberta. Ticket: #${resp.data.order_id}`, 'TRADE');
+                try {
+                    const tickResp = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.settings.symbol] });
+                    const tick = tickResp.data?.[this.settings.symbol];
+                    const price = side === 'BUY' ? tick?.ask || 0 : tick?.bid || 0;
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeOpened('Micro Sniper', this.settings.symbol, side, lot, price, 0, 0);
+                } catch (e) {}
             } else {
                 this.addLog(`❌ Falha ao abrir ordem: ${resp.data?.error || 'Unknown'}`, 'WARN');
             }

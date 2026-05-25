@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { MarketService } from './MarketService';
 import { BridgeClient } from './BridgeClient';
+import { SymbolLockService } from './SymbolLockService';
 
 export interface TradeRecord {
     id: string;
@@ -158,6 +159,11 @@ export class SupremeEngine {
                     };
                     this.tradeHistory.unshift(record);
                     newTradesCount++;
+                    try {
+                        const { TradeNotificationBot } = require('./TradeNotificationBot');
+                        const dir = t.type === 0 ? 'BUY' : 'SELL';
+                        TradeNotificationBot.notifyTradeClosed('Supreme', t.symbol, dir, realProfit, realProfit >= 0 ? 'WIN' : 'LOSS', 'Auto', t.volume);
+                    } catch (e) { /* notif fail */ }
                 }
             });
 
@@ -333,13 +339,32 @@ export class SupremeEngine {
             const MT5_BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
 
             await MarketService.retryWhenOpen(symbol, async () => {
-                await axios.post(`${MT5_BRIDGE_URL}/order`, {
+                const tickRes = await axios.post(`${MT5_BRIDGE_URL}/ticks`, { symbols: [symbol] }, { timeout: 5000 });
+                const tick = tickRes.data?.[symbol];
+                const action = type.includes('BUY') ? 'BUY' : 'SELL';
+                const price = action === 'BUY' ? tick?.ask || 0 : tick?.bid || 0;
+                const isForex = ['EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'NZD', 'CAD'].some(p => symbol.startsWith(p));
+                const slPct = isForex ? 0.005 : 0.01;
+                const tpPct = slPct * 2;
+                const sl = action === 'BUY' ? price * (1 - slPct) : price * (1 + slPct);
+                const tp = action === 'BUY' ? price * (1 + tpPct) : price * (1 - tpPct);
+
+                const resp = await axios.post(`${MT5_BRIDGE_URL}/order`, {
                     symbol: symbol,
-                    action: type.includes('BUY') ? 'BUY' : 'SELL',
+                    action,
                     lot: lot,
+                    sl: Math.round(sl * 100) / 100,
+                    tp: Math.round(tp * 100) / 100,
                     magic: this.ROBOT_MAGIC,
                     comment: `ALPHA SUPREME ${reason.split(' ')[0]}`.substring(0, 31)
                 });
+                if (resp.data?.status === 'success' || resp.data?.ticket) {
+                    SymbolLockService.acquire(symbol, 'Supreme', resp.data?.ticket || resp.data?.order_id || 0, action);
+                    try {
+                        const { TradeNotificationBot } = require('./TradeNotificationBot');
+                        TradeNotificationBot.notifyTradeOpened('Supreme', symbol, action, lot, price, sl, tp);
+                    } catch (e) { /* notif fail */ }
+                }
             });
         } catch (e) {
             console.error('❌ Supreme Trade execution failed', e);

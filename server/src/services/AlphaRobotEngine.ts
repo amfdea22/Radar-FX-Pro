@@ -8,6 +8,7 @@ import { MarketService } from './MarketService';
 import { CryptoRiskEngine } from './CryptoRiskEngine';
 import { BridgeClient } from './BridgeClient';
 import { MarketDataService } from './MarketDataService';
+import { SymbolLockService } from './SymbolLockService';
 import { PolygonBar } from './PolygonService';
 
 // ──────────────────────────────────────────────
@@ -130,7 +131,7 @@ export class AlphaRobotEngine {
     private static SETTINGS_PATH = path.resolve(process.cwd(), 'alpha_robot_settings.json');
 
     private static BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
-    private static ROBOT_MAGIC = 8888;
+    private static ROBOT_MAGIC = 88881;
     private static HISTORY_PATH = path.resolve(process.cwd(), 'alpha_robot_history.json');
 
     // Trade history
@@ -932,6 +933,12 @@ export class AlphaRobotEngine {
 
             if (orderResult && (orderResult.status === 'success' || orderResult.ticket)) {
                 const ticket = orderResult.ticket || orderResult.order;
+                SymbolLockService.acquire(analysis.symbol, 'Alpha Robot', ticket, analysis.direction);
+
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeOpened('Alpha Robot', analysis.symbol, analysis.direction, lot, orderResult.price || 0, analysis.sl, analysis.tp);
+                } catch (e) { /* notif fail */ }
 
                 // Apply SL/TP after a brief delay (needed for crypto CFDs)
                 setTimeout(async () => {
@@ -1004,11 +1011,17 @@ export class AlphaRobotEngine {
             });
 
             if (orderResult && (orderResult.status === 'success' || orderResult.ticket)) {
+                const ticket = orderResult.ticket || orderResult.order;
+                SymbolLockService.acquire(signal.symbol, 'Alpha Robot', ticket, signal.type);
                 this.processedSignals.add(signal.id);
                 this.tradesThisWindow++;
                 this.dailyTradeCount++;
                 AlertEngine.addAlert('GUARDIAN', 'INFO', `Robô Alpha: ${signal.symbol} ${signal.type}`,
                     `Executado via ${signal.setup}`);
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeOpened('Alpha Robot', signal.symbol, signal.type, this.settings.defaultLot, orderResult.price || 0, signal.sl, signal.tp);
+                } catch (e) { /* notif fail */ }
             }
         } catch (error) {
             console.error(`❌ Alpha Robot: Failed to execute trade for ${signal.symbol}`, error);
@@ -1126,6 +1139,11 @@ export class AlphaRobotEngine {
                 else this.totalLosses++;
                 this.totalProfitAllTime += record.profit;
                 newCount++;
+
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeClosed('Alpha Robot', t.symbol || 'Unknown', record.type, record.profit, record.result, record.closeReason, record.lot);
+                } catch (e) { /* notif fail */ }
             }
 
             if (this.tradeHistory.length > 200) {

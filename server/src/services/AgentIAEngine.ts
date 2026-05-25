@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { SymbolLockService } from './SymbolLockService';
 
 interface Candle {
   datetime: string;
@@ -218,10 +219,12 @@ class AgentIAEngineClass {
     const bridgeUrl = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
     try {
       const [tickRes, smcRes] = await Promise.all([
-        axios.get(`${bridgeUrl}/tick`, { params: { symbol: this.symbolMt5 }, timeout: 5000 }),
+        axios.post(`${bridgeUrl}/ticks`, { symbols: [this.symbolMt5] }, { timeout: 5000 }),
         axios.get(`${bridgeUrl}/smc_levels`, { params: { symbol: this.symbolMt5, direction: 'BUY' }, timeout: 8000 }),
       ]);
-      const spread = tickRes.data?.spread || 99;
+      const tickData = tickRes.data || {};
+      const tick = tickData[this.symbolMt5] || tickData;
+      const spread = tick?.spread || 99;
       const trend = smcRes.data?.market_trend || 'NEUTRAL';
       return { spread, obs: smcRes.data?.order_blocks || {}, smcTrend: trend };
     } catch {
@@ -441,6 +444,7 @@ class AgentIAEngineClass {
       }, { timeout: 10000 });
 
       if (resp.data?.status === 'success') {
+        SymbolLockService.acquire(this.symbolMt5, 'Agent IA', resp.data.order_id || 0, action);
         this.log('order', `✅ Ordem #${resp.data.order_id} — ${action} ${lot} XAUUSD`);
         this.pendingTickets.set(resp.data.order_id, {
           signalIndex: this.state.signals.length - 1,
@@ -448,6 +452,10 @@ class AgentIAEngineClass {
           sl, tp,
           direction: direcao,
         });
+        try {
+          const { TradeNotificationBot } = require('./TradeNotificationBot');
+          TradeNotificationBot.notifyTradeOpened('Agent IA', this.symbolMt5, action, lot, resp.data.price || this.state.lastPrice || 0, sl, tp);
+        } catch (e) { /* notif fail */ }
       } else {
         this.log('error', `❌ Falha ordem: ${resp.data?.error || 'desconhecida'}`);
       }
@@ -482,9 +490,14 @@ class AgentIAEngineClass {
     for (const [ticket, info] of this.pendingTickets) {
       try {
         const bridgeUrl = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
-        const posRes = await axios.get(`${bridgeUrl}/position`, { params: { ticket }, timeout: 5000 });
-        if (posRes.data?.closed) {
-          const profit = posRes.data.profit || 0;
+        const posRes = await axios.get(`${bridgeUrl}/positions`, { timeout: 5000 });
+        const positions = posRes.data || [];
+        const pos = positions.find((p: any) => p.ticket === Number(ticket));
+        if (!pos) {
+          const histRes = await axios.get(`${bridgeUrl}/history`, { timeout: 5000 });
+          const history = histRes.data || [];
+          const closed = history.find((t: any) => t.ticket === Number(ticket) || t.order === Number(ticket));
+          const profit = closed?.profit || closed?.pl || 0;
           await this.markSignalOutcome(info.signalIndex, profit >= 0 ? 'win' : 'loss', profit);
           this.pendingTickets.delete(ticket);
         }
@@ -508,6 +521,11 @@ class AgentIAEngineClass {
       } else {
         this.state.consecutiveLosses = 0;
       }
+      try {
+        const { TradeNotificationBot } = require('./TradeNotificationBot');
+        const sig = this.state.signals[index];
+        TradeNotificationBot.notifyTradeClosed('Agent IA', this.symbolMt5, sig.direction === 'COMPRA' ? 'BUY' : 'SELL', profit, outcome === 'win' ? 'WIN' : 'LOSS', outcome === 'win' ? 'Take Profit' : 'Stop Loss', this.state.config.lotBase);
+      } catch (e) { /* notif fail */ }
     }
   }
 

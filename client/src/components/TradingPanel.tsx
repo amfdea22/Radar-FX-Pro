@@ -122,9 +122,9 @@ export const TradingPanel: React.FC = () => {
             if (['NAS100', 'US30', 'US500', 'GER40', 'US100Cash', 'US30Cash', 'GER40Cash'].includes(inst.symbol)) {
                 defaultVols[inst.symbol] = 1.0;
             } else if (['BTCUSD', 'ETHUSD', 'SOLUSD', 'GOLD', 'XAGUSD'].includes(inst.symbol)) {
-                defaultVols[inst.symbol] = 0.01;
+                defaultVols[inst.symbol] = 0.02;
             } else {
-                defaultVols[inst.symbol] = 0.01;
+                defaultVols[inst.symbol] = 0.02;
             }
         });
         setVolumes(defaultVols);
@@ -197,7 +197,7 @@ export const TradingPanel: React.FC = () => {
         if (isExecutingRef.current) return;
 
         isExecutingRef.current = true;
-        const lot = volumes[symbol] || 0.01;
+        const lot = volumes[symbol] || 0.02;
         setExecutingId(`${symbol}-${action}`);
         setOrderResult(null);
 
@@ -417,7 +417,7 @@ export const TradingPanel: React.FC = () => {
                         const microTrendDir = getPriceDirection(inst.symbol, 'micro');
                         const macroTrendDir = getPriceDirection(inst.symbol, 'macro');
                         const bidTrend = getPriceDirection(inst.symbol, 'bid');
-                        const vol = volumes[inst.symbol] || 0.01;
+                        const vol = volumes[inst.symbol] || 0.02;
                         const changePercent = (tick as any)?.changePercent || 0;
 
                         return (

@@ -1,6 +1,6 @@
 {
   "nakamotoActive": false,
-  "intelligence7Active": false,
+  "intelligence7Active": true,
   "confluenceMode": true,
   "capitalAllocation": 50,
   "maxLoss": 100,

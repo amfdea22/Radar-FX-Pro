@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { MarketDataService } from './MarketDataService';
 import { AlertEngine } from './AlertEngine';
+import { SymbolLockService } from './SymbolLockService';
 
 interface BitcoinProSettings {
     enabled: boolean;
@@ -54,7 +55,7 @@ interface DailyAnalysis {
     ema50: number;
     ema200: number;
     ema50Slope: 'UP' | 'DOWN' | 'FLAT';
-    trend: 'BULLISH' | 'BEARISH' | 'FLAT';
+    trend: 'STRONG_BULLISH' | 'BULLISH' | 'BEARISH' | 'STRONG_BEARISH' | 'FLAT';
     rsi: number;
     distanceToEma50: number;
     pullbackToEma: boolean;
@@ -67,7 +68,7 @@ interface DailyAnalysis {
 
 export class BitcoinProEngine {
     private static BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
-    private static MAGIC = 9999;
+    private static MAGIC = 444111;
 
     private static settings: BitcoinProSettings = {
         enabled: false,
@@ -218,9 +219,19 @@ export class BitcoinProEngine {
                     if (analysis) {
                         this.lastAnalysis = analysis;
                         if (!this.state.position) {
-                            const marginSufficient = await this.checkMargin();
-                            if (marginSufficient) {
-                                await this.evaluateEntry(analysis);
+                            if (this.state.dailyLoss >= this.settings.maxDailyLoss) {
+                                if (this.state.dailyLoss === this.settings.maxDailyLoss) {
+                                    console.log(`₿ BitcoinPro: Limite de perda diária atingido ($${this.state.dailyLoss.toFixed(2)}). Bloqueado.`);
+                                }
+                            } else if (this.state.dailyProfit >= this.settings.maxDailyProfit) {
+                                if (this.state.dailyProfit === this.settings.maxDailyProfit) {
+                                    console.log(`₿ BitcoinPro: Meta diária atingida ($${this.state.dailyProfit.toFixed(2)}). Bloqueado.`);
+                                }
+                            } else {
+                                const marginSufficient = await this.checkMargin();
+                                if (marginSufficient) {
+                                    await this.evaluateEntry(analysis);
+                                }
                             }
                         } else {
                             await this.managePosition(analysis);
@@ -252,9 +263,11 @@ export class BitcoinProEngine {
 
             const price = bars[bars.length - 1].c;
 
-            const trend: 'BULLISH' | 'BEARISH' | 'FLAT' =
-                price > ema50 && ema50 > ema200 && ema50Slope === 'UP' ? 'BULLISH' :
-                price < ema50 && ema50 < ema200 ? 'BEARISH' : 'FLAT';
+            const trend: 'STRONG_BULLISH' | 'BULLISH' | 'BEARISH' | 'STRONG_BEARISH' | 'FLAT' =
+                price > ema50 && ema50 > ema200 ? 'STRONG_BULLISH' :
+                price > ema50 ? 'BULLISH' :
+                price < ema50 && ema50 < ema200 ? 'STRONG_BEARISH' :
+                price < ema50 ? 'BEARISH' : 'FLAT';
 
             const rsi = this.calcRSI(closePrices, 14);
             const rsiPrev = this.calcRSI(closePrices.slice(0, -1), 14);
@@ -275,8 +288,10 @@ export class BitcoinProEngine {
             const rsiBearSignal = rsi > 40 && rsi < 60 && rsi < rsiPrev;
 
             let bullScore = 0, bearScore = 0;
-            if (trend === 'BULLISH') bullScore += 30;
-            if (trend === 'BEARISH') bearScore += 30;
+            if (trend === 'STRONG_BULLISH') bullScore += 30;
+            else if (trend === 'BULLISH') bullScore += 15;
+            if (trend === 'STRONG_BEARISH') bearScore += 30;
+            else if (trend === 'BEARISH') bearScore += 15;
             if (ema50Slope === 'UP') bullScore += 15;
             if (ema50Slope === 'DOWN') bearScore += 15;
             if (pullbackToEma) { bullScore += 25; bearScore += 25; }
@@ -321,7 +336,7 @@ export class BitcoinProEngine {
     }
 
     private static async evaluateEntry(analysis: DailyAnalysis) {
-        if (analysis.entryScore < 60) return;
+        if (analysis.entryScore < 50) return;
 
         const currentPrice = await this.getCurrentPrice();
         if (!currentPrice) { console.log('₿ BitcoinPro: No current price'); return; }
@@ -369,6 +384,7 @@ export class BitcoinProEngine {
 
             const ticket = resp.data?.order_id || resp.data?.ticket;
             if (ticket) {
+                SymbolLockService.acquire(this.settings.symbol, 'Bitcoin Pro', ticket, action);
                 this.state.position = {
                     ticket,
                     type: analysis.direction,
@@ -387,7 +403,7 @@ export class BitcoinProEngine {
                     result: 'WIN',
                     profit: 0,
                     conditions: {
-                        trendBullish: analysis.trend === 'BULLISH',
+                        trendBullish: analysis.trend === 'BULLISH' || analysis.trend === 'STRONG_BULLISH',
                         ema50SlopeUp: analysis.ema50Slope === 'UP',
                         pullbackToEma: analysis.pullbackToEma,
                         nearPullback: !analysis.pullbackToEma && analysis.distanceToEma50 > -5.0 && analysis.distanceToEma50 < 5.0,
@@ -398,6 +414,11 @@ export class BitcoinProEngine {
                 this.trades.push(tradeRec);
 
                 AlertEngine.addAlert('GUARDIAN', 'INFO', 'BitcoinPro', `${action} BTC: ${currentPrice} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)} | Score: ${analysis.entryScore}`);
+
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    TradeNotificationBot.notifyTradeOpened('Bitcoin Pro', this.settings.symbol, action, this.settings.lotSize, currentPrice, sl, tp);
+                } catch (e) { /* notif fail */ }
 
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 await this.syncPosition();
@@ -458,11 +479,37 @@ export class BitcoinProEngine {
 
                 if (profit > 0) this.state.dailyProfit += profit;
                 else this.state.dailyLoss += Math.abs(profit);
+
+                try {
+                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    const dir = this.state.position?.type || (profit > 0 ? 'BUY' : 'SELL');
+                    TradeNotificationBot.notifyTradeClosed('Bitcoin Pro', this.settings.symbol, dir, Math.round(profit * 100) / 100, result, hitTp ? 'Take Profit' : 'Stop Loss', this.settings.lotSize);
+                } catch (e) { /* notif fail */ }
+
                 this.state.position = null;
                 return;
             }
 
             const priceNow = pos.price_current || currentPrice;
+
+            // Breakeven at 50% of TP
+            const isBuy = this.state.position.type === 'BUY';
+            const entry = this.state.position.price;
+            const tp = this.state.position.tp;
+            const tpDistance = isBuy ? tp - entry : entry - tp;
+            const currentDistance = isBuy ? priceNow - entry : entry - priceNow;
+            if (tpDistance > 0 && currentDistance >= tpDistance * 0.5) {
+                const bePrice = isBuy ? entry + 0.01 : entry - 0.01;
+                if ((isBuy && this.state.position.sl < entry) || (!isBuy && this.state.position.sl > entry)) {
+                    await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                        ticket: this.state.position.ticket,
+                        sl: Math.round(bePrice * 100) / 100,
+                        magic: this.MAGIC
+                    });
+                    this.state.position.sl = bePrice;
+                    console.log(`₿ BitcoinPro: Breakeven ativado #${this.state.position.ticket}`);
+                }
+            }
 
             if (this.state.position.type === 'BUY') {
                 const trailActivation = this.state.position.price + (priceNow - this.state.position.price) * 0.4;

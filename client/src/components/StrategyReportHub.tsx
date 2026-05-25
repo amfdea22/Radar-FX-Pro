@@ -10,17 +10,19 @@ const API = '';
 
 const ALL_STRATEGIES = [
     { name: 'Alpha Nakamoto', category: 'Cripto', asset: 'BTCUSD', baseWin: 94.8, color: '#f7931a' },
-    { name: 'Quantum BTC Pro', category: 'Cripto', asset: 'BTCUSD', baseWin: 92.5, color: '#8b5cf6' },
     { name: 'Ethereum Core', category: 'Cripto', asset: 'ETHUSD', baseWin: 93.8, color: '#627eea' },
     { name: 'Crypto Whale Hunt', category: 'Cripto', asset: 'Multi', baseWin: 88.2, color: '#06b6d4' },
     { name: 'Altcoin Sniper', category: 'Cripto', asset: 'Altcoins', baseWin: 89.5, color: '#10b981' },
+    { name: 'Crypto IA Pro', category: 'Cripto', asset: 'Multi-IA', baseWin: 90.0, color: '#00ccff' },
+    { name: 'Alpha Robot', category: 'Forex', asset: 'Multi', baseWin: 85.0, color: '#d946ef' },
     { name: 'Intelligence 7', category: 'Forex', asset: 'Majors', baseWin: 94.2, color: '#3b82f6' },
     { name: 'Smart Momentum', category: 'Forex', asset: 'Majors', baseWin: 87.5, color: '#6366f1' },
-    { name: 'Alpha Shark', category: 'Metais/Cripto', asset: 'XAU/Cripto', baseWin: 91.8, color: '#ef4444' },
-    { name: 'Golden Rejection', category: 'Metais', asset: 'XAU/XAG', baseWin: 88.2, color: '#eab308' },
-    { name: 'Shark Hunt XAU', category: 'Metais', asset: 'XAUUSD', baseWin: 86.0, color: '#f59e0b' },
-    { name: 'Gold Scalper', category: 'Metais', asset: 'XAUUSD', baseWin: 92.5, color: '#fbbf24' },
     { name: 'Supreme Engine', category: 'Forex', asset: 'Multi', baseWin: 94.0, color: '#f87171' },
+    { name: 'Gold Scalper', category: 'Metais', asset: 'XAUUSD', baseWin: 92.5, color: '#fbbf24' },
+    { name: 'Shark Hunt XAU', category: 'Metais', asset: 'XAUUSD', baseWin: 86.0, color: '#f59e0b' },
+    { name: 'Golden Rejection', category: 'Metais', asset: 'XAU/XAG', baseWin: 88.2, color: '#eab308' },
+    { name: 'Alpha Shark', category: 'Metais/Cripto', asset: 'XAU/Cripto', baseWin: 91.8, color: '#ef4444' },
+    { name: 'Omni Probabilistic', category: 'Ciclos', asset: 'Multi-Asset', baseWin: 85.0, color: '#06b6d4' },
 ];
 
 interface StrategyStats {

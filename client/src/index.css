@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Alpha Station Premium Scrollbar */
+/* Neon Blue Scrollbar */
 .alpha-scrollbar::-webkit-scrollbar,
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
@@ -17,31 +17,34 @@
 
 .alpha-scrollbar::-webkit-scrollbar-thumb,
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #FFD700 0%, #00A3FF 100%);
+    background: linear-gradient(180deg, #3b82f6 0%, #22d3ee 100%);
     border-radius: 20px;
     border: 2px solid transparent;
     background-clip: content-box;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
 }
 
 .alpha-scrollbar::-webkit-scrollbar-thumb:hover,
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #00A3FF;
-    box-shadow: 0 0 15px rgba(0, 163, 255, 0.5);
+    background: #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
 }
 
-/* Sidebar Sleek Scrollbar */
+/* Sidebar Neon Scrollbar */
 .sidebar-scrollbar::-webkit-scrollbar {
-    width: 4px;
+    width: 5px;
 }
 .sidebar-scrollbar::-webkit-scrollbar-track {
     background: transparent;
 }
 .sidebar-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.2); 
+    background: linear-gradient(180deg, #1e3a5f, #1e40af);
     border-radius: 10px;
+    box-shadow: 0 0 6px rgba(30, 64, 175, 0.2), 0 0 12px rgba(30, 58, 95, 0.08);
 }
 .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(148, 163, 184, 0.4); 
+    background: #1e40af;
+    box-shadow: 0 0 10px rgba(30, 64, 175, 0.35), 0 0 20px rgba(30, 64, 175, 0.1);
 }
 
 /* Firefox Support */
@@ -49,10 +52,10 @@
 .alpha-scrollbar,
 .custom-scrollbar-terminal {
     scrollbar-width: thin;
-    scrollbar-color: #FFD700 rgba(15, 23, 42, 0.4);
+    scrollbar-color: #3b82f6 rgba(15, 23, 42, 0.4);
 }
 
-/* Terminal Green Scrollbar */
+/* Terminal Blue Scrollbar */
 .custom-scrollbar-terminal::-webkit-scrollbar {
     width: 4px;
     height: 4px;
@@ -61,11 +64,13 @@
     background: rgba(0, 0, 0, 0.4);
 }
 .custom-scrollbar-terminal::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 100, 0.3);
+    background: rgba(59, 130, 246, 0.3);
     border-radius: 10px;
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.2);
 }
 .custom-scrollbar-terminal::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 100, 0.6);
+    background: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
 }
 
 /* Glassmorphism utility */
@@ -148,4 +153,20 @@
 
 .active-pulse {
     animation: glow-pulse 2s infinite;
+}
+
+/* Radar menu animation keyframes */
+@keyframes pulse-ring {
+    0%, 100% { opacity: 0.2; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes blink-target {
+    0%, 100% { opacity: 0.1; transform: scale(0.6); box-shadow: 0 0 4px rgba(103,232,249,0.2); }
+    50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 16px rgba(103,232,249,1), 0 0 32px rgba(103,232,249,0.4); }
+}
+
+@keyframes spin-sweep {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }

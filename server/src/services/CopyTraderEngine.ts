@@ -4,6 +4,7 @@ import { AlertEngine } from './AlertEngine';
 import { DisciplineEngine } from './DisciplineEngine';
 import { SentimentService } from './SentimentService';
 import { MarketService } from './MarketService';
+import { SymbolLockService } from './SymbolLockService';
 
 export class CopyTraderEngine {
     private static isRunning = false;
@@ -129,6 +130,8 @@ export class CopyTraderEngine {
             });
 
             if (orderResult && (orderResult.status === 'success' || orderResult.order_id)) {
+                const ticket = orderResult.ticket || orderResult.order_id || 0;
+                SymbolLockService.acquire(signal.symbol, 'Copy Trader', ticket, signal.type);
                 this.processedSignals.add(signal.id);
                 AlertEngine.addAlert('GUARDIAN', 'INFO', `Cópia Executada: ${masterName}`, `${signal.symbol}: ${signal.type} replicado com sucesso.`);
             }

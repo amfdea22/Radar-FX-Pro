@@ -218,6 +218,24 @@ export const MicroScalperPanel: React.FC = () => {
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* SYMBOL SELECTOR */}
+                        <div className="md:col-span-2 bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Ativo</span>
+                                <span className="text-sm font-black text-indigo-400">{s.symbol}</span>
+                            </div>
+                            <div className="grid grid-cols-6 gap-2 mt-3">
+                                {['BTCUSD', 'ETHUSD', 'SOLUSD', 'XRPUSD', 'EURUSD', 'XAUUSD'].map(sym => (
+                                    <button key={sym}
+                                        onClick={() => updateSetting('symbol', sym)}
+                                        className={`py-2 rounded-xl border font-black text-[10px] transition-all ${s.symbol === sym
+                                            ? 'bg-indigo-500/20 border-indigo-500/30 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                                            : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
+                                        {sym}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                         <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
                             <div className="flex justify-between items-center mb-1">
                                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Alvo Cesta ($)</span>
@@ -233,7 +251,7 @@ export const MicroScalperPanel: React.FC = () => {
                         </div>
                         <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Grade Step (Pts)</span>
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Grade Step (Pips)</span>
                                 <span className="text-sm font-black text-indigo-400">{s.gridStepPips}</span>
                             </div>
                             <div className="flex items-center justify-between mt-3">

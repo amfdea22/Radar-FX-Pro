@@ -256,7 +256,7 @@ export class ReportEngine {
                 else if (comment.includes('SIGNAL') || comment.includes('INTELLIGENCE')) {
                     origin = 'Sinais';
                 }
-                else if (t.magic === 8888 || comment.includes('ROBOT') || comment.includes('ALPHA')) {
+                else if (t.magic === 8888 || t.magic === 88881 || comment.includes('ROBOT') || comment.includes('ALPHA')) {
                     origin = 'Alpha Robot';
                 }
 

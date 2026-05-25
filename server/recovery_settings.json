@@ -1,0 +1,26 @@
+{
+  "enabled": true,
+  "maxDrawdownPercent": 15,
+  "maxDailyRecoveryTrades": 5,
+  "baseLotSize": 0.01,
+  "maxLotMultiplier": 3,
+  "recoveryCooldownMinutes": 30,
+  "targetSymbols": [
+    "XAUUSD",
+    "BTCUSD",
+    "EURUSD",
+    "GBPUSD",
+    "ETHUSD"
+  ],
+  "minConfidenceScore": 40,
+  "useMartingale": true,
+  "martingaleMultiplier": 1.6,
+  "useAntiMartingale": true,
+  "antiMartingaleMultiplier": 1.3,
+  "useKellySizing": true,
+  "kellyFraction": 0.25,
+  "volatilityAdjustment": true,
+  "consecutiveLossThreshold": 2,
+  "preserveModeOnDrawdown": true,
+  "telegramAlerts": true
+}

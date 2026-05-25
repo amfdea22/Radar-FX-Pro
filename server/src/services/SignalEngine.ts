@@ -85,15 +85,17 @@ export class SignalEngine {
             { name: 'Alpha Nakamoto', category: 'Cripto', asset: 'BTCUSD', color: '#f7931a', symbols: ['BTCUSD'], priority: 1, magic: 8888 },
             { name: 'Ethereum Core', category: 'Cripto', asset: 'ETHUSD', color: '#627eea', symbols: ['ETHUSD'], priority: 1, magic: 8888 },
             { name: 'Crypto Whale Hunt', category: 'Cripto', asset: 'Multi', color: '#06b6d4', symbols: ['BNBUSD', 'DOGEUSD', 'SOLUSD', 'XRPUSD', 'ADAUSD', 'AVAXUSD', 'MATICUSD', 'DOTUSD', 'LINKUSD', 'TRXUSD', 'LTCUSD', 'SHIBUSD', 'BCHUSD', 'ETCUSD', 'XLMUSD', 'XMRUSD', 'ZECUSD', 'EOSUSD'], priority: 2, magic: 8888 },
-            { name: 'Altcoin Sniper', category: 'Cripto', asset: 'Altcoins', color: '#10b981', symbols: ['BNBUSD', 'DOGEUSD', 'SOLUSD', 'XRPUSD', 'ADAUSD', 'AVAXUSD', 'DOTUSD', 'LINKUSD', 'LTCUSD', 'SHIBUSD'], priority: 1, magic: 8888 },
+            { name: 'Altcoin Sniper', category: 'Cripto', asset: 'Altcoins', color: '#10b981', symbols: ['BNBUSD', 'DOGEUSD', 'SOLUSD', 'XRPUSD', 'ADAUSD', 'DOTUSD', 'LINKUSD', 'LTCUSD', 'SHIBUSD'], priority: 1, magic: 8888 },
             { name: 'Crypto IA Pro', category: 'Cripto', asset: 'Multi-IA', color: '#00ccff', symbols: ['BTCUSD', 'ETHUSD', 'SOLUSD', 'BNBUSD', 'ADABUSD', 'XRPBUSD'], priority: 0, magic: 8888 },
-            { name: 'Intelligence 7', category: 'Forex', asset: 'Majors', color: '#3b82f6', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'EURJPY'], priority: 1 },
-            { name: 'Smart Momentum', category: 'Forex', asset: 'Majors', color: '#6366f1', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'NZDUSD', 'USDCHF', 'USDCAD'], priority: 2 },
-            { name: 'Alpha Shark', category: 'Metais/Cripto', asset: 'XAU/Cripto', color: '#ef4444', symbols: ['XAUUSD', 'GOLD', 'BTCUSD', 'ETHUSD'], priority: 3 },
-            { name: 'Golden Rejection', category: 'Metais', asset: 'XAU/XAG', color: '#eab308', symbols: ['XAUUSD', 'GOLD', 'XAGUSD'], priority: 2 },
-            { name: 'Shark Hunt XAU', category: 'Metais', asset: 'XAUUSD', color: '#f59e0b', symbols: ['XAUUSD', 'GOLD'], priority: 1 },
+            { name: 'Alpha Robot', category: 'Forex', asset: 'Multi', color: '#d946ef', symbols: ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD'], priority: 1, magic: 88881 },
+            { name: 'Supreme Engine', category: 'Forex', asset: 'Multi', color: '#f87171', symbols: ['EURUSD', 'GBPUSD', 'US100Cash', 'US30Cash', 'US100', 'NAS100'], priority: 1, magic: 7777 },
+            { name: 'Intelligence 7', category: 'Forex', asset: 'Majors', color: '#3b82f6', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'EURJPY'], priority: 2 },
+            { name: 'Smart Momentum', category: 'Forex', asset: 'Majors', color: '#6366f1', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'NZDUSD', 'USDCHF', 'USDCAD'], priority: 3 },
             { name: 'Gold Scalper', category: 'Metais', asset: 'XAUUSD', color: '#fbbf24', symbols: ['XAUUSD', 'GOLD', 'XAU'], priority: 0, magic: 9999 },
-            { name: 'Supreme Engine', category: 'Forex/Indices', asset: 'Multi', color: '#f87171', symbols: ['EURUSD', 'GBPUSD', 'US100Cash', 'US30Cash', 'US100', 'NAS100'], priority: 0, magic: 7777 },
+            { name: 'Shark Hunt XAU', category: 'Metais', asset: 'XAUUSD', color: '#f59e0b', symbols: ['XAUUSD', 'GOLD'], priority: 1 },
+            { name: 'Golden Rejection', category: 'Metais', asset: 'XAU/XAG', color: '#eab308', symbols: ['XAUUSD', 'GOLD', 'XAGUSD'], priority: 2 },
+            { name: 'Alpha Shark', category: 'Metais/Cripto', asset: 'XAU/Cripto', color: '#ef4444', symbols: ['XAUUSD', 'GOLD', 'BTCUSD', 'ETHUSD'], priority: 3 },
+            { name: 'Shark Bot', category: 'Metais', asset: 'XAUUSD', color: '#06b6d4', symbols: ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD', 'XAGUSD', 'WTI', 'SP500'], priority: 0, magic: 9876 },
             { name: 'Omni Probabilistic', category: 'Ciclos', asset: 'Multi-Asset', color: '#06b6d4', symbols: ['EURUSD', 'GBPUSD', 'XAUUSD', 'BTCUSD'], priority: 0, magic: 999111 },
         ];
 
@@ -110,10 +112,10 @@ export class SignalEngine {
 
             if (profit === 0 && (trade.commission || 0) === 0) return; // ignora trades nulos
 
-            // 0. Tenta classificar pelo Magic Number (Alta Precisão)
+            // 0. Tenta classificar pelo campo comment (nome da estratégia explícito)
             let matched = false;
             for (const s of catalog) {
-                if (s.magic && trade.magic === s.magic) {
+                if (comment.includes(s.name.toLowerCase())) {
                     if (netProfit > 0) {
                         stats[s.name].wins++;
                         stats[s.name].grossProfit += netProfit;
@@ -129,9 +131,9 @@ export class SignalEngine {
 
             if (matched) return;
 
-            // 1. Tenta classificar pelo campo comment (trades do Robô Alpha / Supreme)
+            // 1. Tenta classificar pelo Magic Number (Alta Precisão)
             for (const s of catalog) {
-                if (comment.includes(s.name.toLowerCase())) {
+                if (s.magic && trade.magic === s.magic) {
                     if (netProfit > 0) {
                         stats[s.name].wins++;
                         stats[s.name].grossProfit += netProfit;
