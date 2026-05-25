@@ -32,6 +32,10 @@ import { StrategyRanking } from './components/StrategyRanking';
 import { CapitalSimulator } from './components/CapitalSimulator';
 import { CostEstimator } from './components/CostEstimator';
 import MLInsightsPanel from './components/MLInsightsPanel';
+import { RecoveryPanel } from './components/RecoveryPanel';
+import { MotorIAPanel } from './components/MotorIAPanel';
+import { EconomicCalendarPanel } from './components/EconomicCalendarPanel';
+import { AssetDashboard } from './components/AssetDashboard';
 
 function useDeviceDetect() {
     const [device, setDevice] = useState<'mobile' | 'tablet' | 'desktop'>(() => {
@@ -112,6 +116,7 @@ function App() {
                         className="h-full"
                     >
                         {activeTab === 'cockpit' && <Dashboard onNewTrade={() => setIsTradeModalOpen(true)} />}
+                        {activeTab === 'dashboard' && <AssetDashboard />}
                         {activeTab === 'analytics' && <PerformanceAnalytics />}
                         {activeTab === 'ml' && <MLInsightsPanel />}
                         {activeTab === 'robot' && <RobotControlPanel />}
@@ -138,6 +143,9 @@ function App() {
                         {activeTab === 'ai_monitoring' && <AiMonitoring />}
                         {activeTab === 'agent_ia' && <AgentIAPanel />}
                         {activeTab === 'alerts' && <SystemAlerts />}
+                        {activeTab === 'recovery' && <RecoveryPanel />}
+                        {activeTab === 'motor_ia' && <MotorIAPanel />}
+                        {activeTab === 'calendario' && <EconomicCalendarPanel />}
                         {activeTab === 'settings' && <SystemSettings />}
                     </motion.div>
                 </AnimatePresence>

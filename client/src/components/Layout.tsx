@@ -28,7 +28,9 @@ import {
     LineChart,
     Sigma,
     Box,
-    Wallet
+    Wallet,
+    Calendar,
+    Layers
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -95,7 +97,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         {
             label: 'PRINCIPAL',
             items: [
-                { id: 'cockpit', icon: LayoutDashboard, label: 'Cockpit' },
+                { id: 'dashboard', icon: Layers, label: 'Dashboard' },
+                { id: 'cockpit', icon: LayoutDashboard, label: 'Sinais' },
                 { id: 'analytics', icon: BarChart2, label: 'Analytics' },
                 { id: 'ml', icon: Brain, label: 'ML Insights' },
             ]
@@ -103,25 +106,28 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         {
             label: 'ROBÔS',
             items: [
+                { id: 'gold_scalper', icon: Target, label: 'Gold Scalper' },
                 { id: 'robot', icon: Cpu, label: 'Alpha Robot' },
+                { id: 'supreme', icon: Crown, label: 'Supreme IA' },
                 { id: 'bitcoin_pro', icon: Bitcoin, label: 'Bitcoin Pro' },
                 { id: 'shark_bot', icon: Zap, label: 'Shark Bot' },
                 { id: 'crypto', icon: Bitcoin, label: 'Alpha Cripto' },
-                { id: 'gold_scalper', icon: Target, label: 'Gold Scalper' },
                 { id: 'micro_sniper', icon: Zap, label: 'Micro Sniper' },
                 { id: 'swing_ia', icon: TrendingUp, label: 'Swing IA' },
                 { id: 'speed_scalper', icon: Zap, label: 'Speed Scalper' },
-                { id: 'supreme', icon: Crown, label: 'Supreme AI' },
                 { id: 'omni', icon: Sigma, label: 'Omni Prob' },
             ]
         },
         {
             label: 'TRADING',
             items: [
+                { id: 'recovery', icon: Brain, label: 'Recovery' },
+                { id: 'motor_ia', icon: Brain, label: 'Motor IA' },
                 { id: 'trade', icon: Send, label: 'Operar' },
                 { id: 'copy', icon: Copy, label: 'Copy Trader' },
                 { id: 'analysis', icon: LineChart, label: 'Análise Técnica' },
                 { id: 'ranking', icon: PieChart, label: 'Ranking' },
+                { id: 'calendario', icon: Calendar, label: 'Calendário' },
             ]
         },
         {
@@ -154,19 +160,42 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
     const sidebarContent = (
         <>
-            <div className={`p-6 flex items-center ${isSidebarCollapsed && !isTablet ? 'justify-center' : 'gap-3'} h-[88px]`}>
-                <div className="w-10 h-10 bg-trader-blue rounded-xl flex items-center justify-center shadow-lg shadow-trader-blue/20 shrink-0">
-                    <TrendingUp className="text-white" size={24} />
+            <div className={`px-5 py-5 flex items-center ${isSidebarCollapsed && !isTablet ? 'justify-center' : 'gap-3'} h-[76px]`}>
+                <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
+                    <div className="absolute w-full h-full rounded-full border-2 border-blue-500/60" style={{ animation: 'pulse-ring 2.5s infinite' }} />
+                    <div className="absolute w-[34px] h-[34px] rounded-full border-2 border-blue-400/50" style={{ animation: 'pulse-ring 2.5s 0.4s infinite' }} />
+                    <div className="absolute w-[22px] h-[22px] rounded-full border border-cyan-300/60" style={{ animation: 'pulse-ring 2.5s 0.8s infinite' }} />
+                    <div className="absolute w-[14px] h-[14px] rounded-full bg-white shadow-[0_0_20px_rgba(96,165,250,1),0_0_40px_rgba(96,165,250,0.4)]" />
+                    <div className="absolute w-full h-full rounded-full overflow-hidden">
+                        <div className="w-full h-full" style={{ animation: 'spin-sweep 2s linear infinite', background: 'conic-gradient(from 0deg, transparent 0%, transparent 15%, rgba(96,165,250,0.5) 25%, rgba(103,232,249,0.3) 35%, transparent 50%)', filter: 'drop-shadow(0 0 8px rgba(59,130,246,0.5))' }} />
+                    </div>
+                    <div className="absolute w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,1)]" style={{ top: '18%', left: '72%', animation: 'blink-target 1.5s infinite' }} />
+                    <div className="absolute w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,1)]" style={{ top: '68%', left: '20%', animation: 'blink-target 2s 0.5s infinite' }} />
+                    <div className="absolute w-1.5 h-1.5 rounded-full bg-blue-300 shadow-[0_0_10px_rgba(147,197,253,0.8)]" style={{ top: '40%', left: '60%', animation: 'blink-target 1.8s 1s infinite' }} />
                 </div>
-                {(!isSidebarCollapsed || isTablet) && <span className="text-xl font-black text-white tracking-tighter italic whitespace-nowrap overflow-hidden">RADAR-FX</span>}
+                {(!isSidebarCollapsed || isTablet) && (
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-[22px] font-black italic tracking-wide whitespace-nowrap">
+                            <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">RADAR </span>
+                            <span className="text-white">FX</span>
+                        </span>
+                        <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-green-600/10 border border-green-600/20 rounded-full w-fit">
+                            <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                            <span className="text-[8px] font-black text-green-400 uppercase tracking-wider">MT5 Online</span>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            <nav className="flex-1 pl-4 pr-3 py-6 overflow-y-auto overflow-x-hidden sidebar-scrollbar">
+            <nav className="flex-1 pl-4 pr-3 py-5 overflow-y-auto overflow-x-hidden sidebar-scrollbar">
                 {menuSections.map((section) => (
-                    <div key={section.label} className="mb-4">
+                    <div key={section.label} className="mb-5">
                         {(!isSidebarCollapsed || isTablet) && (
-                            <div className="px-4 py-1.5 mb-1 text-xs font-semibold text-trader-blue uppercase tracking-[0.15em]">
-                                {section.label}
+                            <div className="flex items-center gap-2 px-4 pb-2 mb-1">
+                                <span className="text-[10px] font-bold tracking-[0.2em] bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent uppercase">
+                                    {section.label}
+                                </span>
+                                <div className="flex-1 h-px bg-gradient-to-r from-blue-500/30 to-transparent" />
                             </div>
                         )}
                         {section.items.map((item) => (
@@ -174,47 +203,47 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 key={item.id}
                                 title={(!isSidebarCollapsed || isTablet) ? undefined : item.label}
                                 onClick={() => handleNavClick(item.id)}
-                                className={`w-full flex items-center ${isSidebarCollapsed && !isTablet ? 'justify-center' : 'justify-between'} px-4 py-2.5 rounded-xl transition-all duration-200 mb-0.5 ${activeTab === item.id
-                                    ? 'bg-trader-blue text-white shadow-lg shadow-trader-blue/10'
-                                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+                                className={`w-full flex items-center ${isSidebarCollapsed && !isTablet ? 'justify-center' : 'justify-between'} px-4 py-2.5 rounded-xl transition-all duration-150 mb-0.5 relative group ${activeTab === item.id
+                                    ? 'bg-blue-500/10 border-l-[3px] border-blue-400 text-white shadow-[inset_0_0_30px_rgba(59,130,246,0.15),2px_0_20px_rgba(59,130,246,0.15)] shadow-blue-500/5'
+                                    : 'text-slate-400 hover:bg-white/[0.06] hover:text-white hover:border-l-2 hover:border-slate-500 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] hover:translate-x-0.5'
                                     }`}
                             >
                                 <div className={`flex items-center ${isSidebarCollapsed && !isTablet ? 'justify-center relative' : 'gap-3'}`}>
-                                    <item.icon size={18} className="shrink-0" />
+                                    <item.icon size={18} className="shrink-0" style={activeTab === item.id ? { filter: 'drop-shadow(0 0 12px rgba(59,130,246,0.7))' } : undefined} />
                                     {(!isSidebarCollapsed || isTablet) && <span className="font-semibold text-sm tracking-wide uppercase whitespace-nowrap">{item.label}</span>}
                                 </div>
                                 {item.id === 'robot' && isRobotActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-fuchsia-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '217, 70, 239' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-fuchsia-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '217, 70, 239', boxShadow: '0 0 6px rgba(217,70,239,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'bitcoin_pro' && isBitcoinProActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-green-600 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '22, 163, 74' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-green-600 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '22, 163, 74', boxShadow: '0 0 6px rgba(22,163,74,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'shark_bot' && isSharkActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-cyan-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '6, 182, 212' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-cyan-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '6, 182, 212', boxShadow: '0 0 6px rgba(6,182,212,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'crypto' && isCryptoActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-orange-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '249, 115, 22' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-orange-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '249, 115, 22', boxShadow: '0 0 6px rgba(249,115,22,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'gold_scalper' && isGoldActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-amber-400 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '251, 191, 36' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-amber-400 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '251, 191, 36', boxShadow: '0 0 6px rgba(251,191,36,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'micro_sniper' && isTitanActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-indigo-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '99, 102, 241' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-indigo-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '99, 102, 241', boxShadow: '0 0 6px rgba(99,102,241,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'swing_ia' && isSwingActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-yellow-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '234, 179, 8' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-yellow-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '234, 179, 8', boxShadow: '0 0 6px rgba(234,179,8,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'copy' && isCopyActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-violet-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '139, 92, 246' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-violet-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '139, 92, 246', boxShadow: '0 0 6px rgba(139,92,246,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'speed_scalper' && isSpeedActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-cyan-400 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '34, 211, 238' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-cyan-400 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '34, 211, 238', boxShadow: '0 0 6px rgba(34,211,238,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'supreme' && isSupremeActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-emerald-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '16, 185, 129' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-emerald-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '16, 185, 129', boxShadow: '0 0 6px rgba(16,185,129,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'omni' && isOmniActive && (
-                                    <div className={`w-1.5 h-1.5 rounded-full bg-purple-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '168, 85, 247' } as any}></div>
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-purple-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '168, 85, 247', boxShadow: '0 0 6px rgba(168,85,247,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                             </button>
                         ))}
@@ -224,8 +253,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
             <div className={`p-4 border-t border-slate-800 transition-all ${isSidebarCollapsed && !isTablet ? 'flex justify-center items-center h-[88px]' : ''}`}>
                 <div className={`flex items-center ${isSidebarCollapsed && !isTablet ? 'justify-center p-2' : 'gap-3 p-3'} bg-slate-800/50 rounded-xl border border-slate-800 w-full`}>
-                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0 relative">
                         <User size={16} className="text-slate-300" />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-slate-900 rounded-full" />
                     </div>
                     {(!isSidebarCollapsed || isTablet) && (
                         <div className="flex-1 min-w-0">

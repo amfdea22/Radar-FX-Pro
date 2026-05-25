@@ -23,6 +23,10 @@ import { GoldScalperEngine } from './services/GoldScalperEngine';
 import { BitcoinProEngine } from './services/BitcoinProEngine';
 import { CryptoIAEngine } from './services/CryptoIAEngine';
 import { SharkBotEngine } from './services/SharkBotEngine';
+import { RecoveryEngine } from './services/RecoveryEngine';
+import { HealthService } from './services/HealthService';
+import { SymbolLockService } from './services/SymbolLockService';
+import { DatabaseService } from './services/DatabaseService';
 import { MicroScalperEngine } from './services/MicroScalperEngine';
 import { SwingTraderEngine } from './services/SwingTraderEngine';
 import { SwingTraderSimulator } from './services/SwingTraderSimulator';
@@ -32,6 +36,8 @@ import { JournalService } from './services/JournalService';
 
 import { AgentIAEngine } from './services/AgentIAEngine';
 import { MLInsightsService } from './services/MLInsightsService';
+import { MotorIAEngine } from './services/MotorIAEngine';
+import { InfraService } from './services/InfraService';
 
 
 // Motores serão inicializados APÓS o servidor abrir a porta (veja app.listen)
@@ -57,6 +63,110 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Radar-FX Server is running v1.1-RESET' });
 });
 
+// --- HEALTH CHECK ---
+app.get('/api/health/full', async (req, res) => {
+    try {
+        const report = await HealthService.getFullReport();
+        res.json(report);
+    } catch (error: any) {
+        res.status(500).json({ error: 'Health check failed', details: error.message });
+    }
+});
+
+app.get('/api/locks', (req, res) => {
+    res.json({ locks: SymbolLockService.getAllLocks() });
+});
+
+app.post('/api/locks/reset', (req, res) => {
+    SymbolLockService.reset();
+    res.json({ status: 'success', message: 'Todos os locks foram resetados' });
+});
+
+// --- DATABASE ---
+app.get('/api/db/trades', async (req, res) => {
+    try {
+        const trades = await DatabaseService.getTrades({ limit: Number(req.query.limit) || 100 });
+        res.json(trades);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/db/stats', async (req, res) => {
+    try {
+        const stats = await DatabaseService.getTradeStats(req.query.strategy as string);
+        res.json(stats);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/db/settings', async (req, res) => {
+    try {
+        await DatabaseService.setSetting(req.body.key, req.body.value);
+        res.json({ status: 'success' });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/db/settings/:key', async (req, res) => {
+    try {
+        const value = await DatabaseService.getSetting(req.params.key);
+        res.json({ key: req.params.key, value });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/db/alerts', async (req, res) => {
+    try {
+        const alerts = await DatabaseService.getAlerts(Number(req.query.limit) || 50);
+        res.json(alerts);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/db/migrate', async (req, res) => {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const dataDir = process.cwd();
+        const migrations = [
+            { name: 'Motor IA', file: 'motor_ia_history.json', dataKey: 'executions' },
+            { name: 'Gold Scalper', file: 'gold_scalper_history.json' },
+            { name: 'Alpha Robot', file: 'alpha_robot_history.json' },
+            { name: 'Recovery', file: 'recovery_history.json' },
+            { name: 'Supreme', file: 'alpha_supreme_history.json' },
+        ];
+        const results: Record<string, number> = {};
+        for (const m of migrations) {
+            const filePath = path.join(dataDir, m.file);
+            if (fs.existsSync(filePath)) {
+                const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+                const trades = m.dataKey ? content[m.dataKey] : (Array.isArray(content) ? content : []);
+                if (Array.isArray(trades) && trades.length > 0) {
+                    await DatabaseService.migrateFromJson(m.name, trades);
+                    results[m.name] = trades.length;
+                }
+            }
+        }
+        res.json({ status: 'success', results });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/db/health', async (_req, res) => {
+    try {
+        const count = await DatabaseService.getTradeStats();
+        res.json({ status: 'ok', totalTrades: count.total });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message, status: 'error' });
+    }
+});
+
 // --- METATRADER 5 BRIDGE PROXY ---
 
 app.post('/api/mt5/login', async (req, res) => {
@@ -68,7 +178,15 @@ app.post('/api/mt5/login', async (req, res) => {
     }
 });
 
+const SYMBOL_MAP_ORDER: Record<string, string> = {
+    'GOLD': 'XAUUSD', 'WING': 'WIN$N', 'WDO': 'WDO$N',
+    'US30': 'US30Cash', 'NAS100': 'US100Cash', 'GER40': 'GER40Cash',
+};
+
 app.post('/api/mt5/order', async (req, res) => {
+    if (req.body.symbol && SYMBOL_MAP_ORDER[req.body.symbol.toUpperCase()]) {
+        req.body.symbol = SYMBOL_MAP_ORDER[req.body.symbol.toUpperCase()];
+    }
     console.log(`⚡ [ORDEM] Recebida requisição para ${req.body.symbol} (${req.body.action})`);
     try {
         // Validação de Disciplina antes da Ordem
@@ -90,6 +208,11 @@ app.post('/api/mt5/order', async (req, res) => {
             const response = await axios.post(`${MT5_BRIDGE_URL}/order`, body);
             return response.data;
         });
+
+        // Bloqueia símbolo via SymbolLockService
+        if (orderResult?.ticket) {
+            SymbolLockService.acquire(req.body.symbol, 'Manual', orderResult.ticket, req.body.action);
+        }
 
         // CAPTURA DE AUDITORIA ALPHA (Async para não atrasar a resposta)
         if (orderResult && (orderResult.ticket || orderResult.success !== false)) {
@@ -227,6 +350,19 @@ app.get('/api/mt5/analysis', async (req, res) => {
             error: 'Failed to fetch analysis', 
             details: error.response?.data || error.message 
         });
+    }
+});
+
+app.get('/api/mt5/candles', async (req, res) => {
+    try {
+        const { symbol, timeframe, count } = req.query;
+        const response = await axios.get(`${MT5_BRIDGE_URL}/candles`, {
+            params: { symbol, timeframe, count }, timeout: 5000
+        });
+        res.json(response.data);
+    } catch (error: any) {
+        console.error(`[Proxy Error] Candles failed:`, error.message);
+        res.status(500).json({ error: 'Failed to fetch candles', details: error.response?.data || error.message });
     }
 });
 
@@ -379,6 +515,31 @@ app.get('/api/mt5/bitcoin-pro/status', (req, res) => {
 app.post('/api/mt5/bitcoin-pro/settings', (req, res) => {
     BitcoinProEngine.updateSettings(req.body);
     res.json({ status: 'success', statusData: BitcoinProEngine.getStatus() });
+});
+
+// --- RECOVERY ENGINE ---
+app.get('/api/mt5/recovery/status', (req, res) => {
+    res.json(RecoveryEngine.getStatus());
+});
+
+app.post('/api/mt5/recovery/settings', (req, res) => {
+    RecoveryEngine.updateSettings(req.body);
+    res.json({ status: 'success', statusData: RecoveryEngine.getStatus() });
+});
+
+app.get('/api/mt5/recovery/signals', async (req, res) => {
+    const signals = await RecoveryEngine.getRecoverySignals();
+    res.json(signals);
+});
+
+// --- MOTOR IA ENGINE ---
+app.get('/api/mt5/motor-ia/status', (req, res) => {
+    res.json(MotorIAEngine.getStatus());
+});
+
+app.post('/api/mt5/motor-ia/settings', (req, res) => {
+    MotorIAEngine.updateSettings(req.body);
+    res.json({ status: 'success', statusData: MotorIAEngine.getStatus() });
 });
 
 // --- SHARK BOT ENGINE ---
@@ -728,6 +889,42 @@ app.get('/api/mt5/gold-scalper/calendar', async (req, res) => {
     }
 });
 
+app.get('/api/mt5/economic-calendar', async (req, res) => {
+    try {
+        const response = await axios.get('https://nfs.faireconomy.media/ff_calendar_thisweek.json', { timeout: 10000 });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch economic calendar' });
+    }
+});
+
+app.get('/api/mt5/economic-news', async (req, res) => {
+    try {
+        const FMP_KEY = process.env.FMP_API_KEY;
+        const symbols = ['XAUUSD', 'BTCUSD', 'EURUSD', 'GBPUSD', 'ETHUSD', 'SP500'];
+        if (FMP_KEY) {
+            const response = await axios.get(`https://financialmodelingprep.com/api/v3/stock_news?tickers=${symbols.join(',')}&limit=30&apikey=${FMP_KEY}`, { timeout: 8000 });
+            return res.json(response.data || []);
+        }
+        const response = await axios.get('https://nfs.faireconomy.media/ff_calendar_thisweek.json', { timeout: 8000 });
+        const events = Array.isArray(response.data) ? response.data : [];
+        const news = events.filter((e: any) => e.title && e.impact !== 'Holiday').slice(0, 20).map((e: any) => ({
+            title: e.title,
+            symbol: e.country,
+            source: 'Economic Calendar',
+            time: e.date,
+            sentiment: e.impact === 'High' ? 0.8 : e.impact === 'Medium' ? 0.5 : 0.2,
+            label: e.impact === 'High' ? 'HIGH_IMPACT' : e.impact === 'Medium' ? 'MEDIUM_IMPACT' : 'LOW_IMPACT',
+            url: '',
+            image: '',
+            text: e.forecast ? `Forecast: ${e.forecast} | Previous: ${e.previous}` : `${e.impact} impact economic event for ${e.country}`,
+        }));
+        res.json(news);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch news' });
+    }
+});
+
 app.post('/api/mt5/gold-scalper/sync', async (req, res) => {
     try {
         const result = await GoldScalperEngine.syncTradesFromMT5();
@@ -971,6 +1168,191 @@ app.post('/api/mt5/sentiment', async (req, res) => {
     }
 });
 
+// --- GLOBAL REPORT (all engines) ---
+app.get('/api/mt5/global-report', async (req, res) => {
+    try {
+        const reportEndpoints = [
+            { id: 'gold-scalper', name: 'Gold Scalper', endpoint: '/api/mt5/gold-scalper/report' },
+            { id: 'robot', name: 'Alpha Robot', endpoint: '/api/mt5/robot/report' },
+            { id: 'supreme', name: 'Supreme', endpoint: '/api/mt5/supreme/report' },
+        ];
+        const statusEndpoints = [
+            { id: 'micro-scalper', name: 'Micro Sniper' },
+            { id: 'forex-scalper', name: 'Speed Scalper' },
+            { id: 'swing-trader', name: 'Swing IA' },
+            { id: 'bitcoin-pro', name: 'Bitcoin Pro' },
+            { id: 'shark-bot', name: 'Shark Bot' },
+            { id: 'crypto-ia', name: 'Crypto IA' },
+            { id: 'omni', name: 'Omni Probabilistic' },
+        ];
+        const engineData: any[] = [];
+        const allTrades: any[] = [];
+
+        // Busca trades dos engines com report
+        for (const eng of reportEndpoints) {
+            try {
+                const resp = await axios.get(`http://127.0.0.1:${port}${eng.endpoint}`, { timeout: 4000 });
+                const data = resp.data;
+                engineData.push({
+                    name: eng.name,
+                    summary: data.summary || data.performance || null,
+                    totalTrades: data.summary?.totalTrades || data.performance?.totalTrades || 0,
+                    totalProfit: data.summary?.totalProfit || data.performance?.totalProfit || 0,
+                    winRate: data.summary?.winRate || data.performance?.winRate || 0,
+                });
+                const trades = data.trades || data.recentTrades || [];
+                for (const t of trades) {
+                    allTrades.push({ ...t, engine: eng.name });
+                }
+            } catch (e) {
+                engineData.push({ name: eng.name, summary: null, totalTrades: 0, totalProfit: 0, winRate: 0 });
+            }
+        }
+
+        // Busca dados dos engines sem report
+        for (const eng of statusEndpoints) {
+            try {
+                const resp = await axios.get(`http://127.0.0.1:${port}/api/mt5/${eng.id}/status`, { timeout: 3000 });
+                const d = resp.data;
+                let dailyProfit = 0;
+                if (typeof d.dailyProfit === 'number') dailyProfit = d.dailyProfit;
+                else if (d.state && typeof d.state.dailyProfit === 'number') dailyProfit = d.state.dailyProfit;
+                else if (typeof d.totalProfit === 'number') dailyProfit = d.totalProfit;
+                else if (d.performance && typeof d.performance.totalProfit === 'number') dailyProfit = d.performance.totalProfit;
+                engineData.push({
+                    name: eng.name,
+                    summary: null,
+                    totalTrades: d.performance?.totalTrades || d.stats?.totalTrades || 0,
+                    totalProfit: dailyProfit,
+                    winRate: d.performance?.winRate || d.stats?.winRate || null,
+                });
+            } catch (e) {
+                engineData.push({ name: eng.name, summary: null, totalTrades: 0, totalProfit: 0, winRate: 0 });
+            }
+        }
+
+        // Busca posições abertas DO BRIDGE para mostrar atividade atual
+        let openPositions: any[] = [];
+        try {
+            const posResp = await axios.get(`${MT5_BRIDGE_URL}/positions`, { timeout: 5000 });
+            openPositions = Array.isArray(posResp.data) ? posResp.data : [];
+        } catch (e) {}
+
+        // Filtra apenas trades das últimas 2 horas para o "recentTrades"
+        const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+        const recentTrades = allTrades
+            .filter(t => {
+                const ts = t.closeTime || t.openTime || 0;
+                return ts >= twoHoursAgo;
+            })
+            .sort((a, b) => (b.closeTime || b.openTime || 0) - (a.closeTime || a.openTime || 0));
+
+        // Trades de hoje
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const todayTrades = allTrades
+            .filter(t => {
+                const ts = t.closeTime || t.openTime || 0;
+                return ts >= todayStart;
+            })
+            .sort((a, b) => (b.closeTime || b.openTime || 0) - (a.closeTime || a.openTime || 0));
+
+        const magicMap: Record<number, string> = { 888111: 'Micro Sniper', 777111: 'Speed Scalper', 9999: 'Gold Scalper', 8888: 'Crypto IA', 88881: 'Alpha Robot', 7777: 'Supreme', 999111: 'Omni', 9876: 'Shark Bot', 777222: 'Swing Trader', 444111: 'Bitcoin Pro', 202605: 'Agent IA' };
+
+        res.json({
+            generatedAt: now.toISOString(),
+            date: now.toLocaleDateString('pt-BR'),
+            time: now.toLocaleTimeString('pt-BR'),
+            account: null,
+            engines: engineData,
+            recentTrades: recentTrades.slice(0, 50),
+            todayTrades: todayTrades.slice(0, 50),
+            openPositions: openPositions.map(p => ({
+                ticket: p.ticket,
+                symbol: p.symbol,
+                type: p.type === 0 ? 'BUY' : 'SELL',
+                volume: p.volume,
+                price_open: p.price_open,
+                price_current: p.price_current,
+                profit: p.profit,
+                magic: p.magic,
+                engine: magicMap[p.magic] || `Magic ${p.magic}`,
+                sl: p.sl,
+                tp: p.tp,
+                comment: p.comment,
+            })),
+            summary: {
+                totalEngines: engineData.length,
+                totalTradesAllTime: engineData.reduce((s, e) => s + e.totalTrades, 0),
+                totalProfitAllTime: engineData.reduce((s, e) => s + e.totalProfit, 0),
+                todayTradesCount: todayTrades.length,
+                openPositionsCount: openPositions.length,
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to generate global report' });
+    }
+});
+
+// --- ALL POSITIONS ---
+app.get('/api/mt5/positions', async (req, res) => {
+    try {
+        const resp = await axios.get(`${MT5_BRIDGE_URL}/positions`, { timeout: 5000 });
+        res.json(resp.data || []);
+    } catch (error) {
+        res.json([]);
+    }
+});
+
+// --- MANUAL TRADE EXECUTION (Telegram) ---
+app.post('/api/mt5/trade/open', async (req, res) => {
+    try {
+        const { symbol, direction, lot, sl, tp, comment } = req.body;
+        if (!symbol || !direction) return res.status(400).json({ error: 'symbol and direction required' });
+        const payload: any = {
+            action: direction === 'BUY' ? 'BUY' : 'SELL',
+            symbol: symbol.toUpperCase(),
+            lot: Math.max(0.01, lot || 0.01),
+            magic: 999999,
+            comment: comment || 'Telegram_Manual'
+        };
+        if (sl) payload.sl = sl;
+        if (tp) payload.tp = tp;
+        const resp = await axios.post(`${MT5_BRIDGE_URL}/order`, payload, { timeout: 10000 });
+        res.json(resp.data);
+    } catch (error: any) {
+        res.status(500).json({ error: error.response?.data?.message || error.message });
+    }
+});
+
+app.post('/api/mt5/trade/close', async (req, res) => {
+    try {
+        const { ticket } = req.body;
+        if (!ticket) return res.status(400).json({ error: 'ticket required' });
+        const resp = await axios.post(`${MT5_BRIDGE_URL}/close_order`, { ticket }, { timeout: 5000 });
+        res.json(resp.data || { success: true });
+    } catch (error: any) {
+        res.status(500).json({ error: error.response?.data?.message || error.message });
+    }
+});
+
+app.post('/api/mt5/trade/close-all', async (req, res) => {
+    try {
+        const positions = await axios.get(`${MT5_BRIDGE_URL}/positions`, { timeout: 5000 });
+        const posList = positions.data || [];
+        let closed = 0, errors = 0;
+        for (const p of posList) {
+            try {
+                await axios.post(`${MT5_BRIDGE_URL}/close_order`, { ticket: p.ticket }, { timeout: 3000 });
+                closed++;
+            } catch (e) { errors++; }
+        }
+        res.json({ closed, errors, total: posList.length });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.get('/api/mt5/audit/history', async (req, res) => {
     try {
         const history = await AlphaAuditService.getHistory();
@@ -991,6 +1373,15 @@ app.post('/api/system/config', (req, res) => {
     res.json({ success });
 });
 
+// --- INFRA (Backup, Logs, Health) ---
+app.get('/api/system/backup', (req, res) => {
+    res.json(InfraService.getBackupInfo());
+});
+
+app.get('/api/system/alerts/stats', (req, res) => {
+    res.json(AlertEngine.getStats());
+});
+
 app.listen(Number(port), '0.0.0.0', async () => {
     console.log(`Server v1.1 [CLEAN] running at http://0.0.0.0:${port}`);
 
@@ -1007,7 +1398,38 @@ app.listen(Number(port), '0.0.0.0', async () => {
         console.error(`   Erro: ${e.message}`);
     }
 
-    // Inicializar todos os motores APÓS o servidor estar escutando
+    // Migração assíncrona de JSON → Prisma
+    (async () => {
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const dataDir = process.cwd();
+            const migrations = [
+                { name: 'Motor IA', file: 'motor_ia_history.json', dataKey: 'executions' },
+                { name: 'Gold Scalper', file: 'gold_scalper_history.json' },
+                { name: 'Alpha Robot', file: 'alpha_robot_history.json' },
+                { name: 'Recovery', file: 'recovery_history.json' },
+            ];
+            for (const m of migrations) {
+                const filePath = path.join(dataDir, m.file);
+                if (fs.existsSync(filePath)) {
+                    const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+                    const trades = m.dataKey ? content[m.dataKey] : (Array.isArray(content) ? content : []);
+                    if (Array.isArray(trades) && trades.length > 0) {
+                        await DatabaseService.migrateFromJson(m.name, trades);
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ Migração automática ignorada (primeira execução ou sem dados)');
+        }
+    })();
+
+    // Inicializar serviços de infraestrutura e motores
+    console.log('🚀 Iniciando serviços de infraestrutura...');
+    AlertEngine.init();
+    InfraService.init();
+
     console.log('🚀 Iniciando motores de trading...');
 
     TradeGuardian.start();
@@ -1022,7 +1444,21 @@ app.listen(Number(port), '0.0.0.0', async () => {
     ForexScalperEngine.init();
     OmniProbabilisticEngine.start();
     SharkBotEngine.init();
+    RecoveryEngine.init();
+    MotorIAEngine.init();
     TradeNotificationBot.start();
     console.log('⚡ Todos os motores iniciados com sucesso!');
+
+    // Process shutdown handlers
+    const shutdown = async (signal: string) => {
+        console.log(`\n⚠️  Recebido ${signal}. Iniciando desligamento gracioso...`);
+        const engines = [MotorIAEngine, GoldScalperEngine, CryptoIAEngine, AlphaRobotEngine, SupremeEngine, RecoveryEngine, SharkBotEngine, BitcoinProEngine, MicroScalperEngine, SwingTraderEngine, ForexScalperEngine, OmniProbabilisticEngine, TradeGuardian, CopyTraderEngine];
+        for (const eng of engines) { try { (eng as any).stop?.(); } catch { /* ignore */ } }
+        try { await DatabaseService.disconnect(); } catch (e) { console.error('DB disconnect fail', e); }
+        console.log('✅ Desligamento concluído.');
+        process.exit(0);
+    };
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
 });
 

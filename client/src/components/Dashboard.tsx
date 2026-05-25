@@ -70,7 +70,7 @@ export const Dashboard: React.FC<{ onNewTrade: () => void }> = ({ onNewTrade }) 
                     </div>
                     <div>
                         <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-500">Radar</span> Cockpit
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-500">Radar</span> Sinais
                             <span className={`px-2 py-1 rounded-lg text-xs tracking-widest uppercase ${account ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 border border-slate-500/20 text-slate-500'}`}>
                                 {account ? 'Live' : 'Offline'}
                             </span>
@@ -118,66 +118,17 @@ export const Dashboard: React.FC<{ onNewTrade: () => void }> = ({ onNewTrade }) 
                 </div>
             </div>
 
-            {/* COCKPIT PANEL */}
+            {/* SINAIS SCANNER */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/10 p-8 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent"></div>
-
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
-                                <Eye className="text-sky-500" size={18} /> Posições em Aberto
-                            </h3>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Mercado ao Vivo</p>
-                        </div>
-                        <div className="px-4 py-2 bg-sky-500/10 rounded-xl border border-sky-500/20">
-                            <span className="text-[10px] font-black text-sky-400 uppercase tracking-widest">MT5 Sync OK</span>
-                        </div>
-                    </div>
-
-                    <div className="space-y-3">
-                        <AnimatePresence mode="popLayout">
-                            {positions.length > 0 ? positions.map((pos) => (
-                                <motion.div key={pos.ticket} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-                                    whileHover={{ x: 4 }}
-                                    className="flex items-center gap-5 p-5 bg-slate-950/40 rounded-2xl border border-white/5 hover:border-sky-500/20 transition-all group">
-                                    <div className={`w-1.5 h-14 rounded-full ${pos.type === 0 ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-xl font-black text-white italic">{pos.symbol}</span>
-                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${pos.type === 0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
-                                                {pos.type === 0 ? 'BUY' : 'SELL'} {pos.volume}
-                                            </span>
-                                        </div>
-                                        <div className="flex gap-5 mt-1.5">
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Entry: <span className="text-slate-300 font-black">{pos.price_open.toFixed(2)}</span></span>
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price: <span className="text-slate-300 font-black">{pos.price_current.toFixed(2)}</span></span>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className={`text-2xl font-black italic ${pos.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{pos.profit >= 0 ? '+' : ''}{pos.profit.toFixed(2)}</p>
-                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Flutuante</p>
-                                    </div>
-                                </motion.div>
-                            )) : (
-                                <div className="p-16 text-center">
-                                    <Activity size={48} className="mx-auto mb-4 text-slate-700" />
-                                    <p className="text-sm font-black text-slate-500 uppercase tracking-widest">Nenhuma posição aberta no momento</p>
-                                </div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                    <SignalScanner />
                 </div>
 
-                {/* SIDEBAR */}
                 <div className="lg:col-span-1 space-y-6">
                     <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/10 p-6 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent"></div>
                         <DisciplinePanel />
-                    </div>
-                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/10 p-6 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent"></div>
-                        <SignalScanner />
                     </div>
                 </div>
             </div>
