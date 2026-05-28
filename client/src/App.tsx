@@ -36,6 +36,7 @@ import { EconomicCalendarPanel } from './components/EconomicCalendarPanel';
 import { RadarDashboard } from './components/RadarDashboard';
 import { SystemSettings } from './components/SystemSettings';
 import { TraderArea } from './components/TraderArea';
+import { QuickStart } from './components/QuickStart';
 import { isAuthenticated } from './services/auth';
 import LoginPage from './pages/LoginPage';
 
@@ -154,6 +155,7 @@ function App() {
                         {activeTab === 'motor_ia' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><MotorIAPanel /></React.Suspense>}
                         {activeTab === 'calendario' && <EconomicCalendarPanel />}
                         {activeTab === 'trader_area' && <TraderArea />}
+                        {activeTab === 'quick_start' && <QuickStart />}
                         {activeTab === 'settings' && <SystemSettings />}
                     </motion.div>
                 </AnimatePresence>

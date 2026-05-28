@@ -160,6 +160,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             ]
         },
         {
+            label: 'MANUAL',
+            items: [
+                { id: 'quick_start', icon: BookOpen, label: 'Início Rápido' },
+            ]
+        },
+        {
             label: 'SISTEMA',
             items: [
                 { id: 'ai_monitoring', icon: Cpu, label: 'Monitoramento IA' },
