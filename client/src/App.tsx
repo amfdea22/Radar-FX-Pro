@@ -5,25 +5,18 @@ import { TradeModal } from './components/TradeModal';
 import { TradingJournal } from './components/TradingJournal';
 import { PerformanceAnalytics } from './components/PerformanceAnalytics';
 import { SystemAlerts } from './components/SystemAlerts';
-import { SystemSettings } from './components/SystemSettings';
-import { AlphaSupremeHub } from './components/AlphaSupremeHub';
-import { StrategyReportHub } from './components/StrategyReportHub';
 import { FinancialControl } from './components/FinancialControl';
-import { GoldScalperPanel } from './components/GoldScalperPanel';
 import { RiskManagement } from './components/RiskManagement';
 import { Statistics } from './components/Statistics';
 import { AiMonitoring } from './components/AiMonitoring';
-
+import { AlphaSupremeHub } from './components/AlphaSupremeHub';
+import { StrategyReportHub } from './components/StrategyReportHub';
 import { MicroScalperPanel } from './components/MicroScalperPanel';
 import { SwingTraderPanel } from './components/SwingTraderPanel';
 import { ForexScalperPanel } from './components/ForexScalperPanel';
 import { RadarApp } from './components/RadarApp';
-import { BitcoinProPanel } from './components/BitcoinProPanel';
-import { SharkBotPanel } from './components/SharkBotPanel';
 import { AgentIAPanel } from './components/AgentIAPanel';
 import { AnimatePresence, motion } from 'framer-motion';
-import { RobotControlPanel } from './components/RobotControlPanel';
-import { CryptoIntelligenceHub } from './components/CryptoIntelligenceHub';
 import { CopyTraderPanel } from './components/CopyTraderPanel';
 import { TradingPanel } from './components/TradingPanel';
 import { TechnicalAnalysisPanel } from './components/TechnicalAnalysisPanel';
@@ -32,10 +25,19 @@ import { StrategyRanking } from './components/StrategyRanking';
 import { CapitalSimulator } from './components/CapitalSimulator';
 import { CostEstimator } from './components/CostEstimator';
 import MLInsightsPanel from './components/MLInsightsPanel';
+import { GoldScalperPanel } from './components/GoldScalperPanel';
+import { SharkBotPanel } from './components/SharkBotPanel';
+import { CryptoIntelligenceHub } from './components/CryptoIntelligenceHub';
+import { RobotControlPanel } from './components/RobotControlPanel';
+import { BitcoinProPanel } from './components/BitcoinProPanel';
 import { RecoveryPanel } from './components/RecoveryPanel';
 import { MotorIAPanel } from './components/MotorIAPanel';
 import { EconomicCalendarPanel } from './components/EconomicCalendarPanel';
-import { AssetDashboard } from './components/AssetDashboard';
+import { RadarDashboard } from './components/RadarDashboard';
+import { SystemSettings } from './components/SystemSettings';
+import { TraderArea } from './components/TraderArea';
+import { isAuthenticated } from './services/auth';
+import LoginPage from './pages/LoginPage';
 
 function useDeviceDetect() {
     const [device, setDevice] = useState<'mobile' | 'tablet' | 'desktop'>(() => {
@@ -65,6 +67,7 @@ function useDeviceDetect() {
 }
 
 function App() {
+    const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated());
     const autoDevice = useDeviceDetect();
     const [activeTab, setActiveTab] = useState('cockpit');
     const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
@@ -91,6 +94,10 @@ function App() {
         exit: { opacity: 0, y: -10 }
     };
 
+    if (!isLoggedIn) {
+        return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+    }
+
     if (device === 'mobile') {
         return (
             <RadarApp onOverrideDevice={setManualOverride} />
@@ -116,14 +123,14 @@ function App() {
                         className="h-full"
                     >
                         {activeTab === 'cockpit' && <Dashboard onNewTrade={() => setIsTradeModalOpen(true)} />}
-                        {activeTab === 'dashboard' && <AssetDashboard />}
+                        {activeTab === 'dashboard' && <RadarDashboard />}
                         {activeTab === 'analytics' && <PerformanceAnalytics />}
                         {activeTab === 'ml' && <MLInsightsPanel />}
-                        {activeTab === 'robot' && <RobotControlPanel />}
-                        {activeTab === 'bitcoin_pro' && <BitcoinProPanel />}
-                        {activeTab === 'shark_bot' && <SharkBotPanel />}
-                        {activeTab === 'crypto' && <CryptoIntelligenceHub />}
-                        {activeTab === 'gold_scalper' && <GoldScalperPanel />}
+                        {activeTab === 'robot' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><RobotControlPanel /></React.Suspense>}
+                        {activeTab === 'bitcoin_pro' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><BitcoinProPanel /></React.Suspense>}
+                        {activeTab === 'shark_bot' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><SharkBotPanel /></React.Suspense>}
+                        {activeTab === 'crypto' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><CryptoIntelligenceHub /></React.Suspense>}
+                        {activeTab === 'gold_scalper' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><GoldScalperPanel /></React.Suspense>}
                         {activeTab === 'micro_sniper' && <MicroScalperPanel />}
                         {activeTab === 'swing_ia' && <SwingTraderPanel />}
                         {activeTab === 'copy' && <CopyTraderPanel />}
@@ -143,9 +150,10 @@ function App() {
                         {activeTab === 'ai_monitoring' && <AiMonitoring />}
                         {activeTab === 'agent_ia' && <AgentIAPanel />}
                         {activeTab === 'alerts' && <SystemAlerts />}
-                        {activeTab === 'recovery' && <RecoveryPanel />}
-                        {activeTab === 'motor_ia' && <MotorIAPanel />}
+                        {activeTab === 'recovery' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><RecoveryPanel /></React.Suspense>}
+                        {activeTab === 'motor_ia' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><MotorIAPanel /></React.Suspense>}
                         {activeTab === 'calendario' && <EconomicCalendarPanel />}
+                        {activeTab === 'trader_area' && <TraderArea />}
                         {activeTab === 'settings' && <SystemSettings />}
                     </motion.div>
                 </AnimatePresence>

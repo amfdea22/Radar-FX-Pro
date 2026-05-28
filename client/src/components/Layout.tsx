@@ -17,6 +17,7 @@ import {
     Activity,
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     Menu,
     X,
     Brain,
@@ -56,6 +57,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     const [isOmniActive, setIsOmniActive] = React.useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+    const [collapsedSections, setCollapsedSections] = React.useState<Set<string>>(new Set());
+
+    const toggleSection = (label: string) => {
+        setCollapsedSections(prev => {
+            const next = new Set(prev);
+            if (next.has(label)) next.delete(label);
+            else next.add(label);
+            return next;
+        });
+    };
 
     React.useEffect(() => {
         const checkStatus = async () => {
@@ -101,6 +112,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 { id: 'cockpit', icon: LayoutDashboard, label: 'Sinais' },
                 { id: 'analytics', icon: BarChart2, label: 'Analytics' },
                 { id: 'ml', icon: Brain, label: 'ML Insights' },
+            ]
+        },
+        {
+            label: 'TRADER',
+            items: [
+                { id: 'trader_area', icon: User, label: 'Área Trader' },
             ]
         },
         {
@@ -192,13 +209,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                     <div key={section.label} className="mb-5">
                         {(!isSidebarCollapsed || isTablet) && (
                             <div className="flex items-center gap-2 px-4 pb-2 mb-1">
-                                <span className="text-[10px] font-bold tracking-[0.2em] bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent uppercase">
-                                    {section.label}
-                                </span>
+                                <button onClick={() => toggleSection(section.label)} className="flex items-center gap-2 flex-1 min-w-0 group px-2 -mx-2 py-1 rounded-lg transition-all duration-300 hover:bg-blue-500/10 hover:shadow-[0_0_30px_rgba(59,130,246,0.3),inset_0_0_20px_rgba(59,130,246,0.1)] hover:scale-[1.03] active:scale-[0.98]">
+                                    <ChevronDown size={12} className={`text-blue-400/50 group-hover:text-blue-300 transition-all duration-300 shrink-0 ${collapsedSections.has(section.label) ? '-rotate-90' : ''}`} />
+                                    <span className="text-sm font-bold tracking-[0.2em] bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent uppercase transition-all duration-300 group-hover:from-blue-300 group-hover:to-cyan-200 group-hover:drop-shadow-[0_0_12px_rgba(59,130,246,0.8)]">
+                                        {section.label}
+                                    </span>
+                                </button>
                                 <div className="flex-1 h-px bg-gradient-to-r from-blue-500/30 to-transparent" />
                             </div>
                         )}
-                        {section.items.map((item) => (
+                        {!collapsedSections.has(section.label) && section.items.map((item) => (
                             <button
                                 key={item.id}
                                 title={(!isSidebarCollapsed || isTablet) ? undefined : item.label}
