@@ -73,6 +73,31 @@
     box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
 }
 
+/* Risk Management Blue Gradient Scrollbar */
+.risk-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.risk-scrollbar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 20px;
+}
+.risk-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #3b82f6 0%, #22d3ee 100%);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3), 0 0 16px rgba(59, 130, 246, 0.15);
+}
+.risk-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #22d3ee 0%, #3b82f6 100%);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 40px rgba(34, 211, 238, 0.4);
+}
+.risk-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #3b82f6 rgba(15, 23, 42, 0.4);
+}
+
 /* Glassmorphism utility */
 .glass-panel {
     background: rgba(15, 23, 42, 0.6);
@@ -169,4 +194,10 @@
 @keyframes spin-sweep {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+@keyframes radar-blip {
+    0% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(3); }
+    100% { opacity: 0; transform: scale(6); }
 }

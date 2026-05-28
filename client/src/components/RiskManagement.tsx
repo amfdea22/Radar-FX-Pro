@@ -145,7 +145,7 @@ export const RiskManagement: React.FC = () => {
         { key: 'freeMargin', label: 'Margem Livre Mínima', value: '50', suffix: '%', color: 'text-emerald-400', icon: Wallet, desc: 'Percentual mínimo de margem livre recomendado para segurança.' },
     ];
     return (
-        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 risk-scrollbar">
             {/* HEADLINE */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-8 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.1)] relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
@@ -196,12 +196,39 @@ export const RiskManagement: React.FC = () => {
                                 <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{cfg.label}</span>
                             </div>
                             <div className="flex items-center gap-2 mb-2">
-                                <input
-                                    type="text"
-                                    value={editValues[cfg.key]}
-                                    onChange={(e) => setEditValues(prev => ({ ...prev, [cfg.key]: e.target.value }))}
-                                    className={`w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic ${cfg.color} focus:border-amber-500/50 focus:outline-none`}
-                                />
+                                {cfg.key === 'lotSize' ? (
+                                    <select
+                                        value={editValues[cfg.key]}
+                                        onChange={(e) => setEditValues(prev => ({ ...prev, [cfg.key]: e.target.value }))}
+                                        className="w-24 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-blue-400 focus:border-amber-500/50 focus:outline-none cursor-pointer appearance-none"
+                                    >
+                                        <option value="0.01">0.01</option>
+                                        <option value="0.02">0.02</option>
+                                        <option value="0.03">0.03</option>
+                                        <option value="0.05">0.05</option>
+                                        <option value="0.07">0.07</option>
+                                        <option value="0.10">0.10</option>
+                                        <option value="0.15">0.15</option>
+                                        <option value="0.20">0.20</option>
+                                        <option value="0.25">0.25</option>
+                                        <option value="0.30">0.30</option>
+                                        <option value="0.40">0.40</option>
+                                        <option value="0.50">0.50</option>
+                                        <option value="0.75">0.75</option>
+                                        <option value="1.00">1.00</option>
+                                        <option value="1.50">1.50</option>
+                                        <option value="2.00">2.00</option>
+                                        <option value="5.00">5.00</option>
+                                        <option value="10.0">10.0</option>
+                                    </select>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        value={editValues[cfg.key]}
+                                        onChange={(e) => setEditValues(prev => ({ ...prev, [cfg.key]: e.target.value }))}
+                                        className={`w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic ${cfg.color} focus:border-amber-500/50 focus:outline-none`}
+                                    />
+                                )}
                                 <span className="text-xs text-slate-500 font-bold uppercase">{cfg.suffix}</span>
                             </div>
                             <p className="text-[10px] text-slate-500 leading-relaxed">{cfg.desc}</p>
