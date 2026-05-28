@@ -135,6 +135,38 @@ export const RiskManagement: React.FC = () => {
                 </div>
             </div>
 
+            {/* Configurações de Risco */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
+                <div className="flex items-center gap-2 mb-5">
+                    <Shield size={16} className="text-amber-400" />
+                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Configure a Gestão de Risco</span>
+                </div>
+                <p className="text-[10px] text-slate-400 mb-5 leading-relaxed">
+                    Defina limites de perda diária, drawdown máximo e tamanho de lote no menu "Gestão de Risco". Mantenha a margem livre acima de 50%.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[
+                        { label: 'Limite de Perda Diária', value: '250', suffix: 'USD', color: 'text-rose-400', icon: TrendingDown, desc: 'Máximo de perda permitida por dia antes de parar todas as operações.' },
+                        { label: 'Drawdown Máximo', value: '15', suffix: '%', color: 'text-amber-400', icon: Activity, desc: 'Percentual máximo de drawdown em relação ao saldo total da conta.' },
+                        { label: 'Tamanho de Lote', value: '0.01', suffix: 'lote', color: 'text-blue-400', icon: Target, desc: 'Volume padrão para cada ordem executada pelos robôs.' },
+                        { label: 'Margem Livre', value: '>50', suffix: '%', color: 'text-emerald-400', icon: Wallet, desc: 'Percentual mínimo de margem livre recomendado para segurança.' },
+                    ].map((cfg) => (
+                        <div key={cfg.label} className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 hover:border-amber-500/20 transition-all">
+                            <div className="flex items-center gap-2 mb-3">
+                                <cfg.icon size={14} className={cfg.color} />
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{cfg.label}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className={`text-lg font-black italic ${cfg.color}`}>{cfg.value}</span>
+                                <span className="text-[10px] text-slate-600 font-bold uppercase">{cfg.suffix}</span>
+                            </div>
+                            <p className="text-[9px] text-slate-500 leading-relaxed">{cfg.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* Account Health */}
             <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
