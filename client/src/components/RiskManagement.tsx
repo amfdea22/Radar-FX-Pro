@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
     Shield, Target, DollarSign, TrendingUp, TrendingDown, Activity,
     Wallet, BarChart3, Layers, AlertTriangle, Minus, Plus, Brain, Info, Cpu,
     Lock, Unlock, Volume2, Flag, CheckCircle2
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import axios from 'axios';
 
 interface RiskData {
@@ -83,11 +85,45 @@ export const RiskManagement: React.FC = () => {
         }
     };
 
+    const [dailyGoal, setDailyGoal] = useState(50);
+    const [goalLock, setGoalLock] = useState(false);
+    const [goalSound, setGoalSound] = useState(true);
+    const [prevReached, setPrevReached] = useState(false);
+    const [editValues, setEditValues] = useState<Record<string, string>>({
+        dailyLoss: '250', maxDrawdown: '15', lotSize: '0.01', freeMargin: '50',
+    });
+    const dailyProfit = data?.discipline?.dailyProfit || 0;
+    const goalReached = dailyProfit >= dailyGoal;
+
     useEffect(() => {
         fetchData();
         const interval = setInterval(fetchData, 8000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        if (goalReached && !prevReached && goalSound) {
+            try {
+                const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+                const play = (freq: number, time: number) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.3, time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(time);
+                    osc.stop(time + 0.3);
+                };
+                play(880, ctx.currentTime);
+                play(1100, ctx.currentTime + 0.15);
+                play(1320, ctx.currentTime + 0.3);
+            } catch {}
+        }
+        setPrevReached(goalReached);
+    }, [goalReached, goalSound, prevReached]);
 
     if (loading && !data) {
         return (
@@ -102,24 +138,12 @@ export const RiskManagement: React.FC = () => {
 
     const goldReport = data?.robots?.find(r => r.id === 'gold_scalper')?.report;
 
-    const [dailyGoal, setDailyGoal] = useState(50);
-    const [goalLock, setGoalLock] = useState(false);
-    const [goalSound, setGoalSound] = useState(true);
-    const dailyProfit = data?.discipline?.dailyProfit || 0;
-    const goalReached = dailyProfit >= dailyGoal;
-
     const configLimits = [
         { key: 'dailyLoss', label: 'Limite de Perda Diária', value: '250', suffix: 'USD', color: 'text-rose-400', icon: TrendingDown, desc: 'Máximo de perda permitida por dia antes de parar todas as operações.' },
         { key: 'maxDrawdown', label: 'Drawdown Máximo', value: '15', suffix: '%', color: 'text-amber-400', icon: Activity, desc: 'Percentual máximo de drawdown em relação ao saldo total da conta.' },
         { key: 'lotSize', label: 'Tamanho de Lote', value: '0.01', suffix: 'lote', color: 'text-blue-400', icon: Target, desc: 'Volume padrão para cada ordem executada pelos robôs.' },
         { key: 'freeMargin', label: 'Margem Livre Mínima', value: '50', suffix: '%', color: 'text-emerald-400', icon: Wallet, desc: 'Percentual mínimo de margem livre recomendado para segurança.' },
     ];
-    const [editValues, setEditValues] = useState<Record<string, string>>(() => {
-        const initial: Record<string, string> = {};
-        configLimits.forEach(c => { initial[c.key] = c.value; });
-        return initial;
-    });
-
     return (
         <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* HEADLINE */}
@@ -279,6 +303,80 @@ export const RiskManagement: React.FC = () => {
                     ))}
                 </div>
             </div>
+
+            {/* Gráficos Estatísticos */}
+            {goldReport?.monthly?.length > 0 && (
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"></div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <div className="flex items-center gap-2 mb-4">
+                            <BarChart3 size={16} className="text-blue-400" />
+                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Histograma — Lucro Mensal</span>
+                        </div>
+                        <ResponsiveContainer width="100%" height={220}>
+                            <BarChart data={goldReport.monthly.map((m: any) => ({ ...m, profit: Number(m.profit.toFixed(2)) }))}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                                <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                <Tooltip
+                                    contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 12, fontSize: 12 }}
+                                    labelStyle={{ color: '#94a3b8' }}
+                                    formatter={(value: number) => [`$${value}`, 'Lucro']}
+                                />
+                                <Bar dataKey="profit" radius={[6, 6, 0, 0]} maxBarSize={40}>
+                                    {goldReport.monthly.map((m: any, idx: number) => (
+                                        <Cell key={idx} fill={m.profit >= 0 ? '#10b981' : '#ef4444'} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2 mb-4">
+                            <Activity size={16} className="text-emerald-400" />
+                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Distribuição — Win / Loss</span>
+                        </div>
+                        <div className="flex items-center justify-center h-[220px]">
+                            <ResponsiveContainer width="60%" height={220}>
+                                <PieChart>
+                                    <Pie
+                                        data={[
+                                            { name: 'Wins', value: goldReport.discipline.breakdown.wins || goldReport.monthly.reduce((a: number, m: any) => a + m.wins, 0), color: '#10b981' },
+                                            { name: 'Losses', value: goldReport.discipline.breakdown.losses || goldReport.monthly.reduce((a: number, m: any) => a + m.losses, 0), color: '#ef4444' },
+                                        ]}
+                                        cx="50%" cy="50%" innerRadius={50} outerRadius={80}
+                                        paddingAngle={4} dataKey="value"
+                                    >
+                                        {[{ color: '#10b981' }, { color: '#ef4444' }].map((e, idx) => (
+                                            <Cell key={idx} fill={e.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 12, fontSize: 12 }}
+                                        formatter={(value: number) => [value, 'Trades']}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            <div className="flex flex-col gap-2 text-[10px]">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-sm bg-emerald-500" />
+                                    <span className="text-slate-400">Wins: <strong className="text-emerald-400">{goldReport.discipline.breakdown.wins || goldReport.monthly.reduce((a: number, m: any) => a + m.wins, 0)}</strong></span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-sm bg-red-500" />
+                                    <span className="text-slate-400">Losses: <strong className="text-red-400">{goldReport.discipline.breakdown.losses || goldReport.monthly.reduce((a: number, m: any) => a + m.losses, 0)}</strong></span>
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="w-3 h-3 rounded-sm bg-slate-700" />
+                                    <span className="text-slate-400">Win Rate: <strong className="text-white">{goldReport.discipline.breakdown.winRate || 0}%</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            )}
 
             {/* Risk Limits + Discipline Score row */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
