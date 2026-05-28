@@ -193,7 +193,7 @@ export const SecurityCenter: React.FC = () => {
                                 {isLocked ? 'Bloqueado' : 'Seguro'}
                             </span>
                         </h2>
-                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+                        <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-xs mt-2 flex items-center gap-2">
                             <Lock size={12} className="text-blue-400" /> Proteção institucional contra erros operacionais
                         </p>
                     </div>
@@ -301,7 +301,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <DollarSign size={18} className="text-amber-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Perda Diária</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Perda Diária</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('dailyLossLock', !config.dailyLossLock)}
@@ -311,7 +311,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="text-xs text-slate-500 font-bold">$</span>
+                            <span className="text-sm text-slate-500 font-bold">$</span>
                             <input
                                 type="text"
                                 value={config.dailyLossAmount}
@@ -320,8 +320,8 @@ export const SecurityCenter: React.FC = () => {
                                 className="w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-amber-400 focus:border-amber-500/50 focus:outline-none disabled:opacity-40"
                             />
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Bloqueia novas posições ao atingir o drawdown máximo estipulado</p>
-                        <div className={`mt-3 text-[10px] font-bold uppercase tracking-wider ${config.dailyLossLock ? 'text-amber-400' : 'text-slate-600'}`}>
+                        <p className="text-sm text-slate-500 leading-relaxed">Bloqueia novas posições ao atingir o drawdown máximo estipulado</p>
+                        <div className={`mt-3 text-sm font-bold uppercase tracking-wider ${config.dailyLossLock ? 'text-amber-400' : 'text-slate-600'}`}>
                             {config.dailyLossLock ? '🟢 Ativo' : '⚪ Inativo'}
                         </div>
                     </div>
@@ -334,7 +334,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Activity size={18} className="text-emerald-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Meta Batida</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Meta Batida</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('targetHitLock', !config.targetHitLock)}
@@ -344,7 +344,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="text-xs text-slate-500 font-bold">$</span>
+                            <span className="text-sm text-slate-500 font-bold">$</span>
                             <input
                                 type="text"
                                 value={config.targetHitAmount}
@@ -353,8 +353,8 @@ export const SecurityCenter: React.FC = () => {
                                 className="w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-emerald-400 focus:border-emerald-500/50 focus:outline-none disabled:opacity-40"
                             />
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Bloqueio opcional ao atingir o lucro financeiro do dia</p>
-                        <div className={`mt-3 text-[10px] font-bold uppercase tracking-wider ${config.targetHitLock ? 'text-emerald-400' : 'text-slate-600'}`}>
+                        <p className="text-sm text-slate-500 leading-relaxed">Bloqueio opcional ao atingir o lucro financeiro do dia</p>
+                        <div className={`mt-3 text-sm font-bold uppercase tracking-wider ${config.targetHitLock ? 'text-emerald-400' : 'text-slate-600'}`}>
                             {config.targetHitLock ? '🟢 Ativo' : '⚪ Inativo'}
                         </div>
                     </div>
@@ -367,7 +367,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Hand size={18} className="text-blue-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Fat Finger</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Fat Finger</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('fatFingerEnabled', !config.fatFingerEnabled)}
@@ -377,7 +377,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="text-xs text-slate-500 font-bold">Máx</span>
+                            <span className="text-sm text-slate-500 font-bold">Máx</span>
                             <input
                                 type="text"
                                 value={config.maxLotSize}
@@ -385,10 +385,10 @@ export const SecurityCenter: React.FC = () => {
                                 disabled={config.hardLockEnabled}
                                 className="w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-blue-400 focus:border-blue-500/50 focus:outline-none disabled:opacity-40"
                             />
-                            <span className="text-xs text-slate-500 font-bold">lotes</span>
+                            <span className="text-sm text-slate-500 font-bold">lotes</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Validador que barra ordens cujo lote exceda o limite máximo padrão</p>
-                        <div className={`mt-3 text-[10px] font-bold uppercase tracking-wider ${config.fatFingerEnabled ? 'text-blue-400' : 'text-slate-600'}`}>
+                        <p className="text-sm text-slate-500 leading-relaxed">Validador que barra ordens cujo lote exceda o limite máximo padrão</p>
+                        <div className={`mt-3 text-sm font-bold uppercase tracking-wider ${config.fatFingerEnabled ? 'text-blue-400' : 'text-slate-600'}`}>
                             {config.fatFingerEnabled ? '🟢 Ativo' : '⚪ Inativo'}
                         </div>
                     </div>
@@ -401,7 +401,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Zap size={18} className="text-cyan-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Spread Máximo (Anti-Slippage)</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Spread Máximo (Anti-Slippage)</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('spreadLockEnabled', !config.spreadLockEnabled)}
@@ -411,7 +411,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs text-slate-500 font-bold">Spread Máx Aceitável:</span>
+                            <span className="text-sm text-slate-500 font-bold">Spread Máx Aceitável:</span>
                             <input
                                 type="text"
                                 value={config.maxSpread}
@@ -419,11 +419,11 @@ export const SecurityCenter: React.FC = () => {
                                 disabled={config.hardLockEnabled}
                                 className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-cyan-400 focus:border-cyan-500/50 focus:outline-none disabled:opacity-40"
                             />
-                            <span className="text-xs text-slate-500 font-bold">pontos</span>
+                            <span className="text-sm text-slate-500 font-bold">pontos</span>
                         </div>
                         <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-slate-950/50 rounded-xl border border-slate-800">
                             <Activity size={14} className="text-slate-500" />
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Spread Atual:</span>
+                            <span className="text-sm text-slate-400 font-bold uppercase tracking-wider">Spread Atual:</span>
                             {currentSpread !== null ? (
                                 <span className={`text-sm font-black ${currentSpread <= config.maxSpread ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {currentSpread} pts
@@ -433,10 +433,10 @@ export const SecurityCenter: React.FC = () => {
                             )}
                         </div>
                         <div className="mb-3">
-                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Ação: </span>
-                            <span className="text-[10px] text-cyan-400 font-bold uppercase">🚫 Rejeitar entrada</span>
+                            <span className="text-sm text-slate-500 font-bold uppercase tracking-wider">Ação: </span>
+                            <span className="text-xs text-cyan-400 font-bold uppercase">🚫 Rejeitar entrada</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Impede operações em momentos de falta de liquidez ou pós-notícias</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Impede operações em momentos de falta de liquidez ou pós-notícias</p>
                     </div>
                 </div>
 
@@ -447,7 +447,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Brain size={18} className="text-violet-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Posições Simultâneas</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Posições Simultâneas</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('positionLockEnabled', !config.positionLockEnabled)}
@@ -457,7 +457,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs text-slate-500 font-bold">Máx de Posições Abertas:</span>
+                            <span className="text-sm text-slate-500 font-bold">Máx de Posições Abertas:</span>
                             <input
                                 type="text"
                                 value={config.maxPositions}
@@ -465,14 +465,14 @@ export const SecurityCenter: React.FC = () => {
                                 disabled={config.hardLockEnabled}
                                 className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-violet-400 focus:border-violet-500/50 focus:outline-none disabled:opacity-40"
                             />
-                            <span className="text-xs text-slate-500 font-bold">trades</span>
+                            <span className="text-sm text-slate-500 font-bold">trades</span>
                         </div>
                         <div className="px-3 py-2 bg-amber-500/5 border border-amber-500/10 rounded-xl mb-3">
-                            <p className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                            <p className="text-sm text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
                                 <AlertTriangle size={12} /> Tentativas de abertura além deste limite serão descartadas
                             </p>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Previne bug/loop no código Python ou atraso no MT5 de abrir dezenas de posições no mesmo preço</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Previne bug/loop no código Python ou atraso no MT5 de abrir dezenas de posições no mesmo preço</p>
                     </div>
                 </div>
 
@@ -483,7 +483,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <ShieldOff size={18} className="text-rose-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Hard Lock</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Hard Lock</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('hardLockEnabled', !config.hardLockEnabled)}
@@ -496,8 +496,8 @@ export const SecurityCenter: React.FC = () => {
                             <Clock size={14} className="text-slate-500" />
                             <span className="text-lg font-black italic text-slate-400">00:00</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Desativa edições de todos os limites até às 00:00 do servidor</p>
-                        <div className={`mt-3 text-[10px] font-bold uppercase tracking-wider ${config.hardLockEnabled ? 'text-rose-400' : 'text-slate-600'}`}>
+                        <p className="text-sm text-slate-500 leading-relaxed">Desativa edições de todos os limites até às 00:00 do servidor</p>
+                        <div className={`mt-3 text-sm font-bold uppercase tracking-wider ${config.hardLockEnabled ? 'text-rose-400' : 'text-slate-600'}`}>
                             {config.hardLockEnabled ? '🔴 Bloqueado' : '⚪ Liberado'}
                         </div>
                     </div>
@@ -510,12 +510,12 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Wifi size={18} className="text-green-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Saúde da Conexão</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Saúde da Conexão</span>
                             </div>
                             <RefreshCw size={14} className="text-slate-600 animate-[spin_2s_linear_infinite]" />
                         </div>
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs text-slate-500 font-bold">Latência Máx (ms):</span>
+                            <span className="text-sm text-slate-500 font-bold">Latência Máx (ms):</span>
                             <input
                                 type="text"
                                 value={config.maxLatency}
@@ -523,11 +523,11 @@ export const SecurityCenter: React.FC = () => {
                                 disabled={config.hardLockEnabled}
                                 className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-green-400 focus:border-green-500/50 focus:outline-none disabled:opacity-40"
                             />
-                            <span className="text-xs text-slate-500 font-bold">ms</span>
+                            <span className="text-sm text-slate-500 font-bold">ms</span>
                         </div>
                         <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-slate-950/50 rounded-xl border border-slate-800">
                             <Radio size={14} className="text-slate-500" />
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Conexão Atual:</span>
+                            <span className="text-sm text-slate-400 font-bold uppercase tracking-wider">Conexão Atual:</span>
                             {currentLatency !== null ? (
                                 <span className={`flex items-center gap-1.5 text-sm font-black ${
                                     currentLatency < 50 ? 'text-emerald-400' :
@@ -547,7 +547,7 @@ export const SecurityCenter: React.FC = () => {
                             )}
                         </div>
                         <div className="mb-3">
-                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Ação em caso de atraso: </span>
+                            <span className="text-sm text-slate-500 font-bold uppercase tracking-wider">Ação em caso de atraso: </span>
                             <div className="flex gap-3 mt-1">
                                 <label className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border cursor-pointer transition-all ${
                                     config.latencyAction === 'pause'
@@ -561,7 +561,7 @@ export const SecurityCenter: React.FC = () => {
                                         onChange={() => toggleSetting('latencyAction', 'pause')}
                                         className="sr-only"
                                     />
-                                    <span className="text-[10px] font-bold uppercase">Pausar Entradas</span>
+                                    <span className="text-sm font-bold uppercase">Pausar Entradas</span>
                                 </label>
                                 <label className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border cursor-pointer transition-all ${
                                     config.latencyAction === 'close'
@@ -575,11 +575,11 @@ export const SecurityCenter: React.FC = () => {
                                         onChange={() => toggleSetting('latencyAction', 'close')}
                                         className="sr-only"
                                     />
-                                    <span className="text-[10px] font-bold uppercase">Fechar Posições</span>
+                                    <span className="text-sm font-bold uppercase">Fechar Posições</span>
                                 </label>
                             </div>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Impede operações "cegas" com preços desatualizados por lentidão na VPS</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Impede operações "cegas" com preços desatualizados por lentidão na VPS</p>
                     </div>
                 </div>
 
@@ -590,7 +590,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Newspaper size={18} className="text-orange-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Trava de Notícias</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Trava de Notícias</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('newsLockEnabled', !config.newsLockEnabled)}
@@ -600,7 +600,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs text-slate-500 font-bold">Impacto Mín:</span>
+                            <span className="text-sm text-slate-500 font-bold">Impacto Mín:</span>
                             <select
                                 value={config.newsImpactMin}
                                 onChange={e => toggleSetting('newsImpactMin', e.target.value)}
@@ -613,10 +613,10 @@ export const SecurityCenter: React.FC = () => {
                             </select>
                         </div>
                         <div className="px-3 py-2 bg-slate-950/50 rounded-xl border border-slate-800 mb-3">
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status: </span>
-                            <span className="text-[10px] text-emerald-400 font-bold uppercase">📰 Monitorando calendário</span>
+                            <span className="text-sm text-slate-400 font-bold uppercase tracking-wider">Status: </span>
+                            <span className="text-xs text-emerald-400 font-bold uppercase">📰 Monitorando calendário</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Bloqueia operações durante eventos de alto impacto (CPI, FOMC, NFP)</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Bloqueia operações durante eventos de alto impacto (CPI, FOMC, NFP)</p>
                     </div>
                 </div>
 
@@ -627,7 +627,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <ListChecks size={18} className="text-teal-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Whitelist de Símbolos</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Whitelist de Símbolos</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('whitelistEnabled', !config.whitelistEnabled)}
@@ -646,10 +646,10 @@ export const SecurityCenter: React.FC = () => {
                         />
                         <div className="flex flex-wrap gap-1.5 mb-3">
                             {config.whitelistSymbols.split(',').map(s => s.trim()).filter(Boolean).map(sym => (
-                                <span key={sym} className="px-2 py-0.5 bg-teal-500/10 border border-teal-500/20 rounded-md text-[9px] font-bold text-teal-400 uppercase tracking-wider">{sym}</span>
+                                <span key={sym} className="px-2 py-0.5 bg-teal-500/10 border border-teal-500/20 rounded-md text-xs font-bold text-teal-400 uppercase tracking-wider">{sym}</span>
                             ))}
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Impede abrir posição em símbolo errado por engano</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Impede abrir posição em símbolo errado por engano</p>
                     </div>
                 </div>
 
@@ -660,7 +660,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Timer size={18} className="text-indigo-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Horário de Funcionamento</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Horário de Funcionamento</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('tradingHoursEnabled', !config.tradingHoursEnabled)}
@@ -671,7 +671,7 @@ export const SecurityCenter: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-3 mb-3">
                             <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-slate-500 font-bold">De</span>
+                                <span className="text-sm text-slate-500 font-bold">De</span>
                                 <input
                                     type="time"
                                     value={config.tradingStartHour}
@@ -681,7 +681,7 @@ export const SecurityCenter: React.FC = () => {
                                 />
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-slate-500 font-bold">Até</span>
+                                <span className="text-sm text-slate-500 font-bold">Até</span>
                                 <input
                                     type="time"
                                     value={config.tradingEndHour}
@@ -691,7 +691,7 @@ export const SecurityCenter: React.FC = () => {
                                 />
                             </div>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Fora da janela definida o robô não opera automaticamente</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Fora da janela definida o robô não opera automaticamente</p>
                     </div>
                 </div>
 
@@ -702,7 +702,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <TrendingDown size={18} className="text-rose-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Perdas Consecutivas</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Perdas Consecutivas</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('consecutiveLossLockEnabled', !config.consecutiveLossLockEnabled)}
@@ -712,7 +712,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs text-slate-500 font-bold">Máx de Losses:</span>
+                            <span className="text-sm text-slate-500 font-bold">Máx de Losses:</span>
                             <input
                                 type="text"
                                 value={config.maxConsecutiveLosses}
@@ -720,9 +720,9 @@ export const SecurityCenter: React.FC = () => {
                                 disabled={config.hardLockEnabled}
                                 className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-rose-400 focus:border-rose-500/50 focus:outline-none disabled:opacity-40"
                             />
-                            <span className="text-xs text-slate-500 font-bold">seguidos</span>
+                            <span className="text-sm text-slate-500 font-bold">seguidos</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Pausa todos os robôs automaticamente após X losses consecutivos</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Pausa todos os robôs automaticamente após X losses consecutivos</p>
                     </div>
                 </div>
 
@@ -733,7 +733,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <PiggyBank size={18} className="text-yellow-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Proteção de Saldo</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Proteção de Saldo</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('balanceProtectionEnabled', !config.balanceProtectionEnabled)}
@@ -743,7 +743,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs text-slate-500 font-bold">Saldo Mín:</span>
+                            <span className="text-sm text-slate-500 font-bold">Saldo Mín:</span>
                             <input
                                 type="text"
                                 value={config.minBalance}
@@ -751,9 +751,9 @@ export const SecurityCenter: React.FC = () => {
                                 disabled={config.hardLockEnabled}
                                 className="w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-yellow-400 focus:border-yellow-500/50 focus:outline-none disabled:opacity-40"
                             />
-                            <span className="text-xs text-slate-500 font-bold">USD</span>
+                            <span className="text-sm text-slate-500 font-bold">USD</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Se o saldo atingir este valor, todas as operações são encerradas e robôs desligados</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Se o saldo atingir este valor, todas as operações são encerradas e robôs desligados</p>
                     </div>
                 </div>
 
@@ -764,7 +764,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <EqualNot size={18} className="text-fuchsia-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Equity Protector</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Equity Protector</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('equityProtectionEnabled', !config.equityProtectionEnabled)}
@@ -774,7 +774,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs text-slate-500 font-bold">Drawdown Equity:</span>
+                            <span className="text-sm text-slate-500 font-bold">Drawdown Equity:</span>
                             <input
                                 type="text"
                                 value={config.equityDrawdownPercent}
@@ -782,9 +782,9 @@ export const SecurityCenter: React.FC = () => {
                                 disabled={config.hardLockEnabled}
                                 className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-fuchsia-400 focus:border-fuchsia-500/50 focus:outline-none disabled:opacity-40"
                             />
-                            <span className="text-xs text-slate-500 font-bold">%</span>
+                            <span className="text-sm text-slate-500 font-bold">%</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Trava baseada no equity (saldo + lucro flutuante), não apenas no saldo</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Trava baseada no equity (saldo + lucro flutuante), não apenas no saldo</p>
                     </div>
                 </div>
 
@@ -795,7 +795,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <KeyRound size={18} className="text-pink-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Confirmação 2FA</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Confirmação 2FA</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('twoFactorEnabled', !config.twoFactorEnabled)}
@@ -805,7 +805,7 @@ export const SecurityCenter: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs text-slate-500 font-bold">PIN:</span>
+                            <span className="text-sm text-slate-500 font-bold">PIN:</span>
                             <input
                                 type="password"
                                 value={config.twoFactorPin}
@@ -816,7 +816,7 @@ export const SecurityCenter: React.FC = () => {
                                 placeholder="******"
                             />
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Exige PIN secundário para Pânico, alterar limites e desligar travas</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Exige PIN secundário para Pânico, alterar limites e desligar travas</p>
                     </div>
                 </div>
 
@@ -827,7 +827,7 @@ export const SecurityCenter: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Ban size={18} className="text-sky-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Correlation Guard</span>
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Correlation Guard</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('correlationGuardEnabled', !config.correlationGuardEnabled)}
@@ -846,10 +846,10 @@ export const SecurityCenter: React.FC = () => {
                         />
                         <div className="flex flex-wrap gap-1.5 mb-3">
                             {config.correlationPairs.split(',').filter(Boolean).map(pair => (
-                                <span key={pair} className="px-2 py-0.5 bg-sky-500/10 border border-sky-500/20 rounded-md text-[9px] font-bold text-sky-400 uppercase tracking-wider">{pair}</span>
+                                <span key={pair} className="px-2 py-0.5 bg-sky-500/10 border border-sky-500/20 rounded-md text-xs font-bold text-sky-400 uppercase tracking-wider">{pair}</span>
                             ))}
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Bloqueia pares opostos simultâneos (ex: comprar XAUUSD e vender XAGUSD)</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">Bloqueia pares opostos simultâneos (ex: comprar XAUUSD e vender XAGUSD)</p>
                     </div>
                 </div>
             </div>
@@ -860,7 +860,7 @@ export const SecurityCenter: React.FC = () => {
                 <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-2">
                         <Terminal size={18} className="text-blue-400" />
-                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Histórico de Auditoria</span>
+                        <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Histórico de Auditoria</span>
                     </div>
                     <div className="flex items-center gap-3">
                         <select
@@ -883,12 +883,12 @@ export const SecurityCenter: React.FC = () => {
                         <div className="text-center py-12">
                             <FileText size={32} className="text-slate-700 mx-auto mb-3" />
                             <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">Nenhum registro de auditoria encontrado</p>
-                            <p className="text-[10px] text-slate-700 mt-1">Os eventos de segurança aparecerão aqui automaticamente</p>
+                            <p className="text-xs text-slate-700 mt-1">Os eventos de segurança aparecerão aqui automaticamente</p>
                         </div>
                     ) : (
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="text-[10px] text-slate-600 font-bold uppercase tracking-widest border-b border-slate-800">
+                                <tr className="text-sm text-slate-500 font-bold uppercase tracking-widest border-b border-slate-800">
                                     <th className="pb-3 pr-4">Timestamp</th>
                                     <th className="pb-3 pr-4">Nível</th>
                                     <th className="pb-3 pr-4">Ativo</th>
@@ -899,13 +899,13 @@ export const SecurityCenter: React.FC = () => {
                             </thead>
                             <tbody>
                                 {auditLogs.filter(e => filterLevel === 'all' || e.nivel === filterLevel).map(entry => (
-                                    <tr key={entry.id} className="text-xs text-slate-400 border-b border-slate-800/50 hover:bg-white/[0.02]">
-                                        <td className="py-3 pr-4 font-mono text-[10px] text-slate-500">{entry.timestamp}</td>
+                                    <tr key={entry.id} className="text-sm text-slate-300 border-b border-slate-800/50 hover:bg-white/[0.02]">
+                                        <td className="py-3 pr-4 font-mono text-xs text-slate-500">{entry.timestamp}</td>
                                         <td className="py-3 pr-4">{entry.nivel}</td>
                                         <td className="py-3 pr-4 font-bold">{entry.ativo}</td>
                                         <td className="py-3 pr-4">{entry.trava_acionada}</td>
                                         <td className="py-3 pr-4">{entry.acao_executada}</td>
-                                        <td className="py-3 pr-4 text-[10px] text-slate-500">{entry.detalhe_tecnico}</td>
+                                        <td className="py-3 pr-4 text-xs text-slate-500">{entry.detalhe_tecnico}</td>
                                     </tr>
                                 ))}
                             </tbody>
