@@ -31,7 +31,8 @@ import {
     Box,
     Wallet,
     Calendar,
-    Layers
+    Layers,
+    FileText
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -163,6 +164,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             label: 'MANUAL',
             items: [
                 { id: 'quick_start', icon: BookOpen, label: 'Início Rápido' },
+                { id: 'radar_guide', icon: FileText, label: 'Guia Radar' },
             ]
         },
         {

@@ -37,6 +37,7 @@ import { RadarDashboard } from './components/RadarDashboard';
 import { SystemSettings } from './components/SystemSettings';
 import { TraderArea } from './components/TraderArea';
 import { QuickStart } from './components/QuickStart';
+import { RadarGuide } from './components/RadarGuide';
 import { isAuthenticated } from './services/auth';
 import LoginPage from './pages/LoginPage';
 
@@ -156,6 +157,7 @@ function App() {
                         {activeTab === 'calendario' && <EconomicCalendarPanel />}
                         {activeTab === 'trader_area' && <TraderArea />}
                         {activeTab === 'quick_start' && <QuickStart />}
+                        {activeTab === 'radar_guide' && <RadarGuide />}
                         {activeTab === 'settings' && <SystemSettings />}
                     </motion.div>
                 </AnimatePresence>
