@@ -133,17 +133,6 @@ export const SecurityCenter: React.FC = () => {
     const [currentLatency, setCurrentLatency] = useState<number | null>(null);
 
     useEffect(() => {
-        axios.get('/api/mt5/risk-management').then(res => {
-            const d = res.data;
-            setConfig(prev => ({
-                ...prev,
-                dailyLossLock: d?.discipline?.isLocked || false,
-                dailyLossAmount: d?.discipline?.dailyStopLoss || 250,
-            }));
-        }).catch(() => {});
-    }, []);
-
-    useEffect(() => {
         const fetchRealtime = async () => {
             try {
                 const res = await axios.get('/api/mt5/gold-scalper/status');
