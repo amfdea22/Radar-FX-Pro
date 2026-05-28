@@ -257,7 +257,7 @@ export const RiskManagement: React.FC = () => {
                             </div>
                             <div className="h-4 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
                                 <div
-                                    className={`h-full rounded-full transition-all duration-1000 ease-out ${goalReached ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]' : 'bg-gradient-to-r from-amber-500 to-amber-400'}`}
+                                    className={`h-full rounded-full transition-all duration-1000 ease-out ${goalReached ? 'bg-gradient-to-r from-emerald-400 to-green-300 shadow-[0_0_30px_rgba(52,211,153,0.8),0_0_60px_rgba(52,211,153,0.3)]' : 'bg-gradient-to-r from-amber-500 to-amber-400'}`}
                                     style={{ width: `${Math.min(100, (dailyProfit / dailyGoal) * 100)}%` }}
                                 />
                             </div>
@@ -314,14 +314,14 @@ export const RiskManagement: React.FC = () => {
                             <BarChart3 size={16} className="text-blue-400" />
                             <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Histograma — Lucro Mensal</span>
                         </div>
-                        <ResponsiveContainer width="100%" height={220}>
+                        <ResponsiveContainer width="100%" height={260}>
                             <BarChart data={goldReport.monthly.map((m: any) => ({ ...m, profit: Number(m.profit.toFixed(2)) }))}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                                <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} axisLine={false} />
-                                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#ffffff', fontWeight: 700 }} tickLine={false} axisLine={{ stroke: '#334155' }} />
+                                <YAxis tick={{ fontSize: 11, fill: '#ffffff', fontWeight: 700 }} tickLine={false} axisLine={false} tickFormatter={(v: number) => `$${v}`} />
                                 <Tooltip
-                                    contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 12, fontSize: 12 }}
-                                    labelStyle={{ color: '#94a3b8' }}
+                                    contentStyle={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 12, fontSize: 12, color: '#fff' }}
+                                    labelStyle={{ color: '#fff', fontWeight: 700 }}
                                     formatter={(value: number) => [`$${value}`, 'Lucro']}
                                 />
                                 <Bar dataKey="profit" radius={[6, 6, 0, 0]} maxBarSize={40}>
