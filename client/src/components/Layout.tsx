@@ -32,7 +32,8 @@ import {
     Wallet,
     Calendar,
     Layers,
-    FileText
+    FileText,
+    Lock
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -174,6 +175,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 { id: 'agent_ia', icon: Brain, label: 'Agente IA' },
                 { id: 'alerts', icon: Bell, label: 'Alertas' },
                 { id: 'settings', icon: Settings, label: 'Ajustes' },
+            ]
+        },
+        {
+            label: 'SEGURANÇA',
+            items: [
+                { id: 'security_center', icon: Lock, label: 'Central Segurança' },
             ]
         },
     ];
