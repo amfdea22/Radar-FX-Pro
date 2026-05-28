@@ -103,9 +103,9 @@ export const RadarGuide: React.FC = () => {
           <div>
             <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Guia</span> Radar
-              <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-lg text-xs tracking-widest uppercase">Manual do Sistema</span>
+              <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-lg text-sm tracking-widest uppercase">Manual do Sistema</span>
             </h2>
-            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-xs mt-2 flex items-center gap-2">
               <Cpu size={12} className="text-blue-500" /> Guia Completo do Radar FX — Robôs, Ferramentas e Gestão
             </p>
           </div>
@@ -127,7 +127,7 @@ export const RadarGuide: React.FC = () => {
             <div className={`p-2 rounded-xl ${section.bgColor} ${section.borderColor} border`}>
               <section.icon size={18} className={section.color} />
             </div>
-            <h3 className="text-lg font-black text-white uppercase tracking-tight">{section.title}</h3>
+            <h3 className="text-xl font-black text-white uppercase tracking-tight">{section.title}</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -136,8 +136,8 @@ export const RadarGuide: React.FC = () => {
                 key={item.label}
                 className="bg-slate-800/30 rounded-xl p-4 border border-white/5 hover:bg-slate-800/50 transition-all duration-200"
               >
-                <p className="text-xs font-bold text-white mb-1.5">{item.label}</p>
-                <p className="text-[10px] text-slate-400 leading-relaxed">{item.desc}</p>
+                <p className="text-sm font-bold text-white mb-1.5">{item.label}</p>
+                <p className="text-sm text-slate-400 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>

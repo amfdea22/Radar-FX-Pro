@@ -74,9 +74,9 @@ export const QuickStart: React.FC = () => {
           <div>
             <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Início</span> Rápido
-              <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-lg text-xs tracking-widest uppercase">Quick Start</span>
+              <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-lg text-sm tracking-widest uppercase">Quick Start</span>
             </h2>
-            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 flex items-center gap-2">
+            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-xs mt-2 flex items-center gap-2">
               <Cpu size={12} className="text-blue-500" /> Guia Essencial para Começar com o Radar FX
             </p>
           </div>
@@ -99,11 +99,11 @@ export const QuickStart: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Passo {idx + 1}</span>
+                  <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Passo {idx + 1}</span>
                   <ArrowRight size={10} className="text-slate-600" />
                 </div>
-                <h3 className="text-sm font-black text-white uppercase tracking-tight mb-2">{step.title}</h3>
-                <p className="text-[10px] text-slate-400 leading-relaxed">{step.desc}</p>
+                <h3 className="text-base font-black text-white uppercase tracking-tight mb-2">{step.title}</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">{step.desc}</p>
               </div>
             </div>
           </motion.div>
@@ -116,14 +116,14 @@ export const QuickStart: React.FC = () => {
 
         <div className="flex items-center gap-2 mb-6">
           <Zap size={16} className="text-amber-400" />
-          <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Dicas Rápidas</p>
+          <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Dicas Rápidas</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {tips.map((tip, idx) => (
             <div key={idx} className="flex items-start gap-3 bg-slate-800/30 rounded-xl p-4 border border-white/5">
               <CheckCircle size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-              <p className="text-[10px] text-slate-400 leading-relaxed">{tip}</p>
+              <p className="text-sm text-slate-400 leading-relaxed">{tip}</p>
             </div>
           ))}
         </div>
