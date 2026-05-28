@@ -17,7 +17,10 @@ import {
     CheckCircle2,
     XCircle,
     FileText,
-    Download
+    Download,
+    Wifi,
+    Radio,
+    RefreshCw
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -35,6 +38,8 @@ interface SecurityConfig {
     positionLockEnabled: boolean;
     hardLockEnabled: boolean;
     hardLockUntil: string;
+    maxLatency: number;
+    latencyAction: 'pause' | 'close';
 }
 
 interface AuditEntry {
@@ -62,12 +67,16 @@ export const SecurityCenter: React.FC = () => {
         positionLockEnabled: true,
         hardLockEnabled: false,
         hardLockUntil: '00:00',
+        maxLatency: 150,
+        latencyAction: 'pause',
     });
     const [showPanicConfirm, setShowPanicConfirm] = useState(false);
     const [panicResult, setPanicResult] = useState<'idle' | 'executing' | 'success' | 'error'>('idle');
     const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([]);
     const [filterLevel, setFilterLevel] = useState<string>('all');
     const [isLocked, setIsLocked] = useState(false);
+    const [currentSpread, setCurrentSpread] = useState<number | null>(null);
+    const [currentLatency, setCurrentLatency] = useState<number | null>(null);
 
     useEffect(() => {
         axios.get('/api/mt5/risk-management').then(res => {
@@ -78,6 +87,26 @@ export const SecurityCenter: React.FC = () => {
                 dailyLossAmount: d?.discipline?.dailyStopLoss || 250,
             }));
         }).catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        const fetchRealtime = async () => {
+            try {
+                const res = await axios.get('/api/mt5/gold-scalper/status');
+                const spread = res.data?.currentSpread;
+                if (spread !== undefined) setCurrentSpread(spread);
+            } catch {}
+            try {
+                const t0 = performance.now();
+                await axios.get('/api/health', { timeout: 3000 });
+                setCurrentLatency(Math.round(performance.now() - t0));
+            } catch {
+                setCurrentLatency(null);
+            }
+        };
+        fetchRealtime();
+        const interval = setInterval(fetchRealtime, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const handlePanic = useCallback(async () => {
@@ -317,14 +346,14 @@ export const SecurityCenter: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Trava de Spread Máximo */}
+                {/* Trava de Spread Máximo (Anti-Slippage) */}
                 <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-cyan-500/20 transition-all relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Zap size={18} className="text-cyan-400" />
-                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Spread Máximo</span>
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Spread Máximo (Anti-Slippage)</span>
                             </div>
                             <button
                                 onClick={() => toggleSetting('spreadLockEnabled', !config.spreadLockEnabled)}
@@ -333,24 +362,37 @@ export const SecurityCenter: React.FC = () => {
                                 {config.spreadLockEnabled ? <Lock size={14} /> : <Unlock size={14} />}
                             </button>
                         </div>
-                        <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs text-slate-500 font-bold">Spread Máx Aceitável:</span>
                             <input
                                 type="text"
                                 value={config.maxSpread}
                                 onChange={e => toggleSetting('maxSpread', e.target.value)}
                                 disabled={config.hardLockEnabled}
-                                className="w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-cyan-400 focus:border-cyan-500/50 focus:outline-none disabled:opacity-40"
+                                className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-cyan-400 focus:border-cyan-500/50 focus:outline-none disabled:opacity-40"
                             />
-                            <span className="text-xs text-slate-500 font-bold">pts</span>
+                            <span className="text-xs text-slate-500 font-bold">pontos</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Rejeita operações no ativo se o spread estourar o limite configurado</p>
-                        <div className={`mt-3 text-[10px] font-bold uppercase tracking-wider ${config.spreadLockEnabled ? 'text-cyan-400' : 'text-slate-600'}`}>
-                            {config.spreadLockEnabled ? '🟢 Ativo' : '⚪ Inativo'}
+                        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-slate-950/50 rounded-xl border border-slate-800">
+                            <Activity size={14} className="text-slate-500" />
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Spread Atual:</span>
+                            {currentSpread !== null ? (
+                                <span className={`text-sm font-black ${currentSpread <= config.maxSpread ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {currentSpread} pts
+                                </span>
+                            ) : (
+                                <span className="text-xs text-slate-600">—</span>
+                            )}
                         </div>
+                        <div className="mb-3">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Ação: </span>
+                            <span className="text-[10px] text-cyan-400 font-bold uppercase">🚫 Rejeitar entrada</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Impede operações em momentos de falta de liquidez ou pós-notícias</p>
                     </div>
                 </div>
 
-                {/* Limite de Posições Simultâneas */}
+                {/* Limite de Operações Simultâneas (Anti-Grid de Erro) */}
                 <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-violet-500/20 transition-all relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
                     <div className="relative z-10">
@@ -366,20 +408,23 @@ export const SecurityCenter: React.FC = () => {
                                 {config.positionLockEnabled ? <Lock size={14} /> : <Unlock size={14} />}
                             </button>
                         </div>
-                        <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs text-slate-500 font-bold">Máx de Posições Abertas:</span>
                             <input
                                 type="text"
                                 value={config.maxPositions}
                                 onChange={e => toggleSetting('maxPositions', e.target.value)}
                                 disabled={config.hardLockEnabled}
-                                className="w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-violet-400 focus:border-violet-500/50 focus:outline-none disabled:opacity-40"
+                                className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-violet-400 focus:border-violet-500/50 focus:outline-none disabled:opacity-40"
                             />
-                            <span className="text-xs text-slate-500 font-bold">posições</span>
+                            <span className="text-xs text-slate-500 font-bold">trades</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">Trava para evitar loops infinitos de aberturas no mesmo preço</p>
-                        <div className={`mt-3 text-[10px] font-bold uppercase tracking-wider ${config.positionLockEnabled ? 'text-violet-400' : 'text-slate-600'}`}>
-                            {config.positionLockEnabled ? '🟢 Ativo' : '⚪ Inativo'}
+                        <div className="px-3 py-2 bg-amber-500/5 border border-amber-500/10 rounded-xl mb-3">
+                            <p className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                <AlertTriangle size={12} /> Tentativas de abertura além deste limite serão descartadas
+                            </p>
                         </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Previne bug/loop no código Python ou atraso no MT5 de abrir dezenas de posições no mesmo preço</p>
                     </div>
                 </div>
 
@@ -407,6 +452,86 @@ export const SecurityCenter: React.FC = () => {
                         <div className={`mt-3 text-[10px] font-bold uppercase tracking-wider ${config.hardLockEnabled ? 'text-rose-400' : 'text-slate-600'}`}>
                             {config.hardLockEnabled ? '🔴 Bloqueado' : '⚪ Liberado'}
                         </div>
+                    </div>
+                </div>
+
+                {/* Monitor de Saúde da Conexão (Ping e Latência) */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-green-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-green-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Wifi size={18} className="text-green-400" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Saúde da Conexão</span>
+                            </div>
+                            <RefreshCw size={14} className="text-slate-600 animate-[spin_2s_linear_infinite]" />
+                        </div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs text-slate-500 font-bold">Latência Máx (ms):</span>
+                            <input
+                                type="text"
+                                value={config.maxLatency}
+                                onChange={e => toggleSetting('maxLatency', Number(e.target.value))}
+                                disabled={config.hardLockEnabled}
+                                className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-green-400 focus:border-green-500/50 focus:outline-none disabled:opacity-40"
+                            />
+                            <span className="text-xs text-slate-500 font-bold">ms</span>
+                        </div>
+                        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-slate-950/50 rounded-xl border border-slate-800">
+                            <Radio size={14} className="text-slate-500" />
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Conexão Atual:</span>
+                            {currentLatency !== null ? (
+                                <span className={`flex items-center gap-1.5 text-sm font-black ${
+                                    currentLatency < 50 ? 'text-emerald-400' :
+                                    currentLatency < config.maxLatency ? 'text-amber-400' : 'text-rose-400'
+                                }`}>
+                                    <span className={`w-2 h-2 rounded-full ${
+                                        currentLatency < 50 ? 'bg-emerald-400' :
+                                        currentLatency < config.maxLatency ? 'bg-amber-400' : 'bg-rose-400'
+                                    }`} />
+                                    {currentLatency} ms
+                                    <span className="text-[8px] text-slate-500 font-normal normal-case">
+                                        ({currentLatency < 50 ? 'excelente' : currentLatency < config.maxLatency ? 'moderado' : 'crítico'})
+                                    </span>
+                                </span>
+                            ) : (
+                                <span className="text-xs text-rose-400 font-bold">🔴 Sem conexão</span>
+                            )}
+                        </div>
+                        <div className="mb-3">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Ação em caso de atraso: </span>
+                            <div className="flex gap-3 mt-1">
+                                <label className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border cursor-pointer transition-all ${
+                                    config.latencyAction === 'pause'
+                                        ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                                        : 'bg-slate-800/50 border-slate-700 text-slate-500'
+                                }`}>
+                                    <input
+                                        type="radio"
+                                        name="latencyAction"
+                                        checked={config.latencyAction === 'pause'}
+                                        onChange={() => toggleSetting('latencyAction', 'pause')}
+                                        className="sr-only"
+                                    />
+                                    <span className="text-[10px] font-bold uppercase">Pausar Entradas</span>
+                                </label>
+                                <label className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border cursor-pointer transition-all ${
+                                    config.latencyAction === 'close'
+                                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                                        : 'bg-slate-800/50 border-slate-700 text-slate-500'
+                                }`}>
+                                    <input
+                                        type="radio"
+                                        name="latencyAction"
+                                        checked={config.latencyAction === 'close'}
+                                        onChange={() => toggleSetting('latencyAction', 'close')}
+                                        className="sr-only"
+                                    />
+                                    <span className="text-[10px] font-bold uppercase">Fechar Posições</span>
+                                </label>
+                            </div>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Impede operações "cegas" com preços desatualizados por lentidão na VPS</p>
                     </div>
                 </div>
             </div>
