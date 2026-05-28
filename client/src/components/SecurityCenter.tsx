@@ -77,41 +77,53 @@ interface AuditEntry {
     detalhe_tecnico: string;
 }
 
+const STORAGE_KEY = 'radar_security_config';
+
+const DEFAULT_CONFIG: SecurityConfig = {
+    panicEnabled: false,
+    dailyLossLock: true,
+    dailyLossAmount: 250,
+    targetHitLock: false,
+    targetHitAmount: 500,
+    maxLotSize: 2.0,
+    fatFingerEnabled: true,
+    maxSpread: 30,
+    spreadLockEnabled: true,
+    maxPositions: 5,
+    positionLockEnabled: true,
+    hardLockEnabled: false,
+    hardLockUntil: '00:00',
+    maxLatency: 150,
+    latencyAction: 'pause',
+    newsLockEnabled: true,
+    newsImpactMin: 'HIGH',
+    whitelistEnabled: false,
+    whitelistSymbols: 'XAUUSD,BTCUSD,GBPUSD',
+    tradingHoursEnabled: true,
+    tradingStartHour: '09:00',
+    tradingEndHour: '17:00',
+    maxConsecutiveLosses: 3,
+    consecutiveLossLockEnabled: true,
+    minBalance: 100,
+    balanceProtectionEnabled: true,
+    equityProtectionEnabled: true,
+    equityDrawdownPercent: 20,
+    twoFactorEnabled: false,
+    twoFactorPin: '',
+    correlationGuardEnabled: false,
+    correlationPairs: 'XAUUSD⇄XAGUSD,EURUSD⇄GBPUSD',
+};
+
+function loadConfig(): SecurityConfig {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
+    } catch {}
+    return DEFAULT_CONFIG;
+}
+
 export const SecurityCenter: React.FC = () => {
-    const [config, setConfig] = useState<SecurityConfig>({
-        panicEnabled: false,
-        dailyLossLock: true,
-        dailyLossAmount: 250,
-        targetHitLock: false,
-        targetHitAmount: 500,
-        maxLotSize: 2.0,
-        fatFingerEnabled: true,
-        maxSpread: 30,
-        spreadLockEnabled: true,
-        maxPositions: 5,
-        positionLockEnabled: true,
-        hardLockEnabled: false,
-        hardLockUntil: '00:00',
-        maxLatency: 150,
-        latencyAction: 'pause',
-        newsLockEnabled: true,
-        newsImpactMin: 'HIGH',
-        whitelistEnabled: false,
-        whitelistSymbols: 'XAUUSD,BTCUSD,GBPUSD',
-        tradingHoursEnabled: true,
-        tradingStartHour: '09:00',
-        tradingEndHour: '17:00',
-        maxConsecutiveLosses: 3,
-        consecutiveLossLockEnabled: true,
-        minBalance: 100,
-        balanceProtectionEnabled: true,
-        equityProtectionEnabled: true,
-        equityDrawdownPercent: 20,
-        twoFactorEnabled: false,
-        twoFactorPin: '',
-        correlationGuardEnabled: false,
-        correlationPairs: 'XAUUSD⇄XAGUSD,EURUSD⇄GBPUSD',
-    });
+    const [config, setConfig] = useState<SecurityConfig>(loadConfig);
     const [showPanicConfirm, setShowPanicConfirm] = useState(false);
     const [panicResult, setPanicResult] = useState<'idle' | 'executing' | 'success' | 'error'>('idle');
     const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([]);
@@ -150,6 +162,11 @@ export const SecurityCenter: React.FC = () => {
         const interval = setInterval(fetchRealtime, 5000);
         return () => clearInterval(interval);
     }, []);
+
+    // Persiste config no localStorage e tenta salvar no backend
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    }, [config]);
 
     const handlePanic = useCallback(async () => {
         setPanicResult('executing');
