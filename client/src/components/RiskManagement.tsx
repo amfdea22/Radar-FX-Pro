@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
     Shield, Target, DollarSign, TrendingUp, TrendingDown, Activity,
-    Wallet, BarChart3, Layers, AlertTriangle, Minus, Plus, Brain, Info, Cpu
+    Wallet, BarChart3, Layers, AlertTriangle, Minus, Plus, Brain, Info, Cpu,
+    Lock, Unlock, Volume2, Flag, CheckCircle2
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -101,6 +102,24 @@ export const RiskManagement: React.FC = () => {
 
     const goldReport = data?.robots?.find(r => r.id === 'gold_scalper')?.report;
 
+    const [dailyGoal, setDailyGoal] = useState(50);
+    const [goalLock, setGoalLock] = useState(false);
+    const [goalSound, setGoalSound] = useState(true);
+    const dailyProfit = data?.discipline?.dailyProfit || 0;
+    const goalReached = dailyProfit >= dailyGoal;
+
+    const configLimits = [
+        { key: 'dailyLoss', label: 'Limite de Perda Diária', value: '250', suffix: 'USD', color: 'text-rose-400', icon: TrendingDown, desc: 'Máximo de perda permitida por dia antes de parar todas as operações.' },
+        { key: 'maxDrawdown', label: 'Drawdown Máximo', value: '15', suffix: '%', color: 'text-amber-400', icon: Activity, desc: 'Percentual máximo de drawdown em relação ao saldo total da conta.' },
+        { key: 'lotSize', label: 'Tamanho de Lote', value: '0.01', suffix: 'lote', color: 'text-blue-400', icon: Target, desc: 'Volume padrão para cada ordem executada pelos robôs.' },
+        { key: 'freeMargin', label: 'Margem Livre Mínima', value: '50', suffix: '%', color: 'text-emerald-400', icon: Wallet, desc: 'Percentual mínimo de margem livre recomendado para segurança.' },
+    ];
+    const [editValues, setEditValues] = useState<Record<string, string>>(() => {
+        const initial: Record<string, string> = {};
+        configLimits.forEach(c => { initial[c.key] = c.value; });
+        return initial;
+    });
+
     return (
         <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* HEADLINE */}
@@ -139,31 +158,99 @@ export const RiskManagement: React.FC = () => {
             <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
                 <div className="flex items-center gap-2 mb-5">
-                    <Shield size={16} className="text-amber-400" />
-                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Configure a Gestão de Risco</span>
+                    <Shield size={18} className="text-amber-400" />
+                    <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Configure a Gestão de Risco</span>
                 </div>
-                <p className="text-[10px] text-slate-400 mb-5 leading-relaxed">
-                    Defina limites de perda diária, drawdown máximo e tamanho de lote no menu "Gestão de Risco". Mantenha a margem livre acima de 50%.
+                <p className="text-xs text-slate-400 mb-5 leading-relaxed">
+                    Defina limites de perda diária, drawdown máximo e tamanho de lote. Mantenha a margem livre acima de 50%.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                        { label: 'Limite de Perda Diária', value: '250', suffix: 'USD', color: 'text-rose-400', icon: TrendingDown, desc: 'Máximo de perda permitida por dia antes de parar todas as operações.' },
-                        { label: 'Drawdown Máximo', value: '15', suffix: '%', color: 'text-amber-400', icon: Activity, desc: 'Percentual máximo de drawdown em relação ao saldo total da conta.' },
-                        { label: 'Tamanho de Lote', value: '0.01', suffix: 'lote', color: 'text-blue-400', icon: Target, desc: 'Volume padrão para cada ordem executada pelos robôs.' },
-                        { label: 'Margem Livre', value: '>50', suffix: '%', color: 'text-emerald-400', icon: Wallet, desc: 'Percentual mínimo de margem livre recomendado para segurança.' },
-                    ].map((cfg) => (
-                        <div key={cfg.label} className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 hover:border-amber-500/20 transition-all">
+                    {configLimits.map((cfg) => (
+                        <div key={cfg.key} className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 hover:border-amber-500/20 transition-all">
                             <div className="flex items-center gap-2 mb-3">
-                                <cfg.icon size={14} className={cfg.color} />
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{cfg.label}</span>
+                                <cfg.icon size={16} className={cfg.color} />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{cfg.label}</span>
                             </div>
                             <div className="flex items-center gap-2 mb-2">
-                                <span className={`text-lg font-black italic ${cfg.color}`}>{cfg.value}</span>
-                                <span className="text-[10px] text-slate-600 font-bold uppercase">{cfg.suffix}</span>
+                                <input
+                                    type="text"
+                                    value={editValues[cfg.key]}
+                                    onChange={(e) => setEditValues(prev => ({ ...prev, [cfg.key]: e.target.value }))}
+                                    className={`w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic ${cfg.color} focus:border-amber-500/50 focus:outline-none`}
+                                />
+                                <span className="text-xs text-slate-500 font-bold uppercase">{cfg.suffix}</span>
                             </div>
-                            <p className="text-[9px] text-slate-500 leading-relaxed">{cfg.desc}</p>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">{cfg.desc}</p>
                         </div>
                     ))}
+                </div>
+            </div>
+
+            {/* Meta Diária */}
+            <div className={`bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border shadow-2xl relative overflow-hidden transition-all duration-500 ${goalReached ? 'border-emerald-500/40 shadow-[0_0_60px_rgba(16,185,129,0.15)]' : 'border-white/5'}`}>
+                <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-current to-transparent ${goalReached ? 'text-emerald-400' : 'text-amber-500/40'}`}></div>
+                {goalReached && (
+                    <div className="absolute inset-0 pointer-events-none">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] animate-pulse"></div>
+                    </div>
+                )}
+                <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-2">
+                            <Flag size={18} className={goalReached ? 'text-emerald-400' : 'text-amber-400'} />
+                            <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Meta Diária</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button onClick={() => setGoalSound(!goalSound)} className={`p-2 rounded-xl border transition-all ${goalSound ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`} title="Sinal Sonoro">
+                                <Volume2 size={14} />
+                            </button>
+                            <button onClick={() => setGoalLock(!goalLock)} className={`p-2 rounded-xl border transition-all ${goalLock ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`} title="Travar ao Atingir Meta">
+                                {goalLock ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+                        <div className="lg:col-span-1">
+                            <p className="text-[10px] text-slate-500 mb-1 font-bold uppercase tracking-widest">Meta de Lucro</p>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    value={dailyGoal}
+                                    onChange={(e) => setDailyGoal(Number(e.target.value))}
+                                    className="w-28 bg-slate-950/80 border border-slate-700 rounded-xl px-3 py-2 text-2xl font-black text-white focus:border-emerald-500/50 focus:outline-none"
+                                />
+                                <span className="text-xs text-slate-500 font-bold uppercase">USD</span>
+                            </div>
+                        </div>
+
+                        <div className="lg:col-span-2">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Progresso</span>
+                                <span className={`text-sm font-black italic ${goalReached ? 'text-emerald-400' : 'text-slate-400'}`}>
+                                    ${dailyProfit.toFixed(2)} / ${dailyGoal}
+                                </span>
+                            </div>
+                            <div className="h-4 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                                <div
+                                    className={`h-full rounded-full transition-all duration-1000 ease-out ${goalReached ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]' : 'bg-gradient-to-r from-amber-500 to-amber-400'}`}
+                                    style={{ width: `${Math.min(100, (dailyProfit / dailyGoal) * 100)}%` }}
+                                />
+                            </div>
+                            {goalReached && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="flex items-center gap-2 mt-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"
+                                >
+                                    <CheckCircle2 size={16} className="text-emerald-400" />
+                                    <span className="text-xs font-black text-emerald-400 uppercase tracking-wider">
+                                        Meta Atingida! {goalLock ? 'Travado — operações pausadas.' : 'Operações ativas.'}
+                                    </span>
+                                </motion.div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
