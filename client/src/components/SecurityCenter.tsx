@@ -20,7 +20,15 @@ import {
     Download,
     Wifi,
     Radio,
-    RefreshCw
+    RefreshCw,
+    Newspaper,
+    ListChecks,
+    Timer,
+    TrendingDown,
+    PiggyBank,
+    EqualNot,
+    KeyRound,
+    Ban
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -40,6 +48,23 @@ interface SecurityConfig {
     hardLockUntil: string;
     maxLatency: number;
     latencyAction: 'pause' | 'close';
+    newsLockEnabled: boolean;
+    newsImpactMin: string;
+    whitelistEnabled: boolean;
+    whitelistSymbols: string;
+    tradingHoursEnabled: boolean;
+    tradingStartHour: string;
+    tradingEndHour: string;
+    maxConsecutiveLosses: number;
+    consecutiveLossLockEnabled: boolean;
+    minBalance: number;
+    balanceProtectionEnabled: boolean;
+    equityProtectionEnabled: boolean;
+    equityDrawdownPercent: number;
+    twoFactorEnabled: boolean;
+    twoFactorPin: string;
+    correlationGuardEnabled: boolean;
+    correlationPairs: string;
 }
 
 interface AuditEntry {
@@ -69,6 +94,23 @@ export const SecurityCenter: React.FC = () => {
         hardLockUntil: '00:00',
         maxLatency: 150,
         latencyAction: 'pause',
+        newsLockEnabled: true,
+        newsImpactMin: 'HIGH',
+        whitelistEnabled: false,
+        whitelistSymbols: 'XAUUSD,BTCUSD,GBPUSD',
+        tradingHoursEnabled: true,
+        tradingStartHour: '09:00',
+        tradingEndHour: '17:00',
+        maxConsecutiveLosses: 3,
+        consecutiveLossLockEnabled: true,
+        minBalance: 100,
+        balanceProtectionEnabled: true,
+        equityProtectionEnabled: true,
+        equityDrawdownPercent: 20,
+        twoFactorEnabled: false,
+        twoFactorPin: '',
+        correlationGuardEnabled: false,
+        correlationPairs: 'XAUUSD⇄XAGUSD,EURUSD⇄GBPUSD',
     });
     const [showPanicConfirm, setShowPanicConfirm] = useState(false);
     const [panicResult, setPanicResult] = useState<'idle' | 'executing' | 'success' | 'error'>('idle');
@@ -532,6 +574,276 @@ export const SecurityCenter: React.FC = () => {
                             </div>
                         </div>
                         <p className="text-[10px] text-slate-500 leading-relaxed">Impede operações "cegas" com preços desatualizados por lentidão na VPS</p>
+                    </div>
+                </div>
+
+                {/* Trava de Notícias */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-orange-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-orange-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Newspaper size={18} className="text-orange-400" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Trava de Notícias</span>
+                            </div>
+                            <button
+                                onClick={() => toggleSetting('newsLockEnabled', !config.newsLockEnabled)}
+                                className={`p-2 rounded-xl border transition-all ${config.newsLockEnabled ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`}
+                            >
+                                {config.newsLockEnabled ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs text-slate-500 font-bold">Impacto Mín:</span>
+                            <select
+                                value={config.newsImpactMin}
+                                onChange={e => toggleSetting('newsImpactMin', e.target.value)}
+                                disabled={config.hardLockEnabled}
+                                className="bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-xs font-black text-orange-400 focus:border-orange-500/50 focus:outline-none disabled:opacity-40 cursor-pointer"
+                            >
+                                <option value="HIGH">Alto</option>
+                                <option value="MEDIUM">Médio</option>
+                                <option value="LOW">Baixo</option>
+                            </select>
+                        </div>
+                        <div className="px-3 py-2 bg-slate-950/50 rounded-xl border border-slate-800 mb-3">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status: </span>
+                            <span className="text-[10px] text-emerald-400 font-bold uppercase">📰 Monitorando calendário</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Bloqueia operações durante eventos de alto impacto (CPI, FOMC, NFP)</p>
+                    </div>
+                </div>
+
+                {/* Whitelist de Símbolos */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-teal-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-teal-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <ListChecks size={18} className="text-teal-400" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Whitelist de Símbolos</span>
+                            </div>
+                            <button
+                                onClick={() => toggleSetting('whitelistEnabled', !config.whitelistEnabled)}
+                                className={`p-2 rounded-xl border transition-all ${config.whitelistEnabled ? 'bg-teal-500/10 border-teal-500/20 text-teal-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`}
+                            >
+                                {config.whitelistEnabled ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                        <input
+                            type="text"
+                            value={config.whitelistSymbols}
+                            onChange={e => toggleSetting('whitelistSymbols', e.target.value)}
+                            disabled={config.hardLockEnabled || !config.whitelistEnabled}
+                            className="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-teal-400 focus:border-teal-500/50 focus:outline-none disabled:opacity-40 mb-3"
+                            placeholder="XAUUSD,BTCUSD,GBPUSD"
+                        />
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                            {config.whitelistSymbols.split(',').map(s => s.trim()).filter(Boolean).map(sym => (
+                                <span key={sym} className="px-2 py-0.5 bg-teal-500/10 border border-teal-500/20 rounded-md text-[9px] font-bold text-teal-400 uppercase tracking-wider">{sym}</span>
+                            ))}
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Impede abrir posição em símbolo errado por engano</p>
+                    </div>
+                </div>
+
+                {/* Horário de Funcionamento */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-indigo-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Timer size={18} className="text-indigo-400" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Horário de Funcionamento</span>
+                            </div>
+                            <button
+                                onClick={() => toggleSetting('tradingHoursEnabled', !config.tradingHoursEnabled)}
+                                className={`p-2 rounded-xl border transition-all ${config.tradingHoursEnabled ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`}
+                            >
+                                {config.tradingHoursEnabled ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-slate-500 font-bold">De</span>
+                                <input
+                                    type="time"
+                                    value={config.tradingStartHour}
+                                    onChange={e => toggleSetting('tradingStartHour', e.target.value)}
+                                    disabled={config.hardLockEnabled}
+                                    className="bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-xs font-black text-indigo-400 focus:border-indigo-500/50 focus:outline-none disabled:opacity-40"
+                                />
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-slate-500 font-bold">Até</span>
+                                <input
+                                    type="time"
+                                    value={config.tradingEndHour}
+                                    onChange={e => toggleSetting('tradingEndHour', e.target.value)}
+                                    disabled={config.hardLockEnabled}
+                                    className="bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-xs font-black text-indigo-400 focus:border-indigo-500/50 focus:outline-none disabled:opacity-40"
+                                />
+                            </div>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Fora da janela definida o robô não opera automaticamente</p>
+                    </div>
+                </div>
+
+                {/* Perdas Consecutivas */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-rose-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-rose-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <TrendingDown size={18} className="text-rose-400" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Perdas Consecutivas</span>
+                            </div>
+                            <button
+                                onClick={() => toggleSetting('consecutiveLossLockEnabled', !config.consecutiveLossLockEnabled)}
+                                className={`p-2 rounded-xl border transition-all ${config.consecutiveLossLockEnabled ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`}
+                            >
+                                {config.consecutiveLossLockEnabled ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs text-slate-500 font-bold">Máx de Losses:</span>
+                            <input
+                                type="text"
+                                value={config.maxConsecutiveLosses}
+                                onChange={e => toggleSetting('maxConsecutiveLosses', Number(e.target.value))}
+                                disabled={config.hardLockEnabled}
+                                className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-rose-400 focus:border-rose-500/50 focus:outline-none disabled:opacity-40"
+                            />
+                            <span className="text-xs text-slate-500 font-bold">seguidos</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Pausa todos os robôs automaticamente após X losses consecutivos</p>
+                    </div>
+                </div>
+
+                {/* Proteção de Saldo */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-yellow-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-yellow-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <PiggyBank size={18} className="text-yellow-400" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Proteção de Saldo</span>
+                            </div>
+                            <button
+                                onClick={() => toggleSetting('balanceProtectionEnabled', !config.balanceProtectionEnabled)}
+                                className={`p-2 rounded-xl border transition-all ${config.balanceProtectionEnabled ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`}
+                            >
+                                {config.balanceProtectionEnabled ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs text-slate-500 font-bold">Saldo Mín:</span>
+                            <input
+                                type="text"
+                                value={config.minBalance}
+                                onChange={e => toggleSetting('minBalance', Number(e.target.value))}
+                                disabled={config.hardLockEnabled}
+                                className="w-20 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-yellow-400 focus:border-yellow-500/50 focus:outline-none disabled:opacity-40"
+                            />
+                            <span className="text-xs text-slate-500 font-bold">USD</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Se o saldo atingir este valor, todas as operações são encerradas e robôs desligados</p>
+                    </div>
+                </div>
+
+                {/* Equity Protector */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-fuchsia-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <EqualNot size={18} className="text-fuchsia-400" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Equity Protector</span>
+                            </div>
+                            <button
+                                onClick={() => toggleSetting('equityProtectionEnabled', !config.equityProtectionEnabled)}
+                                className={`p-2 rounded-xl border transition-all ${config.equityProtectionEnabled ? 'bg-fuchsia-500/10 border-fuchsia-500/20 text-fuchsia-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`}
+                            >
+                                {config.equityProtectionEnabled ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs text-slate-500 font-bold">Drawdown Equity:</span>
+                            <input
+                                type="text"
+                                value={config.equityDrawdownPercent}
+                                onChange={e => toggleSetting('equityDrawdownPercent', Number(e.target.value))}
+                                disabled={config.hardLockEnabled}
+                                className="w-16 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-fuchsia-400 focus:border-fuchsia-500/50 focus:outline-none disabled:opacity-40"
+                            />
+                            <span className="text-xs text-slate-500 font-bold">%</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Trava baseada no equity (saldo + lucro flutuante), não apenas no saldo</p>
+                    </div>
+                </div>
+
+                {/* Confirmação 2FA */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-pink-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-pink-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <KeyRound size={18} className="text-pink-400" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Confirmação 2FA</span>
+                            </div>
+                            <button
+                                onClick={() => toggleSetting('twoFactorEnabled', !config.twoFactorEnabled)}
+                                className={`p-2 rounded-xl border transition-all ${config.twoFactorEnabled ? 'bg-pink-500/10 border-pink-500/20 text-pink-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`}
+                            >
+                                {config.twoFactorEnabled ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs text-slate-500 font-bold">PIN:</span>
+                            <input
+                                type="password"
+                                value={config.twoFactorPin}
+                                onChange={e => toggleSetting('twoFactorPin', e.target.value)}
+                                disabled={config.hardLockEnabled || !config.twoFactorEnabled}
+                                maxLength={6}
+                                className="w-24 bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1 text-lg font-black italic text-pink-400 focus:border-pink-500/50 focus:outline-none disabled:opacity-40 placeholder:text-slate-700"
+                                placeholder="******"
+                            />
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Exige PIN secundário para Pânico, alterar limites e desligar travas</p>
+                    </div>
+                </div>
+
+                {/* Correlation Guard */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-sky-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Ban size={18} className="text-sky-400" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Correlation Guard</span>
+                            </div>
+                            <button
+                                onClick={() => toggleSetting('correlationGuardEnabled', !config.correlationGuardEnabled)}
+                                className={`p-2 rounded-xl border transition-all ${config.correlationGuardEnabled ? 'bg-sky-500/10 border-sky-500/20 text-sky-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`}
+                            >
+                                {config.correlationGuardEnabled ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                        <input
+                            type="text"
+                            value={config.correlationPairs}
+                            onChange={e => toggleSetting('correlationPairs', e.target.value)}
+                            disabled={config.hardLockEnabled || !config.correlationGuardEnabled}
+                            className="w-full bg-slate-950/80 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold text-sky-400 focus:border-sky-500/50 focus:outline-none disabled:opacity-40 mb-3"
+                            placeholder="XAUUSD⇄XAGUSD,EURUSD⇄GBPUSD"
+                        />
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                            {config.correlationPairs.split(',').filter(Boolean).map(pair => (
+                                <span key={pair} className="px-2 py-0.5 bg-sky-500/10 border border-sky-500/20 rounded-md text-[9px] font-bold text-sky-400 uppercase tracking-wider">{pair}</span>
+                            ))}
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">Bloqueia pares opostos simultâneos (ex: comprar XAUUSD e vender XAGUSD)</p>
                     </div>
                 </div>
             </div>
