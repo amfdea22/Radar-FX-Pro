@@ -48,15 +48,24 @@ export const Dashboard: React.FC<{ onNewTrade: () => void }> = ({ onNewTrade }) 
                 axios.get('/api/mt5/discipline')
             ]);
             setAccount(accRes.data);
-            setPositions(posRes.data);
+            setPositions(Array.isArray(posRes.data) ? posRes.data : []);
             setDiscipline(discRes.data);
             setLoading(false);
-        } catch (error) { console.error('Failed to sync MT5 data:', error); }
+        } catch (error) { console.error('Failed to sync MT5 data:', error); setLoading(false); }
     };
 
     useEffect(() => { fetchData(); const interval = setInterval(fetchData, 5000); return () => clearInterval(interval); }, []);
 
-    const totalProfit = positions.reduce((sum, pos) => sum + pos.profit, 0);
+    const totalProfit = (positions || []).reduce((sum, pos) => sum + pos.profit, 0);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64 gap-4">
+                <RefreshCw size={32} className="text-blue-500 animate-spin" />
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Carregando...</span>
+            </div>
+        );
+    }
 
     return (
         <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">

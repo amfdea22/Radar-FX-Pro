@@ -74,7 +74,7 @@ export const MobileHome: React.FC<{ onTradeClick: () => void }> = ({ onTradeClic
         return () => clearInterval(interval);
     }, []);
 
-    const totalProfit = positions.reduce((sum, pos) => sum + pos.profit, 0);
+    const totalProfit = (positions || []).reduce((sum, pos) => sum + pos.profit, 0);
     const dailyProfit = discipline?.daily_profit ?? null;
     const isDailyPositive = dailyProfit !== null && dailyProfit >= 0;
     const isDailyNegative = dailyProfit !== null && dailyProfit < 0;
@@ -167,10 +167,10 @@ export const MobileHome: React.FC<{ onTradeClick: () => void }> = ({ onTradeClic
             <div className="space-y-3 md:space-y-4">
                 <div className="flex justify-between items-center px-1 md:px-2">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[11px] md:text-xs font-black text-white uppercase tracking-[0.2em]">Posições ({positions.length})</h3>
-                        {positions.length > 0 && (
+                        <h3 className="text-[11px] md:text-xs font-black text-white uppercase tracking-[0.2em]">Posições ({(positions || []).length})</h3>
+                        {(positions || []).length > 0 && (
                             <span className="text-[7px] font-bold text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">
-                                {positions.reduce((sum, p) => sum + p.volume, 0).toFixed(2)} lots
+                                {(positions || []).reduce((sum, p) => sum + p.volume, 0).toFixed(2)} lots
                             </span>
                         )}
                     </div>

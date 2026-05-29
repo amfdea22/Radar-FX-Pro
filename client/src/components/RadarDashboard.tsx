@@ -147,7 +147,7 @@ export const RadarDashboard: React.FC = () => {
         return result;
     }, []);
 
-    const totalFloatingPL = useMemo(() => positions.reduce((s, p) => s + p.profit, 0), [positions]);
+    const totalFloatingPL = useMemo(() => (positions || []).reduce((s, p) => s + p.profit, 0), [positions]);
 
     const getSignalFor = (sym: string): Signal | undefined => signals.find(s => s.symbol.toUpperCase() === sym.toUpperCase());
     const getPositionFor = (sym: string): Position | undefined => positions.find(p => p.symbol.toUpperCase() === sym.toUpperCase());

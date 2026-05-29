@@ -27,18 +27,17 @@ import {
     PieChart,
     Star,
     GripHorizontal,
-    Bitcoin
+    Bitcoin,
+    Crown,
+    Sigma
 } from 'lucide-react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { RobotControlPanel } from './RobotControlPanel';
 import { TradingPanel } from './TradingPanel';
 import { StrategyReportHub } from './StrategyReportHub';
 import { TradingJournal } from './TradingJournal';
 import { MobileHome } from './MobileHome';
-import { CryptoIntelligenceHub } from './CryptoIntelligenceHub';
 import { SignalScanner } from './SignalScanner';
 import { PerformanceAnalytics } from './PerformanceAnalytics';
-import { GoldScalperPanel } from './GoldScalperPanel';
 import MLInsightsPanel from './MLInsightsPanel';
 import { Statistics } from './Statistics';
 import { RiskManagement } from './RiskManagement';
@@ -46,9 +45,12 @@ import { AgentIAPanel } from './AgentIAPanel';
 import { ForexScalperPanel } from './ForexScalperPanel';
 import { MicroScalperPanel } from './MicroScalperPanel';
 import { SwingTraderPanel } from './SwingTraderPanel';
-import { BitcoinProPanel } from './BitcoinProPanel';
-import { SharkBotPanel } from './SharkBotPanel';
 import { OmniProbabilisticPanel } from './OmniProbabilisticPanel';
+const GoldScalperPanel = React.lazy(() => import('./GoldScalperPanel').then(m => ({ default: m.GoldScalperPanel })));
+const SharkBotPanel = React.lazy(() => import('./SharkBotPanel').then(m => ({ default: m.SharkBotPanel })));
+const RobotControlPanel = React.lazy(() => import('./RobotControlPanel').then(m => ({ default: m.RobotControlPanel })));
+const CryptoIntelligenceHub = React.lazy(() => import('./CryptoIntelligenceHub').then(m => ({ default: m.CryptoIntelligenceHub })));
+const BitcoinProPanel = React.lazy(() => import('./BitcoinProPanel').then(m => ({ default: m.BitcoinProPanel })));
 
 type TabType = 'home' | 'intelligence' | 'robot' | 'trade' | 'management' | 'bitcoin_pro' | 'crypto' | 'gold_scalper' | 'micro_sniper' | 'swing_ia' | 'copy' | 'speed_scalper' | 'supreme' | 'analytics' | 'ml' | 'agent_ia' | 'ai_monitoring' | 'alerts' | 'settings' | 'risk' | 'financial' | 'statistics' | 'strategy_reports' | 'journal' | 'simulator' | 'costs' | 'analysis' | 'omni' | 'ranking';
 
@@ -163,13 +165,13 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
                     );
                 })}
             </div>
-            {robotTab === 'alpha' && <RobotControlPanel />}
-            {robotTab === 'gold' && <GoldScalperPanel />}
+            {robotTab === 'alpha' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><RobotControlPanel /></React.Suspense>}
+            {robotTab === 'gold' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando Gold Scalper...</div>}><GoldScalperPanel /></React.Suspense>}
             {robotTab === 'speed' && <ForexScalperPanel />}
             {robotTab === 'titan' && <MicroScalperPanel />}
             {robotTab === 'swing' && <SwingTraderPanel />}
-            {robotTab === 'bitcoin_pro' && <BitcoinProPanel />}
-            {robotTab === 'shark_bot' && <SharkBotPanel />}
+            {robotTab === 'bitcoin_pro' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><BitcoinProPanel /></React.Suspense>}
+            {robotTab === 'shark_bot' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando Shark Bot...</div>}><SharkBotPanel /></React.Suspense>}
         </div>
     );
 
@@ -202,7 +204,7 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
                                 <span className="flex items-center justify-center gap-2"><Brain size={14} /> ML</span>
                             </button>
                         </div>
-                        {intelTab === 'crypto' && <CryptoIntelligenceHub />}
+                        {intelTab === 'crypto' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><CryptoIntelligenceHub /></React.Suspense>}
                         {intelTab === 'signals' && <SignalScanner />}
                         {intelTab === 'ml' && <MLInsightsPanel />}
                     </div>

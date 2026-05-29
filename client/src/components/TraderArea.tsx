@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getUser } from '../services/auth';
-import { User, Wallet, TrendingUp, TrendingDown, RefreshCw, ArrowDownToLine, ArrowUpFromLine, BarChart3, Activity, Shield, Zap, PieChart, Target, Flag, Cpu, DollarSign } from 'lucide-react';
+import { User, Wallet, TrendingUp, TrendingDown, RefreshCw, ArrowDownToLine, ArrowUpFromLine, BarChart3, Activity, Shield, Zap, PieChart, Target, Flag, Cpu, DollarSign, Fingerprint, Smartphone, CheckCircle2, XCircle } from 'lucide-react';
+import axios from 'axios';
 
 interface Account {
   login: number; balance: number; equity: number; margin: number;
@@ -31,6 +32,18 @@ export const TraderArea: React.FC = () => {
   const username = getUser() || 'Trader';
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [bioRegistered, setBioRegistered] = useState(false);
+  const [bioCount, setBioCount] = useState(0);
+
+  const checkBiometricStatus = async () => {
+    try {
+      const r = await axios.get('/api/biometria/status');
+      setBioRegistered(r.data.registered);
+      setBioCount(r.data.credentialCount || 0);
+    } catch {}
+  };
+
+  useEffect(() => { checkBiometricStatus(); }, []);
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -91,6 +104,43 @@ export const TraderArea: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Biometric Status */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-cyan-500/10 p-6 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className={`p-5 rounded-2xl ${bioRegistered ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-slate-800 border-white/5'} border`}>
+              {bioRegistered ? <Fingerprint size={40} className="text-emerald-400" /> : <Smartphone size={40} className="text-slate-500" />}
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+                Acesso Biométrico
+                {bioRegistered ? (
+                  <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg text-[8px] tracking-widest uppercase flex items-center gap-1">
+                    <CheckCircle2 size={10} /> Ativo
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 bg-slate-800 border border-white/10 text-slate-500 rounded-lg text-[8px] tracking-widest uppercase flex items-center gap-1">
+                    <XCircle size={10} /> Inativo
+                  </span>
+                )}
+              </h3>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                {bioRegistered
+                  ? `${bioCount} credencial(is) — Use Windows Hello para acessar o Radar FX`
+                  : 'Cadastre sua biometria na Central de Segurança'}
+              </p>
+            </div>
+          </div>
+          {!bioRegistered && (
+            <button onClick={() => window.dispatchEvent(new CustomEvent('switchTab', { detail: 'security_center' }))}
+              className="px-5 py-2.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500/20 transition-all flex items-center gap-2">
+              <Shield size={14} /> Cadastrar
+            </button>
+          )}
+        </div>
+      </motion.div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
