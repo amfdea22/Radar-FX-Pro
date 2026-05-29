@@ -28,8 +28,15 @@ import {
     PiggyBank,
     EqualNot,
     KeyRound,
-    Ban
+    Ban,
+    Filter,
+    Search,
+    Eye,
+    EyeOff,
+    FileSpreadsheet,
+    Copy
 } from 'lucide-react';
+import BiometricRegistration from './BiometricRegistration';
 import axios from 'axios';
 
 interface SecurityConfig {
@@ -65,6 +72,7 @@ interface SecurityConfig {
     twoFactorPin: string;
     correlationGuardEnabled: boolean;
     correlationPairs: string;
+    strictMA200Filter: boolean;
 }
 
 interface AuditEntry {
@@ -112,6 +120,7 @@ const DEFAULT_CONFIG: SecurityConfig = {
     twoFactorPin: '',
     correlationGuardEnabled: false,
     correlationPairs: 'XAUUSD⇄XAGUSD,EURUSD⇄GBPUSD',
+    strictMA200Filter: false,
 };
 
 function loadConfig(): SecurityConfig {
@@ -131,6 +140,12 @@ export const SecurityCenter: React.FC = () => {
     const [isLocked, setIsLocked] = useState(false);
     const [currentSpread, setCurrentSpread] = useState<number | null>(null);
     const [currentLatency, setCurrentLatency] = useState<number | null>(null);
+    const [filterAsset, setFilterAsset] = useState('');
+    const [filterTrava, setFilterTrava] = useState('');
+    const [showRaioX, setShowRaioX] = useState(false);
+    const [showDailySummary, setShowDailySummary] = useState(false);
+    const [dailySummary, setDailySummary] = useState('');
+    const [syncingAudit, setSyncingAudit] = useState(false);
 
     useEffect(() => {
         const fetchRealtime = async () => {
@@ -152,29 +167,113 @@ export const SecurityCenter: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
-    // Persiste config no localStorage e tenta salvar no backend
+    const fetchAuditLogs = useCallback(async () => {
+        try {
+            const params = new URLSearchParams();
+            if (filterLevel !== 'all') params.set('nivel', filterLevel);
+            if (filterAsset) params.set('ativo', filterAsset);
+            if (filterTrava) params.set('trava', filterTrava);
+            if (showRaioX) params.set('nivel', '🔴');
+            const resp = await axios.get(`/api/security/audit-logs?${params.toString()}`);
+            if (Array.isArray(resp.data)) setAuditLogs(resp.data);
+        } catch {
+            // Fallback: mantém logs atuais
+        }
+    }, [filterLevel, filterAsset, filterTrava, showRaioX]);
+
+    useEffect(() => {
+        fetchAuditLogs();
+        const interval = setInterval(fetchAuditLogs, 10000);
+        return () => clearInterval(interval);
+    }, [fetchAuditLogs]);
+
+    // Persiste config no localStorage
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
     }, [config]);
 
+    const generateLog = useCallback(async (nivel: string, ativo: string, trava: string, acao: string, detalhe: string) => {
+        const entry: AuditEntry = {
+            id: Date.now(),
+            timestamp: new Date().toLocaleTimeString('pt-BR') + ',' + String(new Date().getMilliseconds()).padStart(3, '0'),
+            nivel, ativo, trava_acionada: trava, acao_executada: acao, detalhe_tecnico: detalhe,
+        };
+        setAuditLogs(prev => [entry, ...prev]);
+        try {
+            await axios.post('/api/security/audit-logs', { nivel, ativo, trava, acao, detalhe });
+        } catch {}
+    }, []);
+
     const handlePanic = useCallback(async () => {
         setPanicResult('executing');
+        generateLog('🔴', 'Sistema', 'Botão de Pânico', '💥 Plataforma Zerada', 'Acionamento manual do usuário.');
         try {
-            await axios.post('/api/mt5/close-all-orders');
-            await axios.post('/api/mt5/cancel-pending');
+            await axios.post('/api/mt5/trade/close-all');
             setPanicResult('success');
             setTimeout(() => { setShowPanicConfirm(false); setPanicResult('idle'); }, 2000);
         } catch {
             setPanicResult('error');
             setTimeout(() => { setPanicResult('idle'); }, 2000);
         }
-    }, []);
+    }, [generateLog]);
 
+    const handleCSVExport = async () => {
+        try {
+            const resp = await axios.get('/api/security/audit-logs/export-csv', { responseType: 'blob' });
+            const url = URL.createObjectURL(new Blob([resp.data], { type: 'text/csv' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `audit_logs_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            // Fallback: gera CSV local
+            const header = 'id;timestamp;nivel;ativo;trava_acionada;acao_executada;detalhe_tecnico';
+            const rows = auditLogs.map(l => `${l.id};${l.timestamp};${l.nivel};${l.ativo};${l.trava_acionada};${l.acao_executada};"${l.detalhe_tecnico.replace(/"/g, '""')}"`);
+            const csv = [header, ...rows].join('\n');
+            const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `audit_logs_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    };
+
+    const handleShowDailySummary = async () => {
+        try {
+            const resp = await axios.get('/api/security/audit-logs/resumo-diario');
+            setDailySummary(resp.data.resumo);
+        } catch {
+            // Fallback local
+            const hoje = new Date().toISOString().split('T')[0];
+            const hojeLogs = auditLogs.filter(l => l.timestamp.startsWith(hoje) || l.timestamp.includes(new Date().toLocaleDateString('pt-BR').split('/').reverse().join('-')));
+            const bloqueios = hojeLogs.filter(l => l.acao_executada.includes('🚫') || l.acao_executada.includes('⏸️') || l.acao_executada.includes('Bloquead'));
+            const spreadAlto = hojeLogs.filter(l => l.trava_acionada.includes('Spread'));
+            const ordensDuplicadas = hojeLogs.filter(l => l.trava_acionada.includes('Posi'));
+            const panico = hojeLogs.filter(l => l.trava_acionada.includes('Pânico'));
+            const partes: string[] = [];
+            if (bloqueios.length > 0) partes.push(`bloqueou ${bloqueios.length} tentativas de entrada`);
+            if (spreadAlto.length > 0) partes.push(`${spreadAlto.length} por spread alto`);
+            if (ordensDuplicadas.length > 0) partes.push(`evitou ${ordensDuplicadas.length} ordens duplicadas`);
+            if (panico.length > 0) partes.push(`Pânico foi acionado ${panico.length} vez(es)`);
+            setDailySummary(partes.length > 0 ? `Hoje o sistema ${partes.join(', ')}.` : 'Nenhum evento de segurança registrado hoje.');
+        }
+        setShowDailySummary(true);
+    };
+
+    // Gera logs automaticamente nas interações do painel
     const toggleSetting = useCallback(async (key: keyof SecurityConfig, value: any) => {
         setConfig(prev => ({ ...prev, [key]: value }));
-        try {
-            await axios.post('/api/mt5/security/settings', { [key]: value });
-        } catch {}
+        if (key === 'strictMA200Filter') {
+            try {
+                const gsRes = await axios.get('/api/mt5/gold-scalper/settings');
+                await axios.post('/api/mt5/gold-scalper/settings', {
+                    ...gsRes.data,
+                    strictMA200Filter: value
+                });
+            } catch {}
+        }
     }, []);
 
     return (
@@ -820,6 +919,30 @@ export const SecurityCenter: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Filtro MA200 Estrito */}
+                <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-amber-500/20 transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <EqualNot size={18} className="text-amber-400" />
+                                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Filtro MA200 Estrito</span>
+                            </div>
+                            <button
+                                onClick={() => toggleSetting('strictMA200Filter', !config.strictMA200Filter)}
+                                className={`p-2 rounded-xl border transition-all ${config.strictMA200Filter ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-slate-800/50 border-slate-700 text-slate-600'}`}
+                                disabled={config.hardLockEnabled}
+                            >
+                                {config.strictMA200Filter ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
+                        </div>
+                        <div className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider mb-3 ${config.strictMA200Filter ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800/50 text-slate-600 border border-slate-700'}`}>
+                            {config.strictMA200Filter ? 'Bloqueio Total Ativo' : 'Filtro Direcional (padrão)'}
+                        </div>
+                        <p className="text-sm text-slate-500 leading-relaxed">Quando ativo, bloqueia <strong className="text-amber-400">qualquer direção</strong> (BUY e SELL) se o preço estiver abaixo da MA200. Desativado = bloqueia apenas BUY abaixo da MA200 (filtro direcional padrão)</p>
+                    </div>
+                </div>
+
                 {/* Correlation Guard */}
                 <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[1.5rem] border border-white/5 hover:border-sky-500/20 transition-all relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
@@ -854,65 +977,247 @@ export const SecurityCenter: React.FC = () => {
                 </div>
             </div>
 
-            {/* Histórico de Auditoria */}
-            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+            {/* Painel de Auditoria e Eventos Críticos */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-blue-500/10 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"></div>
-                <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-2">
-                        <Terminal size={18} className="text-blue-400" />
-                        <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Histórico de Auditoria</span>
-                    </div>
+
+                {/* Header */}
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
                     <div className="flex items-center gap-3">
-                        <select
-                            value={filterLevel}
-                            onChange={e => setFilterLevel(e.target.value)}
-                            className="bg-slate-950/80 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-400 focus:border-blue-500/50 focus:outline-none cursor-pointer"
+                        <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                            <Terminal size={22} className="text-blue-400" />
+                        </div>
+                        <div>
+                            <span className="text-sm font-black text-slate-300 uppercase tracking-widest">Painel de Auditoria</span>
+                            <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-3">Eventos Críticos</span>
+                            <span className="ml-3 px-2 py-0.5 bg-blue-500/10 rounded-md text-[10px] font-bold text-blue-400 tracking-wider">{auditLogs.length} registros</span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                            onClick={() => { setShowRaioX(!showRaioX); }}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${
+                                showRaioX
+                                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                                    : 'bg-slate-800/50 border-slate-700 text-slate-500 hover:text-slate-300'
+                            }`}
+                            title="Filtrar apenas rejeições"
                         >
-                            <option value="all">Todos</option>
-                            <option value="🔴">Crítico</option>
-                            <option value="🟡">Atenção</option>
-                            <option value="🟢">Sucesso</option>
-                        </select>
-                        <button className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-all">
-                            <Download size={14} />
+                            {showRaioX ? <EyeOff size={12} /> : <Eye size={12} />} Raio-X Rejeição
+                        </button>
+                        <button
+                            onClick={handleShowDailySummary}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border bg-slate-800/50 border-slate-700 text-slate-500 hover:text-blue-400"
+                        >
+                            <FileText size={12} /> Resumo
+                        </button>
+                        <button
+                            onClick={handleCSVExport}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border bg-slate-800/50 border-slate-700 text-slate-500 hover:text-emerald-400"
+                        >
+                            <FileSpreadsheet size={12} /> CSV
+                        </button>
+                        <button
+                            onClick={() => { fetchAuditLogs(); }}
+                            className="p-2 rounded-lg border bg-slate-800/50 border-slate-700 text-slate-500 hover:text-blue-400 transition-all"
+                            title="Atualizar logs"
+                        >
+                            <RefreshCw size={12} className={syncingAudit ? 'animate-spin' : ''} />
                         </button>
                     </div>
                 </div>
-                <div className="max-h-80 overflow-y-auto custom-scrollbar">
+
+                {/* Filtros Rápidos */}
+                <div className="flex flex-col sm:flex-row gap-3 mb-5">
+                    <div className="flex items-center gap-2 bg-slate-950/60 rounded-xl px-3 py-1.5 border border-slate-800 flex-1">
+                        <Filter size={12} className="text-slate-600 shrink-0" />
+                        <select
+                            value={filterLevel}
+                            onChange={e => setFilterLevel(e.target.value)}
+                            className="bg-transparent text-xs font-bold text-slate-400 focus:outline-none w-full cursor-pointer"
+                        >
+                            <option value="all">Todos os Níveis</option>
+                            <option value="🔴">🔴 Crítico</option>
+                            <option value="🟡">🟡 Atenção</option>
+                            <option value="🟢">🟢 Sucesso</option>
+                        </select>
+                    </div>
+                    <div className="flex items-center gap-2 bg-slate-950/60 rounded-xl px-3 py-1.5 border border-slate-800 flex-1">
+                        <Search size={12} className="text-slate-600 shrink-0" />
+                        <input
+                            type="text"
+                            value={filterAsset}
+                            onChange={e => setFilterAsset(e.target.value)}
+                            placeholder="Filtrar por Ativo..."
+                            className="bg-transparent text-xs font-bold text-slate-400 focus:outline-none w-full placeholder:text-slate-700"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 bg-slate-950/60 rounded-xl px-3 py-1.5 border border-slate-800 flex-1">
+                        <ListChecks size={12} className="text-slate-600 shrink-0" />
+                        <input
+                            type="text"
+                            value={filterTrava}
+                            onChange={e => setFilterTrava(e.target.value)}
+                            placeholder="Filtrar por Trava..."
+                            className="bg-transparent text-xs font-bold text-slate-400 focus:outline-none w-full placeholder:text-slate-700"
+                        />
+                    </div>
+                </div>
+
+                {/* Tabela de Auditoria */}
+                <div className="overflow-x-auto custom-scrollbar" style={{ maxHeight: '420px' }}>
                     {auditLogs.length === 0 ? (
-                        <div className="text-center py-12">
-                            <FileText size={32} className="text-slate-700 mx-auto mb-3" />
-                            <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">Nenhum registro de auditoria encontrado</p>
-                            <p className="text-xs text-slate-700 mt-1">Os eventos de segurança aparecerão aqui automaticamente</p>
+                        <div className="text-center py-16">
+                            <FileText size={40} className="text-slate-700 mx-auto mb-4" />
+                            <p className="text-sm font-black text-slate-600 uppercase tracking-widest">Nenhum registro de auditoria encontrado</p>
+                            <p className="text-xs text-slate-700 mt-2">Os eventos de segurança aparecerão aqui automaticamente</p>
                         </div>
                     ) : (
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="text-sm text-slate-500 font-bold uppercase tracking-widest border-b border-slate-800">
-                                    <th className="pb-3 pr-4">Timestamp</th>
-                                    <th className="pb-3 pr-4">Nível</th>
-                                    <th className="pb-3 pr-4">Ativo</th>
-                                    <th className="pb-3 pr-4">Trava</th>
-                                    <th className="pb-3 pr-4">Ação</th>
-                                    <th className="pb-3 pr-4">Detalhe</th>
+                        <table className="w-full text-left border-collapse">
+                            <thead className="sticky top-0 bg-slate-900/95 backdrop-blur-sm z-10">
+                                <tr className="text-[9px] text-slate-500 font-black uppercase tracking-widest border-b border-slate-800">
+                                    <th className="pb-3 pr-3 w-16">Nível</th>
+                                    <th className="pb-3 pr-3 w-24">Horário</th>
+                                    <th className="pb-3 pr-3 w-24">Ativo</th>
+                                    <th className="pb-3 pr-3">Trava Acionada</th>
+                                    <th className="pb-3 pr-3">Ação Executada</th>
+                                    <th className="pb-3 pr-3">Detalhe Técnico</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {auditLogs.filter(e => filterLevel === 'all' || e.nivel === filterLevel).map(entry => (
-                                    <tr key={entry.id} className="text-sm text-slate-300 border-b border-slate-800/50 hover:bg-white/[0.02]">
-                                        <td className="py-3 pr-4 font-mono text-xs text-slate-500">{entry.timestamp}</td>
-                                        <td className="py-3 pr-4">{entry.nivel}</td>
-                                        <td className="py-3 pr-4 font-bold">{entry.ativo}</td>
-                                        <td className="py-3 pr-4">{entry.trava_acionada}</td>
-                                        <td className="py-3 pr-4">{entry.acao_executada}</td>
-                                        <td className="py-3 pr-4 text-xs text-slate-500">{entry.detalhe_tecnico}</td>
+                                {auditLogs.map(entry => (
+                                    <tr
+                                        key={entry.id}
+                                        className={`text-sm border-b border-slate-800/50 transition-all ${
+                                            entry.nivel === '🔴'
+                                                ? 'hover:bg-rose-500/[0.03] bg-rose-500/[0.01]'
+                                                : entry.nivel === '🟡'
+                                                ? 'hover:bg-amber-500/[0.03] bg-amber-500/[0.01]'
+                                                : 'hover:bg-emerald-500/[0.03]'
+                                        }`}
+                                    >
+                                        <td className="py-2.5 pr-3">
+                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                                                entry.nivel === '🔴'
+                                                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                                                    : entry.nivel === '🟡'
+                                                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                            }`}>
+                                                {entry.nivel}
+                                            </span>
+                                        </td>
+                                        <td className="py-2.5 pr-3 font-mono text-[11px] text-slate-500 font-bold">{entry.timestamp}</td>
+                                        <td className="py-2.5 pr-3">
+                                            <span className={`font-black text-xs tracking-wider ${
+                                                entry.ativo === 'Sistema' ? 'text-slate-400' : 'text-cyan-400'
+                                            }`}>
+                                                {entry.ativo}
+                                            </span>
+                                        </td>
+                                        <td className="py-2.5 pr-3">
+                                            <span className={`text-xs font-bold ${
+                                                entry.trava_acionada.includes('Spread') || entry.trava_acionada.includes('Pânico')
+                                                    ? 'text-rose-400'
+                                                    : entry.trava_acionada.includes('IA') || entry.trava_acionada.includes('Posi')
+                                                    ? 'text-amber-400'
+                                                    : 'text-sky-400'
+                                            }`}>
+                                                {entry.trava_acionada}
+                                            </span>
+                                        </td>
+                                        <td className="py-2.5 pr-3">
+                                            <span className={`text-xs font-black ${
+                                                entry.acao_executada.includes('🚫') || entry.acao_executada.includes('💥')
+                                                    ? 'text-rose-400'
+                                                    : entry.acao_executada.includes('⏸️')
+                                                    ? 'text-amber-400'
+                                                    : entry.acao_executada.includes('🔒')
+                                                    ? 'text-sky-400'
+                                                    : 'text-emerald-400'
+                                            }`}>
+                                                {entry.acao_executada}
+                                            </span>
+                                        </td>
+                                        <td className="py-2.5 pr-3">
+                                            <p className="text-[11px] text-slate-500 leading-relaxed max-w-xs truncate" title={entry.detalhe_tecnico}>
+                                                {entry.detalhe_tecnico}
+                                            </p>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     )}
                 </div>
+
+                {/* Legenda */}
+                <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-slate-800/50">
+                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Legenda:</span>
+                    <span className="flex items-center gap-1 text-[9px] text-slate-500"><span className="w-2 h-2 rounded-full bg-rose-500/60"></span> Crítico</span>
+                    <span className="flex items-center gap-1 text-[9px] text-slate-500"><span className="w-2 h-2 rounded-full bg-amber-500/60"></span> Atenção</span>
+                    <span className="flex items-center gap-1 text-[9px] text-slate-500"><span className="w-2 h-2 rounded-full bg-emerald-500/60"></span> Sucesso</span>
+                    <span className="text-[8px] text-slate-700 ml-auto">Atualizado em tempo real · Clique em <RefreshCw size={10} className="inline text-slate-600" /> para recarregar</span>
+                </div>
             </div>
+
+            {/* Biometria */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-cyan-500/20 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/20">
+                        <Lock size={24} className="text-cyan-400" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-black text-white uppercase tracking-widest">Autenticação Biométrica</h3>
+                        <p className="text-xs text-slate-400 mt-1">Windows Hello · Face ID · Impressão Digital</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <BiometricRegistration />
+                </div>
+            </div>
+
+            {/* Modal Resumo Diário */}
+            <AnimatePresence>
+                {showDailySummary && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={() => setShowDailySummary(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-slate-900 border border-blue-500/30 rounded-[2rem] p-8 max-w-lg w-full shadow-[0_0_80px_rgba(59,130,246,0.15)]"
+                        >
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+                                    <FileText size={28} className="text-blue-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-white uppercase tracking-widest">Resumo Diário</h3>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Relatório de Segurança</p>
+                                </div>
+                            </div>
+                            <div className="bg-slate-950/60 rounded-2xl p-6 border border-slate-800">
+                                <p className="text-sm text-slate-300 leading-relaxed">{dailySummary}</p>
+                            </div>
+                            <button
+                                onClick={() => setShowDailySummary(false)}
+                                className="mt-6 w-full py-3 bg-blue-500/10 text-blue-400 font-black uppercase tracking-widest text-sm rounded-xl hover:bg-blue-500/20 transition-all border border-blue-500/20"
+                            >
+                                Fechar
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

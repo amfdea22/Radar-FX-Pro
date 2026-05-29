@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { AlertEngine } from './AlertEngine';
 import { SymbolLockService } from './SymbolLockService';
+import { DisciplineEngine } from './DisciplineEngine';
 
 interface RecoverySettings {
     enabled: boolean;
@@ -217,17 +218,27 @@ export class RecoveryEngine {
                 await this.resetDailyIfNeeded();
                 await this.updateAccountMetrics();
                 await this.analyzeEngineLosses();
+                await this.monitorRecoveryPositions();
                 await this.evaluateRecovery();
 
             } catch (error) {
                 console.error('🔄 RecoveryEngine: Loop error', error);
             }
-            await this.sleep(30000);
+            // Adaptive loop: 5s se tem recovery pendente, 30s idle
+            const hasPending = await this.hasPendingRecovery();
+            await this.sleep(hasPending ? 5000 : 30000);
         }
     }
 
     private static async sleep(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    private static async hasPendingRecovery(): Promise<boolean> {
+        try {
+            const positions = await this.getOpenPositions();
+            return positions.some(p => p.magic === 999000);
+        } catch { return false; }
     }
 
     private static async resetDailyIfNeeded() {
@@ -436,6 +447,17 @@ export class RecoveryEngine {
         }
         if (Date.now() - this.state.lastRecoveryTime < this.settings.recoveryCooldownMinutes * 60 * 1000) return;
 
+        // SAFETY LOCK: verificar DisciplineEngine antes de qualquer recovery
+        try {
+            const discipline = await DisciplineEngine.getDailyStatus();
+            if (discipline.isLocked) {
+                console.log(`🔄 RecoveryEngine: Safety Lock bloqueou recovery — ${discipline.reason}`);
+                return;
+            }
+        } catch (e) {
+            console.warn('🔄 RecoveryEngine: Erro ao verificar DisciplineEngine', e);
+        }
+
         this.determineDrawdownTier();
 
         const signals: RecoverySignal[] = [];
@@ -508,7 +530,7 @@ export class RecoveryEngine {
     private static async getRecentBars(symbol?: string): Promise<any[] | null> {
         try {
             const sym = symbol || 'XAUUSD';
-            const resp = await axios.post(`${this.BRIDGE_URL}/candles`, { symbol: sym, timeframe: 'H1', count: 50 }, { timeout: 5000 });
+            const resp = await axios.get(`${this.BRIDGE_URL}/candles`, { params: { symbol: sym, timeframe: 'H1', count: 50 }, timeout: 5000 });
             const data = resp.data?.candles || resp.data || [];
             return Array.isArray(data) ? data : null;
         } catch { return null; }
@@ -528,8 +550,13 @@ export class RecoveryEngine {
 
     private static async findBestSymbol(strategyName: string): Promise<string> {
         const positions = await this.getOpenPositions();
+        const pendingSymbols = new Set(
+            this.recoveryHistory.filter(h => h.result === 'PENDING').map(h => h.symbol)
+        );
         for (const sym of this.settings.targetSymbols) {
-            if (!positions.some((p: TradeRecord) => p.symbol === sym)) return sym;
+            const hasOpenPos = positions.some((p: TradeRecord) => p.symbol === sym);
+            const hasPendingRecovery = pendingSymbols.has(sym);
+            if (!hasOpenPos && !hasPendingRecovery) return sym;
         }
         return this.settings.targetSymbols[0] || 'XAUUSD';
     }
@@ -593,26 +620,34 @@ export class RecoveryEngine {
     private static async monitorRecoveryPositions() {
         try {
             const positions = await this.getOpenPositions();
-            const recoveryPositions = positions.filter(p => p.magic === 999000);
+            const openTickets = new Set(positions.filter(p => p.magic === 999000).map(p => p.ticket));
 
-            for (const pos of recoveryPositions) {
-                const historyEntry = this.recoveryHistory.find(h => h.ticket === pos.ticket);
-                if (!historyEntry) continue;
-                if (historyEntry.result !== 'PENDING') continue;
+            // Resolve posições que sumiram das abertas (fechadas pelo MT5)
+            for (const entry of this.recoveryHistory) {
+                if (entry.result !== 'PENDING') continue;
+                if (openTickets.has(entry.ticket)) continue;
 
-                if (pos.profit !== 0 && (pos.profit >= historyEntry.takeProfit - historyEntry.entryPrice || pos.profit <= historyEntry.entryPrice - historyEntry.stopLoss)) {
-                    const isWin = pos.profit > 0;
-                    historyEntry.result = isWin ? 'WIN' : 'LOSS';
-                    historyEntry.profit = pos.profit;
-                    historyEntry.closeTime = Date.now();
+                // Posição fechada — buscar no history da bridge
+                try {
+                    const histResp = await axios.get(`${this.BRIDGE_URL}/history`, { timeout: 5000 });
+                    const closedTrades: any[] = Array.isArray(histResp.data) ? histResp.data : [];
+                    const closed = closedTrades.find((t: any) => t.ticket === entry.ticket || t.order === entry.ticket);
+                    if (!closed) continue;
+
+                    const profit = (closed.profit || 0) + (closed.commission || 0) + (closed.swap || 0);
+                    const isWin = profit >= 0;
+
+                    entry.result = isWin ? 'WIN' : 'LOSS';
+                    entry.profit = profit;
+                    entry.closeTime = Date.now();
 
                     if (isWin) {
                         this.state.successfulRecoveries++;
-                        this.state.totalRecovered += pos.profit;
+                        this.state.totalRecovered += profit;
                         this.state.consecutiveLosses = 0;
                     } else {
                         this.state.failedRecoveries++;
-                        this.state.totalLosses += Math.abs(pos.profit);
+                        this.state.totalLosses += Math.abs(profit);
                     }
 
                     this.saveHistory();
@@ -620,12 +655,12 @@ export class RecoveryEngine {
                     if (this.settings.telegramAlerts) {
                         try {
                             const { TradeNotificationBot } = require('./TradeNotificationBot');
-                            TradeNotificationBot.notifyTradeClosed('Recovery Engine', pos.symbol, pos.type || pos.direction, pos.profit, isWin ? 'WIN' : 'LOSS', isWin ? 'Take Profit' : 'Stop Loss', pos.volume || pos.volume);
+                            TradeNotificationBot.notifyTradeClosed('Recovery Engine', closed.symbol || entry.symbol, closed.type || entry.direction, profit, isWin ? 'WIN' : 'LOSS', isWin ? 'Take Profit' : 'Stop Loss', closed.volume || entry.lotSize);
                         } catch (e) { /* notif fail */ }
                     }
 
-                    AlertEngine.addAlert('GUARDIAN', isWin ? 'INFO' : 'WARNING', 'Recovery Engine', `${isWin ? '✓' : '✗'} ${pos.symbol} ${isWin ? `+$${pos.profit.toFixed(2)}` : `-$${Math.abs(pos.profit).toFixed(2)}`}`);
-                }
+                    AlertEngine.addAlert('GUARDIAN', isWin ? 'INFO' : 'WARNING', 'Recovery Engine', `${isWin ? '✓' : '✗'} ${entry.symbol} ${isWin ? `+$${profit.toFixed(2)}` : `-$${Math.abs(profit).toFixed(2)}`}`);
+                } catch { /* history fetch fail */ }
             }
         } catch (e) {
             console.warn('🔄 RecoveryEngine: Erro ao monitorar posições', e);

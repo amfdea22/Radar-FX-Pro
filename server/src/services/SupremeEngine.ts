@@ -159,11 +159,13 @@ export class SupremeEngine {
                     };
                     this.tradeHistory.unshift(record);
                     newTradesCount++;
-                    try {
-                        const { TradeNotificationBot } = require('./TradeNotificationBot');
-                        const dir = t.type === 0 ? 'BUY' : 'SELL';
-                        TradeNotificationBot.notifyTradeClosed('Supreme', t.symbol, dir, realProfit, realProfit >= 0 ? 'WIN' : 'LOSS', 'Auto', t.volume);
-                    } catch (e) { /* notif fail */ }
+                    if (this.settings.nakamotoActive || this.settings.intelligence7Active) {
+                        try {
+                            const { TradeNotificationBot } = require('./TradeNotificationBot');
+                            const dir = t.type === 0 ? 'BUY' : 'SELL';
+                            TradeNotificationBot.notifyTradeClosed('Supreme', t.symbol, dir, realProfit, realProfit >= 0 ? 'WIN' : 'LOSS', 'Auto', t.volume);
+                        } catch (e) { /* notif fail */ }
+                    }
                 }
             });
 

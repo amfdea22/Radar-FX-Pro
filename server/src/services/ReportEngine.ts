@@ -216,12 +216,10 @@ export class ReportEngine {
                 }
                 assetMap.set(asset, aData);
 
-                // By Setup (Comment) - Clean names
+                // By Setup (Comment) - Show robot name + strategy
                 let setup = t.comment || 'Manual/Other';
                 if (setup.includes('|')) {
                     setup = setup.split('|').pop()?.trim() || setup;
-                } else {
-                    setup = setup.replace(/^Alpha Robot (v[0-9.]+\s?)?/i, '').trim();
                 }
 
                 if (!setup) setup = 'Manual/Other';
@@ -470,7 +468,6 @@ export class ReportEngine {
             const hour = `${String(date.getHours()).padStart(2, '0')}:00`;
             let setup = t.comment || 'Manual/Other';
             if (setup.includes('|')) setup = setup.split('|').pop()?.trim() || setup;
-            setup = setup.replace(/^Alpha Robot (v[0-9.]+\s?)?/i, '').trim() || 'Manual';
 
             const key = `${t.symbol}-${setup}-${hour}`;
             const data = matrixMap.get(key) || { w: 0, t: 0, symbol: t.symbol, setup: setup, hour: hour };

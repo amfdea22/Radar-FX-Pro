@@ -10,6 +10,7 @@ import axios from 'axios';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import GoldScalperTradeMonitor from './GoldScalperTradeMonitor';
 interface GoldScalperStatus {
     enabled: boolean;
     settings: {
@@ -381,6 +382,7 @@ export const GoldScalperPanel: React.FC = () => {
     const [tradeStatus, setTradeStatus] = useState<{ BUY: 'idle' | 'loading' | 'success' | 'error', SELL: 'idle' | 'loading' | 'success' | 'error' }>({ BUY: 'idle', SELL: 'idle' });
     const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
     const [masCollapsed, setMasCollapsed] = useState(false);
+    const [tradeMonitorCollapsed, setTradeMonitorCollapsed] = useState(false);
     const terminalRef = useRef<HTMLDivElement>(null);
     const [showCalendar, setShowCalendar] = useState(false);
     const [calendarEvents, setCalendarEvents] = useState<any[] | null>(null);
@@ -671,15 +673,21 @@ export const GoldScalperPanel: React.FC = () => {
             const resp = await axios.post('/api/mt5/gold-scalper/sync');
             if (resp.data?.report) {
                 setReport(resp.data.report);
+                const synced = resp.data.synced || 0;
+                const total = resp.data.total || 0;
+                setUiAlert({ type: 'success', message: `Sincronizado: ${synced} novo(s) · Total: ${total} trades` });
             } else {
                 await fetchReport();
+                setUiAlert({ type: 'success', message: 'Relatório atualizado' });
             }
             await fetchStatus();
             await fetchAccount();
         } catch (err) {
             console.error('Sync error:', err);
+            setUiAlert({ type: 'error', message: 'Erro ao sincronizar. Verifique conexão MT5.' });
         }
         setSyncing(false);
+        setTimeout(() => setUiAlert(null), 4000);
     };
 
     const handleReset = async () => {
@@ -1007,7 +1015,9 @@ export const GoldScalperPanel: React.FC = () => {
             {/* NOVO Header Premium */}
             <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
                 <div className="flex items-center justify-between cursor-pointer select-none" onClick={() => toggleSection('header')}>
-                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Cockpit Principal</span>
+                    <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Cockpit</span> Principal
+                        </h3>
                     <button className="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center justify-center transition-all">
                         {collapsedSections['header'] ? <Plus size={14} /> : <Minus size={14} />}
                     </button>
@@ -1534,7 +1544,9 @@ export const GoldScalperPanel: React.FC = () => {
                         <div className="p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20">
                             <Activity size={18} className="text-amber-400" />
                         </div>
-                        <h3 className="text-sm font-black italic text-white uppercase tracking-tighter">Monitoramento Rápido</h3>
+                        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Monitoramento</span> Rápido
+                        </h3>
                     </div>
                     <div className="flex items-center gap-2">
                         <button
@@ -1597,12 +1609,31 @@ export const GoldScalperPanel: React.FC = () => {
                 )}
             </div>
 
+            {/* GS MONITOR - Trade Monitor ao Vivo */}
+            <div className="p-6 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/20 shadow-[0_0_50px_rgba(245,158,11,0.1)]">
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                            <Activity size={18} className="text-amber-500" />
+                        </div>
+                        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Trade Monitor</span> ao Vivo
+                        </h3>
+                    </div>
+                    <button onClick={() => setTradeMonitorCollapsed(!tradeMonitorCollapsed)} className="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center justify-center transition-all">
+                        {tradeMonitorCollapsed ? <Plus size={14} /> : <Minus size={14} />}
+                    </button>
+                </div>
+                {!tradeMonitorCollapsed && <GoldScalperTradeMonitor embedded />}
+            </div>
+
             {/* ==================== MA14 · MA21 · MA50 · MA100 · MA200 (H1) ==================== */}
             <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-trader-blue/10">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 cursor-pointer select-none" onClick={() => setMasCollapsed(!masCollapsed)}>
-                        <h3 className="text-white font-black italic uppercase tracking-tighter flex items-center gap-2 text-sm">
-                            <Activity className="text-trader-blue" size={16} /> Médias Móveis — H1
+                        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-2">
+                            <Activity className="text-trader-blue" size={16} />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Médias Móveis</span> — H1
                         </h3>
                         <span className="text-[8px] text-slate-500 italic tracking-wider">14 · 21 · 50 · 100 · 200</span>
                     </div>
@@ -1665,7 +1696,9 @@ export const GoldScalperPanel: React.FC = () => {
                             <path d="M2 17l10 5 10-5" />
                             <path d="M2 12l10 5 10-5" />
                         </svg>
-                        <h3 className="text-white font-black italic uppercase tracking-tighter text-sm">Smart Money Concept</h3>
+                        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Smart Money</span> Concept
+                        </h3>
                     </div>
                     <button onClick={() => setMasCollapsed(!masCollapsed)} className="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center justify-center transition-all">
                         {masCollapsed ? <Plus size={14} /> : <Minus size={14} />}
@@ -1744,8 +1777,9 @@ export const GoldScalperPanel: React.FC = () => {
             {/* ==================== TRADE REPORT WIN/LOSS ==================== */}
             <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-amber-500/10">
                 <div className="flex items-center justify-between mb-5 cursor-pointer select-none" onClick={() => toggleSection('trades')}>
-                    <h3 className="text-white font-black italic uppercase tracking-tighter flex items-center gap-2">
-                        <Trophy className="text-amber-500" size={18} /> Relatório de Trades — Win & Loss
+                    <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-2">
+                        <Trophy className="text-amber-500" size={18} />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Relatório de Trades</span> — Win & Loss
                     </h3>
                     <div className="flex items-center gap-2">
                         <button
@@ -1971,8 +2005,9 @@ export const GoldScalperPanel: React.FC = () => {
                 {/* Configurações Principais */}
                 <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-slate-800">
                     <div className="flex items-center justify-between mb-5 cursor-pointer select-none" onClick={() => toggleSection('parametros')}>
-                        <h3 className="text-white font-black italic uppercase tracking-tighter flex items-center gap-2">
-                            <Settings className="text-amber-500" size={18} /> Parâmetros de Scalping
+                        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-2">
+                            <Settings className="text-amber-500" size={18} />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Parâmetros de Scalping</span>
                         </h3>
                         <button className="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center justify-center transition-all">
                             {collapsedSections['parametros'] ? <Plus size={14} /> : <Minus size={14} />}
@@ -2425,8 +2460,9 @@ export const GoldScalperPanel: React.FC = () => {
                 {/* Risco & Proteção */}
                 <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-slate-800">
                     <div className="flex items-center justify-between mb-5 cursor-pointer select-none" onClick={() => toggleSection('blindagem')}>
-                        <h3 className="text-white font-black italic uppercase tracking-tighter flex items-center gap-2">
-                            <Shield className="text-trader-red" size={18} /> Blindagem & Risco
+                        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-2">
+                            <Shield className="text-trader-red" size={18} />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Blindagem</span> & Risco
                         </h3>
                         <button className="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center justify-center transition-all">
                             {collapsedSections['blindagem'] ? <Plus size={14} /> : <Minus size={14} />}
@@ -2849,7 +2885,9 @@ export const GoldScalperPanel: React.FC = () => {
                             <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full animate-ping opacity-50" />
                         </div>
                         <div>
-                            <h3 className="text-white font-black italic uppercase tracking-tighter text-sm">Córtex Neural IA</h3>
+                            <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Córtex Neural</span> IA
+                            </h3>
                             <p className="text-[7px] text-purple-500/50 font-mono tracking-[0.2em] uppercase">Machine Learning • Autoaprendizado • v3.2</p>
                         </div>
                     </div>
@@ -3081,7 +3119,7 @@ export const GoldScalperPanel: React.FC = () => {
                     {/* Stats bar */}
                     <div className="grid grid-cols-4 gap-2 mb-4">
                         {[
-                            { label: 'Trades Hoje', value: status.operationLog?.filter(l => l.action === 'OPEN').length || 0, color: 'text-emerald-400' },
+                            { label: 'Trades Hoje', value: status.operationLog?.filter(l => l.action === 'OPEN' || l.action === 'TRADE').length || 0, color: 'text-emerald-400' },
                             { label: 'Fechamentos', value: status.operationLog?.filter(l => l.action === 'CLOSE' || l.action === 'STOP' || l.action === 'PROFIT').length || 0, color: 'text-amber-400' },
                             { label: 'Erros', value: status.operationLog?.filter(l => l.action === 'ERROR').length || 0, color: status.operationLog?.filter(l => l.action === 'ERROR').length ? 'text-red-400' : 'text-emerald-400' },
                             { label: 'Basket TP', value: status.operationLog?.filter(l => l.action === 'BASKET_TP').length || 0, color: 'text-trader-green' },

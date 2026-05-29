@@ -41,6 +41,7 @@ export interface GoldScalperSettings {
     newsGuardEnabled: boolean;
     strategyMode: 'CONSERVATIVE' | 'NORMAL' | 'AGGRESSIVE';
     swingTrendFilter: boolean;
+    strictMA200Filter: boolean;
     dynamicATRMode: boolean;
     dynamicStopLoss: boolean;
     dynamicSLMultiplier: number;
@@ -93,6 +94,7 @@ interface GoldPosition {
 export interface TradeRecord {
     id: string;
     ticket: number;
+    positionId?: number;
     symbol?: string;
     type: 'BUY' | 'SELL';
     lot: number;
@@ -133,6 +135,7 @@ export class GoldScalperEngine {
     private static sentimentLong = 50;
     private static sentimentShort = 50;
     private static lastSentimentSync = 0;
+    private static lastBasketSMCFetch = 0;
     private static currentRSI = 50;
     private static relativeVolume = 1.0;
     private static dailyProfit = 0;
@@ -195,7 +198,7 @@ export class GoldScalperEngine {
         takeProfitUSD: 5.0, stopLossUSD: 1.5, useFixedTP: true, useFixedSL: true, basketTP: 15.0, basketSL: -30.0, basketTPEnabled: true, basketSLEnabled: true,
         maxDailyLoss: 100.0, maxDailyProfit: 150.0, sessionFilter: false,
         direction: 'BOTH', cooldownSeconds: 30, maxSpreadPoints: 50, newsGuardEnabled: true,
-        strategyMode: 'NORMAL', swingTrendFilter: false, dynamicATRMode: false,
+        strategyMode: 'NORMAL', swingTrendFilter: false, strictMA200Filter: false, dynamicATRMode: false,
         dynamicStopLoss: false, dynamicSLMultiplier: 1.5,
         antiMartingale: false, orderBlockFilter: false, smartTargeting: false,
         smartTrailing: false, atrTrailingPeriod: 14, atrTrailingMultiplier: 2.5, atrTrailingTimeframe: 'M15', smartGridIA: false, smartBreakeven: false, dxyFilter: true,
@@ -228,7 +231,7 @@ export class GoldScalperEngine {
         this.resolveGoldSymbol();
         console.log('🚀 Gold Scalper Engine: Iniciando...');
         this.fetchMacroIndicators(); // Chamada imediata para não esperar 5 minutos
-        setInterval(() => this.mainCycle(), 1500);
+        setInterval(() => this.mainCycle(), 3000);
         setInterval(() => this.fetchMacroIndicators(), 60000); // Macro a cada 1min (Swing/DXY)
         setInterval(async () => {
             if (this.settings.enabled) {
@@ -559,13 +562,21 @@ export class GoldScalperEngine {
                     return;
                 }
                 const cp = dir === 'BUY' ? tick.ask : tick.bid;
-                if (dir === 'BUY' && cp < this.currentMA200) {
-                    if (Math.random() < 0.05) console.log(`[MA200 GUARD] Entrada BUY bloqueada: Preço (${cp}) abaixo da MA200 (${this.currentMA200})`);
-                    return;
-                }
-                if (dir === 'SELL' && cp > this.currentMA200) {
-                    if (Math.random() < 0.05) console.log(`[MA200 GUARD] Entrada SELL bloqueada: Preço (${cp}) acima da MA200 (${this.currentMA200})`);
-                    return;
+                // Modo estrito: bloqueia BUY e SELL se preço abaixo da MA200
+                if (this.settings.strictMA200Filter) {
+                    if (cp < this.currentMA200) {
+                        if (Math.random() < 0.05) console.log(`[MA200 STRICT] Entrada ${dir} bloqueada: Preço (${cp}) abaixo da MA200 (${this.currentMA200})`);
+                        return;
+                    }
+                } else {
+                    if (dir === 'BUY' && cp < this.currentMA200) {
+                        if (Math.random() < 0.05) console.log(`[MA200 GUARD] Entrada BUY bloqueada: Preço (${cp}) abaixo da MA200 (${this.currentMA200})`);
+                        return;
+                    }
+                    if (dir === 'SELL' && cp > this.currentMA200) {
+                        if (Math.random() < 0.05) console.log(`[MA200 GUARD] Entrada SELL bloqueada: Preço (${cp}) acima da MA200 (${this.currentMA200})`);
+                        return;
+                    }
                 }
             }
 
@@ -716,6 +727,15 @@ export class GoldScalperEngine {
     private static async openPosition(dir: 'BUY' | 'SELL', tick: any, level: number, manual = false) {
         if (!this.resolvedSymbol) return false;
 
+        // SAFETY LOCK: verificar DisciplineEngine antes de abrir posição
+        try {
+            const discipline = await DisciplineEngine.getDailyStatus();
+            if (discipline.isLocked) {
+                this.log('DISCIPLINA', `⛔ Safety Lock bloqueou posição: ${discipline.reason}`);
+                return false;
+            }
+        } catch (e) { /* discipline fail */ }
+
         const entry = dir === 'BUY' ? tick.ask : tick.bid;
         
         let sl: number | undefined, tp: number | undefined;
@@ -843,7 +863,7 @@ export class GoldScalperEngine {
                     });
                 }
                 const modo = smcData ? 'SMC_v2' : 'USD';
-                this.log('TRADE', `Sucesso #${ticket} ${dir} Lote:${lot} SL:${(sl as number).toFixed(2)} TP:${(tp as number).toFixed(2)} [${modo}]`);
+                this.log('OPEN', `Sucesso #${ticket} ${dir} Lote:${lot} SL:${(sl as number).toFixed(2)} TP:${(tp as number).toFixed(2)} [${modo}]`);
                 TradeNotificationBot.notifyTradeOpened('Gold Scalper', this.resolvedSymbol, dir, lot, entry, sl as number, tp as number);
                 return true; 
             }
@@ -932,43 +952,47 @@ export class GoldScalperEngine {
         const net = pos.reduce((s, x) => s + x.profit, 0);
         let basketTP = this.settings.basketTP;
         let basketSL = this.settings.basketSL;
-        // SMC: calcular TP da cesta baseado na estrutura de mercado
+        // SMC: calcular TP da cesta baseado na estrutura de mercado (com cache de 30s)
         if (this.settings.strategy === 'SMC' && this.resolvedSymbol && pos.length > 0) {
-            try {
-                const firstPos = pos[0];
-                const dir = firstPos.type === 0 ? 'BUY' : 'SELL';
-                const entry = firstPos.price_open;
-                const smcResp = await axios.get(`${this.BRIDGE_URL}/smc_levels`, {
-                    params: { symbol: this.resolvedSymbol, direction: dir, entry_price: entry },
-                    timeout: 3000
-                });
-                if (smcResp.data && smcResp.data.tp2) {
-                    const tp2Price = smcResp.data.tp2;
-                    const priceDist = Math.abs(tp2Price - entry);
-                    const totalLot = pos.reduce((s, p) => s + p.volume, 0);
-                    const tpUSD = Number((priceDist * totalLot * 100).toFixed(2));
-                    if (tpUSD > 0) {
-                        basketTP = Math.max(tpUSD, 0.5);
-                        this.log('SMC', `Basket TP ajustado para $${basketTP} (TP2 SMC: ${tp2Price})`);
+            if (Date.now() - this.lastBasketSMCFetch > 30000) {
+                this.lastBasketSMCFetch = Date.now();
+                try {
+                    const firstPos = pos[0];
+                    const dir = firstPos.type === 0 ? 'BUY' : 'SELL';
+                    const entry = firstPos.price_open;
+                    const smcResp = await axios.get(`${this.BRIDGE_URL}/smc_levels`, {
+                        params: { symbol: this.resolvedSymbol, direction: dir, entry_price: entry },
+                        timeout: 3000
+                    });
+                    if (smcResp.data && smcResp.data.tp2) {
+                        const tp2Price = smcResp.data.tp2;
+                        const priceDist = Math.abs(tp2Price - entry);
+                        const totalLot = pos.reduce((s, p) => s + p.volume, 0);
+                        const tpUSD = Number((priceDist * totalLot * 100).toFixed(2));
+                        if (tpUSD > 0) {
+                            basketTP = Math.max(tpUSD, 0.5);
+                            this.log('SMC', `Basket TP ajustado para $${basketTP} (TP2 SMC: ${tp2Price})`);
+                        }
+                        if (smcResp.data.atr && smcResp.data.atr > 0) {
+                            const slPrice = dir === 'BUY' ? tp2Price - smcResp.data.atr * 2 : tp2Price + smcResp.data.atr * 2;
+                            const slDist = Math.abs(slPrice - entry);
+                            const slUSD = -Number((slDist * totalLot * 100).toFixed(2));
+                            basketSL = Math.max(slUSD, this.settings.basketSL);
+                        }
                     }
-                    if (smcResp.data.atr && smcResp.data.atr > 0) {
-                        const slPrice = dir === 'BUY' ? tp2Price - smcResp.data.atr * 2 : tp2Price + smcResp.data.atr * 2;
-                        const slDist = Math.abs(slPrice - entry);
-                        const slUSD = -Number((slDist * totalLot * 100).toFixed(2));
-                        basketSL = Math.max(slUSD, this.settings.basketSL);
-                    }
+                } catch (e: any) {
+                    // Fallback: usar valores fixos
                 }
-            } catch (e: any) {
-                // Fallback: usar valores fixos
             }
         }
         if (this.settings.basketTPEnabled && net >= basketTP) {
             for (const p of pos) await axios.post(`${this.BRIDGE_URL}/close_order`, { ticket: p.ticket });
             this.log('PROFIT', `Cesta finalizada com lucro de $${net.toFixed(2)}`);
+            this.log('BASKET_TP', `Basket TP batido em $${net.toFixed(2)}`);
             return true;
         } else if (this.settings.basketSLEnabled && net <= basketSL) {
             for (const p of pos) await axios.post(`${this.BRIDGE_URL}/close_order`, { ticket: p.ticket });
-            this.log('PROFIT', `Cesta finalizada com perda de $${net.toFixed(2)}`);
+            this.log('STOP', `Cesta finalizada com perda de $${net.toFixed(2)}`);
             this.lastLossTime = Date.now();
             return true;
         }
@@ -989,8 +1013,8 @@ export class GoldScalperEngine {
     }
 
     private static async recalculateDailyStats() {
-        // FAST SYNC: Reduzido de 10000ms para 1500ms para alinhar com o tick da UI e disparar alertas instantâneos de Gain/Loss
-        if (Date.now() - this.lastSyncTime > 1500) { this.lastSyncTime = Date.now(); await this.syncTradesFromMT5(); }
+        // Auto-sync a cada 60s (não mais a cada 1.5s)
+        if (Date.now() - this.lastSyncTime > 60000) { this.lastSyncTime = Date.now(); await this.syncTradesFromMT5(); }
         
         // RETROACTIVE FIX: Corrige trades antigos que foram registrados como LOSS ou WIN mesmo sendo $0.00
         let historyModified = false;
@@ -1087,7 +1111,7 @@ export class GoldScalperEngine {
                 })(),
                 streakType: robotTrades.length > 0 ? (robotTrades[0].result === 'WIN' ? 'WIN' : 'LOSS') : 'NONE'
             },
-            trades: this.tradeHistory.slice(0, 50)
+            trades: robotTrades.slice(0, 50)
         };
     }
 
@@ -1214,40 +1238,98 @@ export class GoldScalperEngine {
         try {
             const r = await axios.get(`${this.BRIDGE_URL}/history`);
             const h = r.data || [];
-            const seen = new Set(this.tradeHistory.map(x => x.ticket));
-            let added = 0;
+
+            // Remove trades corrompidos (entry deals com profit zero, sem positionId)
+            const oldCount = this.tradeHistory.length;
+            this.tradeHistory = this.tradeHistory.filter(t => t.profit !== 0 || t.positionId);
+            this.totalProfitAllTime = this.tradeHistory.length > 0
+                ? Number(this.tradeHistory.filter(t => t.magic === this.MAGIC || (t.comment || '').includes('GSL')).reduce((s, t) => s + t.profit, 0).toFixed(2))
+                : 0;
+
+            const seenTickets = new Set(this.tradeHistory.map(x => x.ticket));
+            const seenPositions = new Set(this.tradeHistory.filter(x => x.positionId).map(x => x.positionId));
+
+            // Agrupa deals por position_id
+            const entriesByPos = new Map<number, any>();
+            const exitsByPos = new Map<number, any>();
+
             for (const t of h) {
-                // Filtra apenas símbolos XAUUSD/GOLD — ignorar trades de outros ativos
                 const sym = (t.symbol || '').toUpperCase();
                 const isGold = this.GOLD_SYMBOLS.some(gs => sym.includes(gs.toUpperCase()));
                 if (!isGold) continue;
+                if (!t.position_id) continue;
 
-                if (!seen.has(t.ticket)) {
-                    const isRobot = t.magic === this.MAGIC || (t.comment || '').includes('GSL');
-                    // Sincronizamos TUDO para o histórico da conta, preservando horários originais do MT5
-                    const closeTime = t.time ? new Date(t.time * 1000).toISOString() : new Date().toISOString();
-                    const openTime = t.time ? new Date(t.time * 1000).toISOString() : closeTime;
-                    const netProfit = (t.profit || 0) + (t.commission || 0) + (t.swap || 0);
-
-                    const trade: TradeRecord = {
-                        id: `mt5_${t.ticket}`, ticket: t.ticket, symbol: t.symbol, type: t.type === 0 ? 'BUY' : 'SELL',
-                        lot: t.volume, entryPrice: t.price_open, exitPrice: t.price_current, profit: Number(netProfit.toFixed(2)),
-                        result: netProfit > 0.01 ? 'WIN' : (netProfit < -0.01 ? 'LOSS' : 'TIE'), gridLevel: 1, closeReason: 'TP',
-                        openTime, closeTime, duration: '-', magic: t.magic, comment: t.comment
-                    };
-                    this.tradeHistory.push(trade);
-                    if (isRobot) this.totalProfitAllTime += netProfit;
-                    TradeNotificationBot.notifyTradeClosed('Gold Scalper', this.resolvedSymbol, trade.type, trade.profit, trade.result, t.comment || 'Sincronizado', trade.lot);
-                    added++;
+                if (t.entry === 0) {
+                    entriesByPos.set(t.position_id, t);
+                } else if (t.entry === 1) {
+                    exitsByPos.set(t.position_id, t);
                 }
             }
-            if (added > 0) {
-                // Ordenar por closeTime decrescente para processamento correto
-                this.tradeHistory.sort((a, b) => new Date(b.closeTime).getTime() - new Date(a.closeTime).getTime());
+
+            let added = 0;
+            for (const [posId, entry] of entriesByPos) {
+                const exit = exitsByPos.get(posId);
+                if (!exit) continue;
+
+                const ticket = exit.ticket || entry.ticket;
+                if (seenTickets.has(ticket)) continue;
+                if (seenPositions.has(posId)) continue;
+
+                const netProfit = Number(((exit.profit || 0) + (exit.commission || 0) + (exit.swap || 0)).toFixed(2));
+                const direction = entry.type === 0 ? 'BUY' : 'SELL';
+                const isRobot = entry.magic === this.MAGIC || exit.magic === this.MAGIC ||
+                    (entry.comment || '').includes('GSL') || (exit.comment || '').includes('GSL');
+
+                const closeTime = exit.time ? new Date(exit.time * 1000).toISOString() : new Date().toISOString();
+                const openTime = entry.time ? new Date(entry.time * 1000).toISOString() : closeTime;
+                const comment = (entry.comment || exit.comment || '').toLowerCase();
+
+                let closeReason: TradeRecord['closeReason'] = 'TP';
+                if (comment.includes('[sl') || comment.includes('stop loss') || comment.includes('sl ')) closeReason = 'SL';
+                else if (comment.includes('trailing') || comment.includes('[tr')) closeReason = 'TRAILING';
+                else if (comment.includes('manual')) closeReason = 'MANUAL';
+
+                const trade: TradeRecord = {
+                    id: `mt5_${ticket}`,
+                    ticket,
+                    positionId: posId,
+                    symbol: entry.symbol,
+                    type: direction,
+                    lot: entry.volume || 0,
+                    entryPrice: entry.price || 0,
+                    exitPrice: exit.price || 0,
+                    profit: netProfit,
+                    result: netProfit > 0.01 ? 'WIN' : (netProfit < -0.01 ? 'LOSS' : 'TIE'),
+                    gridLevel: 1,
+                    closeReason,
+                    openTime,
+                    closeTime,
+                    duration: '-',
+                    magic: entry.magic || exit.magic,
+                    comment: (entry.comment || exit.comment || '').trim()
+                };
+
+                if (!isRobot) continue;
+                this.tradeHistory.push(trade);
+                this.totalProfitAllTime += netProfit;
+                if (this.settings.enabled) {
+                    TradeNotificationBot.notifyTradeClosed('Gold Scalper', this.resolvedSymbol, trade.type, trade.profit, trade.result, comment || 'Sincronizado', trade.lot);
+                }
+                added++;
+            }
+
+            // Ordenar por closeTime decrescente
+            this.tradeHistory.sort((a, b) => new Date(b.closeTime).getTime() - new Date(a.closeTime).getTime());
+
+            // Salva sempre que houver mudanças
+            if (added > 0 || oldCount !== this.tradeHistory.length) {
                 this.saveTradeHistory();
             }
             return { synced: added, total: this.tradeHistory.length };
-        } catch (e) { return { synced: 0, total: this.tradeHistory.length }; }
+        } catch (e) {
+            console.error('[SYNC ERROR]', e);
+            return { synced: 0, total: this.tradeHistory.length };
+        }
     }
 
     private static log(action: string, details: string) {
@@ -1267,13 +1349,15 @@ export class GoldScalperEngine {
             try {
                 const d = JSON.parse(fs.readFileSync(this.HISTORY_PATH, 'utf-8'));
                 this.tradeHistory = (d.trades || []).filter((t: TradeRecord) => {
+                    const isOur = t.magic === this.MAGIC || (t.comment || '').toUpperCase().includes('GSL');
+                    if (!isOur) return false;
                     if (t.symbol) {
                         const sym = t.symbol.toUpperCase();
                         return this.GOLD_SYMBOLS.some(gs => sym.includes(gs.toUpperCase()));
                     }
-                    return t.magic === this.MAGIC;
+                    return true;
                 });
-                this.totalProfitAllTime = d.totalProfitAllTime || 0;
+                this.totalProfitAllTime = this.tradeHistory.reduce((s, t) => s + t.profit, 0);
             } catch (e) { }
         }
     }

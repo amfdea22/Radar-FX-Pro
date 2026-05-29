@@ -36,19 +36,19 @@ if "%ERRORLEVEL%"=="1" (
 )
 
 :: 4. Verificar/Iniciar Vite
-netstat -an | find "127.0.0.1:3006" >NUL
+netstat -an | find "127.0.0.1:3009" >NUL
 if "%ERRORLEVEL%"=="1" (
-    echo [4/4] Iniciando Frontend Vite (porta 3006)...
-    start /B "" "npx.cmd" vite --host "%~dp0client"
+    echo [4/4] Iniciando Frontend Vite (porta 3009)...
+    start /B "" "npx.cmd" vite --host "%~dp0client" --port 3009
     timeout /t 8 /nobreak >NUL
 ) else (
-    echo [4/4] Frontend Vite ja esta rodando na porta 3006.
+    echo [4/4] Frontend Vite ja esta rodando na porta 3009.
 )
 
 echo.
 echo ============================================
 echo  Radar-FX PRONTO!
-echo  Frontend: http://localhost:3006
+echo  Frontend: http://localhost:3009
 echo  Server:   http://localhost:3015
 echo  Bridge:   http://localhost:5555
 echo ============================================

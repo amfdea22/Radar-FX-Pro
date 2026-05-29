@@ -4,14 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
 interface SharkBotStatus {
-    settings: { enabled: boolean; symbol: string; timeframe: string; lotSize: number; maxDailyLoss: number; maxDailyProfit: number; riskPercent: number; fvgMinAtrRatio: number };
+    settings: { enabled: boolean; symbol: string; timeframe: string; lotSize: number; maxDailyLoss: number; maxDailyProfit: number; riskPercent: number; fvgMinAtrRatio: number; maxSpread: number; minVolume: number; tradingStartHour: number; tradingEndHour: number; useLimitOrders: boolean; useTrailingStop: boolean; usePartialClose: boolean; useMultiTimeframe: boolean };
     state: { position: any | null; dailyProfit: number; dailyLoss: number };
     isRunning: boolean;
     marginOk: boolean;
     lastAnalysis: {
         price: number; atr: number; swingHigh: number; swingLow: number;
         nivel50: number; sma50: number; fvgCount: number; bos: boolean;
-        setupCount: number; setups: { entradaLimit: number; stopLoss: number; gapSize: number }[];
+        setupCount: number; setups: { entradaLimit: number; stopLoss: number; gapSize: number }[]; setupsSell: { entradaLimit: number; stopLoss: number; gapSize: number }[];
+        htTrend?: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
     } | null;
     trades: any[];
     operationLog: Array<{ time: string; action: string; details: string }>;
@@ -40,30 +41,43 @@ function SharkLogo() {
     );
 }
 
-function FvgDepthChart({ nivel50, swingLow, swingHigh, price, fvgs }: { nivel50: number; swingLow: number; swingHigh: number; price: number; fvgs: { entradaLimit: number }[] }) {
+function FvgDepthChart({ nivel50, swingLow, swingHigh, price, fvgs, htTrend }: { nivel50: number; swingLow: number; swingHigh: number; price: number; fvgs: { entradaLimit: number }[]; htTrend?: string }) {
     const range = swingHigh - swingLow || 1;
-    const h = 96, w = 260;
+    const h = 120, w = 260;
     const pad = 16;
     const toY = (v: number) => pad + (1 - (v - swingLow) / range) * (h - pad * 2);
     const midY = toY(nivel50);
     const priceY = toY(price);
+    const discountTop = toY(swingLow + (swingHigh - swingLow) * 0.5);
+    const discountBot = toY(swingLow + (swingHigh - swingLow) * 0.382);
+    const trendColor = htTrend === 'BULLISH' ? '#34d399' : htTrend === 'BEARISH' ? '#f87171' : '#22d3ee';
     return (
         <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} className="overflow-visible">
             <defs>
                 <linearGradient id="dg" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.12" />
+                    <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.15" />
                     <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
                 </linearGradient>
+                <linearGradient id="dzg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.08" />
+                    <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.18" />
+                </linearGradient>
             </defs>
+            {/* 50% Discount Zone (50%-61.8% retracement area) */}
+            <rect x={0} y={discountTop} width={w} height={discountBot - discountTop} fill="url(#dzg)" rx={2} />
+            <text x={w - 4} y={discountTop - 4} textAnchor="end" fill="#22d3ee" fontSize="7" fontWeight="700">50-61.8% Zone</text>
             <rect x={0} y={midY} width={w} height={h - midY} fill="url(#dg)" />
             <line x1={0} y1={midY} x2={w} y2={midY} stroke="#22d3ee" strokeWidth="1" strokeDasharray="4 3" opacity="0.5" />
-            <text x={w - 4} y={midY - 4} textAnchor="end" fill="#22d3ee" fontSize="8" fontWeight="700">50% Discount Zone</text>
+            <text x={w - 4} y={midY - 4} textAnchor="end" fill="#22d3ee" fontSize="8" fontWeight="700">50%</text>
+            {/* 61.8% line */}
+            <line x1={0} y1={discountBot} x2={w} y2={discountBot} stroke="#22d3ee" strokeWidth="0.5" strokeDasharray="2 3" opacity="0.3" />
+            <text x={w - 4} y={discountBot + 8} textAnchor="end" fill="#22d3ee" fontSize="6" fontWeight="700">61.8%</text>
             {fvgs.slice(0, 3).map((fvg, i) => {
                 const fy = toY(fvg.entradaLimit);
                 return (
                     <g key={i}>
-                        <rect x={50 + i * 65} y={fy - 1} width={36} height={4} rx={2} fill="#22d3ee" opacity={0.9} />
-                        <rect x={50 + i * 65} y={fy - 4} width={36} height={10} rx={2} fill="none" stroke="#22d3ee" strokeWidth="1" opacity={0.25} className="animate-pulse" />
+                        <rect x={50 + i * 65} y={fy - 1} width={36} height={4} rx={2} fill={trendColor} opacity={0.9} />
+                        <rect x={50 + i * 65} y={fy - 4} width={36} height={10} rx={2} fill="none" stroke={trendColor} strokeWidth="1" opacity={0.25} className="animate-pulse" />
                     </g>
                 );
             })}
@@ -80,32 +94,88 @@ function FvgDepthChart({ nivel50, swingLow, swingHigh, price, fvgs }: { nivel50:
 const SYMBOLS = ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD', 'XAGUSD', 'WTI', 'SP500'];
 const TIMEFRAMES = ['M15', 'M30', 'H1', 'H4'];
 
+interface TradeRecord {
+    entryTime: number;
+    exitTime: number;
+    entryPrice: number;
+    exitPrice: number;
+    direction: 'BUY' | 'SELL';
+    result: 'WIN' | 'LOSS';
+    profit: number;
+    fvgSize: number;
+    gapSize: number;
+}
+
 export const SharkBotPanel: React.FC = () => {
     const [status, setStatus] = useState<SharkBotStatus | null>(null);
     const [loading, setLoading] = useState(false);
+    const [history, setHistory] = useState<TradeRecord[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
     const [lotSize, setLotSize] = useState(0.01);
     const [riskPercent, setRiskPercent] = useState(1.0);
     const [symbol, setSymbol] = useState('XAUUSD');
     const [timeframe, setTimeframe] = useState('H1');
     const [fvgMinAtr, setFvgMinAtr] = useState(0.5);
+    const [maxSpread, setMaxSpread] = useState(30);
+    const [minVolume, setMinVolume] = useState(0);
+    const [tradingStart, setTradingStart] = useState(1);
+    const [tradingEnd, setTradingEnd] = useState(23);
+    const [useLimitOrders, setUseLimitOrders] = useState(false);
+    const [useTrailingStop, setUseTrailingStop] = useState(true);
+    const [usePartialClose, setUsePartialClose] = useState(true);
+    const [useMultiTimeframe, setUseMultiTimeframe] = useState(true);
+    const [soundEnabled, setSoundEnabled] = useState(true);
+    const prevTradeCount = useRef(0);
     const terminalRef = useRef<HTMLDivElement>(null);
 
     const fetchStatus = async () => {
         try {
             const res = await axios.get('/api/mt5/shark-bot/status');
-            setStatus(res.data);
-            setLotSize(res.data.settings.lotSize);
-            setRiskPercent(res.data.settings.riskPercent);
-            setSymbol(res.data.settings.symbol);
-            setTimeframe(res.data.settings.timeframe);
-            setFvgMinAtr(res.data.settings.fvgMinAtrRatio);
+            const data = res.data;
+            setStatus(data);
+            setLotSize(data.settings.lotSize);
+            setRiskPercent(data.settings.riskPercent);
+            setSymbol(data.settings.symbol);
+            setTimeframe(data.settings.timeframe);
+            setFvgMinAtr(data.settings.fvgMinAtrRatio);
+            setMaxSpread(data.settings.maxSpread);
+            setMinVolume(data.settings.minVolume);
+            setTradingStart(data.settings.tradingStartHour);
+            setTradingEnd(data.settings.tradingEndHour);
+            setUseLimitOrders(data.settings.useLimitOrders);
+            setUseTrailingStop(data.settings.useTrailingStop);
+            setUsePartialClose(data.settings.usePartialClose);
+            setUseMultiTimeframe(data.settings.useMultiTimeframe);
+            // C16: som quando novo trade aparece
+            if (soundEnabled && data.trades && data.trades.length > prevTradeCount.current) {
+                const lastTrade = data.trades[0];
+                if (lastTrade && (lastTrade.result === 'WIN' || lastTrade.result === 'LOSS')) {
+                    try {
+                        const ctx = new AudioContext();
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain); gain.connect(ctx.destination);
+                        osc.frequency.value = lastTrade.result === 'WIN' ? 880 : 440;
+                        gain.gain.value = 0.1;
+                        osc.start(); osc.stop(ctx.currentTime + 0.15);
+                    } catch { }
+                }
+            }
+            prevTradeCount.current = data.trades?.length || 0;
         } catch { }
     };
 
+    const fetchHistory = async () => {
+        try { setHistoryLoading(true); const r = await axios.get('/api/mt5/shark-bot/history'); setHistory(r.data); } catch {} finally { setHistoryLoading(false); }
+    };
+
     useEffect(() => {
-        fetchStatus();
-        const iv = setInterval(fetchStatus, 5000);
-        return () => clearInterval(iv);
+        const timer = setInterval(() => {
+            fetchStatus();
+        }, 500);
+        fetchHistory();
+        const histTimer = setInterval(fetchHistory, 15000);
+        return () => { clearInterval(timer); clearInterval(histTimer); };
     }, []);
 
     useEffect(() => {
@@ -317,12 +387,13 @@ export const SharkBotPanel: React.FC = () => {
                             <div className="flex items-center justify-between mb-4">
                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estrutura de Mercado</span>
                                 <div className="flex gap-2">
+                                    <span className={`px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest ${a.htTrend === 'BULLISH' ? 'bg-emerald-500/20 text-emerald-500' : a.htTrend === 'BEARISH' ? 'bg-red-500/20 text-red-500' : 'bg-slate-500/10 text-slate-500'}`}>{a.htTrend || 'HT N/A'}</span>
                                     <span className={`px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest ${a.bos ? 'bg-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 text-slate-500'}`}>BOS</span>
                                     <span className={`px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest ${a.fvgCount > 0 ? 'bg-cyan-500/20 text-cyan-500' : 'bg-slate-500/10 text-slate-500'}`}>FVG</span>
                                     <span className={`px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest ${a.setupCount > 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 text-slate-500'}`}>SETUP</span>
                                 </div>
                             </div>
-                            <FvgDepthChart nivel50={a.nivel50} swingLow={a.swingLow} swingHigh={a.swingHigh} price={a.price} fvgs={a.setups} />
+                            <FvgDepthChart nivel50={a.nivel50} swingLow={a.swingLow} swingHigh={a.swingHigh} price={a.price} fvgs={a.setups} htTrend={a.htTrend} />
                         </motion.div>
                     )}
                 </div>
@@ -342,52 +413,97 @@ export const SharkBotPanel: React.FC = () => {
                         )}
                     </div>
 
-                    {a?.setups && a.setups.length > 0 ? (
-                        <div className="grid gap-4">
-                            {a.setups.slice(-6).reverse().map((s, i) => {
-                                const dist = ((a.price - s.entradaLimit) / s.entradaLimit * 100);
-                                return (
-                                    <motion.div key={i} whileHover={{ x: 5 }} className="bg-slate-900/50 backdrop-blur-md p-5 rounded-2xl border border-white/5 hover:border-cyan-500/30 transition-all flex items-center justify-between group">
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
-                                                <Target size={24} />
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <span className="text-xl font-black text-white italic tracking-tight">FVG #{a.setups.length - i}</span>
-                                                    <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-cyan-500/20 text-cyan-500">
-                                                        LIMIT BUY
-                                                    </span>
-                                                    {dist <= 0 && (
-                                                        <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 animate-pulse">
-                                                            Na Zona!
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                                    Gap: ${s.gapSize.toFixed(2)} • Distância: {dist > 0 ? '+' : ''}{dist.toFixed(2)}%
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-6">
-                                            <div className="text-right">
-                                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Entrada</p>
-                                                <p className="text-lg font-black text-white">${s.entradaLimit.toFixed(2)}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Stop Loss</p>
-                                                <p className="text-lg font-black text-red-400">${s.stopLoss.toFixed(2)}</p>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
-                    ) : a ? (
-                        <div className="bg-slate-900/50 backdrop-blur-md p-8 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
-                            <Target size={32} className="text-slate-700 mb-3" />
-                            <p className="text-sm font-bold text-slate-500">Nenhum FVG válido encontrado</p>
-                            <p className="text-[10px] text-slate-600 mt-1">Aguardando nova formação de desequilíbrio de mercado</p>
+                    {a ? (
+                        <div className="grid gap-6">
+                            {a.setupsSell && a.setupsSell.length > 0 && (
+                                <div>
+                                    <h4 className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> SELL SETUPS ({a.setupsSell.length})
+                                    </h4>
+                                    <div className="grid gap-3">
+                                        {a.setupsSell.slice(-6).reverse().map((s, i) => {
+                                            const dist = ((a.price - s.entradaLimit) / s.entradaLimit * 100);
+                                            return (
+                                                <motion.div key={i} whileHover={{ x: 5 }} className="bg-slate-900/50 backdrop-blur-md p-4 rounded-2xl border border-white/5 hover:border-red-500/30 transition-all flex items-center justify-between group">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-base shadow-lg bg-red-500/10 text-red-400 border border-red-500/20">
+                                                            <Target size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center gap-2 mb-0.5">
+                                                                <span className="text-base font-black text-white italic tracking-tight">FVG Sell #{a.setupsSell.length - i}</span>
+                                                                <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30">LIMIT SELL</span>
+                                                                {dist >= 0 && (
+                                                                    <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">Na Zona!</span>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Gap: ${s.gapSize.toFixed(2)} • Distância: {dist > 0 ? '+' : ''}{dist.toFixed(2)}%</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="text-right">
+                                                            <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Entrada</p>
+                                                            <p className="text-base font-black text-white">${s.entradaLimit.toFixed(2)}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Stop Loss</p>
+                                                            <p className="text-base font-black text-red-400">${s.stopLoss.toFixed(2)}</p>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                            {a.setups && a.setups.length > 0 && (
+                                <div>
+                                    <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> BUY SETUPS ({a.setups.length})
+                                    </h4>
+                                    <div className="grid gap-3">
+                                        {a.setups.slice(-6).reverse().map((s, i) => {
+                                            const dist = ((a.price - s.entradaLimit) / s.entradaLimit * 100);
+                                            return (
+                                                <motion.div key={i} whileHover={{ x: 5 }} className="bg-slate-900/50 backdrop-blur-md p-4 rounded-2xl border border-white/5 hover:border-cyan-500/30 transition-all flex items-center justify-between group">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-base shadow-lg bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
+                                                            <Target size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center gap-2 mb-0.5">
+                                                                <span className="text-base font-black text-white italic tracking-tight">FVG Buy #{a.setups.length - i}</span>
+                                                                <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-cyan-500/20 text-cyan-500 border border-cyan-500/30">LIMIT BUY</span>
+                                                                {dist <= 0 && (
+                                                                    <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 animate-pulse">Na Zona!</span>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Gap: ${s.gapSize.toFixed(2)} • Distância: {dist > 0 ? '+' : ''}{dist.toFixed(2)}%</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="text-right">
+                                                            <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Entrada</p>
+                                                            <p className="text-base font-black text-white">${s.entradaLimit.toFixed(2)}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Stop Loss</p>
+                                                            <p className="text-base font-black text-red-400">${s.stopLoss.toFixed(2)}</p>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                            {(!a.setups || a.setups.length === 0) && (!a.setupsSell || a.setupsSell.length === 0) && (
+                                <div className="bg-slate-900/50 backdrop-blur-md p-8 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
+                                    <Target size={32} className="text-slate-700 mb-3" />
+                                    <p className="text-sm font-bold text-slate-500">Nenhum FVG válido encontrado</p>
+                                    <p className="text-[10px] text-slate-600 mt-1">Aguardando nova formação de desequilíbrio de mercado</p>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="bg-slate-900/50 backdrop-blur-md p-8 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
@@ -460,6 +576,81 @@ export const SharkBotPanel: React.FC = () => {
                                     onMouseUp={() => saveSettings()}
                                     className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-cyan-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg" />
                             </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Spread Máx</span>
+                                    <span className="text-sm font-black text-amber-400">{maxSpread}</span>
+                                </div>
+                                <input type="range" min={5} max={100} step={1} value={maxSpread}
+                                    onChange={e => { setMaxSpread(Number(e.target.value)); }}
+                                    onMouseUp={() => saveSettings()}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-amber-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg" />
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Volume Min</span>
+                                    <span className="text-sm font-black text-indigo-400">{minVolume.toFixed(1)}x</span>
+                                </div>
+                                <input type="range" min={0} max={3} step={0.1} value={minVolume}
+                                    onChange={e => { setMinVolume(Number(e.target.value)); }}
+                                    onMouseUp={() => saveSettings()}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-indigo-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg" />
+                                <p className="text-[7px] text-slate-600 mt-1">0 = desligado</p>
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Horário Trading (UTC)</span>
+                                    <span className="text-sm font-black text-cyan-400">{tradingStart}h - {tradingEnd}h</span>
+                                </div>
+                                <div className="flex gap-2 mt-2">
+                                    <input type="range" min={0} max={23} step={1} value={tradingStart}
+                                        onChange={e => { setTradingStart(Number(e.target.value)); }}
+                                        onMouseUp={() => saveSettings()}
+                                        className="flex-1 h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-cyan-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg" />
+                                    <span className="text-[10px] font-black text-slate-500">→</span>
+                                    <input type="range" min={0} max={23} step={1} value={tradingEnd}
+                                        onChange={e => { setTradingEnd(Number(e.target.value)); }}
+                                        onMouseUp={() => saveSettings()}
+                                        className="flex-1 h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-cyan-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg" />
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2 pt-2 border-t border-white/10">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <button onClick={() => { setUsePartialClose(!usePartialClose); saveSettings({ usePartialClose: !usePartialClose }); }}
+                                        className={`w-8 h-4 rounded-full transition-colors ${usePartialClose ? 'bg-emerald-500' : 'bg-slate-700'}`}>
+                                        <div className={`w-3 h-3 rounded-full bg-white transition-transform ${usePartialClose ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                                    </button>
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Fech. Parcial</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <button onClick={() => { setUseTrailingStop(!useTrailingStop); saveSettings({ useTrailingStop: !useTrailingStop }); }}
+                                        className={`w-8 h-4 rounded-full transition-colors ${useTrailingStop ? 'bg-emerald-500' : 'bg-slate-700'}`}>
+                                        <div className={`w-3 h-3 rounded-full bg-white transition-transform ${useTrailingStop ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                                    </button>
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Trailing</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <button onClick={() => { setUseMultiTimeframe(!useMultiTimeframe); saveSettings({ useMultiTimeframe: !useMultiTimeframe }); }}
+                                        className={`w-8 h-4 rounded-full transition-colors ${useMultiTimeframe ? 'bg-emerald-500' : 'bg-slate-700'}`}>
+                                        <div className={`w-3 h-3 rounded-full bg-white transition-transform ${useMultiTimeframe ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                                    </button>
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Multi-TF</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <button onClick={() => { setUseLimitOrders(!useLimitOrders); saveSettings({ useLimitOrders: !useLimitOrders }); }}
+                                        className={`w-8 h-4 rounded-full transition-colors ${useLimitOrders ? 'bg-emerald-500' : 'bg-slate-700'}`}>
+                                        <div className={`w-3 h-3 rounded-full bg-white transition-transform ${useLimitOrders ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                                    </button>
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Limit</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <button onClick={() => setSoundEnabled(!soundEnabled)}
+                                        className={`w-8 h-4 rounded-full transition-colors ${soundEnabled ? 'bg-emerald-500' : 'bg-slate-700'}`}>
+                                        <div className={`w-3 h-3 rounded-full bg-white transition-transform ${soundEnabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                                    </button>
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Som</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -481,7 +672,7 @@ export const SharkBotPanel: React.FC = () => {
                                 </div>
                                 <div className="bg-slate-950/40 p-3 rounded-2xl border border-white/5 text-center">
                                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Profit Factor</p>
-                                    <p className={`text-2xl font-black italic ${perf.profitFactor >= 1.5 ? 'text-emerald-400' : 'text-amber-400'}`}>{perf.profitFactor === Infinity ? '∞' : perf.profitFactor.toFixed(2)}</p>
+                                    <p className={`text-2xl font-black italic ${perf.profitFactor != null && perf.profitFactor >= 1.5 ? 'text-emerald-400' : 'text-amber-400'}`}>{perf.profitFactor != null && perf.profitFactor !== Infinity ? perf.profitFactor.toFixed(2) : '∞'}</p>
                                 </div>
                                 <div className="bg-slate-950/40 p-3 rounded-2xl border border-white/5 text-center">
                                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">P&L</p>
@@ -505,32 +696,52 @@ export const SharkBotPanel: React.FC = () => {
 
                     {/* ACTIVE POSITION */}
                     {status?.state?.position ? (
-                        <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/20 p-8 relative overflow-hidden shadow-[0_0_30px_rgba(52,211,153,0.08)]">
-                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
+                        <div className={`bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border p-8 relative overflow-hidden shadow-[0_0_30px_rgba(52,211,153,0.08)] ${status.state.position.type === 'BUY' ? 'border-emerald-500/20' : 'border-red-500/20'}`}>
+                            <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent ${status.state.position.type === 'BUY' ? 'via-emerald-500/50' : 'via-red-500/50'} to-transparent`}></div>
                             <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
-                                <DollarSign className="text-emerald-400" size={18} /> Posição Ativa
+                                <DollarSign className={status.state.position.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'} size={18} />
+                                Posição Ativa
+                                <span className={`text-[8px] font-black px-2 py-0.5 rounded border ${status.state.position.type === 'BUY' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                                    {status.state.position.type}
+                                </span>
+                                <span className="text-[7px] font-mono text-slate-600">#{status.state.position.ticket}</span>
                             </h3>
                             <div className="space-y-3">
                                 {[
-                                    { label: 'Tipo', value: 'BUY', color: 'text-emerald-400' },
                                     { label: 'Entrada', value: `$${status.state.position.price.toFixed(2)}`, color: 'text-white' },
                                     { label: 'Stop Loss', value: `$${status.state.position.sl.toFixed(2)}`, color: 'text-red-400' },
                                     { label: 'Take Profit', value: `$${status.state.position.tp.toFixed(2)}`, color: 'text-emerald-400' },
+                                    { label: 'Flutuante', value: `${(status.state.position.profit || 0) >= 0 ? '+' : ''}$${(status.state.position.profit || 0).toFixed(2)}`, color: (status.state.position.profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400' },
                                 ].map((r, i) => (
                                     <div key={i} className="flex items-center justify-between bg-slate-950/40 p-3 rounded-xl border border-white/5">
                                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{r.label}</span>
                                         <span className={`text-sm font-black ${r.color}`}>{r.value}</span>
                                     </div>
                                 ))}
-                                <div className="mt-4">
-                                    <div className="flex justify-between text-[9px] text-slate-500 mb-1">
-                                        <span>SL ${status.state.position.sl.toFixed(0)}</span>
-                                        <span>TP ${status.state.position.tp.toFixed(0)}</span>
-                                    </div>
-                                    <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                                        <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-emerald-400 transition-all duration-1000" style={{ width: '45%' }} />
-                                    </div>
-                                </div>
+                                {(() => {
+                                    const pos = status.state.position;
+                                    const isBuy = pos.type === 'BUY';
+                                    const entry = pos.price;
+                                    const sl = pos.sl;
+                                    const tp = pos.tp;
+                                    const slDist = Math.abs(entry - sl);
+                                    const tpDist = Math.abs(entry - tp);
+                                    const totalDist = slDist + tpDist;
+                                    const progress = totalDist > 0 ? (slDist / totalDist) * 100 : 50;
+                                    return (
+                                        <div className="mt-4">
+                                            <div className="flex justify-between text-[9px] text-slate-500 mb-1">
+                                                <span>SL ${sl.toFixed(0)}</span>
+                                                <span>Entrada ${entry.toFixed(0)}</span>
+                                                <span>TP ${tp.toFixed(0)}</span>
+                                            </div>
+                                            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div className={`h-full rounded-full transition-all duration-1000 ${isBuy ? 'bg-gradient-to-r from-red-500 via-slate-600 to-emerald-400' : 'bg-gradient-to-r from-emerald-400 via-slate-600 to-red-500'}`}
+                                                    style={{ width: `${progress}%`, marginLeft: isBuy ? '0' : `${100 - progress}%` }} />
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         </div>
                     ) : (
@@ -577,6 +788,63 @@ export const SharkBotPanel: React.FC = () => {
                             <Terminal size={24} className="text-slate-700 mb-2" />
                             <p className="text-[11px] font-bold text-slate-600">Aguardando logs do Shark Bot...</p>
                             <p className="text-[9px] text-slate-700 mt-1">Os eventos aparecerão aqui em tempo real</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* HISTÓRICO DE TRADES */}
+            <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                            <Target size={16} className="text-cyan-400" />
+                        </div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Histórico de Trades</span>
+                        <span className="text-[8px] font-black text-slate-500">{history.length} trades</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {history.length > 0 && (
+                            <>
+                                <span className="text-[9px] font-black text-emerald-400">{history.filter(t => t.result === 'WIN').length}W</span>
+                                <span className="text-[9px] font-black text-red-400">{history.filter(t => t.result === 'LOSS').length}L</span>
+                            </>
+                        )}
+                    </div>
+                </div>
+                <div className="max-h-72 overflow-y-auto no-scrollbar">
+                    {history.length > 0 ? (
+                        <div className="divide-y divide-white/5">
+                            {history.map((t, i) => (
+                                <div key={i} className="flex items-center gap-4 px-6 py-3 hover:bg-white/[0.02] transition-colors">
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${t.result === 'WIN' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                                        {t.result === 'WIN' ? 'W' : 'L'}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <span className={`text-xs font-black ${t.direction === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                {t.direction === 'BUY' ? 'COMPRA' : 'VENDA'}
+                                            </span>
+                                            <span className="text-[9px] text-slate-600">${t.entryPrice.toFixed(2)} → ${t.exitPrice.toFixed(2)}</span>
+                                        </div>
+                                        <div className="text-[9px] text-slate-600">
+                                            {new Date(t.entryTime).toLocaleDateString('pt-BR')} • FVG: ${t.fvgSize.toFixed(2)} • Gap: ${t.gapSize.toFixed(2)}
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className={`text-sm font-black ${t.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            {t.profit >= 0 ? '+' : ''}{t.profit.toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <Target size={28} className="text-slate-700 mb-2" />
+                            <p className="text-sm font-bold text-slate-500">Nenhum trade realizado</p>
+                            <p className="text-[10px] text-slate-600 mt-1">O histórico aparecerá aqui quando houver trades fechados</p>
                         </div>
                     )}
                 </div>

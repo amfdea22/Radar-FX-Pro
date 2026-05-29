@@ -8,13 +8,13 @@ import axios from 'axios';
 
 interface AiStatus {
     gold?: any;
-    crypto?: any;
     swing?: any;
     omni?: any;
     supreme?: any;
     robot?: any;
     analytics?: any;
     discipline?: any;
+    shark_bot?: any;
 }
 
 const NEURO_COLORS = {
@@ -111,17 +111,18 @@ export const AiMonitoring: React.FC = () => {
     const sc = data.supreme || {};
     const rc = data.robot || {};
     const dc = data.discipline || {};
+    const sb = data.shark_bot || {};
     const an = data.analytics || {};
     const aiInsights: string[] = an?.aiInsights || [];
 
-    const engines = [
-        { id: 'gold', name: 'Gold Scalper', icon: Target, active: s.enabled, data: g, color: '#F59E0B' },
-        { id: 'crypto', name: 'Crypto IA', icon: Brain, active: data.crypto?.settings?.enabled, data: data.crypto, color: '#8B5CF6' },
-        { id: 'swing', name: 'Swing Trader', icon: TrendingUp, active: data.swing?.settings?.enabled, data: data.swing, color: '#06B6D4' },
-        { id: 'omni', name: 'Omni Prob.', icon: Layers, active: data.omni?.settings?.enabled, data: data.omni, color: '#EC4899' },
-        { id: 'supreme', name: 'Supreme AI', icon: Cpu, active: sc.status === 'ACTIVE', data: sc, color: '#10B981' },
-        { id: 'robot', name: 'Alpha Robot', icon: Radio, active: data.robot?.enabled, data: rc, color: '#6366F1' },
-    ];
+     const engines = [
+         { id: 'gold', name: 'Gold Scalper', icon: Target, active: s.enabled, data: g, color: '#F59E0B' },
+         { id: 'shark_bot', name: 'Shark Bot', icon: Zap, active: data.shark_bot?.settings?.enabled, data: data.shark_bot, color: '#FBBF24' },
+         { id: 'swing', name: 'Swing Trader', icon: TrendingUp, active: data.swing?.settings?.enabled, data: data.swing, color: '#06B6D4' },
+         { id: 'omni', name: 'Omni Prob.', icon: Layers, active: data.omni?.settings?.enabled, data: data.omni, color: '#EC4899' },
+         { id: 'supreme', name: 'Supreme AI', icon: Cpu, active: sc.status === 'ACTIVE', data: sc, color: '#10B981' },
+         { id: 'robot', name: 'Alpha Robot', icon: Radio, active: data.robot?.enabled, data: rc, color: '#6366F1' },
+     ];
 
     const logs: any[] = g.operationLog ? [...g.operationLog].filter((l: any) => l.action?.startsWith('IA_') || l.action === 'WARN' || l.action === 'NEURO') : [];
 

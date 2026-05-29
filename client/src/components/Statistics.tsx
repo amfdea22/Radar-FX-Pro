@@ -20,6 +20,8 @@ const COLORS = {
 export const Statistics: React.FC = () => {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [correlationData, setCorrelationData] = useState<any>(null);
+    const [corrLoading, setCorrLoading] = useState(true);
 
     const fetchStats = async () => {
         try {
@@ -33,9 +35,39 @@ export const Statistics: React.FC = () => {
     };
 
     useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const resp = await axios.get('/api/mt5/gold-scalper/statistics');
+                setData(resp.data);
+                setLoading(false);
+            } catch (err) {
+                console.error('Stats error:', err);
+                setLoading(false);
+            }
+        };
+
+        const fetchCorrelation = async () => {
+            try {
+                setCorrLoading(true);
+                const resp = await axios.get('/api/mt5/correlation/xauusd');
+                setCorrelationData(resp.data);
+                setCorrLoading(false);
+            } catch (err) {
+                console.error('Correlation error:', err);
+                setCorrLoading(false);
+            }
+        };
+
         fetchStats();
-        const interval = setInterval(fetchStats, 30000);
-        return () => clearInterval(interval);
+        fetchCorrelation();
+        
+        const intervalStats = setInterval(fetchStats, 30000);
+        const intervalCorr = setInterval(fetchCorrelation, 300000); // Update every 5min
+        
+        return () => {
+            clearInterval(intervalStats);
+            clearInterval(intervalCorr);
+        };
     }, []);
 
     if (loading && !data) {
@@ -257,29 +289,93 @@ export const Statistics: React.FC = () => {
                 </div>
             </div>
 
-            {/* Day of Week Performance */}
-            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
-                <div className="flex items-center gap-2 mb-4">
-                    <Calendar size={16} className="text-sky-400" />
-                    <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Performance por Dia da Semana</span>
-                </div>
-                <div className="h-72">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data?.byDayOfWeek || []}>
-                            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} />
-                            <XAxis dataKey="day" tick={{ fill: COLORS.text, fontSize: 12 }} />
-                            <YAxis yAxisId="left" tick={{ fill: COLORS.text, fontSize: 10 }} />
-                            <YAxis yAxisId="right" orientation="right" tick={{ fill: COLORS.text, fontSize: 10 }} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar yAxisId="left" dataKey="trades" fill="#3b82f6" name="Trades" radius={[4, 4, 0, 0]} />
-                            <Bar yAxisId="right" dataKey="winRate" fill="#10b981" name="Win Rate %" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
+             {/* Day of Week Performance */}
+             <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
+                 <div className="flex items-center gap-2 mb-4">
+                     <Calendar size={16} className="text-sky-400" />
+                     <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Performance por Dia da Semana</span>
+                 </div>
+                 <div className="h-72">
+                     <ResponsiveContainer width="100%" height="100%">
+                         <BarChart data={data?.byDayOfWeek || []}>
+                             <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} />
+                             <XAxis dataKey="day" tick={{ fill: COLORS.text, fontSize: 12 }} />
+                             <YAxis yAxisId="left" tick={{ fill: COLORS.text, fontSize: 10 }} />
+                             <YAxis yAxisId="right" orientation="right" tick={{ fill: COLORS.text, fontSize: 10 }} />
+                             <Tooltip content={<CustomTooltip />} />
+                             <Bar yAxisId="left" dataKey="trades" fill="#3b82f6" name="Trades" radius={[4, 4, 0, 0]} />
+                             <Bar yAxisId="right" dataKey="winRate" fill="#10b981" name="Win Rate %" radius={[4, 4, 0, 0]} />
+                         </BarChart>
+                     </ResponsiveContainer>
+                 </div>
+             </div>
 
-            {/* Summary Stats Table */}
+             {/* Correlation Heatmap */}
+             <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
+                 <div className="flex items-center gap-2 mb-4">
+                     <Activity size={16} className="text-sky-400" />
+                     <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Matriz de Correlação XAUUSD</span>
+                 </div>
+                 {corrLoading ? (
+                     <div className="h-96 flex items-center justify-center">
+                         <div className="w-12 h-12 border-4 border-sky-500/30 border-t-sky-500 rounded-full animate-spin" />
+                     </div>
+                 ) : correlationData ? (
+                     <div className="overflow-x-auto">
+                         <table className="w-full text-sm">
+                             <thead>
+                                 <tr>
+                                     <th className="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase tracking-wider"></th>
+                                     {correlationData.assets.map((asset: string, index: number) => (
+                                         <th key={index} className="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                                             {asset}
+                                         </th>
+                                     ))}
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 {correlationData.assets.map((rowAsset: string, rowIndex: number) => (
+                                     <tr key={rowIndex} className="border-b border-slate-800/30 hover:bg-slate-800/20 transition-colors">
+                                         <th className="px-4 py-2 text-left text-xs font-medium text-slate-400">
+                                             {rowAsset}
+                                         </th>
+                                         {correlationData.assets.map((colAsset: string, colIndex: number) => {
+                                             const value = correlationData.matrix[rowAsset]?.[colAsset] || 0;
+                                             const getColorClass = (val: number) => {
+                                                 if (val >= 0.7) return 'bg-emerald-500/20 text-emerald-400';
+                                                 if (val >= 0.3) return 'bg-amber-500/20 text-amber-400';
+                                                 if (val >= 0) return 'bg-slate-500/20 text-slate-400';
+                                                 if (val >= -0.3) return 'bg-slate-500/20 text-slate-400';
+                                                 if (val >= -0.7) return 'bg-amber-500/20 text-amber-400';
+                                                 return 'bg-emerald-500/20 text-emerald-400';
+                                             };
+                                             return (
+                                                 <td 
+                                                     key={colIndex} 
+                                                     className={`px-4 py-2 text-center text-xs font-mono font-bold ${getColorClass(value)}`}
+                                                 >
+                                                     {value.toFixed(2)}
+                                                 </td>
+                                             );
+                                         })}
+                                     </tr>
+                                 ))}
+                             </tbody>
+                         </table>
+                     </div>
+                 ) : (
+                     <div className="h-96 flex items-center justify-center">
+                         <span className="text-slate-500">Erro ao carregar dados de correlação</span>
+                     </div>
+                 )}
+                 <div className="mt-4 text-xs text-slate-500">
+                     Valores: -1 (correlação negativa perfeita) a +1 (correlação positiva perfeita)
+                 </div>
+             </div>
+
+             {/* Summary Stats Table */}
             <div className="bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"></div>
                 <span className="text-xs font-black text-slate-500 uppercase tracking-widest block mb-4">Resumo Geral</span>

@@ -4,7 +4,7 @@ import {
     Bitcoin, Globe, BarChart3, Minus, Plus,
     ArrowUpRight, ArrowDownRight, Activity, Loader2,
     ArrowUp, ArrowDown, Clock, ShieldAlert, CheckCircle2, AlertCircle,
-    Zap, Target
+    Zap, Target, Eye, History, XCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -108,6 +108,7 @@ export const TradingPanel: React.FC = () => {
     const [orderResult, setOrderResult] = useState<{ symbol: string; success: boolean; message: string } | null>(null);
     const [isDisciplineLocked, setIsDisciplineLocked] = useState(false);
     const [disciplineReason, setDisciplineReason] = useState<string | null>(null);
+    const [executedTrades, setExecutedTrades] = useState<any[]>([]);
     const isExecutingRef = useRef(false);
     const ticksRef = useRef<Record<string, TickData>>({});
 
@@ -209,6 +210,14 @@ export const TradingPanel: React.FC = () => {
                 comment: `MANUAL | Quick Trade | ${action} ${symbol}`
             });
 
+            const trade = {
+                id: Date.now().toString(),
+                symbol, action, lot,
+                price: action === 'BUY' ? (ticks[symbol]?.ask || 0) : (ticks[symbol]?.bid || 0),
+                time: new Date().toLocaleTimeString('pt-BR'),
+                status: 'EXECUTADO'
+            };
+            setExecutedTrades(prev => [trade, ...prev]);
             setOrderResult({
                 symbol,
                 success: true,
@@ -623,6 +632,46 @@ export const TradingPanel: React.FC = () => {
                         );
                     })}
                     </div>
+                </div>
+            </div>
+
+            {/* MONITORAMENTO DE TRADES */}
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/10 p-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
+                <div className="flex items-center gap-3 mb-5">
+                    <Eye size={18} className="text-emerald-400" />
+                    <h3 className="text-lg font-black text-white italic uppercase tracking-tighter">Monitoramento de Trades</h3>
+                    <span className="text-[10px] font-black text-slate-500 bg-slate-800/50 px-3 py-1 rounded-xl border border-slate-700/50">
+                        {executedTrades.length} execução(ões)
+                    </span>
+                </div>
+                <div className="space-y-2">
+                    {executedTrades.length > 0 ? executedTrades.map(trade => (
+                        <div key={trade.id}
+                            className="flex items-center gap-4 p-3 bg-slate-950/40 rounded-xl border border-white/5 group">
+                            <div className={`w-1 h-10 rounded-full ${trade.action === 'BUY' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            <div className="flex-1 flex items-center gap-3">
+                                <span className="text-base font-black text-white italic">{trade.symbol}</span>
+                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider border ${trade.action === 'BUY' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                                    {trade.action}
+                                </span>
+                                <span className="text-[10px] font-mono text-slate-500">{trade.lot}</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-[10px] font-bold text-slate-500">
+                                <span>{trade.price > 0 ? trade.price.toFixed(5) : '---'}</span>
+                                <span className="font-mono text-slate-600">{trade.time}</span>
+                                <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                                    {trade.status}
+                                </span>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="py-12 text-center">
+                            <History size={36} className="mx-auto mb-3 text-slate-700" />
+                            <p className="text-sm font-black text-slate-500 uppercase tracking-widest">Nenhum trade manual executado</p>
+                            <p className="text-[10px] text-slate-600 mt-1">Trades feitos pelos botões acima aparecerão aqui</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/amfdea22/Radar-FX-Pro#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3",
     "markdown-pdf": "^11.0.0"
   }
 }

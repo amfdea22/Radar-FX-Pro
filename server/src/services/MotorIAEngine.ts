@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { AlertEngine } from './AlertEngine';
 import { SymbolLockService } from './SymbolLockService';
+import { DisciplineEngine } from './DisciplineEngine';
 
 interface MotorIASettings {
     enabled: boolean;
@@ -235,7 +236,8 @@ export class MotorIAEngine {
             } catch (e) {
                 console.error('🧠 MotorIA: Loop error', e);
             }
-            await this.sleep(15000);
+            const hasPositions = this.state.activePositions > 0;
+            await this.sleep(hasPositions ? 5000 : 15000);
         }
     }
 
@@ -258,7 +260,7 @@ export class MotorIAEngine {
         try {
             const bars = await this.fetchBars('XAUUSD', 'H1', 100);
             if (!bars || bars.length < 30) return;
-            const closes = bars.map((b: any) => b.c);
+            const closes = bars.map((b: any) => b.close);
             const returns = closes.slice(1).map((c: any, i: number) => (c - closes[i]) / closes[i] * 100);
             const mean = returns.reduce((a: number, b: number) => a + b, 0) / returns.length;
             const variance = returns.reduce((a: number, b: number) => a + (b - mean) ** 2, 0) / returns.length;
@@ -283,6 +285,18 @@ export class MotorIAEngine {
             const resp = await axios.get(`${this.BRIDGE_URL}/candles`, { params: { symbol, timeframe: tf, count }, timeout: 5000 });
             return Array.isArray(resp.data?.candles) ? resp.data.candles : Array.isArray(resp.data) ? resp.data : null;
         } catch { return null; }
+    }
+
+    private static calcATR(bars: any[], period: number): number {
+        if (!bars || bars.length < period + 1) return 0;
+        const trs: number[] = [];
+        for (let i = 1; i < Math.min(bars.length, period + 5); i++) {
+            const high = bars[i].h, low = bars[i].l;
+            const prevClose = bars[i - 1].c;
+            trs.push(Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose)));
+        }
+        if (trs.length === 0) return 0;
+        return trs.reduce((a, b) => a + b, 0) / trs.length;
     }
 
     private static async analyzeAllEngines() {
@@ -319,8 +333,9 @@ export class MotorIAEngine {
             const positions: any[] = Array.isArray(resp.data) ? resp.data : [];
             const openTickets = new Set(positions.map(p => p.ticket));
 
-            for (const exec of this.executions) {
-                if (exec.result !== 'PENDING') continue;
+            // Limita iteração apenas aos 100 primeiros pendentes para evitar vazamento
+            const pendingExecs = this.executions.filter(e => e.result === 'PENDING').slice(0, 100);
+            for (const exec of pendingExecs) {
                 const pos = positions.find(p => p.ticket.toString() === exec.id);
                 if (!pos) {
                     const resolved = await this.resolveExecution(exec);
@@ -329,6 +344,57 @@ export class MotorIAEngine {
                     exec.entryPrice = pos.price_open || exec.entryPrice;
                 }
             }
+
+            // Gerencia trailing stop / parcial para posições abertas IA (magic 999001)
+            for (const pos of positions) {
+                if (pos.magic !== 999001) continue;
+                const exec = this.executions.find(e => e.id === pos.ticket.toString() && e.result === 'PENDING');
+                if (!exec) continue;
+                const currentPrice = pos.price_current || pos.price_open;
+                const isBuy = exec.direction === 'BUY';
+                const entry = exec.entryPrice;
+                const totalDist = Math.abs((exec.takeProfit || entry) - entry);
+                if (totalDist <= 0) continue;
+
+                // Fechamento parcial em 50% do target
+                if (!exec.exitReason?.includes('PARTIAL') && exec.lotSize >= 0.02) {
+                    const halfWay = isBuy ? entry + totalDist * 0.5 : entry - totalDist * 0.5;
+                    const reachedHalf = isBuy ? currentPrice >= halfWay : currentPrice <= halfWay;
+                    if (reachedHalf) {
+                        try {
+                            await axios.post(`${this.BRIDGE_URL}/close_partial`, {
+                                ticket: pos.ticket, volume: exec.lotSize / 2, magic: 999001,
+                            }, { timeout: 5000 });
+                            exec.exitReason = 'PARTIAL';
+                        } catch { /* partial close fail */ }
+                    }
+                }
+
+                // Trailing stop após parcial / 50% do target
+                if (exec.exitReason === 'PARTIAL' || (!exec.exitReason && totalDist > 0)) {
+                    const trailTrigger = isBuy ? entry + totalDist * 0.5 : entry - totalDist * 0.5;
+                    const trailTriggered = isBuy ? currentPrice >= trailTrigger : currentPrice <= trailTrigger;
+                    if (trailTriggered) {
+                        const atr = this.calcATR(
+                            (await this.fetchBars(exec.symbol, this.settings.timeframe, 20)) || [],
+                            14
+                        );
+                        const trailDist = Math.max(atr * 0.5, totalDist * 0.15);
+                        const newSl = isBuy ? currentPrice - trailDist : currentPrice + trailDist;
+                        const oldSl = exec.stopLoss;
+                        if (isBuy ? newSl > oldSl + 0.5 : newSl < oldSl - 0.5) {
+                            try {
+                                await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                                    ticket: pos.ticket, sl: Math.round(newSl * 100) / 100, magic: 999001,
+                                }, { timeout: 5000 });
+                                exec.stopLoss = newSl;
+                                console.log(`🧠 MotorIA: Trailing SL -> ${newSl.toFixed(2)} (${exec.symbol} ${exec.direction})`);
+                            } catch { /* trailing fail */ }
+                        }
+                    }
+                }
+            }
+
             this.state.activePositions = positions.filter(p => p.magic === 999001).length;
             this.saveHistory();
         } catch (e) { }
@@ -445,23 +511,22 @@ export class MotorIAEngine {
         }
     }
 
-    private static calcATR(bars: any[], period: number): number {
-        if (bars.length < period + 1) return 0;
-        let trSum = 0;
-        for (let i = 1; i <= period; i++) {
-            const hl = bars[i].h - bars[i].l;
-            const hc = Math.abs(bars[i].h - bars[i - 1].c);
-            const lc = Math.abs(bars[i].l - bars[i - 1].c);
-            trSum += Math.max(hl, hc, lc);
-        }
-        return trSum / period;
-    }
-
     private static async executeTrade(params: {
         symbol: string; direction: 'BUY' | 'SELL'; lotSize: number;
         entryPrice: number; stopLoss: number; takeProfit: number;
         confidence: number; strategy: string; marketRegime: string; tags: string[];
     }) {
+        // SAFETY LOCK: verificar DisciplineEngine antes de executar
+        try {
+            const discipline = await DisciplineEngine.getDailyStatus();
+            if (discipline.isLocked) {
+                console.log(`🧠 MotorIA: Safety Lock bloqueou ordem — ${discipline.reason}`);
+                return;
+            }
+        } catch (e) {
+            console.warn('🧠 MotorIA: Erro ao verificar DisciplineEngine', e);
+        }
+
         const execId = `IA_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         console.log(`🧠 MotorIA: EXECUTANDO ${params.direction} ${params.symbol} | Lote: ${params.lotSize} | Confiança: ${params.confidence.toFixed(0)}% | Regime: ${params.marketRegime}`);
 

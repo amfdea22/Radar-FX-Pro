@@ -121,7 +121,7 @@ export class AlphaRobotEngine {
         atrMultiplierSL: 1.5,
         atrMultiplierTP: 3.5,
         entryScoreThreshold: 70,
-        symbols: ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD']
+        symbols: ['XAUUSD', 'BTCUSD', 'EURUSD', 'GBPUSD']
     };
 
     private static tradesThisWindow = 0;
@@ -1124,7 +1124,7 @@ export class AlphaRobotEngine {
                     exitPrice: t.price || 0,
                     profit: Number(profit.toFixed(2)),
                     result: profit >= 0 ? 'WIN' : 'LOSS',
-                    setup: (t.comment || '').split('|').pop()?.trim() || 'Desconhecido',
+                    setup: `Alpha Robot - ${(t.comment || '').split('|').pop()?.trim() || 'Desconhecido'}`,
                     closeReason,
                     openTime: t.time ? new Date(t.time * 1000).toISOString() : new Date().toISOString(),
                     closeTime: t.time ? new Date(t.time * 1000).toISOString() : new Date().toISOString(),
@@ -1140,10 +1140,12 @@ export class AlphaRobotEngine {
                 this.totalProfitAllTime += record.profit;
                 newCount++;
 
-                try {
-                    const { TradeNotificationBot } = require('./TradeNotificationBot');
-                    TradeNotificationBot.notifyTradeClosed('Alpha Robot', t.symbol || 'Unknown', record.type, record.profit, record.result, record.closeReason, record.lot);
-                } catch (e) { /* notif fail */ }
+                if (this.settings.enabled) {
+                    try {
+                        const { TradeNotificationBot } = require('./TradeNotificationBot');
+                        TradeNotificationBot.notifyTradeClosed('Alpha Robot', t.symbol || 'Unknown', record.type, record.profit, record.result, record.closeReason, record.lot);
+                    } catch (e) { /* notif fail */ }
+                }
             }
 
             if (this.tradeHistory.length > 200) {

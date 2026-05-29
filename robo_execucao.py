@@ -4,6 +4,7 @@ import numpy as np
 import joblib
 import time
 from datetime import datetime
+from logger_seguranca import SecurityLogger
 
 # =========================================================
 # CONFIGURAÇÕES DA CONTA E GERENCIAMENTO DE RISCO
@@ -89,6 +90,13 @@ def obter_e_preparar_dados():
 def rodar_robo():
     iniciar_mt5()
     
+    # Inicializa o banco de dados de segurança com alertas Telegram
+    auditoria = SecurityLogger(
+        db_name="logs_seguranca.db",
+        telegram_token="8038675950:AAE_b8tAcd-c_Y0f8-YDN6-fxYmSre64Wo8",
+        chat_id="888757616"
+    )
+    
     # Carrega a Inteligência Artificial salva (Joblib)
     try:
         ia_institucional = joblib.load(ARQUIVO_IA)
@@ -132,15 +140,63 @@ def rodar_robo():
                     stop_loss = df.iloc[-2]['Low'] - 10 # Fundo do candle que gerou o gap (com margem de segurança)
                     take_profit = preco_entrada + (abs(preco_entrada - stop_loss) * 2) # Risco/Retorno 2:1
                     
+                    # Checa a trava de spread antes de calcular lote
+                    spread_info = mt5.symbol_info(ATIVO)
+                    spread_atual = spread_info.spread if spread_info else 0
+                    limite_spread = 25
+                    
+                    if spread_atual > limite_spread:
+                        auditoria.registrar_evento(
+                            nivel='🔴',
+                            ativo=ATIVO,
+                            trava='Trava de Spread',
+                            acao='🚫 Ordem Cancelada',
+                            detalhe=f'Spread atual ({spread_atual}) maior que o limite ({limite_spread}).'
+                        )
+                        print(f"Alerta: Ordem abortada no {ATIVO} — Spread {spread_atual} pts. Veja os logs.")
+                        time.sleep(60)
+                        continue
+                    
                     lote = calcular_lote(preco_entrada, stop_loss)
+                    
+                    if lote <= 0:
+                        auditoria.registrar_evento(
+                            nivel='🟡',
+                            ativo=ATIVO,
+                            trava='Lote Inválido',
+                            acao='🚫 Ordem Cancelada',
+                            detalhe=f'Lote calculado = {lote}. Stop ou saldo inválido.'
+                        )
+                        time.sleep(60)
+                        continue
                     
                     # Dispara a ordem
                     enviar_ordem(mt5.ORDER_TYPE_BUY_LIMIT, lote, preco_entrada, stop_loss, take_profit)
+                    
+                    # Verifica o retorno da ordem
+                    ordem_atual = mt5.orders_get(symbol=ATIVO)
+                    if ordem_atual and len(ordem_atual) > 0:
+                        ultima = ordem_atual[-1]
+                        if ultima.comment == "Bot_SMC_Inteligencia_Artificial":
+                            auditoria.registrar_evento(
+                                nivel='🟢',
+                                ativo=ATIVO,
+                                trava='Nenhuma',
+                                acao='✅ Ordem Executada',
+                                detalhe=f'Lote {lote} | Entrada {preco_entrada} | SL {stop_loss} | TP {take_profit} | IA {probabilidade_win:.2%}'
+                            )
                     
                     # Dorme por 1 hora para não enviar ordens duplicadas no mesmo FVG
                     time.sleep(3600)
                 else:
                     print(">>> Sinal Vermelho: A IA previu risco de armadilha (Loss). Operação ignorada.")
+                    auditoria.registrar_evento(
+                        nivel='🟡',
+                        ativo=ATIVO,
+                        trava='Confiança da IA',
+                        acao='🚫 Ordem Ignorada',
+                        detalhe=f'Probabilidade {probabilidade_win:.2%} abaixo do mínimo {CONFIANCA_MINIMA_IA:.0%}.'
+                    )
         
         # Pausa de 1 minuto antes de verificar o gráfico novamente para não travar o PC
         time.sleep(60)

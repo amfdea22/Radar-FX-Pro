@@ -1,5 +1,8 @@
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 import { SymbolLockService } from './SymbolLockService';
+import { DisciplineEngine } from './DisciplineEngine';
 
 interface Candle {
   datetime: string;
@@ -91,9 +94,13 @@ class AgentIAEngineClass {
   private maxLogs = 300;
   private maxSignals = 100;
   private pendingTickets: Map<number, { signalIndex: number; entryPrice: number; sl: number; tp: number; direction: string }> = new Map();
+  private logsPath = path.resolve(process.cwd(), 'agent_ia_logs.json');
+  private signalsPath = path.resolve(process.cwd(), 'agent_ia_signals.json');
+  private statePath = path.resolve(process.cwd(), 'agent_ia_state.json');
 
   constructor() {
     this.state = this.freshState();
+    this.loadPersisted();
   }
 
   private freshState() {
@@ -120,9 +127,52 @@ class AgentIAEngineClass {
     };
   }
 
+  private loadPersisted() {
+    try {
+      if (fs.existsSync(this.logsPath)) {
+        const data = JSON.parse(fs.readFileSync(this.logsPath, 'utf-8'));
+        if (Array.isArray(data)) this.state.logs = data.slice(-this.maxLogs);
+      }
+    } catch { /* silent */ }
+    try {
+      if (fs.existsSync(this.signalsPath)) {
+        const data = JSON.parse(fs.readFileSync(this.signalsPath, 'utf-8'));
+        if (Array.isArray(data)) this.state.signals = data.slice(-this.maxSignals);
+      }
+    } catch { /* silent */ }
+    try {
+      if (fs.existsSync(this.statePath)) {
+        const data = JSON.parse(fs.readFileSync(this.statePath, 'utf-8'));
+        if (data.dailyPnl != null) this.state.dailyPnl = data.dailyPnl;
+        if (data.consecutiveLosses != null) this.state.consecutiveLosses = data.consecutiveLosses;
+        if (data.cooldownUntil != null) this.state.cooldownUntil = data.cooldownUntil;
+        if (data.lastResetDate != null) this.state.lastResetDate = data.lastResetDate;
+        if (data.lastSignal != null) this.state.lastSignal = data.lastSignal;
+      }
+    } catch { /* silent */ }
+  }
+
   private log(type: LogEntry['type'], message: string) {
     this.state.logs.push({ time: new Date().toISOString(), type, message });
     if (this.state.logs.length > this.maxLogs) this.state.logs = this.state.logs.slice(-this.maxLogs);
+    this.persistLogs();
+  }
+  private persistLogs() {
+    try { fs.writeFileSync(this.logsPath, JSON.stringify(this.state.logs), 'utf-8'); } catch { /* silent */ }
+  }
+  private persistSignals() {
+    try { fs.writeFileSync(this.signalsPath, JSON.stringify(this.state.signals), 'utf-8'); } catch { /* silent */ }
+  }
+  private persistState() {
+    try {
+      fs.writeFileSync(this.statePath, JSON.stringify({
+        dailyPnl: this.state.dailyPnl,
+        consecutiveLosses: this.state.consecutiveLosses,
+        cooldownUntil: this.state.cooldownUntil,
+        lastResetDate: this.state.lastResetDate,
+        lastSignal: this.state.lastSignal,
+      }), 'utf-8');
+    } catch { /* silent */ }
   }
 
   getStatus() {
@@ -148,17 +198,19 @@ class AgentIAEngineClass {
 
   getLogs(count = 50) { return this.state.logs.slice(-count); }
   getSignals(count = 30) { return this.state.signals.slice(-count); }
-  clearLogs() { this.state.logs = []; }
-  clearSignals() { this.state.signals = []; }
+  clearLogs() { this.state.logs = []; this.persistLogs(); }
+  clearSignals() { this.state.signals = []; this.persistSignals(); }
 
   updateConfig(partial: Partial<AgentConfig>) {
     this.state.config = { ...this.state.config, ...partial };
     this.log('info', `Config atualizada: ${JSON.stringify(partial)}`);
+    this.persistState();
   }
 
   setDryRun(v: boolean) {
     this.state.dryRun = v;
     this.log('info', v ? 'Modo Dry-Run ativado' : '⚠ Modo AO VIVO ativado — ordens reais serão enviadas');
+    this.persistState();
   }
 
   private calcATR(candles: Candle[], period = 14): number {
@@ -412,6 +464,7 @@ class AgentIAEngineClass {
         outcome: 'pending',
       });
       if (this.state.signals.length > this.maxSignals) this.state.signals = this.state.signals.slice(-this.maxSignals);
+      this.persistSignals();
 
       // 11. Auto-resolve Dry-Run signal after 2 cycles by simulating outcome
       if (decisao !== 'AGUARDAR' && this.state.dryRun) {
@@ -434,6 +487,15 @@ class AgentIAEngineClass {
   }
 
   private async enviarOrdemMT5(direcao: string, sl: number, tp: number, lot: number) {
+    // SAFETY LOCK: verificar DisciplineEngine antes de executar
+    try {
+      const discipline = await DisciplineEngine.getDailyStatus();
+      if (discipline.isLocked) {
+        this.log('warning', `⛔ Safety Lock bloqueou ordem: ${discipline.reason}`);
+        return;
+      }
+    } catch (e) { /* discipline fail */ }
+
     try {
       const bridgeUrl = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
       const action = direcao === 'COMPRA' ? 'BUY' : 'SELL';
@@ -521,6 +583,8 @@ class AgentIAEngineClass {
       } else {
         this.state.consecutiveLosses = 0;
       }
+      this.persistSignals();
+      this.persistState();
       try {
         const { TradeNotificationBot } = require('./TradeNotificationBot');
         const sig = this.state.signals[index];
@@ -540,6 +604,7 @@ class AgentIAEngineClass {
     this.state.consecutiveLosses = 0;
     this.state.cooldownUntil = null;
     this.state.lastResetDate = new Date().toISOString();
+    this.persistState();
     this.log('info', '🔄 Contadores diários resetados');
   }
 
