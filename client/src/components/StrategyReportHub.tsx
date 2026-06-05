@@ -8,23 +8,6 @@ import {
 
 const API = '';
 
-const ALL_STRATEGIES = [
-    { name: 'Alpha Nakamoto', category: 'Cripto', asset: 'BTCUSD', baseWin: 94.8, color: '#f7931a' },
-    { name: 'Ethereum Core', category: 'Cripto', asset: 'ETHUSD', baseWin: 93.8, color: '#627eea' },
-    { name: 'Crypto Whale Hunt', category: 'Cripto', asset: 'Multi', baseWin: 88.2, color: '#06b6d4' },
-    { name: 'Altcoin Sniper', category: 'Cripto', asset: 'Altcoins', baseWin: 89.5, color: '#10b981' },
-    { name: 'Crypto IA Pro', category: 'Cripto', asset: 'Multi-IA', baseWin: 90.0, color: '#00ccff' },
-    { name: 'Alpha Robot', category: 'Forex', asset: 'Multi', baseWin: 85.0, color: '#d946ef' },
-    { name: 'Intelligence 7', category: 'Forex', asset: 'Majors', baseWin: 94.2, color: '#3b82f6' },
-    { name: 'Smart Momentum', category: 'Forex', asset: 'Majors', baseWin: 87.5, color: '#6366f1' },
-    { name: 'Supreme Engine', category: 'Forex', asset: 'Multi', baseWin: 94.0, color: '#f87171' },
-    { name: 'Gold Scalper', category: 'Metais', asset: 'XAUUSD', baseWin: 92.5, color: '#fbbf24' },
-    { name: 'Shark Hunt XAU', category: 'Metais', asset: 'XAUUSD', baseWin: 86.0, color: '#f59e0b' },
-    { name: 'Golden Rejection', category: 'Metais', asset: 'XAU/XAG', baseWin: 88.2, color: '#eab308' },
-    { name: 'Alpha Shark', category: 'Metais/Cripto', asset: 'XAU/Cripto', baseWin: 91.8, color: '#ef4444' },
-    { name: 'Omni Probabilistic', category: 'Ciclos', asset: 'Multi-Asset', baseWin: 85.0, color: '#06b6d4' },
-];
-
 interface StrategyStats {
     name: string;
     category: string;
@@ -120,9 +103,10 @@ const PieChart: React.FC<{ data: { label: string; value: number; color: string }
 
 export const StrategyReportHub: React.FC = () => {
     const [strategies, setStrategies] = useState<StrategyStats[]>([]);
+    const [categories, setCategories] = useState<string[]>(['all']);
     const [loading, setLoading] = useState(true);
     const [lastSync, setLastSync] = useState<string | null>(null);
-    const [filter, setFilter] = useState<'all' | 'Cripto' | 'Forex' | 'Metais' | 'Metais/Cripto'>('all');
+    const [filter, setFilter] = useState<string>('all');
     const [sortBy, setSortBy] = useState<'winRate' | 'totalTrades' | 'profitFactor'>('winRate');
 
     const fetchData = async (forceSync = false) => {
@@ -133,21 +117,11 @@ export const StrategyReportHub: React.FC = () => {
 
             const resp = await axios({ method, url });
 
-            let reportData = forceSync ? resp.data.report : resp.data;
-
-            let data: StrategyStats[] = [];
-            if (Array.isArray(reportData)) {
-                data = reportData;
-            } else if (reportData?.value && Array.isArray(reportData.value)) {
-                data = reportData.value;
-            } else if (Array.isArray(Object.values(reportData))) {
-                data = Object.values(reportData).flat().filter((x: any) => x && x.name) as StrategyStats[];
-            }
+            const reportData = forceSync ? resp.data.report : resp.data;
+            const data = Array.isArray(reportData) ? reportData : [];
 
             setStrategies(data);
             setLastSync(new Date().toLocaleTimeString('pt-BR'));
-
-            console.log(`📊 [Report] ${forceSync ? 'Sync ' : ''}Dados recebidos:`, data.length, 'estratégias');
         } catch (err) {
             console.error('❌ [Report] Erro ao buscar dados:', err);
             if (forceSync) fetchData(false);
@@ -155,7 +129,19 @@ export const StrategyReportHub: React.FC = () => {
         setLoading(false);
     };
 
-    useEffect(() => { fetchData(); }, []);
+    const fetchCatalog = async () => {
+        try {
+            const resp = await axios.get('/api/mt5/reports/catalog');
+            if (Array.isArray(resp.data)) {
+                const cats = [...new Set(resp.data.map((s: any) => s.category).filter(Boolean))] as string[];
+                setCategories(['all', ...cats]);
+            }
+        } catch {
+            setCategories(['all', 'Cripto', 'Forex', 'Metais', 'Metais/Cripto', 'Ciclos']);
+        }
+    };
+
+    useEffect(() => { fetchData(); fetchCatalog(); }, []);
 
     const filtered = strategies
         .filter(s => filter === 'all' || s.category === filter)
@@ -174,7 +160,7 @@ export const StrategyReportHub: React.FC = () => {
         { label: 'Derrotas', value: totalLosses, color: '#ef4444' },
     ];
 
-    const categories = ['all', 'Cripto', 'Forex', 'Metais', 'Metais/Cripto'];
+
 
     return (
         <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">

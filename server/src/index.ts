@@ -1,10 +1,11 @@
-import dotenv from 'dotenv';
+﻿import dotenv from 'dotenv';
 dotenv.config();
 
 // Radar Station v1.1 - Emergency Reset Engine Active
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
+import rateLimit from 'express-rate-limit';
 import { SignalEngine } from './services/SignalEngine';
 import { TradeGuardian } from './services/TradeGuardian';
 import { DisciplineEngine } from './services/DisciplineEngine';
@@ -38,29 +39,38 @@ import { SecurityAuditService } from './services/SecurityAuditService';
 
 import { AgentIAEngine } from './services/AgentIAEngine';
 import { MLInsightsService } from './services/MLInsightsService';
+import { AIAnalystAgent } from './services/AIAnalystAgent';
 import { MLService } from './services/MLService';
 import { NLPService, NewsArticle } from './services/NLPService';
 import { MotorIAEngine } from './services/MotorIAEngine';
 import { InfraService } from './services/InfraService';
 import { GoldScalperTradeMonitor } from './services/GoldScalperTradeMonitor';
 import { MAGIC_MAP } from './services/MagicMap';
+import { PatternDetector } from './services/PatternDetector';
 
 
-// Motores serão inicializados APÓS o servidor abrir a porta (veja app.listen)
+// Motores serÃ£o inicializados APÃ“S o servidor abrir a porta (veja app.listen)
 
-// Alertas de Inicialização para confirmar Sincronização
+// Alertas de InicializaÃ§Ã£o para confirmar SincronizaÃ§Ã£o
 AlertEngine.addAlert('GUARDIAN', 'INFO', 'Sistema Radar-FX Online', 'Motores Alpha sincronizados e monitorando o mercado.');
-AlertEngine.addAlert('MARKET', 'INFO', 'Sincronização em Tempo Real Ativa', 'Aguardando confluências institucionais nos motores Alpha.');
+AlertEngine.addAlert('MARKET', 'INFO', 'SincronizaÃ§Ã£o em Tempo Real Ativa', 'Aguardando confluÃªncias institucionais nos motores Alpha.');
 
 const app = express();
 
-// Heartbeat da Central de Alertas (Mantém a percepção de Sincronia Viva)
+// Heartbeat da Central de Alertas (MantÃ©m a percepÃ§Ã£o de Sincronia Viva)
 setInterval(() => {
-    AlertEngine.addAlert('MARKET', 'INFO', 'Sincronização Ativa', 'Motores Alpha monitorando liquidez e confluências institucionais.');
+    AlertEngine.addAlert('MARKET', 'INFO', 'SincronizaÃ§Ã£o Ativa', 'Motores Alpha monitorando liquidez e confluÃªncias institucionais.');
 }, 5 * 60000); // 5 minutos
 
 const port = process.env.PORT || 3015;
 const MT5_BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
+const BRIDGE_API_KEY = process.env.BRIDGE_API_KEY || '';
+
+const bridgeAxios = axios.create({ baseURL: MT5_BRIDGE_URL, timeout: 10000 });
+bridgeAxios.interceptors.request.use(config => {
+    if (BRIDGE_API_KEY) config.headers['X-Api-Key'] = BRIDGE_API_KEY;
+    return config;
+});
 
 app.use(cors());
 app.use(express.json());
@@ -183,7 +193,7 @@ app.get('/api/db/health', async (_req, res) => {
 
 app.post('/api/mt5/login', async (req, res) => {
     try {
-        const response = await axios.post(`${MT5_BRIDGE_URL}/login`, req.body);
+        const response = await bridgeAxios.post('/login', req.body);
         res.json(response.data);
     } catch (error: any) {
         res.status(error.response?.status || 500).json(error.response?.data || { error: error.message });
@@ -199,14 +209,14 @@ app.post('/api/mt5/order', async (req, res) => {
     if (req.body.symbol && SYMBOL_MAP_ORDER[req.body.symbol.toUpperCase()]) {
         req.body.symbol = SYMBOL_MAP_ORDER[req.body.symbol.toUpperCase()];
     }
-    console.log(`⚡ [ORDEM] Recebida requisição para ${req.body.symbol} (${req.body.action})`);
+    console.log(`âš¡ [ORDEM] Recebida requisiÃ§Ã£o para ${req.body.symbol} (${req.body.action})`);
     try {
-        // Validação de Disciplina antes da Ordem
+        // ValidaÃ§Ã£o de Disciplina antes da Ordem
         const discipline = await DisciplineEngine.getDailyStatus();
         if (discipline.isLocked) {
-            console.warn(`🛡️ [GUARDIAN] Ordem bloqueada por disciplina: ${discipline.reason}`);
+            console.warn(`ðŸ›¡ï¸ [GUARDIAN] Ordem bloqueada por disciplina: ${discipline.reason}`);
             return res.status(403).json({
-                error: 'ALERTA DE DISCIPLINA: Operações bloqueadas.',
+                error: 'ALERTA DE DISCIPLINA: OperaÃ§Ãµes bloqueadas.',
                 reason: discipline.reason
             });
         }
@@ -214,19 +224,25 @@ app.post('/api/mt5/order', async (req, res) => {
         // Executar com retry inteligente via MarketService
         const orderResult = await MarketService.retryWhenOpen(req.body.symbol, async () => {
             const body = { ...req.body };
-            // Sanitização Segura: Permite alfa, números, underscore e hífen
+            // SanitizaÃ§Ã£o Segura: Permite alfa, nÃºmeros, underscore e hÃ­fen
             body.comment = String(body.comment || '').replace(/[^a-zA-Z0-9_\- ]/g, "").substring(0, 31) || 'RadarFX';
-            console.log(`🛡️ [BRIDGE] Comment Sanitized: "${req.body.comment}" -> "${body.comment}"`);
-            const response = await axios.post(`${MT5_BRIDGE_URL}/order`, body);
+            console.log(`ðŸ›¡ï¸ [BRIDGE] Comment Sanitized: "${req.body.comment}" -> "${body.comment}"`);
+            const response = await bridgeAxios.post('/order', body);
             return response.data;
         });
 
-        // Bloqueia símbolo via SymbolLockService
+        // Sincroniza entrada no TradingView
+        if (orderResult?.ticket) {
+            const price = orderResult.price || req.body.price || 0;
+            syncTvAlert(req.body.symbol, req.body.action, price, req.body.comment || 'RadarFX', { ticket: orderResult.ticket });
+        }
+
+        // Bloqueia sÃ­mbolo via SymbolLockService
         if (orderResult?.ticket) {
             SymbolLockService.acquire(req.body.symbol, 'Manual', orderResult.ticket, req.body.action);
         }
 
-        // CAPTURA DE AUDITORIA ALPHA (Async para não atrasar a resposta)
+        // CAPTURA DE AUDITORIA ALPHA (Async para nÃ£o atrasar a resposta)
         if (orderResult && (orderResult.ticket || orderResult.success !== false)) {
             setImmediate(async () => {
                 try {
@@ -251,7 +267,7 @@ app.post('/api/mt5/order', async (req, res) => {
                         orderTicket: orderResult.ticket
                     });
                 } catch (auditError) {
-                    console.error('⚠️ Alpha Audit: Failed to capture snapshot', auditError);
+                    console.error('âš ï¸ Alpha Audit: Failed to capture snapshot', auditError);
                 }
             });
         }
@@ -265,7 +281,7 @@ app.post('/api/mt5/order', async (req, res) => {
 
 app.get('/api/mt5/account', async (req, res) => {
     try {
-        const response = await axios.get(`${MT5_BRIDGE_URL}/account`);
+        const response = await bridgeAxios.get('/account');
         const d = response.data;
         res.json({
             balance: d.balance || 0,
@@ -302,13 +318,13 @@ app.get('/api/mt5/account', async (req, res) => {
 
 app.get('/api/mt5/positions', async (req, res) => {
     try {
-        const response = await axios.get(`${MT5_BRIDGE_URL}/positions`);
+        const response = await bridgeAxios.get('/positions');
         const positions = response.data;
         if (Array.isArray(positions) && positions.length > 0) {
             return res.json(positions);
         }
     } catch {}
-    // Fallback: gerar posições sintéticas do Gold Scalper
+    // Fallback: gerar posiÃ§Ãµes sintÃ©ticas do Gold Scalper
     try {
         const gs = await GoldScalperEngine.getStatus();
         if (gs && gs.currentPrice > 0) {
@@ -341,7 +357,7 @@ app.get('/api/mt5/positions', async (req, res) => {
 
 app.get('/api/mt5/history', async (req, res) => {
     try {
-        const response = await axios.get(`${MT5_BRIDGE_URL}/history`);
+        const response = await bridgeAxios.get('/history');
         res.json(response.data);
     } catch (error: any) {
         res.json([]);
@@ -352,7 +368,7 @@ app.get('/api/mt5/analysis', async (req, res) => {
     try {
         const { symbol, timeframe, count } = req.query;
         console.log(`[Proxy] Fetching analysis for ${symbol} (${timeframe}) - Count: ${count}`);
-        const response = await axios.get(`${MT5_BRIDGE_URL}/analysis`, {
+        const response = await bridgeAxios.get('/analysis', {
             params: { symbol, timeframe, count }
         });
         res.json(response.data);
@@ -368,7 +384,7 @@ app.get('/api/mt5/analysis', async (req, res) => {
 app.get('/api/mt5/candles', async (req, res) => {
     try {
         const { symbol, timeframe, count } = req.query;
-        const response = await axios.get(`${MT5_BRIDGE_URL}/candles`, {
+        const response = await bridgeAxios.get('/candles', {
             params: { symbol, timeframe, count }, timeout: 5000
         });
         res.json(response.data);
@@ -385,7 +401,7 @@ app.post('/api/mt5/ticks', async (req, res) => {
         let lfData: any = {};
 
         const [mt5Result, lfResult] = await Promise.allSettled([
-            axios.post(`${MT5_BRIDGE_URL}/ticks`, { symbols }, { timeout: 3000 }).then(r => r.data),
+            bridgeAxios.post('/ticks', { symbols }, { timeout: 3000 }).then(r => r.data),
             LiteFinanceService.getQuotes(symbols)
         ]);
 
@@ -452,7 +468,7 @@ app.get('/api/mt5/guardian/status', (req, res) => {
 app.get('/api/mt5/risk-management', async (req, res) => {
     try {
         const [accountRes, goldRes, disciplineRes] = await Promise.all([
-            axios.get('http://127.0.0.1:5555/account').catch(() => ({ data: {} })),
+            bridgeAxios.get('/account').catch(() => ({ data: {} })),
             GoldScalperEngine.getRiskReport().catch(() => null),
             DisciplineEngine.getDailyStatus().catch(() => null)
         ]);
@@ -550,9 +566,22 @@ app.post('/api/mt5/motor-ia/settings', (req, res) => {
     res.json({ status: 'success', statusData: MotorIAEngine.getStatus() });
 });
 
+app.get('/api/mt5/motor-ia/executions', (req, res) => {
+    const filters: { symbol?: string; result?: string; limit?: number } = {};
+    if (req.query.symbol) filters.symbol = req.query.symbol as string;
+    if (req.query.result) filters.result = req.query.result as string;
+    if (req.query.limit) filters.limit = Number(req.query.limit);
+    res.json(MotorIAEngine.getExecutions(filters));
+});
+
+app.get('/api/mt5/motor-ia/learning', (req, res) => {
+    res.json(MotorIAEngine.getLearningInsights());
+});
+
 // --- SHARK BOT ENGINE ---
-app.get('/api/mt5/shark-bot/status', (req, res) => {
-    res.json(SharkBotEngine.getStatus());
+app.get('/api/mt5/shark-bot/status', async (req, res) => {
+    const status = await SharkBotEngine.getStatus();
+    res.json(status);
 });
 
 app.post('/api/mt5/shark-bot/settings', (req, res) => {
@@ -564,7 +593,7 @@ app.get('/api/mt5/shark-bot/history', (req, res) => {
     res.json(SharkBotEngine.getHistory());
 });
 
-// --- FINANCEIRO & REPORTING & DIÁRIO ---
+// --- FINANCEIRO & REPORTING & DIÃRIO ---
 
 app.get('/api/mt5/reports', async (req, res) => {
     const reports = await ReportEngine.getPerformanceReports();
@@ -622,15 +651,15 @@ app.post('/api/mt5/telegram/settings', (req, res) => {
 app.post('/api/mt5/telegram/test', async (req, res) => {
     const tg = TelegramService.getSettings();
     if (!tg.enabled) {
-        return res.status(500).json({ status: 'error', message: 'Telegram está desabilitado. Ative a integração antes de testar.' });
+        return res.status(500).json({ status: 'error', message: 'Telegram estÃ¡ desabilitado. Ative a integraÃ§Ã£o antes de testar.' });
     }
     if (!tg.botToken || tg.botToken.length < 10) {
-        return res.status(500).json({ status: 'error', message: 'Token do Bot inválido ou vazio. Verifique no @BotFather.' });
+        return res.status(500).json({ status: 'error', message: 'Token do Bot invÃ¡lido ou vazio. Verifique no @BotFather.' });
     }
     if (!tg.chatId) {
         return res.status(500).json({ status: 'error', message: 'Chat ID vazio. Use @userinfobot para descobrir seu ID.' });
     }
-    const success = await TelegramService.sendMessage("<b>TESTE | RADAR FX</b>\n\nSua integração com o Telegram foi configurada com sucesso! Você passará a receber notificações de alvos atingidos e risco aqui na palma da sua mão! 🚀📱");
+    const success = await TelegramService.sendMessage("<b>TESTE | RADAR FX</b>\n\nSua integraÃ§Ã£o com o Telegram foi configurada com sucesso! VocÃª passarÃ¡ a receber notificaÃ§Ãµes de alvos atingidos e risco aqui na palma da sua mÃ£o! ðŸš€ðŸ“±");
     if (success) {
         res.json({ status: 'success' });
     } else {
@@ -661,7 +690,7 @@ app.post('/api/mt5/telegram/bot/test', async (req, res) => {
     if (success) {
         res.json({ success: true });
     } else {
-        res.status(500).json({ success: false, message: 'Falha ao enviar. Verifique token e chat ID nas configurações do Telegram.' });
+        res.status(500).json({ success: false, message: 'Falha ao enviar. Verifique token e chat ID nas configuraÃ§Ãµes do Telegram.' });
     }
 });
 
@@ -679,7 +708,7 @@ app.post('/api/mt5/telegram/webhook', async (req, res) => {
         }
         res.sendStatus(200);
     } catch (e) {
-        console.error('❌ Telegram webhook error', e);
+        console.error('âŒ Telegram webhook error', e);
         res.sendStatus(200);
     }
 });
@@ -696,6 +725,170 @@ app.post('/api/mt5/telegram/reset-backoff', (req, res) => {
 app.post('/api/mt5/telegram/webhook/setup', async (req, res) => {
     const ok = await TelegramService.setWebhook();
     res.json({ status: ok ? 'success' : 'error', message: ok ? 'Webhook configurado' : 'Falhou (verifique TELEGRAM_WEBHOOK_URL)' });
+});
+
+// --- TRADINGVIEW INTEGRATION ---
+
+const TV_WEBHOOK_SECRET = process.env.TV_WEBHOOK_SECRET || '';
+const TV_ALERTS_PATH = require('path').resolve(process.cwd(), 'tv_alerts.json');
+
+interface TvAlert {
+    id: string;
+    timestamp: number;
+    symbol: string;
+    direction: string;
+    price: number;
+    strategy: string;
+    raw: any;
+}
+
+let tvAlerts: TvAlert[] = [];
+const MAX_TV_ALERTS = 100;
+
+function loadTvAlerts(): TvAlert[] {
+    try {
+        const fs = require('fs');
+        if (fs.existsSync(TV_ALERTS_PATH)) {
+            return JSON.parse(fs.readFileSync(TV_ALERTS_PATH, 'utf-8'));
+        }
+    } catch { /* ignore */ }
+    return [];
+}
+
+function saveTvAlerts() {
+    try {
+        const fs = require('fs');
+        fs.writeFileSync(TV_ALERTS_PATH, JSON.stringify(tvAlerts.slice(0, MAX_TV_ALERTS), null, 2));
+    } catch { /* ignore */ }
+}
+
+tvAlerts = loadTvAlerts();
+
+const VALID_DIRECTIONS = new Set(['buy', 'sell', 'long', 'short']);
+
+function createTvAlert(symbol: string, direction: string, price: number, strategy: string, raw: any = {}): TvAlert | null {
+    const sym = (symbol || '').toUpperCase().trim();
+    const dir = (direction || '').toLowerCase().trim();
+    const prc = Number(price);
+
+    if (!sym) { console.warn('[TradingView] símbolo inválido'); return null; }
+    if (!VALID_DIRECTIONS.has(dir)) { console.warn(`[TradingView] direção inválida: ${direction}`); return null; }
+    if (isNaN(prc) || prc <= 0) { console.warn(`[TradingView] preço inválido: ${price}`); return null; }
+
+    return {
+        id: `tv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        timestamp: Date.now(),
+        symbol: sym,
+        direction: dir,
+        price: prc,
+        strategy: strategy || 'manual',
+        raw,
+    };
+}
+
+function persistTvAlert(alert: TvAlert) {
+    tvAlerts.unshift(alert);
+    if (tvAlerts.length > MAX_TV_ALERTS) tvAlerts.length = MAX_TV_ALERTS;
+    saveTvAlerts();
+    console.log(`[TradingView] Alerta: ${alert.symbol} ${alert.direction} @ ${alert.price} (${alert.strategy})`);
+}
+
+function syncTvAlert(symbol: string, direction: string, price: number, strategy: string, extra: any = {}) {
+    const alert = createTvAlert(symbol, direction, price, strategy, extra);
+    if (alert) persistTvAlert(alert);
+}
+
+const webhookLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    message: { error: 'Muitas requisições. Limite: 30/minuto.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+function validateWebhookSecret(req: any, res: any, next: any) {
+    if (!TV_WEBHOOK_SECRET) return next();
+    const secret = req.headers['x-webhook-secret'] || req.headers['x-tv-secret'] || '';
+    if (secret !== TV_WEBHOOK_SECRET) {
+        return res.status(401).json({ error: 'Webhook secret inválido' });
+    }
+    next();
+}
+
+app.post('/api/tradingview/webhook', webhookLimiter, validateWebhookSecret, (req, res) => {
+    try {
+        const { symbol, direction, price, strategy } = req.body;
+        const alert = createTvAlert(symbol, direction, price, strategy || 'webhook', req.body);
+        if (!alert) {
+            return res.status(400).json({
+                error: 'Payload inválido',
+                expected: { symbol: 'string', direction: 'buy|sell|long|short', price: 'number > 0', strategy: 'string (opcional)' },
+                received: req.body,
+            });
+        }
+        persistTvAlert(alert);
+        res.json({ status: 'ok', alertId: alert.id });
+    } catch (e: any) {
+        console.error('[TradingView] Erro no webhook:', e.message);
+        res.status(400).json({ error: e.message });
+    }
+});
+
+app.post('/api/tradingview/webhook/execute', webhookLimiter, validateWebhookSecret, async (req, res) => {
+    try {
+        const { symbol, direction, price, strategy, lot } = req.body;
+        const alert = createTvAlert(symbol, direction, price, strategy || 'webhook_exec', req.body);
+        if (!alert) {
+            return res.status(400).json({
+                error: 'Payload inválido',
+                expected: { symbol: 'string', direction: 'buy|sell|long|short', price: 'number > 0', lot: 'number (opcional)', strategy: 'string (opcional)' },
+                received: req.body,
+            });
+        }
+        persistTvAlert(alert);
+
+        const execLot = Math.max(0.01, Math.min(Number(lot) || 0.01, 1.0));
+        const action = (alert.direction === 'buy' || alert.direction === 'long') ? 'BUY' : 'SELL';
+        const comment = `TvExec_${alert.strategy}_${alert.id.slice(-6)}`;
+
+        const orderResult = await bridgeAxios.post('/order', {
+            symbol: alert.symbol,
+            action,
+            lot: execLot,
+            sl: 0,
+            tp: 0,
+            magic: 999001,
+            comment: comment.replace(/[^a-zA-Z0-9_\- ]/g, '').substring(0, 31),
+        });
+
+        if (orderResult.data?.ticket) {
+            SymbolLockService.acquire(alert.symbol, 'TradingView', orderResult.data.ticket, action);
+        }
+
+        res.json({
+            status: 'ok',
+            alertId: alert.id,
+            order: orderResult.data || null,
+        });
+    } catch (e: any) {
+        console.error('[TradingView] Erro no webhook execute:', e.message);
+        const status = e.response?.status || 500;
+        res.status(status).json({ error: e.response?.data?.error || e.message });
+    }
+});
+
+app.get('/api/tradingview/alerts', (req, res) => {
+    const { symbol, limit } = req.query as any;
+    let filtered = tvAlerts;
+    if (symbol) filtered = filtered.filter(a => a.symbol === symbol.toUpperCase());
+    const max = Math.min(Number(limit) || 20, 100);
+    res.json(filtered.slice(0, max));
+});
+
+app.delete('/api/tradingview/alerts', (req, res) => {
+    tvAlerts.length = 0;
+    saveTvAlerts();
+    res.json({ status: 'ok' });
 });
 
 // --- RISK MANAGER HUB ---
@@ -836,12 +1029,64 @@ app.get('/api/mt5/ml/config', (req, res) => {
     res.json(MLService.getConfig());
 });
 
+// --- AI ANALYST AGENT (Analise Inteligente para Traders) ---
+app.get('/api/mt5/ai-analyst/analyze', async (req, res) => {
+    try {
+        const symbol = (req.query.symbol as string || 'XAUUSD').toUpperCase();
+        const report = await AIAnalystAgent.analyze(symbol);
+        res.json(report);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/mt5/ai-analyst/market-overview', async (_req, res) => {
+    try {
+        const overview = await AIAnalystAgent.getMarketOverview();
+        res.json(overview);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/mt5/ai-analyst/multi-asset', async (req, res) => {
+    try {
+        const symbols: string[] = req.body.symbols || ['XAUUSD', 'EURUSD', 'BTCUSD'];
+        const reports = await AIAnalystAgent.getMultiAssetReport(symbols);
+        res.json(reports);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.post('/api/mt5/ml/config', (req, res) => {
     MLService.updateConfig(req.body);
     res.json({ status: 'success', config: MLService.getConfig() });
 });
 
-// --- NLP ENGINE (Natural Language Processing para Notícias) ---
+// --- PATTERN DETECTOR ---
+app.get('/api/mt5/pattern-detector/analyze', async (req, res) => {
+    try {
+        const symbol = (req.query.symbol as string || 'XAUUSD').toUpperCase();
+        const timeframe = req.query.timeframe as string || 'H1';
+        const count = Number(req.query.count) || 60;
+        const MT5_BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
+        const resp = await axios.get(`${MT5_BRIDGE_URL}/candles`, {
+            params: { symbol, timeframe, count }, timeout: 5000,
+        });
+        const candles = Array.isArray(resp.data?.candles) ? resp.data.candles
+            : Array.isArray(resp.data) ? resp.data : [];
+        if (!candles || candles.length < 10) {
+            return res.status(400).json({ error: 'Dados insuficientes para detectar padrões' });
+        }
+        const analysis = PatternDetector.analyze(candles);
+        res.json({ symbol, timeframe, candlesCount: candles.length, ...analysis });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// --- NLP ENGINE (Natural Language Processing para NotÃ­cias) ---
 app.get('/api/mt5/nlp/news', async (req, res) => {
     try {
         const symbols = (req.query.symbols as string || 'XAUUSD,BTCUSD').split(',').map(s => s.trim().toUpperCase());
@@ -892,7 +1137,7 @@ app.get('/api/mt5/nlp/keywords', (req, res) => {
     }
 });
 
-// --- GOLD SCALPER ENGINE (Acesse as rotas em suas seções específicas)
+// --- GOLD SCALPER ENGINE (Acesse as rotas em suas seÃ§Ãµes especÃ­ficas)
 
 // --- CRYPTO IA ENGINE ---
 app.get('/api/mt5/crypto-ia/status', (req, res) => {
@@ -1193,7 +1438,7 @@ app.get('/api/mt5/omni/history/full', async (req, res) => {
     }
 });
 
-// --- ROTAS DE CORRELAÇÃO (XAUUSD) ---
+// --- ROTAS DE CORRELAÃ‡ÃƒO (XAUUSD) ---
 app.get('/api/mt5/correlation/xauusd', async (req, res) => {
     try {
         const period = req.query.period as string || '6mo';
@@ -1258,20 +1503,81 @@ app.get('/api/mt5/signals', async (req, res) => {
     res.json(signals);
 });
 
-app.get('/api/mt5/debug/symbols', async (req, res) => {
+app.get('/api/mt5/signals/status', async (req, res) => {
+    const status = SignalEngine.getStatus();
+    res.json({
+        engine: status,
+        timestamp: new Date().toISOString(),
+    });
+});
+
+app.get('/api/mt5/signals/history', async (req, res) => {
     try {
-        const bridgeResp = await axios.post(`${MT5_BRIDGE_URL}/ticks`, { symbols: [] });
-        const symbols = Object.keys(bridgeResp.data);
-        res.json({ count: symbols.length, symbols });
+        const {
+            symbol, setup, category, type, limit = '100', offset = '0',
+            fromDate, toDate
+        } = req.query as Record<string, string>;
+        const result = await DatabaseService.getSignalHistory({
+            symbol, setup, category, type,
+            limit: parseInt(limit) || 100,
+            offset: parseInt(offset) || 0,
+            fromDate: fromDate ? new Date(fromDate) : undefined,
+            toDate: toDate ? new Date(toDate) : undefined,
+        });
+        res.json(result);
     } catch (err: any) {
-        res.status(500).json({ error: 'Falha ao buscar símbolos', details: err.message });
+        res.status(500).json({ error: 'Erro ao buscar histórico de sinais', details: err.message });
     }
 });
 
-// --- RELATÓRIO DE ESTRATÉGIAS COM DADOS REAIS ---
+app.get('/api/mt5/signals/stats', async (req, res) => {
+    try {
+        const { signals } = await DatabaseService.getSignalHistory({ limit: 10000 });
+        const total = signals.length;
+        const bySetup: Record<string, { count: number; avgConfidence: number; buys: number; sells: number }> = {};
+        const byCategory: Record<string, number> = {};
+        for (const s of signals) {
+            if (!bySetup[s.setup]) bySetup[s.setup] = { count: 0, avgConfidence: 0, buys: 0, sells: 0 };
+            bySetup[s.setup].count++;
+            bySetup[s.setup].avgConfidence += s.confidence;
+            if (s.type === 'BUY') bySetup[s.setup].buys++;
+            else bySetup[s.setup].sells++;
+            if (s.category) byCategory[s.category] = (byCategory[s.category] || 0) + 1;
+        }
+        for (const k of Object.keys(bySetup)) {
+            bySetup[k].avgConfidence = Math.round(bySetup[k].avgConfidence / bySetup[k].count);
+        }
+        res.json({ total, bySetup, byCategory });
+    } catch (err: any) {
+        res.status(500).json({ error: 'Erro ao buscar stats', details: err.message });
+    }
+});
+
+app.get('/api/mt5/debug/symbols', async (req, res) => {
+    try {
+        const bridgeResp = await bridgeAxios.post('/ticks', { symbols: [] });
+        const symbols = Object.keys(bridgeResp.data);
+        res.json({ count: symbols.length, symbols });
+    } catch (err: any) {
+        res.status(500).json({ error: 'Falha ao buscar sÃ­mbolos', details: err.message });
+    }
+});
+
+// --- CATÃLOGO DE ESTRATÃ‰GIAS (fonte Ãºnica) ---
+app.get('/api/mt5/reports/catalog', async (req, res) => {
+    try {
+        const catalog = SignalEngine.getCatalog();
+        res.json(catalog);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to load catalog' });
+    }
+});
+
+// --- RELATÃ“RIO DE ESTRATÃ‰GIAS COM DADOS REAIS ---
 app.get('/api/mt5/reports/strategies', async (req, res) => {
     try {
-        const report = await SignalEngine.getStrategyReport();
+        const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+        const report = await SignalEngine.getStrategyReport(limit);
         res.json(report);
     } catch (error) {
         res.status(500).json({ error: 'Failed to generate strategy report' });
@@ -1280,14 +1586,14 @@ app.get('/api/mt5/reports/strategies', async (req, res) => {
 
 app.post('/api/mt5/reports/sync', async (req, res) => {
     try {
-        console.log('🔄 [Global Sync] Iniciando sincronização de todos os motores...');
+        console.log('ðŸ”„ [Global Sync] Iniciando sincronizaÃ§Ã£o de todos os motores...');
 
         // Frontend:
-        // - [x] Grid de Stats com 5 colunas (incluindo Meta e Stop visíveis). [QuantumBitcoinPanel.tsx]
-        // - [x] Controles interativos para metas editáveis de TP e SL.
-        // - [x] Botão "Hard Reset Cesta" com confirmação de segurança.
+        // - [x] Grid de Stats com 5 colunas (incluindo Meta e Stop visÃ­veis). [QuantumBitcoinPanel.tsx]
+        // - [x] Controles interativos para metas editÃ¡veis de TP e SL.
+        // - [x] BotÃ£o "Hard Reset Cesta" com confirmaÃ§Ã£o de seguranÃ§a.
         // - [x] Design Premium com feedback visual de zonas de risco (RSI).
-        // Sincroniza todos em paralelo para ser rápido
+        // Sincroniza todos em paralelo para ser rÃ¡pido
         const results = await Promise.allSettled([
             GoldScalperEngine.syncTradesFromMT5(),
             AlphaRobotEngine.syncTradesFromMT5(),
@@ -1297,13 +1603,13 @@ app.post('/api/mt5/reports/sync', async (req, res) => {
         const successful = results.filter(r => r.status === 'fulfilled').length;
         const failed = results.filter(r => r.status === 'rejected').length;
 
-        console.log(`✅ [Global Sync] Concluído. Sucesso: ${successful}, Falha: ${failed}`);
+        console.log(`âœ… [Global Sync] ConcluÃ­do. Sucesso: ${successful}, Falha: ${failed}`);
 
-        // Retorna o relatório atualizado após o sync
+        // Retorna o relatÃ³rio atualizado apÃ³s o sync
         const report = await SignalEngine.getStrategyReport();
         res.json({ status: 'success', successful, failed, report });
     } catch (error) {
-        console.error('❌ [Global Sync] Erro crítico:', error);
+        console.error('âŒ [Global Sync] Erro crÃ­tico:', error);
         res.status(500).json({ error: 'Failed to sync all reports' });
     }
 });
@@ -1406,14 +1712,14 @@ app.get('/api/mt5/global-report', async (req, res) => {
             }
         }
 
-        // Busca posições abertas DO BRIDGE para mostrar atividade atual
+        // Busca posiÃ§Ãµes abertas DO BRIDGE para mostrar atividade atual
         let openPositions: any[] = [];
         try {
-            const posResp = await axios.get(`${MT5_BRIDGE_URL}/positions`, { timeout: 5000 });
+            const posResp = await bridgeAxios.get('/positions', { timeout: 5000 });
             openPositions = Array.isArray(posResp.data) ? posResp.data : [];
         } catch (e) {}
 
-        // Filtra apenas trades das últimas 2 horas para o "recentTrades"
+        // Filtra apenas trades das Ãºltimas 2 horas para o "recentTrades"
         const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
         const recentTrades = allTrades
             .filter(t => {
@@ -1472,7 +1778,7 @@ app.get('/api/mt5/global-report', async (req, res) => {
 // --- ALL POSITIONS ---
 app.get('/api/mt5/positions', async (req, res) => {
     try {
-        const resp = await axios.get(`${MT5_BRIDGE_URL}/positions`, { timeout: 5000 });
+        const resp = await bridgeAxios.get('/positions', { timeout: 5000 });
         res.json(resp.data || []);
     } catch (error) {
         res.json([]);
@@ -1493,7 +1799,10 @@ app.post('/api/mt5/trade/open', async (req, res) => {
         };
         if (sl) payload.sl = sl;
         if (tp) payload.tp = tp;
-        const resp = await axios.post(`${MT5_BRIDGE_URL}/order`, payload, { timeout: 10000 });
+        const resp = await bridgeAxios.post('/order', payload, { timeout: 10000 });
+        if (resp.data?.ticket) {
+            syncTvAlert(symbol, direction, resp.data.price || 0, comment || 'Telegram_Manual', { ticket: resp.data.ticket });
+        }
         res.json(resp.data);
     } catch (error: any) {
         res.status(500).json({ error: error.response?.data?.message || error.message });
@@ -1504,7 +1813,7 @@ app.post('/api/mt5/trade/close', async (req, res) => {
     try {
         const { ticket } = req.body;
         if (!ticket) return res.status(400).json({ error: 'ticket required' });
-        const resp = await axios.post(`${MT5_BRIDGE_URL}/close_order`, { ticket }, { timeout: 5000 });
+        const resp = await bridgeAxios.post('/close_order', { ticket }, { timeout: 5000 });
         res.json(resp.data || { success: true });
     } catch (error: any) {
         res.status(500).json({ error: error.response?.data?.message || error.message });
@@ -1513,12 +1822,12 @@ app.post('/api/mt5/trade/close', async (req, res) => {
 
 app.post('/api/mt5/trade/close-all', async (req, res) => {
     try {
-        const positions = await axios.get(`${MT5_BRIDGE_URL}/positions`, { timeout: 5000 });
+        const positions = await bridgeAxios.get('/positions', { timeout: 5000 });
         const posList = positions.data || [];
         let closed = 0, errors = 0;
         for (const p of posList) {
             try {
-                await axios.post(`${MT5_BRIDGE_URL}/close_order`, { ticket: p.ticket }, { timeout: 3000 });
+                await bridgeAxios.post('/close_order', { ticket: p.ticket }, { timeout: 3000 });
                 closed++;
             } catch (e) { errors++; }
         }
@@ -1596,6 +1905,9 @@ app.delete('/api/security/audit-logs', (req, res) => {
 // --- BIOMETRIA PROXY (-> Python Flask :5001) ---
 
 const BIOMETRIC_URL = 'http://127.0.0.1:5001';
+const BACKTEST_URL = 'http://127.0.0.1:5003';
+const INTEL_ENGINE_URL = 'http://127.0.0.1:5004';
+const TELEMETRY_URL = 'http://127.0.0.1:5006';
 
 app.all('/api/biometria/*', async (req, res) => {
     try {
@@ -1617,11 +1929,56 @@ app.all('/api/biometria/*', async (req, res) => {
     }
 });
 
+app.all('/api/backtest/*', async (req, res) => {
+    try {
+        const path = req.url.replace('/api/backtest', '');
+        if (path === '/node/history' || path === '/node/history/') {
+            const history = await DatabaseService.getBacktestHistory();
+            return res.json(history);
+        }
+        const url = `${BACKTEST_URL}/api/backtest${path}`;
+        const method = req.method.toLowerCase() as 'get' | 'post';
+        const config: any = { timeout: 300000 };
+        if (req.method === 'POST' || req.method === 'PUT') {
+            config.data = req.body;
+        }
+        const resp = await (axios as any)[method](url, config);
+        if (method === 'get' && resp.data?.status === 'completed' && resp.data?.metrics) {
+            const m = resp.data.metrics;
+            DatabaseService.saveBacktest({
+                jobId: resp.data.job_id || path.split('/').pop() || 'unknown',
+                strategy: resp.data.config?.strategy || 'smc',
+                symbol: resp.data.config?.symbol,
+                timeframe: resp.data.config?.timeframe,
+                initialCapital: m.initial_capital || 0,
+                finalBalance: m.final_balance || 0,
+                totalTrades: m.total_trades || 0,
+                winTrades: m.win_trades || 0,
+                lossTrades: m.loss_trades || 0,
+                winRate: m.win_rate || 0,
+                totalPnl: m.total_pnl || 0,
+                totalReturn: m.total_return || 0,
+                profitFactor: m.profit_factor || 0,
+                maxDrawdown: m.max_drawdown || 0,
+                config: resp.data.config,
+                status: 'completed',
+            }).catch(() => {});
+        }
+        res.json(resp.data);
+    } catch (e: any) {
+        if (e.response) {
+            res.status(e.response.status).json(e.response.data);
+        } else {
+            res.status(502).json({ error: 'Backtest service unavailable', detail: e.message });
+        }
+    }
+});
+
 app.get('/api/trader/profile', async (req, res) => {
     try {
         const [accountRes, historyRes] = await Promise.all([
-            axios.get(`${MT5_BRIDGE_URL}/account`).catch(() => ({ data: null })),
-            axios.get(`${MT5_BRIDGE_URL}/history`).catch(() => ({ data: [] }))
+            bridgeAxios.get('/account').catch(() => ({ data: null })),
+            bridgeAxios.get('/history').catch(() => ({ data: [] }))
         ]);
 
         const account = accountRes.data;
@@ -1673,6 +2030,50 @@ app.get('/api/trader/profile', async (req, res) => {
     }
 });
 
+// --- INTEL ENGINE PROXY (-> Python Flask :5004) ---
+
+app.all('/api/intel-engine/*', async (req, res) => {
+    try {
+        const path = req.url.replace('/api/intel-engine', '');
+        const url = `${INTEL_ENGINE_URL}/api/intel-engine${path}`;
+        const method = req.method.toLowerCase() as 'get' | 'post';
+        const config: any = { timeout: 180000 };
+        if (req.method === 'POST' || req.method === 'PUT') {
+            config.data = req.body;
+        }
+        if (method === 'get') {
+            config.params = req.query;
+        }
+        const resp = await (axios as any)[method](url, config);
+        res.json(resp.data);
+    } catch (e: any) {
+        if (e.response) {
+            res.status(e.response.status).json(e.response.data);
+        } else {
+            res.status(502).json({ error: 'Intel Engine service unavailable', detail: e.message });
+        }
+    }
+});
+
+// --- TELEMETRY PROXY (-> Python Flask :5006) ---
+
+app.all('/api/telemetry*', async (req, res) => {
+    try {
+        const url = `${TELEMETRY_URL}/api/telemetry${req.url.replace('/api/telemetry', '')}`;
+        const method = req.method.toLowerCase() as 'get' | 'post';
+        const config: any = { timeout: 10000 };
+        if (method === 'get') { config.params = req.query; }
+        const resp = await (axios as any)[method](url, config);
+        res.json(resp.data);
+    } catch (e: any) {
+        if (e.response) {
+            res.status(e.response.status).json(e.response.data);
+        } else {
+            res.status(502).json({ error: 'Telemetry service unavailable', detail: e.message });
+        }
+    }
+});
+
 app.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(clientDist, 'index.html'));
@@ -1682,20 +2083,20 @@ app.get('*', (req, res) => {
 app.listen(Number(port), '0.0.0.0', async () => {
     console.log(`Server v1.1 [CLEAN] running at http://0.0.0.0:${port}`);
 
-    // Verificar saúde da bridge MT5
+    // Verificar saÃºde da bridge MT5
     try {
-        const health = await axios.get(`${MT5_BRIDGE_URL}/health`, { timeout: 5000 });
+        const health = await bridgeAxios.get('/health', { timeout: 5000 });
         if (health.data?.status === 'connected') {
-            console.log(`✅ Bridge MT5 conectada: ${health.data.server} (conta ${health.data.account}, saldo $${health.data.balance})`);
+            console.log(`âœ… Bridge MT5 conectada: ${health.data.server} (conta ${health.data.account}, saldo $${health.data.balance})`);
         } else {
-            console.warn(`⚠️  Bridge MT5 respondendo mas NÃO conectada ao terminal. Verifique se o MT5 está aberto.`);
+            console.warn(`âš ï¸  Bridge MT5 respondendo mas NÃƒO conectada ao terminal. Verifique se o MT5 estÃ¡ aberto.`);
         }
     } catch (e: any) {
-        console.error(`❌ Bridge MT5 NÃO RESPONDE em ${MT5_BRIDGE_URL}. Execute 'npm run python-bridge' ou 'start_all.bat'.`);
+        console.error(`âŒ Bridge MT5 NÃƒO RESPONDE em ${MT5_BRIDGE_URL}. Execute 'npm run python-bridge' ou 'start_all.bat'.`);
         console.error(`   Erro: ${e.message}`);
     }
 
-    // Migração assíncrona de JSON → Prisma
+    // MigraÃ§Ã£o assÃ­ncrona de JSON â†’ Prisma
     (async () => {
         try {
             const fs = require('fs');
@@ -1718,16 +2119,16 @@ app.listen(Number(port), '0.0.0.0', async () => {
                 }
             }
         } catch (e) {
-            console.warn('⚠️ Migração automática ignorada (primeira execução ou sem dados)');
+            console.warn('âš ï¸ MigraÃ§Ã£o automÃ¡tica ignorada (primeira execuÃ§Ã£o ou sem dados)');
         }
     })();
 
-    // Inicializar serviços de infraestrutura e motores
-    console.log('🚀 Iniciando serviços de infraestrutura...');
+    // Inicializar servicÌ§os de infraestrutura e motores
+    console.log('ðŸš€ Iniciando servicÌ§os de infraestrutura...');
     AlertEngine.init();
     InfraService.init();
 
-    console.log('🚀 Iniciando motores de trading...');
+    console.log('ðŸš€ Iniciando motores de trading...');
 
     TradeGuardian.start();
     AlphaRobotEngine.start();
@@ -1746,15 +2147,15 @@ app.listen(Number(port), '0.0.0.0', async () => {
     RecoveryEngine.init();
     MotorIAEngine.init();
     TradeNotificationBot.start();
-    console.log('⚡ Todos os motores iniciados com sucesso!');
+    console.log('âš¡ Todos os motores iniciados com sucesso!');
 
     // Process shutdown handlers
     const shutdown = async (signal: string) => {
-        console.log(`\n⚠️  Recebido ${signal}. Iniciando desligamento gracioso...`);
+        console.log(`\nâš ï¸  Recebido ${signal}. Iniciando desligamento gracioso...`);
         const engines = [MotorIAEngine, GoldScalperEngine, CryptoIAEngine, AlphaRobotEngine, SupremeEngine, RecoveryEngine, SharkBotEngine, BitcoinProEngine, MicroScalperEngine, SwingTraderEngine, ForexScalperEngine, OmniProbabilisticEngine, TradeGuardian, CopyTraderEngine];
         for (const eng of engines) { try { (eng as any).stop?.(); } catch { /* ignore */ } }
         try { await DatabaseService.disconnect(); } catch (e) { console.error('DB disconnect fail', e); }
-        console.log('✅ Desligamento concluído.');
+        console.log('âœ… Desligamento concluÃ­do.');
         process.exit(0);
     };
     process.on('SIGTERM', () => shutdown('SIGTERM'));

@@ -3,7 +3,7 @@ export interface TradingSignal {
     asset: string;
     symbol: string;
     type: 'BUY' | 'SELL';
-    setup: 'VWAP Pullback' | 'RSI Divergence' | 'Breakout' | 'EMA Cross' | 'Alpha Confluence' | 'Squeeze Breakout' | 'Golden Rejection' | 'Smart Momentum' | 'Shark Hunt XAU' | 'Crypto Whale Hunt' | 'Alpha Scalper Grid' | 'Alpha Nakamoto' | 'Altcoin Sniper' | 'Intelligence 7' | 'Alpha Shark' | 'Ethereum Core' | 'Golden Whale Hunter';
+    setup: 'VWAP Pullback' | 'RSI Divergence' | 'Breakout' | 'EMA Cross' | 'Alpha Confluence' | 'Squeeze Breakout' | 'Golden Rejection' | 'Smart Momentum' | 'Shark Hunt XAU' | 'Crypto Whale Hunt' | 'Alpha Scalper Grid' | 'Alpha Nakamoto' | 'Altcoin Sniper' | 'Intelligence 7' | 'Alpha Shark' | 'Ethereum Core' | 'Golden Whale Hunter' | 'Quantum BTC Pro';
     timeframe: 'M1' | 'M5' | 'M15' | 'M30' | 'H1' | 'H4' | 'D1' | 'W1';
     confidence: number;
     timestamp: Date;
@@ -24,6 +24,7 @@ import { VSAEngine, VSAPattern } from './VSAEngine';
 import { PolygonService } from './PolygonService';
 import { MarketDataService } from './MarketDataService';
 import { GoldenWhaleEngine } from './GoldenWhaleEngine';
+import { DatabaseService } from './DatabaseService';
 import fs from 'fs';
 import path from 'path';
 
@@ -33,6 +34,46 @@ export class SignalEngine {
     private static BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
 
     private static previousTicks: Record<string, any> = {};
+
+    // ═══════════════════════════════════════════════════════════════
+    // CATÁLOGO DE ESTRATÉGIAS (fonte única: strategy_catalog.json)
+    // ═══════════════════════════════════════════════════════════════
+    private static CATALOG_PATH = path.join(__dirname, '../../data/strategy_catalog.json');
+    private static catalogCache: any[] | null = null;
+
+    private static loadCatalog(): any[] {
+        if (this.catalogCache) return this.catalogCache;
+        try {
+            if (fs.existsSync(this.CATALOG_PATH)) {
+                this.catalogCache = JSON.parse(fs.readFileSync(this.CATALOG_PATH, 'utf8'));
+                return this.catalogCache as any[];
+            }
+        } catch { /* fallback below */ }
+
+        // Fallback inline catalog (caso o arquivo não exista)
+        this.catalogCache = [
+            { name: 'Alpha Nakamoto', category: 'Cripto', asset: 'BTCUSD', color: '#f7931a', symbols: ['BTCUSD'], priority: 1, magic: 8888 },
+            { name: 'Ethereum Core', category: 'Cripto', asset: 'ETHUSD', color: '#627eea', symbols: ['ETHUSD'], priority: 1, magic: 8888 },
+            { name: 'Crypto Whale Hunt', category: 'Cripto', asset: 'Multi', color: '#06b6d4', symbols: ['BNBUSD', 'DOGEUSD', 'SOLUSD', 'XRPUSD', 'ADAUSD', 'AVAXUSD', 'MATICUSD', 'DOTUSD', 'LINKUSD', 'TRXUSD', 'LTCUSD', 'SHIBUSD', 'BCHUSD', 'ETCUSD', 'XLMUSD', 'XMRUSD', 'ZECUSD', 'EOSUSD'], priority: 2, magic: 8888 },
+            { name: 'Altcoin Sniper', category: 'Cripto', asset: 'Altcoins', color: '#10b981', symbols: ['BNBUSD', 'DOGEUSD', 'SOLUSD', 'XRPUSD', 'ADAUSD', 'DOTUSD', 'LINKUSD', 'LTCUSD', 'SHIBUSD'], priority: 1, magic: 8888 },
+            { name: 'Crypto IA Pro', category: 'Cripto', asset: 'Multi-IA', color: '#00ccff', symbols: ['BTCUSD', 'ETHUSD', 'SOLUSD', 'BNBUSD', 'ADAUSD', 'XRPUSD'], priority: 0, magic: 8888 },
+            { name: 'Alpha Robot', category: 'Forex', asset: 'Multi', color: '#d946ef', symbols: ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD'], priority: 1, magic: 88881 },
+            { name: 'Supreme Engine', category: 'Forex', asset: 'Multi', color: '#f87171', symbols: ['EURUSD', 'GBPUSD', 'US100Cash', 'US30Cash', 'US100', 'NAS100'], priority: 1, magic: 7777 },
+            { name: 'Intelligence 7', category: 'Forex', asset: 'Majors', color: '#3b82f6', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'EURJPY'], priority: 2, magic: 7770 },
+            { name: 'Smart Momentum', category: 'Forex', asset: 'Majors', color: '#6366f1', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'NZDUSD', 'USDCHF', 'USDCAD'], priority: 3, magic: 7771 },
+            { name: 'Gold Scalper', category: 'Metais', asset: 'XAUUSD', color: '#fbbf24', symbols: ['XAUUSD', 'GOLD', 'XAU'], priority: 0, magic: 9999 },
+            { name: 'Shark Hunt XAU', category: 'Metais', asset: 'XAUUSD', color: '#f59e0b', symbols: ['XAUUSD', 'GOLD'], priority: 1, magic: 7775 },
+            { name: 'Golden Rejection', category: 'Metais', asset: 'XAU/XAG', color: '#eab308', symbols: ['XAUUSD', 'GOLD', 'XAGUSD'], priority: 2, magic: 7776 },
+            { name: 'Alpha Shark', category: 'Metais/Cripto', asset: 'XAU/Cripto', color: '#ef4444', symbols: ['XAUUSD', 'GOLD', 'BTCUSD', 'ETHUSD'], priority: 3, magic: 7778 },
+            { name: 'Shark Bot', category: 'Metais', asset: 'XAUUSD', color: '#06b6d4', symbols: ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD', 'XAGUSD', 'WTI', 'SP500'], priority: 0, magic: 9876 },
+            { name: 'Omni Probabilistic', category: 'Ciclos', asset: 'Multi-Asset', color: '#06b6d4', symbols: ['EURUSD', 'GBPUSD', 'XAUUSD', 'BTCUSD'], priority: 0, magic: 999111 },
+        ];
+        return this.catalogCache;
+    }
+
+    static getCatalog(): any[] {
+        return this.loadCatalog();
+    }
 
     // ═══════════════════════════════════════════════════════════════
     // RASTREAMENTO DE SINAIS EM TEMPO REAL (Persistência em disco)
@@ -70,34 +111,19 @@ export class SignalEngine {
      * Cruza dados do histórico do MT5 com o rastreamento local
      * Classifica trades antigos por SÍMBOLO quando o comment não identifica a estratégia
      */
-    static async getStrategyReport(): Promise<any[]> {
+    static async getStrategyReport(limit?: number): Promise<any[]> {
         this.loadTracker();
 
-        // Busca histórico real do MT5 Bridge
+        // Busca histórico real do MT5 Bridge (com limit opcional)
         let mt5History: any[] = [];
         try {
-            const resp = await axios.get(`${this.BRIDGE_URL}/history`);
+            const url = limit ? `${this.BRIDGE_URL}/history?limit=${limit}` : `${this.BRIDGE_URL}/history`;
+            const resp = await axios.get(url);
             mt5History = Array.isArray(resp.data) ? resp.data : [];
         } catch { /* sem histórico */ }
 
-        // Catálogo de todas as estratégias com regras de mapeamento por símbolo
-        const catalog = [
-            { name: 'Alpha Nakamoto', category: 'Cripto', asset: 'BTCUSD', color: '#f7931a', symbols: ['BTCUSD'], priority: 1, magic: 8888 },
-            { name: 'Ethereum Core', category: 'Cripto', asset: 'ETHUSD', color: '#627eea', symbols: ['ETHUSD'], priority: 1, magic: 8888 },
-            { name: 'Crypto Whale Hunt', category: 'Cripto', asset: 'Multi', color: '#06b6d4', symbols: ['BNBUSD', 'DOGEUSD', 'SOLUSD', 'XRPUSD', 'ADAUSD', 'AVAXUSD', 'MATICUSD', 'DOTUSD', 'LINKUSD', 'TRXUSD', 'LTCUSD', 'SHIBUSD', 'BCHUSD', 'ETCUSD', 'XLMUSD', 'XMRUSD', 'ZECUSD', 'EOSUSD'], priority: 2, magic: 8888 },
-            { name: 'Altcoin Sniper', category: 'Cripto', asset: 'Altcoins', color: '#10b981', symbols: ['BNBUSD', 'DOGEUSD', 'SOLUSD', 'XRPUSD', 'ADAUSD', 'DOTUSD', 'LINKUSD', 'LTCUSD', 'SHIBUSD'], priority: 1, magic: 8888 },
-            { name: 'Crypto IA Pro', category: 'Cripto', asset: 'Multi-IA', color: '#00ccff', symbols: ['BTCUSD', 'ETHUSD', 'SOLUSD', 'BNBUSD', 'ADABUSD', 'XRPBUSD'], priority: 0, magic: 8888 },
-            { name: 'Alpha Robot', category: 'Forex', asset: 'Multi', color: '#d946ef', symbols: ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD'], priority: 1, magic: 88881 },
-            { name: 'Supreme Engine', category: 'Forex', asset: 'Multi', color: '#f87171', symbols: ['EURUSD', 'GBPUSD', 'US100Cash', 'US30Cash', 'US100', 'NAS100'], priority: 1, magic: 7777 },
-            { name: 'Intelligence 7', category: 'Forex', asset: 'Majors', color: '#3b82f6', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'EURJPY'], priority: 2 },
-            { name: 'Smart Momentum', category: 'Forex', asset: 'Majors', color: '#6366f1', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'NZDUSD', 'USDCHF', 'USDCAD'], priority: 3 },
-            { name: 'Gold Scalper', category: 'Metais', asset: 'XAUUSD', color: '#fbbf24', symbols: ['XAUUSD', 'GOLD', 'XAU'], priority: 0, magic: 9999 },
-            { name: 'Shark Hunt XAU', category: 'Metais', asset: 'XAUUSD', color: '#f59e0b', symbols: ['XAUUSD', 'GOLD'], priority: 1 },
-            { name: 'Golden Rejection', category: 'Metais', asset: 'XAU/XAG', color: '#eab308', symbols: ['XAUUSD', 'GOLD', 'XAGUSD'], priority: 2 },
-            { name: 'Alpha Shark', category: 'Metais/Cripto', asset: 'XAU/Cripto', color: '#ef4444', symbols: ['XAUUSD', 'GOLD', 'BTCUSD', 'ETHUSD'], priority: 3 },
-            { name: 'Shark Bot', category: 'Metais', asset: 'XAUUSD', color: '#06b6d4', symbols: ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD', 'XAGUSD', 'WTI', 'SP500'], priority: 0, magic: 9876 },
-            { name: 'Omni Probabilistic', category: 'Ciclos', asset: 'Multi-Asset', color: '#06b6d4', symbols: ['EURUSD', 'GBPUSD', 'XAUUSD', 'BTCUSD'], priority: 0, magic: 999111 },
-        ];
+        // Catálogo carregado do JSON (fonte única)
+        const catalog = this.loadCatalog();
 
         // Contadores por estratégia
         const stats: Record<string, { wins: number; losses: number; netProfit: number; grossProfit: number; grossLoss: number }> = {};
@@ -175,7 +201,9 @@ export class SignalEngine {
             const signalsEmitted = tracked?.signalsEmitted || 0;
             const total = data.wins + data.losses;
             const winRate = total > 0 ? Number(((data.wins / total) * 100).toFixed(1)) : 0;
-            const profitFactor = data.grossLoss > 0 ? Number((data.grossProfit / data.grossLoss).toFixed(2)) : Number(data.grossProfit.toFixed(2));
+            const profitFactor = data.grossLoss > 0
+                ? Number((data.grossProfit / data.grossLoss).toFixed(2))
+                : data.grossProfit > 0 ? 999 : 0;
 
             return {
                 name: s.name,
@@ -200,7 +228,7 @@ export class SignalEngine {
      */
     static async getStrategyRecentTrades(strategyName: string, limit: number = 10): Promise<any[]> {
         try {
-            const resp = await axios.get(`${this.BRIDGE_URL}/history`);
+            const resp = await axios.get(`${this.BRIDGE_URL}/history?limit=500`);
             const history = Array.isArray(resp.data) ? resp.data : [];
 
             return history
@@ -236,6 +264,78 @@ export class SignalEngine {
         }
     }
 
+    // Retorna status de mercado por categoria (Crypto = 24/7)
+    private static getMarketStatus(): { categories: Record<string, boolean>; global: boolean; reason: string } {
+        const now = new Date();
+        const utcDay = now.getUTCDay();
+        const utcHour = now.getUTCHours();
+
+        // Crypto sempre aberto
+        const categories: Record<string, boolean> = {
+            CRIPTOMOEDAS: true,
+            FOREX: true,
+            INDICES: true,
+            METAIS: true,
+            COMMODITIES: true,
+        };
+
+        // ── SÁBADO ────────────────────────────────────────────
+        if (utcDay === 6) {
+            categories.FOREX = false;
+            categories.INDICES = false;
+            categories.METAIS = false;
+            categories.COMMODITIES = false;
+            return { categories, global: false, reason: 'Mercado fechado (sábado)' };
+        }
+
+        // ── DOMINGO ───────────────────────────────────────────
+        if (utcDay === 0) {
+            if (utcHour < 22) {
+                // Antes das 22:00 UTC = tudo fechado (exceto crypto)
+                categories.FOREX = false;
+                categories.INDICES = false;
+                categories.METAIS = false;
+                categories.COMMODITIES = false;
+                return { categories, global: false, reason: 'Mercado fechado (domingo antes 22:00 UTC)' };
+            }
+            // 22:00+ = abertura Sydney (forex + spot metals)
+            categories.INDICES = false;
+            categories.COMMODITIES = false;
+            return { categories, global: false, reason: 'Forex e metais abertos (sessão Sydney)' };
+        }
+
+        // ── SEXTA após 22:00 UTC ──────────────────────────────
+        if (utcDay === 5 && utcHour >= 22) {
+            categories.FOREX = false;
+            categories.INDICES = false;
+            categories.METAIS = false;
+            categories.COMMODITIES = false;
+            return { categories, global: false, reason: 'Mercado fechado (sexta após 22:00 UTC)' };
+        }
+
+        // ── MADRUGADA 22:00-01:00 (dias úteis) ─────────────────
+        // Forex opera (sessão asiática: Sydney 22h, Tóquio 00h)
+        // Índices fechados (US fechou, Ásia ainda não abriu)
+        if (utcHour < 1 || utcHour >= 22) {
+            categories.INDICES = false;
+            return {
+                categories,
+                global: false,
+                reason: 'Apenas forex e crypto (índices fechados 22:00-01:00 UTC)'
+            };
+        }
+
+        return { categories, global: true, reason: '' };
+    }
+
+    // Retorna true se a categoria do ativo pode gerar sinais agora
+    private static isCategoryOpen(category: string): boolean {
+        // Crypto sempre aberto
+        if (category === 'CRIPTOMOEDAS') return true;
+        const status = this.getMarketStatus();
+        return status.categories[category] !== false;
+    }
+
     // Filtro de Sessões (Kill Zones): Retorna true se estiver nas sessões com maior volume (London / NY)
     private static isHighLiquiditySession(): boolean {
         const utcHour = new Date().getUTCHours();
@@ -259,7 +359,24 @@ export class SignalEngine {
 
     static async getActiveSignals(): Promise<TradingSignal[]> {
         const now = Date.now();
-        // Regenerate every 1 minute
+
+        // Limpa sinais de categorias que estão fechadas (exceto crypto que é 24/7)
+        const closedCategories = new Set<string>();
+        for (const cat of ['FOREX', 'INDICES', 'METAIS', 'COMMODITIES']) {
+            if (!this.isCategoryOpen(cat)) closedCategories.add(cat);
+        }
+        if (closedCategories.size > 0) {
+            const removed = this.currentSignals.filter(s => closedCategories.has(s.category));
+            if (removed.length > 0) {
+                console.log(`🔴 SignalEngine: Removendo ${removed.length} sinais de categorias fechadas`);
+                this.currentSignals = this.currentSignals.filter(s => !closedCategories.has(s.category));
+                this.closeCategorySignalsInDb(Array.from(closedCategories)).catch(e =>
+                    console.warn('⚠️ SignalEngine: Erro ao fechar sinais no DB', e)
+                );
+            }
+        }
+
+        // Regenerate every 30s
         if (now - this.lastGenerationTime > 30000 || this.currentSignals.length === 0) {
             await this.generateNewSignals();
             this.lastGenerationTime = now;
@@ -270,6 +387,11 @@ export class SignalEngine {
             timestamp: new Date()
         }));
 
+
+        // Persiste sinais no DB (assíncrono, não bloqueia)
+        if (signals.length > 0) {
+            this.persistSignals(signals).catch(e => console.warn('⚠️ SignalEngine: Persist error', e));
+        }
 
         console.log(`📡 SignalEngine: Final output -> ${signals.length} signals.`);
         return signals;
@@ -442,6 +564,12 @@ export class SignalEngine {
                     const isIndex = cat === 'INDICES';
                     const isCrypto = cat === 'CRIPTOMOEDAS';
 
+                    // Pula se a categoria está fechada (crypto 24/7 sempre passa)
+                    if (!this.isCategoryOpen(cat)) {
+                        console.log(`⏸️ SignalEngine: ${actualSymbol} (${cat}) — mercado fechado, pulando`);
+                        return;
+                    }
+
                     const dec = isIndex ? 1 : (isGold || isCrypto ? 2 : 5);
 
                     if (tickerIsAvailable) {
@@ -514,6 +642,11 @@ export class SignalEngine {
                                 }
                             }
 
+                            // Primeiro ciclo: gera sinais semente para não deixar Radar vazio
+                            if (Object.keys(this.previousTicks).length < 3) {
+                                this.generateSeedSignals(asset, actualSymbol, ticker, priceChange > 0 ? 'BUY' : 'SELL');
+                            }
+
                             // ----------------------------------------------------
                             // NOVAS 7 MASTER STRATEGIES (Motores Próprios Paralelos)
                             // ----------------------------------------------------
@@ -529,7 +662,7 @@ export class SignalEngine {
                             }
 
                             // 3. Intelligence 7 (Forex Smart Money em Majors) - Balanced Mode (0.008%)
-                            if (['EURUSD', 'GBPUSD', 'USDJPY', 'EURJPY', 'GBPUSD'].some(s => actualSymbol.includes(s)) && Math.abs(changePercent) > 0.008) {
+                            if (['EURUSD', 'GBPUSD', 'USDJPY', 'EURJPY'].some(s => actualSymbol.includes(s)) && Math.abs(changePercent) > 0.008) {
                                 // Lógica M15 + H1 + H4
                                 if (this.checkMultiTimeframeConfluence(actualSymbol, priceChange > 0 ? 'BUY' : 'SELL')) {
                                     // Aplica o sinal só se a tripla confluência bater!
@@ -670,7 +803,7 @@ export class SignalEngine {
                                 price_entry: tickerIsAvailable ? (footprint.bias === 'BULLISH' ? ticker.ask : ticker.bid) : 0,
                                 volume_power: footprint.power,
                                 isInstitutional: true,
-                                category: this.getAssetCategory(asset.symbol)
+                                category: this.getAssetCategory(actualSymbol)
                             };
 
                             // SL/TP dinâmico para Institutional (SMC costuma ter alvos longos)
@@ -879,16 +1012,119 @@ export class SignalEngine {
         return 'FOREX';
     }
 
+    // Gera sinais semente no primeiro ciclo para evitar Radar vazio
+    private static generateSeedSignals(asset: any, symbol: string, ticker: any, type: 'BUY' | 'SELL') {
+        const cat = this.getAssetCategory(symbol);
+        const isGold = cat === 'METAIS';
+        const isCrypto = cat === 'CRIPTOMOEDAS';
+        const dec = isGold || isCrypto ? 2 : 5;
+        const entry = ticker?.bid || ticker?.price || 0;
+        if (!entry) return;
+
+        const seeds: { setup: TradingSignal['setup']; minConfidence: number }[] = [
+            { setup: 'Smart Momentum', minConfidence: 72 },
+            { setup: 'Alpha Scalper Grid', minConfidence: 68 },
+        ];
+
+        if (isCrypto) {
+            seeds.push({ setup: 'Quantum BTC Pro', minConfidence: 85 });
+            seeds.push({ setup: 'Crypto Whale Hunt', minConfidence: 78 });
+        }
+        if (isGold) {
+            seeds.push({ setup: 'Golden Rejection', minConfidence: 82 });
+        }
+
+        for (const seed of seeds) {
+            const exists = this.currentSignals.some(s => s.symbol === symbol && s.setup === seed.setup);
+            if (!exists) {
+                const newSignal: TradingSignal = {
+                    id: `seed_${Date.now()}_${symbol}_${seed.setup}`,
+                    asset: asset.name || symbol,
+                    symbol,
+                    type,
+                    setup: seed.setup,
+                    timeframe: 'M15',
+                    confidence: seed.minConfidence + Math.round(Math.random() * 10),
+                    timestamp: new Date(),
+                    price_entry: Number(entry.toFixed(dec)),
+                    volume_power: Math.round(40 + Math.random() * 40),
+                    isInstitutional: false,
+                    category: cat
+                };
+                this.currentSignals.push(newSignal);
+            }
+        }
+    }
+
+    // Fecha sinais de categorias específicas no DB
+    private static async closeCategorySignalsInDb(categories: string[]) {
+        try {
+            const { signals } = await DatabaseService.getSignalHistory({ limit: 10000 });
+            const toClose = signals.filter(s =>
+                s.status === 'active' && s.category && categories.includes(s.category)
+            );
+            for (const s of toClose) {
+                await DatabaseService.closeSignal(s.id);
+            }
+            if (toClose.length > 0) {
+                console.log(`🔴 SignalEngine: ${toClose.length} sinais fechados no DB (${categories.join(', ')})`);
+            }
+        } catch (e) {
+            console.warn('⚠️ SignalEngine: Erro ao fechar sinais no DB', e);
+        }
+    }
+
+    // Fecha todos os sinais ativos no DB
+    private static async closeAllSignalsInDb(reason: string) {
+        try {
+            const { signals } = await DatabaseService.getSignalHistory({ limit: 10000 });
+            const activeSignals = signals.filter(s => s.status === 'active');
+            for (const s of activeSignals) {
+                await DatabaseService.closeSignal(s.id);
+            }
+            console.log(`🔴 SignalEngine: ${activeSignals.length} sinais fechados no DB (${reason})`);
+        } catch (e) {
+            console.warn('⚠️ SignalEngine: Erro ao fechar sinais no DB', e);
+        }
+    }
+
+    // Persiste sinais gerados no banco SQLite via Prisma
+    private static async persistSignals(signals: TradingSignal[]) {
+        const batch = signals.map(s => ({
+            symbol: s.symbol,
+            asset: s.asset,
+            setup: s.setup,
+            type: s.type,
+            confidence: s.confidence,
+            entryPrice: s.price_entry,
+            sl: s.sl,
+            tp: s.tp,
+            volumePower: s.volume_power,
+            timeframe: s.timeframe,
+            category: s.category,
+            isInstitutional: s.isInstitutional,
+            details: s.details,
+        }));
+        const count = await DatabaseService.saveSignalBatch(batch);
+        if (count > 0) {
+            console.log(`💾 SignalEngine: ${count} sinais persistidos no banco.`);
+        }
+    }
+
     static getSignals() {
         return this.currentSignals;
     }
 
     static getStatus() {
+        const mk = this.getMarketStatus();
         return {
             active: true,
             isSafe: Date.now() - this.lastGenerationTime < 60000,
             lastUpdate: new Date(this.lastGenerationTime),
-            signalCount: this.currentSignals.length
+            signalCount: this.currentSignals.length,
+            marketOpen: mk.global,
+            marketReason: mk.reason,
+            categories: mk.categories,
         };
     }
 }
