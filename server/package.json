@@ -6,6 +6,7 @@
     "dev": "nodemon --ignore *.json --ignore *.log src/index.ts",
     "bridge": "ts-node src/bridge.ts",
     "python-bridge": "cd .. && python bridge/mt5_bridge.py",
+    "intel-engine": "cd .. && python -m server.python.ai_agents.intel_service 5004",
     "build": "tsc",
     "start": "node dist/index.js"
   },
@@ -17,6 +18,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-rate-limit": "^8.5.2",
     "jsonwebtoken": "^9.0.3",
     "sentiment": "^5.0.2",
     "yahoo-finance2": "^3.14.1"

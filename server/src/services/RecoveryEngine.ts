@@ -4,6 +4,7 @@ import path from 'path';
 import { AlertEngine } from './AlertEngine';
 import { SymbolLockService } from './SymbolLockService';
 import { DisciplineEngine } from './DisciplineEngine';
+import { TradeNotificationBot } from './TradeNotificationBot';
 
 interface RecoverySettings {
     enabled: boolean;
@@ -198,13 +199,17 @@ export class RecoveryEngine {
                 this.recoveryHistory = data.history || [];
                 this.state = { ...this.state, ...data.state };
             }
-        } catch (e) { /* silent */ }
+        } catch (e) {
+            console.warn('Recovery: load history error', e);
+        }
     }
 
     private static saveHistory() {
         try {
             fs.writeFileSync(this.HISTORY_PATH, JSON.stringify({ history: this.recoveryHistory.slice(-200), state: this.state }, null, 2));
-        } catch (e) { /* silent */ }
+        } catch (e) {
+            console.warn('Recovery: save history error', e);
+        }
     }
 
     private static async loop() {
@@ -602,13 +607,13 @@ export class RecoveryEngine {
 
                 if (this.settings.telegramAlerts) {
                     try {
-                        const { TradeNotificationBot } = require('./TradeNotificationBot');
+                        
                         TradeNotificationBot.notifyTradeOpened('Recovery Engine', signal.symbol, signal.direction, signal.lotSize, signal.entryPrice, signal.stopLoss, signal.takeProfit);
-                    } catch (e) { /* notif fail */ }
+                } catch (e) {
+                    console.warn('Recovery: notification failed', e);
                 }
-
-                    AlertEngine.addAlert('GUARDIAN', 'INFO', 'Recovery Engine', `${signal.direction} ${signal.symbol} ${signal.lotSize} lotes | ${signal.reason}`);
             }
+        }
         } catch (e) {
             console.error('🔄 RecoveryEngine: Falha ao executar recovery', e);
         }
@@ -654,13 +659,17 @@ export class RecoveryEngine {
 
                     if (this.settings.telegramAlerts) {
                         try {
-                            const { TradeNotificationBot } = require('./TradeNotificationBot');
+                            
                             TradeNotificationBot.notifyTradeClosed('Recovery Engine', closed.symbol || entry.symbol, closed.type || entry.direction, profit, isWin ? 'WIN' : 'LOSS', isWin ? 'Take Profit' : 'Stop Loss', closed.volume || entry.lotSize);
-                        } catch (e) { /* notif fail */ }
+                        } catch (e) {
+                            console.warn('Recovery: notification failed', e);
+                        }
                     }
 
                     AlertEngine.addAlert('GUARDIAN', isWin ? 'INFO' : 'WARNING', 'Recovery Engine', `${isWin ? '✓' : '✗'} ${entry.symbol} ${isWin ? `+$${profit.toFixed(2)}` : `-$${Math.abs(profit).toFixed(2)}`}`);
-                } catch { /* history fetch fail */ }
+                } catch {
+                    console.warn('Recovery: history fetch fail');
+                }
             }
         } catch (e) {
             console.warn('🔄 RecoveryEngine: Erro ao monitorar posições', e);

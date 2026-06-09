@@ -1,0 +1,92 @@
+[
+  {
+    "id": 10,
+    "timestamp": "2026-05-28 18:42:01,739",
+    "nivel": "🟢",
+    "ativo": "Sistema",
+    "trava_acionada": "Perda Diária",
+    "acao_executada": "🔒 Robô Pausado",
+    "detalhe_tecnico": "Drawdown de $153 excedeu o limite de $250. Trading interrompido até próximo dia."
+  },
+  {
+    "id": 9,
+    "timestamp": "2026-05-28 18:42:01,739",
+    "nivel": "🟡",
+    "ativo": "XAUUSD",
+    "trava_acionada": "Filtro MA200",
+    "acao_executada": "⏸️ Sinal Ignorado",
+    "detalhe_tecnico": "Preço ($4505) abaixo da MA200 ($4513). Modo estrito: BUY e SELL bloqueados."
+  },
+  {
+    "id": 8,
+    "timestamp": "2026-05-28 18:42:01,738",
+    "nivel": "🔴",
+    "ativo": "EURUSD",
+    "trava_acionada": "Correlation Guard",
+    "acao_executada": "🚫 Ordem Bloqueada",
+    "detalhe_tecnico": "EURUSD ⇄ GBPUSD: posição oposta já aberta. Risco de hedge indesejado."
+  },
+  {
+    "id": 7,
+    "timestamp": "2026-05-28 18:42:01,738",
+    "nivel": "🟢",
+    "ativo": "XAUUSD",
+    "trava_acionada": "Meta Batida",
+    "acao_executada": "✅ Operação Bloqueada",
+    "detalhe_tecnico": "Lucro diário de $127 atingiu a meta de $100. Robô pausado."
+  },
+  {
+    "id": 6,
+    "timestamp": "2026-05-28 18:42:01,738",
+    "nivel": "🟡",
+    "ativo": "BTCUSD",
+    "trava_acionada": "Confiança da IA",
+    "acao_executada": "🚫 Ordem Ignorada",
+    "detalhe_tecnico": "Probabilidade 45% abaixo do mínimo 60%."
+  },
+  {
+    "id": 5,
+    "timestamp": "2026-05-28 18:42:01,737",
+    "nivel": "🔴",
+    "ativo": "Sistema",
+    "trava_acionada": "Monitor de Latência",
+    "acao_executada": "🔌 Entradas Pausadas",
+    "detalhe_tecnico": "Ping com a corretora atingiu 210ms. Comunicação instável."
+  },
+  {
+    "id": 4,
+    "timestamp": "2026-05-28 18:42:01,736",
+    "nivel": "🟢",
+    "ativo": "Sistema",
+    "trava_acionada": "Hard Lock",
+    "acao_executada": "🔒 Modificações Bloqueadas",
+    "detalhe_tecnico": "Edição de limites suspensa até 00:00 do servidor."
+  },
+  {
+    "id": 3,
+    "timestamp": "2026-05-28 18:42:01,736",
+    "nivel": "🔴",
+    "ativo": "Sistema",
+    "trava_acionada": "Botão de Pânico",
+    "acao_executada": "💥 Plataforma Zerada",
+    "detalhe_tecnico": "Acionamento manual do usuário. 2 posições a mercado fechadas."
+  },
+  {
+    "id": 2,
+    "timestamp": "2026-05-28 18:42:01,735",
+    "nivel": "🟡",
+    "ativo": "XAUUSD",
+    "trava_acionada": "Limite de Posições",
+    "acao_executada": "⏸️ Sinal Ignorado",
+    "detalhe_tecnico": "Sinal de Compra do Shark Bot rejeitado. Limite de 3 posições atingido."
+  },
+  {
+    "id": 1,
+    "timestamp": "2026-05-28 18:42:01,735",
+    "nivel": "🔴",
+    "ativo": "XAUUSD",
+    "trava_acionada": "Trava de Spread",
+    "acao_executada": "🚫 Ordem Cancelada",
+    "detalhe_tecnico": "Spread de 35 pontos excedeu o limite máximo (25)."
+  }
+]

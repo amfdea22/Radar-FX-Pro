@@ -5,6 +5,8 @@ import {
     RefreshCw, Cpu, Zap, ArrowUp, ArrowDown, Minus, Eye, DollarSign, BarChart2
 } from 'lucide-react';
 import axios from 'axios';
+import { DisciplinePanel } from './DisciplinePanel';
+import { ActiveBotsCard } from './ActiveBotsCard';
 
 interface AccountInfo { balance: number; equity: number; margin: number; margin_free: number; profit: number; currency: string; }
 interface TickData { bid: number; ask: number; change: number; changePercent: number; changePercent5m: number; changePercent1h: number; is_open: boolean }
@@ -220,13 +222,16 @@ export const RadarDashboard: React.FC = () => {
                             </div>
                             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{kpi.name}</p>
                             <p className={`text-2xl font-black italic ${kpi.color}`}>{kpi.value}</p>
-                        </motion.div>
-                    ))}
-                </div>
-            </motion.div>
+                             </motion.div>
+                         ))}
+                     </div>
+                 </motion.div>
 
-            {/* ASSET GRID HEADER */}
-            <div className="flex items-center justify-between">
+                 <ActiveBotsCard />
+
+                 {/* ASSET GRID HEADER */}
+                 <div className="flex items-center justify-between">
+
                 <div className="flex items-center gap-3">
                     <BarChart2 size={18} className="text-sky-400" />
                     <h3 className="text-lg font-black text-white italic uppercase tracking-tighter">Ativos do Radar FX</h3>
@@ -391,33 +396,7 @@ export const RadarDashboard: React.FC = () => {
                 <div className="space-y-4">
                     <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[2rem] border border-white/5 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
-                        <div className="flex items-center gap-2 mb-4">
-                            <ShieldIcon className="text-emerald-400" size={16} />
-                            <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Disciplina</span>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                                <span className="text-[10px] font-bold text-slate-400">Status</span>
-                                <span className={`text-xs font-black ${discipline?.isLocked ? 'text-red-400' : 'text-emerald-400'}`}>
-                                    {discipline?.isLocked ? 'Bloqueado' : 'Liberado'}
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                                <span className="text-[10px] font-bold text-slate-400">Trades Hoje</span>
-                                <span className="text-xs font-black text-white">{discipline?.tradeCount || 0}</span>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                                <span className="text-[10px] font-bold text-slate-400">P&L Hoje</span>
-                                <span className={`text-xs font-black font-mono ${(discipline?.profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                    ${(discipline?.profit || 0).toFixed(2)}
-                                </span>
-                            </div>
-                            {discipline?.isLocked && discipline?.consecutiveLosses > 0 && (
-                                <div className="p-2.5 bg-red-500/10 rounded-xl border border-red-500/20">
-                                    <p className="text-[10px] font-bold text-red-400 text-center">{discipline.consecutiveLosses}x perdas consecutivas</p>
-                                </div>
-                            )}
-                        </div>
+                        <DisciplinePanel />
                     </div>
 
                     {/* METRICS SUMMARY */}
@@ -445,11 +424,3 @@ export const RadarDashboard: React.FC = () => {
         </div>
     );
 };
-
-function ShieldIcon(props: any) {
-    return (
-        <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        </svg>
-    );
-}

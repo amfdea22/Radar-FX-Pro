@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { AlertEngine } from './AlertEngine';
 import { SymbolLockService } from './SymbolLockService';
+import { TradeNotificationBot } from './TradeNotificationBot';
 
 interface Candle {
     time: number; open: number; high: number; low: number; close: number; tick_volume: number;
@@ -524,14 +525,19 @@ export class CryptoIAEngine {
                         const profit = closed?.profit || closed?.pl || 0;
                         const dir = closed?.type === 0 ? 'BUY' : 'SELL';
                         const sym = closed?.symbol || 'Unknown';
-                        const { TradeNotificationBot } = require('./TradeNotificationBot');
+
                         TradeNotificationBot.notifyTradeClosed('Crypto IA', sym, dir, profit, profit >= 0 ? 'WIN' : 'LOSS', 'Auto', closed?.volume || this.settings.lotSize);
-                    } catch (e) { /* notif fail */ }
+                    } catch (e) {
+                        console.warn('CryptoIA: notification failed', e);
+                    }
                 }
             }
             this.previousTicketSet = newTicketSet;
             this.positions = newPositions;
-        } catch { this.positions = []; }
+        } catch {
+            console.warn('CryptoIA: sync positions error');
+            this.positions = [];
+        }
     }
 
     private static resetDailyIfNeeded() {
@@ -631,7 +637,9 @@ export class CryptoIAEngine {
             fs.writeFileSync(this.DATA_PATH, JSON.stringify({
                 states: this.states, dailyProfit: this.dailyProfit, dailyLoss: this.dailyLoss, timestamp: Date.now()
             }, null, 2));
-        } catch {}
+        } catch {
+            console.warn('CryptoIA: save data error');
+        }
     }
 
     private static loadSettings(): CryptoStrategySettings {
@@ -648,7 +656,9 @@ export class CryptoIAEngine {
         };
         if (fs.existsSync(this.SETTINGS_PATH)) {
             try { return { ...defaults, ...JSON.parse(fs.readFileSync(this.SETTINGS_PATH, 'utf-8')) } as CryptoStrategySettings; }
-            catch {}
+            catch {
+                console.warn('CryptoIA: load settings error');
+            }
         }
         return defaults;
     }

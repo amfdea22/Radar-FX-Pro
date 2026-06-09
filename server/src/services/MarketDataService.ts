@@ -87,7 +87,7 @@ export class MarketDataService {
                 return lfBars;
             }
         } catch (err) {
-            console.error(`❌ MarketData: All providers failed for ${symbol} ${timeframe}`);
+            console.error(`❌ MarketData: LiteFinance failed for ${symbol} ${timeframe}`, (err as any)?.message || '');
         }
 
         return [];
@@ -127,13 +127,12 @@ export class MarketDataService {
             const result: PolygonBar[] = [];
             const len = data.c.length;
             for (let i = len - 1; i >= Math.max(0, len - limit); i--) {
+                const o = data.o?.[i], h = data.h?.[i], l = data.l?.[i], c = data.c[i], t = data.t?.[i];
+                if (o == null || h == null || l == null || c == null || t == null) continue;
                 result.push({
-                    o: data.o[i],
-                    h: data.h[i],
-                    l: data.l[i],
-                    c: data.c[i],
-                    v: data.v ? data.v[i] : (Math.random() * 100 + 50),
-                    t: data.t[i] * 1000
+                    o, h, l, c,
+                    v: data.v?.[i] || (Math.random() * 100 + 50),
+                    t: t * 1000
                 });
             }
             return result;

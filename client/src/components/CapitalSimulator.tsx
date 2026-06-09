@@ -264,7 +264,7 @@ export const CapitalSimulator: React.FC = () => {
 
                                 <button
                                     onClick={importOmniPerformance}
-                                    className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+                                    className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
                                 >
                                     <MousePointer2 size={12} />
                                     Importar Performance

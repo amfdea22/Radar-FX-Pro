@@ -12,6 +12,7 @@ import { DisciplineEngine } from './services/DisciplineEngine';
 import { ReportEngine } from './services/ReportEngine';
 import { AlertEngine } from './services/AlertEngine';
 import { AlphaRobotEngine } from './services/AlphaRobotEngine';
+import { WolfBotEngine } from './services/WolfBotEngine';
 import { CopyTraderEngine } from './services/CopyTraderEngine';
 import { LiteFinanceService } from './services/LiteFinanceService';
 import { ConfigService } from './services/ConfigService';
@@ -224,8 +225,8 @@ app.post('/api/mt5/order', async (req, res) => {
         // Executar com retry inteligente via MarketService
         const orderResult = await MarketService.retryWhenOpen(req.body.symbol, async () => {
             const body = { ...req.body };
-            // SanitizaÃ§Ã£o Segura: Permite alfa, nÃºmeros, underscore e hÃ­fen
-            body.comment = String(body.comment || '').replace(/[^a-zA-Z0-9_\- ]/g, "").substring(0, 31) || 'RadarFX';
+            // SanitizaÃ§Ã£o Segura: Permite alfa, nÃºmeros, underscore, hÃ­fen e espaÃ§o simples
+            body.comment = String(body.comment || '').replace(/[^a-zA-Z0-9_\- ]/g, "").replace(/\s+/g, ' ').trim().substring(0, 30) || 'RadarFX';
             console.log(`ðŸ›¡ï¸ [BRIDGE] Comment Sanitized: "${req.body.comment}" -> "${body.comment}"`);
             const response = await bridgeAxios.post('/order', body);
             return response.data;
@@ -593,6 +594,21 @@ app.get('/api/mt5/shark-bot/history', (req, res) => {
     res.json(SharkBotEngine.getHistory());
 });
 
+// --- WOLF BOT ENGINE ---
+app.get('/api/mt5/wolf-bot/status', async (req, res) => {
+    const status = await WolfBotEngine.getStatus();
+    res.json(status);
+});
+
+app.post('/api/mt5/wolf-bot/settings', (req, res) => {
+    WolfBotEngine.updateSettings(req.body);
+    res.json({ status: 'success', statusData: WolfBotEngine.getStatus() });
+});
+
+app.get('/api/mt5/wolf-bot/history', (req, res) => {
+    res.json(WolfBotEngine.getHistory());
+});
+
 // --- FINANCEIRO & REPORTING & DIÃRIO ---
 
 app.get('/api/mt5/reports', async (req, res) => {
@@ -858,7 +874,7 @@ app.post('/api/tradingview/webhook/execute', webhookLimiter, validateWebhookSecr
             sl: 0,
             tp: 0,
             magic: 999001,
-            comment: comment.replace(/[^a-zA-Z0-9_\- ]/g, '').substring(0, 31),
+            comment: comment.replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/\s+/g, ' ').trim().substring(0, 30),
         });
 
         if (orderResult.data?.ticket) {
@@ -1402,17 +1418,18 @@ app.post('/api/agent-ia/reset-daily', (_req, res) => {
 app.get('/api/mt5/ai-monitoring', async (req, res) => {
      try {
          const safe = <T>(fn: () => T): Promise<T | null> => Promise.resolve(fn()).catch(() => null);
-         const [gold, shark_bot, swing, omni, supreme, robot, analytics, discipline] = await Promise.all([
-             GoldScalperEngine.getStatus().catch(() => null),
-             safe(() => SharkBotEngine.getStatus()),
-             safe(() => SwingTraderEngine.getStatus()),
-             safe(() => OmniProbabilisticEngine.getStatus()),
-             safe(() => SupremeEngine.getStatus()),
-             safe(() => AlphaRobotEngine.getStatus()),
-             (async () => { try { return await ReportEngine.getAdvancedAnalytics(); } catch { return null; } })(),
-             (async () => { try { return await DisciplineEngine.getDailyStatus(); } catch { return null; } })()
-         ]);
-         res.json({ gold, shark_bot, swing, omni, supreme, robot, analytics, discipline });
+        const [gold, shark_bot, wolf_bot, swing, omni, supreme, robot, analytics, discipline] = await Promise.all([
+            GoldScalperEngine.getStatus().catch(() => null),
+            safe(() => SharkBotEngine.getStatus()),
+            safe(() => WolfBotEngine.getStatus()),
+            safe(() => SwingTraderEngine.getStatus()),
+            safe(() => OmniProbabilisticEngine.getStatus()),
+            safe(() => SupremeEngine.getStatus()),
+            safe(() => AlphaRobotEngine.getStatus()),
+            (async () => { try { return await ReportEngine.getAdvancedAnalytics(); } catch { return null; } })(),
+            (async () => { try { return await DisciplineEngine.getDailyStatus(); } catch { return null; } })()
+        ]);
+        res.json({ gold, shark_bot, wolf_bot, swing, omni, supreme, robot, analytics, discipline });
      } catch (e: any) {
          res.status(500).json({ error: e.message });
      }
@@ -1795,7 +1812,7 @@ app.post('/api/mt5/trade/open', async (req, res) => {
             symbol: symbol.toUpperCase(),
             lot: Math.max(0.01, lot || 0.01),
             magic: 999999,
-            comment: comment || 'Telegram_Manual'
+            comment: String(comment || 'Telegram_Manual').replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/\s+/g, ' ').trim().substring(0, 30) || 'Telegram_Manual'
         };
         if (sl) payload.sl = sl;
         if (tp) payload.tp = tp;
@@ -2132,6 +2149,7 @@ app.listen(Number(port), '0.0.0.0', async () => {
 
     TradeGuardian.start();
     AlphaRobotEngine.start();
+    WolfBotEngine.init();
     CopyTraderEngine.start();
     SupremeEngine.start();
     GoldScalperEngine.start();
@@ -2152,7 +2170,7 @@ app.listen(Number(port), '0.0.0.0', async () => {
     // Process shutdown handlers
     const shutdown = async (signal: string) => {
         console.log(`\nâš ï¸  Recebido ${signal}. Iniciando desligamento gracioso...`);
-        const engines = [MotorIAEngine, GoldScalperEngine, CryptoIAEngine, AlphaRobotEngine, SupremeEngine, RecoveryEngine, SharkBotEngine, BitcoinProEngine, MicroScalperEngine, SwingTraderEngine, ForexScalperEngine, OmniProbabilisticEngine, TradeGuardian, CopyTraderEngine];
+        const engines = [MotorIAEngine, GoldScalperEngine, CryptoIAEngine, AlphaRobotEngine, WolfBotEngine, SupremeEngine, RecoveryEngine, SharkBotEngine, BitcoinProEngine, MicroScalperEngine, SwingTraderEngine, ForexScalperEngine, OmniProbabilisticEngine, TradeGuardian, CopyTraderEngine];
         for (const eng of engines) { try { (eng as any).stop?.(); } catch { /* ignore */ } }
         try { await DatabaseService.disconnect(); } catch (e) { console.error('DB disconnect fail', e); }
         console.log('âœ… Desligamento concluÃ­do.');

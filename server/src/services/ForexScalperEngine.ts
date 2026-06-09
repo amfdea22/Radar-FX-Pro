@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { SymbolLockService } from './SymbolLockService';
+import { TradeNotificationBot } from './TradeNotificationBot';
 
 interface ForexScalperSettings {
     enabled: boolean;
@@ -443,7 +444,7 @@ export class ForexScalperEngine {
                 const actionDesc = price > 0 ? `LIMIT ${side}` : side;
                 this.addLog(`⚡ Ordem ${actionDesc} em ${symbol} (${comment})`, 'TRADE');
                 try {
-                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    
                     TradeNotificationBot.notifyTradeOpened('Speed Scalper', symbol, side, lot, resp.data.price || price, 0, 0);
                 } catch (e) {}
             }

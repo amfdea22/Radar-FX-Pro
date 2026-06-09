@@ -1,54 +1,70 @@
 {
   "VSA No Supply": {
-    "signalsEmitted": 46,
-    "lastEmitted": "2026-05-23T17:57:04.726Z"
-  },
-  "VSA No Demand": {
-    "signalsEmitted": 62,
-    "lastEmitted": "2026-05-23T17:57:05.412Z"
+    "signalsEmitted": 11,
+    "lastEmitted": "2026-06-09T04:30:21.128Z"
   },
   "Shark Hunt XAU": {
-    "signalsEmitted": 83,
-    "lastEmitted": "2026-05-23T17:57:05.430Z"
-  },
-  "VSA Shakeout": {
-    "signalsEmitted": 13,
-    "lastEmitted": "2026-05-23T17:57:02.990Z"
+    "signalsEmitted": 41,
+    "lastEmitted": "2026-06-09T04:30:21.114Z"
   },
   "Alpha Confluence": {
-    "signalsEmitted": 78,
-    "lastEmitted": "2026-05-23T17:57:05.413Z"
+    "signalsEmitted": 40,
+    "lastEmitted": "2026-06-09T04:30:22.416Z"
   },
-  "Alpha Scalper Grid": {
-    "signalsEmitted": 6,
-    "lastEmitted": "2026-05-23T05:58:13.581Z"
+  "VSA No Demand": {
+    "signalsEmitted": 28,
+    "lastEmitted": "2026-06-09T04:30:15.492Z"
   },
-  "Crypto Whale Hunt": {
-    "signalsEmitted": 107,
-    "lastEmitted": "2026-05-23T17:57:05.414Z"
-  },
-  "Ethereum Core": {
-    "signalsEmitted": 7,
-    "lastEmitted": "2026-05-23T17:57:00.378Z"
-  },
-  "Squeeze Breakout": {
-    "signalsEmitted": 106,
-    "lastEmitted": "2026-05-23T17:57:05.417Z"
-  },
-  "Altcoin Sniper": {
-    "signalsEmitted": 91,
-    "lastEmitted": "2026-05-23T17:57:05.415Z"
+  "VSA Shakeout": {
+    "signalsEmitted": 2,
+    "lastEmitted": "2026-06-09T04:13:31.582Z"
   },
   "VSA Upthrust": {
-    "signalsEmitted": 7,
-    "lastEmitted": "2026-05-23T17:13:31.079Z"
+    "signalsEmitted": 4,
+    "lastEmitted": "2026-06-09T03:16:25.658Z"
+  },
+  "Crypto Whale Hunt": {
+    "signalsEmitted": 22,
+    "lastEmitted": "2026-06-09T04:30:22.366Z"
+  },
+  "Squeeze Breakout": {
+    "signalsEmitted": 38,
+    "lastEmitted": "2026-06-09T04:30:22.379Z"
+  },
+  "Altcoin Sniper": {
+    "signalsEmitted": 17,
+    "lastEmitted": "2026-06-09T04:30:22.370Z"
   },
   "Alpha Shark": {
-    "signalsEmitted": 97,
-    "lastEmitted": "2026-05-23T17:57:05.416Z"
+    "signalsEmitted": 26,
+    "lastEmitted": "2026-06-09T04:30:22.383Z"
+  },
+  "Alpha Scalper Grid": {
+    "signalsEmitted": 5,
+    "lastEmitted": "2026-06-09T04:30:21.083Z"
+  },
+  "Alpha Index Pro": {
+    "signalsEmitted": 10,
+    "lastEmitted": "2026-06-09T04:13:32.253Z"
+  },
+  "Golden Rejection": {
+    "signalsEmitted": 4,
+    "lastEmitted": "2026-06-09T04:13:34.038Z"
+  },
+  "Smart Momentum": {
+    "signalsEmitted": 9,
+    "lastEmitted": "2026-06-09T04:13:33.186Z"
   },
   "Alpha Nakamoto": {
-    "signalsEmitted": 7,
-    "lastEmitted": "2026-05-23T17:57:00.374Z"
+    "signalsEmitted": 2,
+    "lastEmitted": "2026-06-09T04:13:30.041Z"
+  },
+  "Ethereum Core": {
+    "signalsEmitted": 2,
+    "lastEmitted": "2026-06-09T04:13:30.053Z"
+  },
+  "Golden Whale Hunter": {
+    "signalsEmitted": 1,
+    "lastEmitted": "2026-06-09T03:49:58.130Z"
   }
 }

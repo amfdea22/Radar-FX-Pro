@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Zap, Radar, ShieldCheck, TrendingUp, TrendingDown, Target, Clock, AlertCircle,
     Sparkles, Magnet, Layers, Activity, ShieldAlert, ChevronRight, Settings,
-    MousePointer2, Laptop, BarChart3, Bell, X, CheckCircle2, Link2
+    MousePointer2, Laptop, BarChart3, Bell, X, CheckCircle2, Link2, Copy, Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -38,11 +38,16 @@ import { SoundService } from '../services/SoundService';
 export const SignalScanner: React.FC = () => {
     const [signals, setSignals] = useState<Signal[]>([]);
     const [loading, setLoading] = useState(true);
+    const [marketOpen, setMarketOpen] = useState(true);
+    const [marketReason, setMarketReason] = useState('');
+    const [marketCategories, setMarketCategories] = useState<Record<string, boolean>>({});
     const [guardianActive, setGuardianActive] = useState(true);
     const [riskMode, setRiskMode] = useState<Record<string, 'AUTO' | 'MANUAL'>>({});
     const [manualInputs, setManualInputs] = useState<Record<string, { sl: string, tp: string }>>({});
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<'ALL' | 'FOREX' | 'INDICES' | 'CRIPTOMOEDAS' | 'METAIS' | 'COMMODITIES'>('ALL');
+    const [selectedStrategy, setSelectedStrategy] = useState<string>('ALL');
+    const [searchQuery, setSearchQuery] = useState('');
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isDisciplineLocked, setIsDisciplineLocked] = useState(false);
     const [globalSettings, setGlobalSettings] = useState({
@@ -65,13 +70,26 @@ export const SignalScanner: React.FC = () => {
 
     const fetchSignals = async () => {
         try {
-            const [signalsResp, discResp] = await Promise.all([
+            const [signalsResp, discResp, statusResp] = await Promise.all([
                 axios.get('/api/mt5/signals'),
-                axios.get('/api/mt5/discipline')
+                axios.get('/api/mt5/discipline'),
+                axios.get('/api/mt5/signals/status')
             ]);
 
             const newSignals = signalsResp.data;
             const newDiscipline = discResp.data;
+            const marketStatus = statusResp.data?.engine;
+
+            // Atualiza status do mercado
+            if (marketStatus) {
+                const cats = marketStatus.categories || {};
+                setMarketOpen(marketStatus.marketOpen ?? marketStatus.open ?? true);
+                setMarketReason(marketStatus.marketReason || marketStatus.reason || '');
+                setMarketCategories(cats);
+                // Se pelo menos uma categoria não-crypto estiver aberta, "ALL" mostra sinais
+                const anyCatOpen = Object.entries(cats).some(([k, v]) => k !== 'CRIPTOMOEDAS' && v === true);
+                setMarketOpen(anyCatOpen);
+            }
 
             // Alerta sonoro para novos sinais
             if (newSignals.length > signals.length && signals.length > 0) {
@@ -134,6 +152,16 @@ export const SignalScanner: React.FC = () => {
         return <Target size={14} className="text-slate-500" />;
     };
 
+    const copyToClipboard = async (value: number | undefined, label: string) => {
+        const text = value?.toString() || '0';
+        try {
+            await navigator.clipboard.writeText(text);
+            addNotification('success', `${label} ${text} copiado!`);
+        } catch {
+            addNotification('error', 'Falha ao copiar');
+        }
+    };
+
     const toggleRiskMode = (signalId: string) => {
         setRiskMode(prev => ({
             ...prev,
@@ -174,8 +202,10 @@ export const SignalScanner: React.FC = () => {
                     <div>
                         <h2 className="text-xl font-black text-white italic tracking-tighter uppercase">Radar Station</h2>
                         <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-trader-green animate-ping"></div>
-                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Scanner VSA Ativo</span>
+                            <div className={`w-1.5 h-1.5 rounded-full ${selectedCategory === 'CRIPTOMOEDAS' || (marketOpen && selectedCategory === 'ALL') ? 'bg-trader-green animate-ping' : 'bg-trader-red'}`}></div>
+                            <span className={`text-[8px] font-black uppercase tracking-widest ${selectedCategory === 'CRIPTOMOEDAS' ? 'text-trader-green' : marketOpen ? 'text-trader-green' : 'text-trader-red'}`}>
+                                {selectedCategory === 'CRIPTOMOEDAS' ? 'Crypto 24/7' : selectedCategory !== 'ALL' && marketCategories[selectedCategory] === false ? 'Mercado Fechado' : marketOpen ? 'Scanner VSA Ativo' : 'Mercado Fechado'}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -198,18 +228,51 @@ export const SignalScanner: React.FC = () => {
 
             {/* Asset Categories Filter Bar */}
             <div className="flex items-center gap-2 mb-6 relative z-10 overflow-x-auto pb-2 custom-scrollbar">
-                {(['ALL', 'FOREX', 'INDICES', 'CRIPTOMOEDAS', 'METAIS', 'COMMODITIES'] as const).map(cat => (
-                    <button
-                        key={cat}
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border whitespace-nowrap ${selectedCategory === cat
-                            ? 'bg-trader-blue/20 border-trader-blue text-trader-blue shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                            : 'bg-slate-900/50 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700'
-                            }`}
-                    >
-                        {cat === 'ALL' ? 'Todos Ativos' : cat}
-                    </button>
-                ))}
+                {(['ALL', 'FOREX', 'INDICES', 'CRIPTOMOEDAS', 'METAIS', 'COMMODITIES'] as const).map(cat => {
+                    const isOpen = cat === 'ALL' ? marketOpen : (cat === 'CRIPTOMOEDAS' ? true : marketCategories[cat] !== false);
+                    return (
+                        <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(cat)}
+                            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border whitespace-nowrap flex items-center gap-1.5 ${selectedCategory === cat
+                                ? 'bg-trader-blue/20 border-trader-blue text-trader-blue shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                                : 'bg-slate-900/50 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700'
+                                }`}
+                        >
+                            <div className={`w-1 h-1 rounded-full ${isOpen ? 'bg-trader-green' : 'bg-trader-red'}`}></div>
+                            {cat === 'ALL' ? 'Todos Ativos' : cat}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Search & Strategy Filter */}
+            <div className="flex items-center gap-2 mb-4 relative z-10">
+                <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-slate-900/80 border border-slate-800 rounded-xl">
+                    <Search size={14} className="text-slate-500 shrink-0" />
+                    <input
+                        type="text"
+                        placeholder="Buscar por símbolo..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="bg-transparent text-[10px] font-medium text-slate-300 outline-none w-full placeholder:text-slate-600"
+                    />
+                    {searchQuery && (
+                        <button onClick={() => setSearchQuery('')} className="text-slate-600 hover:text-slate-400">
+                            <X size={14} />
+                        </button>
+                    )}
+                </div>
+                <select
+                    value={selectedStrategy}
+                    onChange={(e) => setSelectedStrategy(e.target.value)}
+                    className="px-3 py-2 bg-slate-900/80 border border-slate-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 outline-none cursor-pointer hover:border-slate-700 transition-all max-w-[160px]"
+                >
+                    <option value="ALL">Todas Estratégias</option>
+                    {[...new Set(signals.map(s => s.setup))].sort().map(strat => (
+                        <option key={strat} value={strat}>{strat}</option>
+                    ))}
+                </select>
             </div>
 
             <div className="space-y-4 relative z-10 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
@@ -233,6 +296,8 @@ export const SignalScanner: React.FC = () => {
                 <AnimatePresence mode='popLayout'>
                     {signals
                         .filter(s => selectedCategory === 'ALL' || s.category === selectedCategory)
+                        .filter(s => selectedStrategy === 'ALL' || s.setup === selectedStrategy)
+                        .filter(s => !searchQuery || s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.asset.toLowerCase().includes(searchQuery.toLowerCase()))
                         .sort((a, b) => {
                             // 1. Prioridade para Institucional
                             if (a.isInstitutional && !b.isInstitutional) return -1;
@@ -286,7 +351,10 @@ export const SignalScanner: React.FC = () => {
                                     )}
 
                                     <div className="flex items-center gap-4">
-                                        <div className={`w-1 h-10 rounded-full ${signal.type === 'BUY' ? 'bg-trader-green' : 'bg-trader-red'}`}></div>
+                                        <div className={`flex flex-col items-center gap-0.5 ${signal.type === 'BUY' ? 'text-trader-green' : 'text-trader-red'}`}>
+                                            {signal.type === 'BUY' ? <TrendingUp size={18} className="drop-shadow-[0_0_6px_rgba(52,211,153,0.5)]" /> : <TrendingDown size={18} className="drop-shadow-[0_0_6px_rgba(239,68,68,0.5)]" />}
+                                            <span className={`text-[6px] font-black uppercase tracking-widest ${signal.type === 'BUY' ? 'text-trader-green' : 'text-trader-red'}`}>{signal.type}</span>
+                                        </div>
 
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-4 mb-2">
@@ -379,12 +447,17 @@ export const SignalScanner: React.FC = () => {
                                         </div>
 
                                         <div className="flex flex-col gap-2">
-                                            <button
+                                            <motion.button
                                                 onClick={() => handleZap(signal)}
-                                                className={`p-4 rounded-2xl shadow-xl active:scale-95 transition-all group/btn ${isDisciplineLocked ? 'bg-slate-700 text-slate-500 cursor-not-allowed shadow-none' : isAlpha ? 'bg-trader-amber text-black shadow-trader-amber/20' : isElite ? 'bg-trader-blue text-white shadow-trader-blue/20' : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'}`}
+                                                className={`p-4 rounded-2xl shadow-xl active:scale-95 transition-all group/btn ${isDisciplineLocked ? 'bg-slate-700 text-slate-500 cursor-not-allowed shadow-none' : isAlpha ? 'bg-trader-amber text-white shadow-trader-amber/20' : isElite ? 'bg-trader-blue text-white shadow-trader-blue/20' : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'}`}
+                                                animate={!isDisciplineLocked ? {
+                                                    boxShadow: ['0 0 0px rgba(59,130,246,0)', '0 0 20px rgba(59,130,246,0.4)', '0 0 0px rgba(59,130,246,0)'],
+                                                    scale: [1, 1.05, 1],
+                                                } : {}}
+                                                transition={!isDisciplineLocked ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
                                             >
                                                 {isDisciplineLocked ? <ShieldAlert size={18} /> : <Zap size={18} className="group-hover/btn:rotate-12 transition-transform" />}
-                                            </button>
+                                            </motion.button>
                                             <button
                                                 onClick={() => toggleRiskMode(signal.id)}
                                                 className={`flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg text-[7px] font-black uppercase border transition-all ${mode === 'AUTO' ? 'bg-trader-blue/10 border-trader-blue/30 text-trader-blue hover:bg-trader-blue/20' : 'bg-purple-900/20 border-purple-500/30 text-purple-400 hover:bg-purple-900/30'}`}
@@ -407,7 +480,14 @@ export const SignalScanner: React.FC = () => {
                                                     <label className="text-[7px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1">
                                                         <ShieldAlert size={8} className="text-trader-red" /> Stop Loss
                                                     </label>
-                                                    {mode === 'AUTO' && <span className="text-[9px] font-black text-trader-red">{signal.sl}</span>}
+                                                    {mode === 'AUTO' && (
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="text-[9px] font-black text-trader-red">{signal.sl}</span>
+                                                            <button onClick={() => copyToClipboard(signal.sl, 'SL')} className="p-0.5 rounded hover:bg-trader-red/20 transition-colors">
+                                                                <Copy size={10} className="text-trader-red/60 hover:text-trader-red" />
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 {mode === 'MANUAL' && (
                                                     <input
@@ -425,7 +505,14 @@ export const SignalScanner: React.FC = () => {
                                                     <label className="text-[7px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1">
                                                         <Target size={8} className="text-trader-green" /> Take Profit
                                                     </label>
-                                                    {mode === 'AUTO' && <span className="text-[9px] font-black text-trader-green">{signal.tp}</span>}
+                                                    {mode === 'AUTO' && (
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="text-[9px] font-black text-trader-green">{signal.tp}</span>
+                                                            <button onClick={() => copyToClipboard(signal.tp, 'TP')} className="p-0.5 rounded hover:bg-trader-green/20 transition-colors">
+                                                                <Copy size={10} className="text-trader-green/60 hover:text-trader-green" />
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 {mode === 'MANUAL' && (
                                                     <input
@@ -450,14 +537,83 @@ export const SignalScanner: React.FC = () => {
                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Escaneando Liquidez VSA...</p>
                     </div>
                 )}
+
+                {!loading && signals.filter(s => selectedCategory === 'ALL' || s.category === selectedCategory)
+                    .filter(s => selectedStrategy === 'ALL' || s.setup === selectedStrategy)
+                    .filter(s => !searchQuery || s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.asset.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col items-center justify-center py-16 space-y-4"
+                    >
+                        {(() => {
+                            // Verifica se a categoria selecionada está aberta
+                            let catOpen = true;
+                            if (selectedCategory === 'ALL') catOpen = marketOpen;
+                            else if (selectedCategory === 'CRIPTOMOEDAS') catOpen = true;
+                            else catOpen = marketCategories[selectedCategory] !== false;
+
+                            if (!catOpen) {
+                                const catName = selectedCategory === 'ALL' ? 'Mercado tradicional' : selectedCategory;
+                                return (
+                                    <>
+                                        <ShieldAlert size={48} className="text-trader-red/50" />
+                                        <h3 className="text-sm font-black text-trader-red uppercase tracking-widest">{catName} Fechado</h3>
+                                        <p className="text-[9px] font-medium text-slate-500 text-center max-w-xs leading-relaxed">
+                                            {selectedCategory === 'ALL' ? marketReason || 'Mercado tradicional fechado no momento.' : `${selectedCategory} fechado no momento.`}
+                                        </p>
+                                        {selectedCategory !== 'CRIPTOMOEDAS' && selectedCategory !== 'ALL' && (
+                                            <p className="text-[8px] font-medium text-slate-600 text-center max-w-xs">
+                                                Criptomoedas ({'CRIPTOMOEDAS'}) operam 24/7 — troque o filtro para ver sinais.
+                                            </p>
+                                        )}
+                                    </>
+                                );
+                            }
+
+                            return (
+                                <>
+                                    <Radar size={48} className="text-slate-700" />
+                                    <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">Nenhum Sinal Detectado</h3>
+                                    <p className="text-[9px] font-medium text-slate-600 text-center max-w-xs leading-relaxed">
+                                        {searchQuery || selectedStrategy !== 'ALL'
+                                            ? 'Nenhum sinal corresponde aos filtros atuais. Tente ajustar a busca ou estratégia.'
+                                            : 'Aguardando dados de mercado... O Radar FX analisa 40+ ativos a cada 30 segundos em busca de oportunidades.'}
+                                    </p>
+                                </>
+                            );
+                        })()}
+                        {(searchQuery || selectedStrategy !== 'ALL') && (
+                            <button
+                                onClick={() => { setSearchQuery(''); setSelectedStrategy('ALL'); }}
+                                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:border-slate-600 transition-all"
+                            >
+                                Limpar Filtros
+                            </button>
+                        )}
+                    </motion.div>
+                )}
             </div>
 
             <div className="mt-8 p-4 bg-slate-950/80 border border-slate-800 rounded-3xl flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[8px] font-black uppercase text-slate-500">
-                    <Clock size={12} /> Próxima Varredura: 2m
+                <div className="flex items-center gap-2">
+                    {signals.length > 0 ? (
+                        <div className="w-2 h-2 rounded-full bg-trader-green animate-ping"></div>
+                    ) : (
+                        <div className="w-2 h-2 rounded-full bg-trader-red"></div>
+                    )}
+                    <span className={`text-[8px] font-black uppercase ${signals.length > 0 ? 'text-trader-green' : 'text-trader-red'}`}>
+                        {signals.length > 0 ? 'Sinais Ativos' : 'Aguardando'}
+                    </span>
                 </div>
-                <div className="flex items-center gap-2 text-[8px] font-black uppercase text-trader-blue">
-                    <Activity size={12} className="animate-pulse" /> Global Risk: {globalSettings.defaultLot} Lot / {globalSettings.trailingPoints}pts
+                <div className="flex items-center gap-3">
+                    <span className="text-[8px] font-black uppercase text-slate-500">
+                        <Clock size={12} className="inline mr-1" />30s
+                    </span>
+                    <span className="text-[8px] font-black uppercase text-slate-600">{signals.length} sinais</span>
+                    <div className="flex items-center gap-2 text-[8px] font-black uppercase text-trader-blue">
+                        <Activity size={12} className="animate-pulse" /> Risk: {globalSettings.defaultLot} Lot
+                    </div>
                 </div>
             </div>
 

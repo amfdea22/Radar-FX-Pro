@@ -5,6 +5,7 @@ import { DisciplineEngine } from './DisciplineEngine';
 import { SymbolLockService } from './SymbolLockService';
 import fs from 'fs';
 import path from 'path';
+import { TradeNotificationBot } from './TradeNotificationBot';
 
 export type ProbabilisticStrategy = 'MHI1' | 'MHI2' | 'MHI3' | 'TWIN_TOWERS' | 'CYCLE_OF_3' | 'SEVEN';
 
@@ -50,14 +51,33 @@ export class OmniProbabilisticEngine {
         magic: 999111
     };
 
+    private static cycleTimer: NodeJS.Timeout | null = null;
+
     static start() {
         if (this.isRunning) return;
         this.loadSettings();
         this.isRunning = true;
         this.addLog('Omni Engine: Serviço Probabilístico Universal INICIADO', 'SUCCESS');
 
-        // Ciclo principal a cada 5 segundos
-        setInterval(() => this.processCycle(), 5000);
+        const runCycle = async () => {
+            if (!this.isRunning) return;
+            try {
+                await this.processCycle();
+            } catch (e: any) {
+                this.addLog(`Erro no ciclo: ${e.message || e}`, 'ERROR');
+            }
+            this.cycleTimer = setTimeout(runCycle, 5000);
+        };
+        this.cycleTimer = setTimeout(runCycle, 5000);
+    }
+
+    static stop() {
+        this.isRunning = false;
+        if (this.cycleTimer) {
+            clearTimeout(this.cycleTimer);
+            this.cycleTimer = null;
+        }
+        this.addLog('Omni Engine: Parado', 'INFO');
     }
 
     private static addLog(msg: string, type: 'INFO' | 'SUCCESS' | 'ERROR' | 'WARN' = 'INFO') {
@@ -196,7 +216,7 @@ export class OmniProbabilisticEngine {
                         currentLot = Number((activeGale.level === 0 ? this.settings.defaultLot * this.settings.martingaleMultiplier : currentLot * this.settings.martingaleMultiplier).toFixed(2));
                         this.addLog(`[Martingale] Perda detectada em ${symbol}. Aplicando Nível ${currentLevel} (Lote: ${currentLot})`, 'WARN');
                         try {
-                            const { TradeNotificationBot } = require('./TradeNotificationBot');
+                            
                             TradeNotificationBot.notifyTradeClosed('Omni', symbol, trade.type === 0 ? 'BUY' : 'SELL', trade.profit || 0, 'LOSS', 'Stop Loss / Martingale', trade.volume || currentLot);
                         } catch (e) { /* notif fail */ }
                     }
@@ -211,7 +231,7 @@ export class OmniProbabilisticEngine {
             if (ticket) {
                 this.lastTickets.set(symbol, { ticket, level: currentLevel, action: signal });
                 try {
-                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    
                     TradeNotificationBot.notifyTradeOpened('Omni', symbol, signal, currentLot, 0, 0, 0);
                 } catch (e) { /* notif fail */ }
             }

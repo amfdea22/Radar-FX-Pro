@@ -10,24 +10,25 @@ interface SymbolLock {
 export class SymbolLockService {
     private static locks: Map<string, SymbolLock> = new Map();
     private static readonly LOCK_DURATION_MS = 24 * 60 * 60 * 1000; // 24h max
-    private static readonly COOLDOWN_MS = 5 * 60 * 1000; // 5 min between same symbol
+
+    private static recentTrades: Map<string, number> = new Map();
+    private static readonly COOLDOWN_MS = 5 * 60 * 1000;
 
     static acquire(symbol: string, engineName: string, ticket: number, direction: string): boolean {
         const normalized = symbol.toUpperCase();
         const existing = this.locks.get(normalized);
 
-        // Se já existe lock, verifica se expirou
         if (existing) {
             if (Date.now() < existing.expiresAt) {
                 console.warn(`🔒 SymbolLock: ${normalized} já bloqueado por ${existing.engineName} (ticket ${existing.ticket})`);
                 return false;
             }
-            // Lock expirado, remove
             this.locks.delete(normalized);
         }
 
-        // Mesma engine, mesmo símbolo: verifica cooldown
-        if (existing?.engineName === engineName && Date.now() - existing.acquiredAt < this.COOLDOWN_MS) {
+        const cooldownKey = `${engineName}:${normalized}`;
+        const lastTrade = this.recentTrades.get(cooldownKey);
+        if (lastTrade && Date.now() - lastTrade < this.COOLDOWN_MS) {
             console.warn(`🔒 SymbolLock: Cooldown de ${this.COOLDOWN_MS/1000}s para ${engineName} em ${normalized}`);
             return false;
         }
@@ -40,6 +41,7 @@ export class SymbolLockService {
             acquiredAt: Date.now(),
             expiresAt: Date.now() + this.LOCK_DURATION_MS,
         });
+        this.recentTrades.set(cooldownKey, Date.now());
 
         console.log(`🔒 SymbolLock: ${engineName} bloqueou ${normalized} (ticket ${ticket})`);
         return true;

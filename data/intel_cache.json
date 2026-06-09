@@ -1,0 +1,4101 @@
+{
+  "cache": {
+    "full_XAUUSD": {
+      "symbol": "XAUUSD",
+      "timestamp": "2026-06-05T03:30:38.145496+00:00",
+      "orchestrator": "Intel Engine",
+      "agent_results": {
+        "session_intel": {
+          "agent": "session_intel",
+          "weight": 0.15,
+          "timestamp": "2026-06-05T03:30:31.112733+00:00",
+          "symbol": "XAUUSD",
+          "current_utc_hour": 3.5,
+          "current_time": "03:30 UTC",
+          "session_bias": "BAIXA_VOLATILIDADE",
+          "confidence": 65,
+          "active_sessions": [
+            {
+              "key": "asia",
+              "name": "Sessao Asiatica",
+              "name_en": "Asian Session",
+              "open_utc": 0,
+              "close_utc": 9,
+              "open_label": "00:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "MEAN_REVERSION",
+              "strategy_label": "Retorno a Media / Consolidacao",
+              "relative_volume": "MEDIO",
+              "description": "Baixa volatilidade, movimentos de consolidacao. Ideal para scalping em pares JPY, AUD, NZD.",
+              "is_active": true,
+              "time_until_open": 20.5,
+              "time_until_close": 5.5
+            },
+            {
+              "key": "london",
+              "name": "Sessao Londres",
+              "name_en": "London Session",
+              "open_utc": 7,
+              "close_utc": 16,
+              "open_label": "07:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "ALTO",
+              "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+              "is_active": false,
+              "time_until_open": 3.5,
+              "time_until_close": 12.5
+            },
+            {
+              "key": "ny",
+              "name": "Sessao Nova York",
+              "name_en": "New York Session",
+              "open_utc": 12,
+              "close_utc": 21,
+              "open_label": "12:00 UTC",
+              "close_label": "21:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "MUITO_ALTO",
+              "description": "Maior liquidez do dia. Sobreposicao com Londres (12-16 UTC) gera os maiores movimentos.",
+              "is_active": false,
+              "time_until_open": 8.5,
+              "time_until_close": 17.5
+            },
+            {
+              "key": "london_ny_overlap",
+              "name": "Sobreposicao Londres-NY",
+              "name_en": "London-NY Overlap",
+              "open_utc": 12,
+              "close_utc": 16,
+              "open_label": "12:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "MOMENTUM",
+              "strategy_label": "Momentum / Rompimento Agressivo",
+              "relative_volume": "MAXIMO",
+              "description": "Pico de volume global. Maior probabilidade de movimentos direcionais fortes.",
+              "is_active": false,
+              "time_until_open": 8.5,
+              "time_until_close": 12.5
+            },
+            {
+              "key": "asia_london_overlap",
+              "name": "Sobreposicao Asia-Londres",
+              "name_en": "Asia-London Overlap",
+              "open_utc": 7,
+              "close_utc": 9,
+              "open_label": "07:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "TRANSITION",
+              "strategy_label": "Transicao / Preparacao",
+              "relative_volume": "MEDIO_ALTO",
+              "description": "Transicao da Asia para Londres. Possivel aumento de volatilidade com a abertura europeia.",
+              "is_active": false,
+              "time_until_open": 3.5,
+              "time_until_close": 5.5
+            }
+          ],
+          "in_kill_zone": false,
+          "active_kill_zones": [],
+          "recommended_strategy": {
+            "name": "Retorno a Media",
+            "indicators": [
+              "RSI",
+              "Bollinger Bands",
+              "Z-Score"
+            ],
+            "risk_level": "BAIXO",
+            "best_for": "Sessoes de baixa liquidez (Asia, finais de sessao)"
+          },
+          "is_optimal_hour": false,
+          "is_suboptimal_hour": true,
+          "optimal_hours": {
+            "best": [
+              13,
+              14,
+              15,
+              8,
+              9
+            ],
+            "worst": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "reason": "Ouro acompanha sobreposicao Londres-NY"
+          },
+          "reasoning": [
+            "Sessao Asiatica \u2014 baixa liquidez esperada",
+            "Estrategia recomendada: Retorno a Media"
+          ],
+          "next_session_open": {
+            "key": "london",
+            "name": "Sessao Londres",
+            "name_en": "London Session",
+            "open_utc": 7,
+            "close_utc": 16,
+            "open_label": "07:00 UTC",
+            "close_label": "16:00 UTC",
+            "strategy": "BREAKOUT",
+            "strategy_label": "Breakout / Rompimento",
+            "relative_volume": "ALTO",
+            "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+            "is_active": false,
+            "time_until_open": 3.5,
+            "time_until_close": 12.5
+          }
+        },
+        "news_macro": {
+          "agent": "news_macro",
+          "weight": 0.3,
+          "timestamp": "2026-06-05T03:30:31.757402+00:00",
+          "symbol": "XAUUSD",
+          "currency": "USD",
+          "volatility_alert": false,
+          "volatility_detail": "Nenhum evento de alto impacto iminente. Mercado livre para operar.",
+          "pre_news": false,
+          "post_news": false,
+          "total_impact_score": 0,
+          "macro_impact_score": 0,
+          "news_sentiment": 0,
+          "news_label": "NEUTRO",
+          "deviation_detail": null,
+          "relevant_events": [],
+          "inference": {
+            "bias": "NEUTRO",
+            "confidence": 50,
+            "action": "ANALYZE",
+            "reasoning": [
+              "Sem desvio significativo no calendario economico. Noticias neutras para o ativo."
+            ]
+          }
+        },
+        "ml_predictor": {
+          "agent": "ml_predictor",
+          "weight": 0.2,
+          "symbol": "XAUUSD",
+          "timestamp": "2026-06-05T03:30:32.557476+00:00",
+          "ml_direction": "BULLISH",
+          "ml_confidence": 68,
+          "prob_up": 0.6891,
+          "prob_down": 0.3109,
+          "bias": "BULLISH",
+          "confidence": 68,
+          "model_accuracy": 0.5,
+          "features": {
+            "retorno": -0.000739,
+            "volatilidade": 0.001411,
+            "distancia_sma": -0.002204,
+            "rsi_14": 26.36,
+            "volume": 194.0
+          }
+        },
+        "bias_trend": {
+          "agent": "bias_trend",
+          "weight": 0.35,
+          "timestamp": "2026-06-05T03:30:34.150869+00:00",
+          "symbol": "XAUUSD",
+          "bias": "BEARISH",
+          "confidence": 95,
+          "timeframes": {
+            "H4": {
+              "structure": "BEARISH",
+              "trend_strength": 15,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 33,
+              "swing_lows": 32,
+              "active_fvg": 0,
+              "active_order_blocks": 2,
+              "nearest_fvg": null,
+              "current_price": 4464.0,
+              "sma20": 4499.025,
+              "sma50": 4491.55601,
+              "sma200": 4510.17152
+            },
+            "H1": {
+              "structure": "BEARISH",
+              "trend_strength": 0,
+              "bos_detected": true,
+              "choch_detected": false,
+              "swing_highs": 16,
+              "swing_lows": 18,
+              "active_fvg": 0,
+              "active_order_blocks": 3,
+              "nearest_fvg": null,
+              "current_price": 4464.0,
+              "sma20": 4499.025,
+              "sma50": 4491.55601,
+              "sma200": 4464.0
+            },
+            "D1": {
+              "structure": "BEARISH",
+              "trend_strength": 57.1,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 12,
+              "swing_lows": 10,
+              "active_fvg": 4,
+              "active_order_blocks": 4,
+              "nearest_fvg": {
+                "type": "BEARISH_FVG",
+                "gap_low": 4474.2001953125,
+                "gap_high": 4471.7001953125,
+                "size": 2.5,
+                "timestamp": "2026-06-02 00:00:00",
+                "distance_from_price": 7.7002
+              },
+              "current_price": 4464.0,
+              "sma20": 4563.58499,
+              "sma50": 4628.07999,
+              "sma200": 4464.0
+            }
+          },
+          "inference": {
+            "direction": "BEARISH",
+            "confidence": 95,
+            "action": "STRONG_SELL",
+            "reasoning": [
+              "H4: Estrutura BEARISH, forca 15/100",
+              "BOS (Break of Structure) detectado no H4",
+              "D1: Estrutura BEARISH, forca 57.1/100",
+              "4 Order Blocks ativos no Diario"
+            ],
+            "key_levels": []
+          }
+        },
+        "quant_stats": {
+          "agent": "quant_stats",
+          "weight": 0.2,
+          "timestamp": "2026-06-05T03:30:35.122349+00:00",
+          "symbol": "XAUUSD",
+          "bias": "BULLISH",
+          "confidence": 95,
+          "total_bias_score": 0.5925,
+          "avg_volatility_pct": 0.518,
+          "avg_volume_ratio": 0.87,
+          "max_reversal_tf": "5 minutos",
+          "max_reversal_probability": 44.9,
+          "max_continuation_tf": "1 hora",
+          "max_continuation_probability": 98.1,
+          "timeframes": [
+            {
+              "tf": "5 minutos",
+              "tf_weight": 0.25,
+              "current_price": 4464.0,
+              "sma": 4471.45496,
+              "z_score": -1.6,
+              "rsi": 32.8,
+              "status": "ESTICADO_BAIXA",
+              "strength": 32.1,
+              "bb_position_pct": 9.9,
+              "bb_width_pct": 0.42,
+              "atr_pct": 0.12,
+              "volume_ratio": 0.13,
+              "momentum_pct": -0.07,
+              "roc_pct": -0.15,
+              "composite_signal": 0.4,
+              "reversal_probability": 44.9,
+              "continuation_probability": 55.1,
+              "deviation_from_mean": -0.167
+            },
+            {
+              "tf": "15 minutos",
+              "tf_weight": 0.3,
+              "current_price": 4464.0,
+              "sma": 4482.71995,
+              "z_score": -1.63,
+              "rsi": 26.4,
+              "status": "ESTICADO_BAIXA",
+              "strength": 32.6,
+              "bb_position_pct": 9.2,
+              "bb_width_pct": 1.02,
+              "atr_pct": 0.23,
+              "volume_ratio": 0.22,
+              "momentum_pct": -0.26,
+              "roc_pct": -0.49,
+              "composite_signal": 0.75,
+              "reversal_probability": 2.6,
+              "continuation_probability": 97.4,
+              "deviation_from_mean": -0.418
+            },
+            {
+              "tf": "1 hora",
+              "tf_weight": 0.25,
+              "current_price": 4463.8999,
+              "sma": 4499.02,
+              "z_score": -1.82,
+              "rsi": 19.0,
+              "status": "ESTICADO_BAIXA",
+              "strength": 36.3,
+              "bb_position_pct": 4.6,
+              "bb_width_pct": 1.72,
+              "atr_pct": 0.35,
+              "volume_ratio": 0.21,
+              "momentum_pct": -0.73,
+              "roc_pct": -1.04,
+              "composite_signal": 0.75,
+              "reversal_probability": 1.9,
+              "continuation_probability": 98.1,
+              "deviation_from_mean": -0.781
+            },
+            {
+              "tf": "Diario",
+              "tf_weight": 0.2,
+              "current_price": 4463.8999,
+              "sma": 4563.57998,
+              "z_score": -1.03,
+              "rsi": 31.8,
+              "status": "ESTICADO_BAIXA",
+              "strength": 20.5,
+              "bb_position_pct": 24.3,
+              "bb_width_pct": 8.51,
+              "atr_pct": 1.37,
+              "volume_ratio": 2.92,
+              "momentum_pct": -0.79,
+              "roc_pct": -1.49,
+              "composite_signal": 0.4,
+              "reversal_probability": 43.4,
+              "continuation_probability": 56.6,
+              "deviation_from_mean": -2.184
+            }
+          ],
+          "regime": {
+            "regime": "ALTA_VOLATILIDADE",
+            "description": "Volatilidade elevada no Diario \u2014 usar stops largos"
+          }
+        }
+      },
+      "decision_matrix": {
+        "session_intel": {
+          "weight": 0.1,
+          "bias": "BAIXA_VOLATILIDADE",
+          "confidence": 65,
+          "in_kill_zone": false,
+          "is_optimal_hour": false,
+          "recommended_strategy": "Retorno a Media",
+          "active_sessions": [
+            "Sessao Asiatica"
+          ]
+        },
+        "news_macro": {
+          "weight": 0.25,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "volatility_alert": false,
+          "pre_news": false,
+          "post_news": false,
+          "news_sentiment": 0,
+          "relevant_events": []
+        },
+        "ml_predictor": {
+          "weight": 0.2,
+          "bias": "BULLISH",
+          "confidence": 68,
+          "prob_up": 0.6891,
+          "prob_down": 0.3109,
+          "model_accuracy": 0.5,
+          "features": {
+            "retorno": -0.000739,
+            "volatilidade": 0.001411,
+            "distancia_sma": -0.002204,
+            "rsi_14": 26.36,
+            "volume": 194.0
+          }
+        },
+        "bias_trend": {
+          "weight": 0.3,
+          "bias": "BEARISH",
+          "confidence": 95,
+          "structure": {
+            "H4": "BEARISH",
+            "H1": "BEARISH",
+            "D1": "BEARISH"
+          },
+          "trend_strength": {
+            "H4": 15,
+            "H1": 0,
+            "D1": 57.1
+          }
+        },
+        "quant_stats": {
+          "weight": 0.15,
+          "bias": "BULLISH",
+          "confidence": 95,
+          "regime": {
+            "regime": "ALTA_VOLATILIDADE",
+            "description": "Volatilidade elevada no Diario \u2014 usar stops largos"
+          },
+          "max_reversal_prob": 44.9,
+          "max_reversal_tf": "5 minutos"
+        }
+      },
+      "final_direction": "NEUTRAL",
+      "final_confidence": 50,
+      "summary": "Vies NEUTRO para XAUUSD \u2014 aguardar Setup",
+      "recommendations": [
+        "H4: Estrutura BEARISH, forca 15/100",
+        "BOS (Break of Structure) detectado no H4",
+        "D1: Estrutura BEARISH, forca 57.1/100",
+        "4 Order Blocks ativos no Diario"
+      ],
+      "alerts": [],
+      "session_info": {
+        "in_kill_zone": false,
+        "volatility_alert": false,
+        "optimal_hour": false
+      },
+      "risk_guardian": {
+        "agent": "risk_guardian",
+        "weight": 0.0,
+        "symbol": "XAUUSD",
+        "calibration": {
+          "max_daily_drawdown": 4.5,
+          "max_total_drawdown": 9.0,
+          "spread_multiplier": 3.5,
+          "base_risk_pct": 0.8,
+          "max_lot": 5.0
+        },
+        "timestamp": "2026-06-05T03:30:38.144498+00:00",
+        "current_price": 4463.9,
+        "atr_pct": 0.0035,
+        "atr_pips": 34.52,
+        "equity": {
+          "current_equity": 314.85,
+          "peak_equity": 100000.0,
+          "current_drawdown_pct": 99.69,
+          "daily_drawdown_pct": 99.69,
+          "remaining_drawdown_pct": 0,
+          "remaining_daily_pct": 0,
+          "max_drawdown_limit": 9.0,
+          "max_daily_limit": 4.5,
+          "risk_level": "CRITICAL",
+          "lot_reduction_factor": 0.0,
+          "prop_firm": "FTMO",
+          "profit_target_pct": 10.0,
+          "profit_progress_pct": 0
+        },
+        "spread": {
+          "symbol": "XAUUSD",
+          "current_spread": 56.91,
+          "avg_spread": 56.94,
+          "spread_std": 0.14,
+          "max_allowed": 199.29,
+          "atr_pips": 34.5151,
+          "blocked": false,
+          "spread_ratio": 0.29,
+          "reason": null,
+          "data_points": 100
+        },
+        "trading_allowed": false,
+        "block_reasons": [
+          "Drawdown critico: 99.69% (limite 9.0%)",
+          "Daily drawdown proximo do limite: 0% restante",
+          "Modo seguro ativo: lotes reduzidos a 0%"
+        ],
+        "lot_sizing_example": {
+          "suggested_lot": 0.01,
+          "raw_lot": 0.0,
+          "risk_amount": 0.0,
+          "sl_pips": 50.0,
+          "structure_multiplier": 0.9,
+          "confidence_multiplier": 1.2,
+          "equity_reduction": 0.0,
+          "structure_type": "FVG",
+          "risk_per_trade_pct": 0.8
+        }
+      }
+    },
+    "full_EURUSD": {
+      "symbol": "EURUSD",
+      "timestamp": "2026-06-05T01:01:50.573706+00:00",
+      "orchestrator": "Intel Engine",
+      "agent_results": {
+        "session_intel": {
+          "agent": "session_intel",
+          "weight": 0.15,
+          "timestamp": "2026-06-05T01:01:38.177776+00:00",
+          "symbol": "EURUSD",
+          "current_utc_hour": 1.02,
+          "current_time": "01:01 UTC",
+          "session_bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "active_sessions": [
+            {
+              "key": "asia",
+              "name": "Sessao Asiatica",
+              "name_en": "Asian Session",
+              "open_utc": 0,
+              "close_utc": 9,
+              "open_label": "00:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "MEAN_REVERSION",
+              "strategy_label": "Retorno a Media / Consolidacao",
+              "relative_volume": "MEDIO",
+              "description": "Baixa volatilidade, movimentos de consolidacao. Ideal para scalping em pares JPY, AUD, NZD.",
+              "is_active": true,
+              "time_until_open": 22.983333333333334,
+              "time_until_close": 7.983333333333333
+            },
+            {
+              "key": "london",
+              "name": "Sessao Londres",
+              "name_en": "London Session",
+              "open_utc": 7,
+              "close_utc": 16,
+              "open_label": "07:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "ALTO",
+              "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "ny",
+              "name": "Sessao Nova York",
+              "name_en": "New York Session",
+              "open_utc": 12,
+              "close_utc": 21,
+              "open_label": "12:00 UTC",
+              "close_label": "21:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "MUITO_ALTO",
+              "description": "Maior liquidez do dia. Sobreposicao com Londres (12-16 UTC) gera os maiores movimentos.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 19.983333333333334
+            },
+            {
+              "key": "london_ny_overlap",
+              "name": "Sobreposicao Londres-NY",
+              "name_en": "London-NY Overlap",
+              "open_utc": 12,
+              "close_utc": 16,
+              "open_label": "12:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "MOMENTUM",
+              "strategy_label": "Momentum / Rompimento Agressivo",
+              "relative_volume": "MAXIMO",
+              "description": "Pico de volume global. Maior probabilidade de movimentos direcionais fortes.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "asia_london_overlap",
+              "name": "Sobreposicao Asia-Londres",
+              "name_en": "Asia-London Overlap",
+              "open_utc": 7,
+              "close_utc": 9,
+              "open_label": "07:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "TRANSITION",
+              "strategy_label": "Transicao / Preparacao",
+              "relative_volume": "MEDIO_ALTO",
+              "description": "Transicao da Asia para Londres. Possivel aumento de volatilidade com a abertura europeia.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 7.983333333333333
+            }
+          ],
+          "in_kill_zone": true,
+          "active_kill_zones": [
+            {
+              "name": "Asia Kill Zone",
+              "open_utc": 0,
+              "close_utc": 1.5,
+              "label": "00:00-01:30 UTC (primeiros 90 min Asia)"
+            }
+          ],
+          "recommended_strategy": {
+            "name": "Retorno a Media",
+            "indicators": [
+              "RSI",
+              "Bollinger Bands",
+              "Z-Score"
+            ],
+            "risk_level": "BAIXO",
+            "best_for": "Sessoes de baixa liquidez (Asia, finais de sessao)"
+          },
+          "is_optimal_hour": false,
+          "is_suboptimal_hour": true,
+          "optimal_hours": {
+            "best": [
+              12,
+              13,
+              14,
+              15,
+              7
+            ],
+            "worst": [
+              1,
+              2,
+              3,
+              22,
+              23
+            ],
+            "reason": "EURUSD tem maior liquidez no overlap Londres-NY"
+          },
+          "reasoning": [
+            "Asia Kill Zone ativa \u2014 00:00-01:30 UTC (primeiros 90 min Asia)",
+            "ATENCAO: Alta manipulacao de preco nos primeiros minutos. Evitar entradas emocionais."
+          ],
+          "next_session_open": {
+            "key": "london",
+            "name": "Sessao Londres",
+            "name_en": "London Session",
+            "open_utc": 7,
+            "close_utc": 16,
+            "open_label": "07:00 UTC",
+            "close_label": "16:00 UTC",
+            "strategy": "BREAKOUT",
+            "strategy_label": "Breakout / Rompimento",
+            "relative_volume": "ALTO",
+            "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+            "is_active": false,
+            "time_until_open": 5.983333333333333,
+            "time_until_close": 14.983333333333334
+          }
+        },
+        "news_macro": {
+          "agent": "news_macro",
+          "weight": 0.3,
+          "timestamp": "2026-06-05T01:01:38.175726+00:00",
+          "symbol": "EURUSD",
+          "currency": "EUR",
+          "volatility_alert": false,
+          "volatility_detail": "Nenhum evento de alto impacto iminente. Mercado livre para operar.",
+          "pre_news": false,
+          "post_news": false,
+          "total_impact_score": 0,
+          "macro_impact_score": 0,
+          "news_sentiment": 0,
+          "news_label": "NEUTRO",
+          "deviation_detail": null,
+          "relevant_events": [],
+          "inference": {
+            "bias": "NEUTRO",
+            "confidence": 50,
+            "action": "ANALYZE",
+            "reasoning": [
+              "Sem desvio significativo no calendario economico. Noticias neutras para o ativo."
+            ]
+          }
+        },
+        "bias_trend": {
+          "agent": "bias_trend",
+          "weight": 0.35,
+          "timestamp": "2026-06-05T01:01:43.268179+00:00",
+          "symbol": "EURUSD",
+          "bias": "RANGING",
+          "confidence": 95,
+          "timeframes": {
+            "H4": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": false,
+              "choch_detected": false,
+              "swing_highs": 31,
+              "swing_lows": 30,
+              "active_fvg": 1,
+              "active_order_blocks": 1,
+              "nearest_fvg": null,
+              "current_price": 1.16158,
+              "sma20": 1.16235,
+              "sma50": 1.16185,
+              "sma200": 1.16355
+            },
+            "H1": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": false,
+              "choch_detected": false,
+              "swing_highs": 15,
+              "swing_lows": 17,
+              "active_fvg": 1,
+              "active_order_blocks": 2,
+              "nearest_fvg": null,
+              "current_price": 1.16158,
+              "sma20": 1.16235,
+              "sma50": 1.16185,
+              "sma200": 1.16355
+            },
+            "D1": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": false,
+              "choch_detected": false,
+              "swing_highs": 10,
+              "swing_lows": 14,
+              "active_fvg": 2,
+              "active_order_blocks": 3,
+              "nearest_fvg": {
+                "type": "BEARISH_FVG",
+                "gap_low": 1.1672425270080566,
+                "gap_high": 1.1664528846740723,
+                "size": 0.000789642333984375,
+                "timestamp": "2026-05-14 00:00:00",
+                "distance_from_price": 0.00488
+              },
+              "current_price": 1.16158,
+              "sma20": 1.16552,
+              "sma50": 1.16704,
+              "sma200": 1.16158
+            }
+          },
+          "inference": {
+            "direction": "RANGING",
+            "confidence": 95,
+            "action": "HOLD",
+            "reasoning": [
+              "H4: Estrutura RANGING, forca 20/100",
+              "D1: Estrutura RANGING, forca 20/100",
+              "3 Order Blocks ativos no Diario"
+            ],
+            "key_levels": []
+          }
+        },
+        "quant_stats": {
+          "agent": "quant_stats",
+          "weight": 0.2,
+          "timestamp": "2026-06-05T01:01:45.881910+00:00",
+          "symbol": "EURUSD",
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "total_bias_score": 0.0,
+          "avg_volatility_pct": 0.113,
+          "avg_volume_ratio": 1.0,
+          "max_reversal_tf": "5 minutos",
+          "max_reversal_probability": 45.0,
+          "max_continuation_tf": "Diario",
+          "max_continuation_probability": 55.6,
+          "timeframes": [
+            {
+              "tf": "5 minutos",
+              "tf_weight": 0.25,
+              "current_price": 1.16158,
+              "sma": 1.1616,
+              "z_score": -0.26,
+              "rsi": 44.4,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 43.6,
+              "bb_width_pct": 0.03,
+              "atr_pct": 0.01,
+              "volume_ratio": 1.0,
+              "momentum_pct": 0.0,
+              "roc_pct": 0.01,
+              "composite_signal": 0.0,
+              "reversal_probability": 45.0,
+              "continuation_probability": 55.0,
+              "deviation_from_mean": -0.002
+            },
+            {
+              "tf": "15 minutos",
+              "tf_weight": 0.3,
+              "current_price": 1.16158,
+              "sma": 1.16164,
+              "z_score": -0.24,
+              "rsi": 50.0,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 44.0,
+              "bb_width_pct": 0.09,
+              "atr_pct": 0.01,
+              "volume_ratio": 1.0,
+              "momentum_pct": 0.0,
+              "roc_pct": 0.02,
+              "composite_signal": 0.0,
+              "reversal_probability": 45.0,
+              "continuation_probability": 55.0,
+              "deviation_from_mean": -0.005
+            },
+            {
+              "tf": "1 hora",
+              "tf_weight": 0.25,
+              "current_price": 1.16158,
+              "sma": 1.16235,
+              "z_score": -0.69,
+              "rsi": 37.5,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 32.8,
+              "bb_width_pct": 0.39,
+              "atr_pct": 0.05,
+              "volume_ratio": 1.0,
+              "momentum_pct": -0.02,
+              "roc_pct": -0.21,
+              "composite_signal": 0.15,
+              "reversal_probability": 45.0,
+              "continuation_probability": 55.0,
+              "deviation_from_mean": -0.066
+            },
+            {
+              "tf": "Diario",
+              "tf_weight": 0.2,
+              "current_price": 1.16158,
+              "sma": 1.16552,
+              "z_score": -0.75,
+              "rsi": 50.3,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 31.2,
+              "bb_width_pct": 1.8,
+              "atr_pct": 0.38,
+              "volume_ratio": 1.0,
+              "momentum_pct": -0.32,
+              "roc_pct": -0.05,
+              "composite_signal": 0.0,
+              "reversal_probability": 44.4,
+              "continuation_probability": 55.6,
+              "deviation_from_mean": -0.339
+            }
+          ],
+          "regime": {
+            "regime": "SQUEEZE",
+            "description": "Bandas de Bollinger contraidas \u2014 possivel explosao de volatilidade iminente"
+          }
+        },
+        "ml_predictor": {
+          "agent": "ml_predictor",
+          "weight": 0.2,
+          "symbol": "EURUSD",
+          "timestamp": "2026-06-05T01:01:47.776699+00:00",
+          "ml_direction": "BEARISH",
+          "ml_confidence": 64,
+          "prob_up": 0.3527,
+          "prob_down": 0.6473,
+          "bias": "BEARISH",
+          "confidence": 64,
+          "model_accuracy": 0.62,
+          "features": {
+            "retorno": -0.000116,
+            "volatilidade": 0.0,
+            "distancia_sma": 1.2e-05,
+            "rsi_14": 50.0,
+            "volume": 0.0
+          }
+        }
+      },
+      "decision_matrix": {
+        "session_intel": {
+          "weight": 0.1,
+          "bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "in_kill_zone": true,
+          "is_optimal_hour": false,
+          "recommended_strategy": "Retorno a Media",
+          "active_sessions": [
+            "Sessao Asiatica"
+          ]
+        },
+        "news_macro": {
+          "weight": 0.25,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "volatility_alert": false,
+          "pre_news": false,
+          "post_news": false,
+          "news_sentiment": 0,
+          "relevant_events": []
+        },
+        "bias_trend": {
+          "weight": 0.3,
+          "bias": "RANGING",
+          "confidence": 95,
+          "structure": {
+            "H4": "RANGING",
+            "H1": "RANGING",
+            "D1": "RANGING"
+          },
+          "trend_strength": {
+            "H4": 20,
+            "H1": 20,
+            "D1": 20
+          }
+        },
+        "quant_stats": {
+          "weight": 0.15,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "regime": {
+            "regime": "SQUEEZE",
+            "description": "Bandas de Bollinger contraidas \u2014 possivel explosao de volatilidade iminente"
+          },
+          "max_reversal_prob": 45.0,
+          "max_reversal_tf": "5 minutos"
+        },
+        "ml_predictor": {
+          "weight": 0.2,
+          "bias": "BEARISH",
+          "confidence": 64,
+          "prob_up": 0.3527,
+          "prob_down": 0.6473,
+          "model_accuracy": 0.62,
+          "features": {
+            "retorno": -0.000116,
+            "volatilidade": 0.0,
+            "distancia_sma": 1.2e-05,
+            "rsi_14": 50.0,
+            "volume": 0.0
+          }
+        }
+      },
+      "final_direction": "NEUTRAL",
+      "final_confidence": 50,
+      "summary": "Vies NEUTRO para EURUSD \u2014 aguardar Setup | ATENCAO: Kill Zone ativa \u2014 cuidado com spreads e manipulacao",
+      "recommendations": [
+        "H4: Estrutura RANGING, forca 20/100",
+        "D1: Estrutura RANGING, forca 20/100",
+        "3 Order Blocks ativos no Diario"
+      ],
+      "alerts": [
+        "KILL ZONE: Asia Kill Zone",
+        "SQUEEZE: Bandas de Bollinger contraidas \u2014 possivel explosao de volatilidade iminente"
+      ],
+      "session_info": {
+        "in_kill_zone": true,
+        "volatility_alert": false,
+        "optimal_hour": false
+      },
+      "risk_guardian": {
+        "agent": "risk_guardian",
+        "weight": 0.0,
+        "symbol": "EURUSD",
+        "calibration": {
+          "max_daily_drawdown": 4.0,
+          "max_total_drawdown": 8.0,
+          "spread_multiplier": 2.5,
+          "base_risk_pct": 1.2,
+          "max_lot": 15.0
+        },
+        "timestamp": "2026-06-05T01:01:50.573706+00:00",
+        "current_price": 1.16,
+        "atr_pct": 0.0005,
+        "atr_pips": 5.24,
+        "equity": {
+          "current_equity": 100000.0,
+          "peak_equity": 100000.0,
+          "current_drawdown_pct": 0,
+          "daily_drawdown_pct": 0,
+          "remaining_drawdown_pct": 9.0,
+          "remaining_daily_pct": 4.5,
+          "max_drawdown_limit": 9.0,
+          "max_daily_limit": 4.5,
+          "risk_level": "LOW",
+          "lot_reduction_factor": 1.0,
+          "prop_firm": "FTMO",
+          "profit_target_pct": 10.0,
+          "profit_progress_pct": 0
+        },
+        "spread": {
+          "symbol": "EURUSD",
+          "current_spread": 9.89,
+          "avg_spread": 9.89,
+          "spread_std": 0,
+          "max_allowed": 24.72,
+          "atr_pips": 5.2415,
+          "blocked": false,
+          "spread_ratio": 0.4,
+          "reason": null,
+          "data_points": 1
+        },
+        "trading_allowed": true,
+        "block_reasons": [],
+        "lot_sizing_example": {
+          "suggested_lot": 1.92,
+          "raw_lot": 1.92,
+          "risk_amount": 960.0,
+          "sl_pips": 50.0,
+          "structure_multiplier": 1.0,
+          "confidence_multiplier": 1.2,
+          "equity_reduction": 1.0,
+          "structure_type": "FVG",
+          "risk_per_trade_pct": 0.8
+        }
+      }
+    },
+    "full_GBPUSD": {
+      "symbol": "GBPUSD",
+      "timestamp": "2026-06-05T01:01:51.206443+00:00",
+      "orchestrator": "Intel Engine",
+      "agent_results": {
+        "news_macro": {
+          "agent": "news_macro",
+          "weight": 0.3,
+          "timestamp": "2026-06-05T01:01:38.162594+00:00",
+          "symbol": "GBPUSD",
+          "currency": "GBP",
+          "volatility_alert": false,
+          "volatility_detail": "Nenhum evento de alto impacto iminente. Mercado livre para operar.",
+          "pre_news": false,
+          "post_news": false,
+          "total_impact_score": 0,
+          "macro_impact_score": 0,
+          "news_sentiment": 0,
+          "news_label": "NEUTRO",
+          "deviation_detail": null,
+          "relevant_events": [],
+          "inference": {
+            "bias": "NEUTRO",
+            "confidence": 50,
+            "action": "ANALYZE",
+            "reasoning": [
+              "Sem desvio significativo no calendario economico. Noticias neutras para o ativo."
+            ]
+          }
+        },
+        "session_intel": {
+          "agent": "session_intel",
+          "weight": 0.15,
+          "timestamp": "2026-06-05T01:01:38.174714+00:00",
+          "symbol": "GBPUSD",
+          "current_utc_hour": 1.02,
+          "current_time": "01:01 UTC",
+          "session_bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "active_sessions": [
+            {
+              "key": "asia",
+              "name": "Sessao Asiatica",
+              "name_en": "Asian Session",
+              "open_utc": 0,
+              "close_utc": 9,
+              "open_label": "00:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "MEAN_REVERSION",
+              "strategy_label": "Retorno a Media / Consolidacao",
+              "relative_volume": "MEDIO",
+              "description": "Baixa volatilidade, movimentos de consolidacao. Ideal para scalping em pares JPY, AUD, NZD.",
+              "is_active": true,
+              "time_until_open": 22.983333333333334,
+              "time_until_close": 7.983333333333333
+            },
+            {
+              "key": "london",
+              "name": "Sessao Londres",
+              "name_en": "London Session",
+              "open_utc": 7,
+              "close_utc": 16,
+              "open_label": "07:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "ALTO",
+              "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "ny",
+              "name": "Sessao Nova York",
+              "name_en": "New York Session",
+              "open_utc": 12,
+              "close_utc": 21,
+              "open_label": "12:00 UTC",
+              "close_label": "21:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "MUITO_ALTO",
+              "description": "Maior liquidez do dia. Sobreposicao com Londres (12-16 UTC) gera os maiores movimentos.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 19.983333333333334
+            },
+            {
+              "key": "london_ny_overlap",
+              "name": "Sobreposicao Londres-NY",
+              "name_en": "London-NY Overlap",
+              "open_utc": 12,
+              "close_utc": 16,
+              "open_label": "12:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "MOMENTUM",
+              "strategy_label": "Momentum / Rompimento Agressivo",
+              "relative_volume": "MAXIMO",
+              "description": "Pico de volume global. Maior probabilidade de movimentos direcionais fortes.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "asia_london_overlap",
+              "name": "Sobreposicao Asia-Londres",
+              "name_en": "Asia-London Overlap",
+              "open_utc": 7,
+              "close_utc": 9,
+              "open_label": "07:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "TRANSITION",
+              "strategy_label": "Transicao / Preparacao",
+              "relative_volume": "MEDIO_ALTO",
+              "description": "Transicao da Asia para Londres. Possivel aumento de volatilidade com a abertura europeia.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 7.983333333333333
+            }
+          ],
+          "in_kill_zone": true,
+          "active_kill_zones": [
+            {
+              "name": "Asia Kill Zone",
+              "open_utc": 0,
+              "close_utc": 1.5,
+              "label": "00:00-01:30 UTC (primeiros 90 min Asia)"
+            }
+          ],
+          "recommended_strategy": {
+            "name": "Retorno a Media",
+            "indicators": [
+              "RSI",
+              "Bollinger Bands",
+              "Z-Score"
+            ],
+            "risk_level": "BAIXO",
+            "best_for": "Sessoes de baixa liquidez (Asia, finais de sessao)"
+          },
+          "is_optimal_hour": false,
+          "is_suboptimal_hour": true,
+          "optimal_hours": {
+            "best": [
+              12,
+              13,
+              14,
+              15,
+              7
+            ],
+            "worst": [
+              1,
+              2,
+              3,
+              22,
+              23
+            ],
+            "reason": "Cable segue horario de Londres e NY"
+          },
+          "reasoning": [
+            "Asia Kill Zone ativa \u2014 00:00-01:30 UTC (primeiros 90 min Asia)",
+            "ATENCAO: Alta manipulacao de preco nos primeiros minutos. Evitar entradas emocionais."
+          ],
+          "next_session_open": {
+            "key": "london",
+            "name": "Sessao Londres",
+            "name_en": "London Session",
+            "open_utc": 7,
+            "close_utc": 16,
+            "open_label": "07:00 UTC",
+            "close_label": "16:00 UTC",
+            "strategy": "BREAKOUT",
+            "strategy_label": "Breakout / Rompimento",
+            "relative_volume": "ALTO",
+            "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+            "is_active": false,
+            "time_until_open": 5.983333333333333,
+            "time_until_close": 14.983333333333334
+          }
+        },
+        "bias_trend": {
+          "agent": "bias_trend",
+          "weight": 0.35,
+          "timestamp": "2026-06-05T01:01:46.006980+00:00",
+          "symbol": "GBPUSD",
+          "bias": "RANGING",
+          "confidence": 95,
+          "timeframes": {
+            "H4": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 39,
+              "swing_lows": 35,
+              "active_fvg": 1,
+              "active_order_blocks": 2,
+              "nearest_fvg": null,
+              "current_price": 1.34226,
+              "sma20": 1.34341,
+              "sma50": 1.34374,
+              "sma200": 1.34481
+            },
+            "H1": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": true,
+              "choch_detected": false,
+              "swing_highs": 17,
+              "swing_lows": 21,
+              "active_fvg": 1,
+              "active_order_blocks": 2,
+              "nearest_fvg": null,
+              "current_price": 1.34226,
+              "sma20": 1.34341,
+              "sma50": 1.34374,
+              "sma200": 1.34481
+            },
+            "D1": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": false,
+              "choch_detected": false,
+              "swing_highs": 14,
+              "swing_lows": 13,
+              "active_fvg": 2,
+              "active_order_blocks": 3,
+              "nearest_fvg": null,
+              "current_price": 1.34217,
+              "sma20": 1.34583,
+              "sma50": 1.34515,
+              "sma200": 1.34217
+            }
+          },
+          "inference": {
+            "direction": "RANGING",
+            "confidence": 95,
+            "action": "HOLD",
+            "reasoning": [
+              "H4: Estrutura RANGING, forca 20/100",
+              "BOS (Break of Structure) detectado no H4",
+              "D1: Estrutura RANGING, forca 20/100",
+              "3 Order Blocks ativos no Diario"
+            ],
+            "key_levels": []
+          }
+        },
+        "quant_stats": {
+          "agent": "quant_stats",
+          "weight": 0.2,
+          "timestamp": "2026-06-05T01:01:46.473746+00:00",
+          "symbol": "GBPUSD",
+          "bias": "BULLISH",
+          "confidence": 64,
+          "total_bias_score": 0.175,
+          "avg_volatility_pct": 0.12,
+          "avg_volume_ratio": 1.0,
+          "max_reversal_tf": "5 minutos",
+          "max_reversal_probability": 45.0,
+          "max_continuation_tf": "Diario",
+          "max_continuation_probability": 55.3,
+          "timeframes": [
+            {
+              "tf": "5 minutos",
+              "tf_weight": 0.25,
+              "current_price": 1.34226,
+              "sma": 1.34226,
+              "z_score": 0.04,
+              "rsi": 45.2,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 51.0,
+              "bb_width_pct": 0.04,
+              "atr_pct": 0.01,
+              "volume_ratio": 1.0,
+              "momentum_pct": 0.0,
+              "roc_pct": 0.02,
+              "composite_signal": 0.0,
+              "reversal_probability": 45.0,
+              "continuation_probability": 55.0,
+              "deviation_from_mean": 0.0
+            },
+            {
+              "tf": "15 minutos",
+              "tf_weight": 0.3,
+              "current_price": 1.34217,
+              "sma": 1.34237,
+              "z_score": -1.0,
+              "rsi": 41.8,
+              "status": "ESTICADO_BAIXA",
+              "strength": 20.0,
+              "bb_position_pct": 25.0,
+              "bb_width_pct": 0.06,
+              "atr_pct": 0.02,
+              "volume_ratio": 1.0,
+              "momentum_pct": -0.01,
+              "roc_pct": -0.0,
+              "composite_signal": 0.25,
+              "reversal_probability": 45.0,
+              "continuation_probability": 55.0,
+              "deviation_from_mean": -0.015
+            },
+            {
+              "tf": "1 hora",
+              "tf_weight": 0.25,
+              "current_price": 1.34217,
+              "sma": 1.34341,
+              "z_score": -1.04,
+              "rsi": 37.2,
+              "status": "ESTICADO_BAIXA",
+              "strength": 20.7,
+              "bb_position_pct": 24.1,
+              "bb_width_pct": 0.35,
+              "atr_pct": 0.06,
+              "volume_ratio": 1.0,
+              "momentum_pct": -0.03,
+              "roc_pct": -0.23,
+              "composite_signal": 0.4,
+              "reversal_probability": 44.9,
+              "continuation_probability": 55.1,
+              "deviation_from_mean": -0.092
+            },
+            {
+              "tf": "Diario",
+              "tf_weight": 0.2,
+              "current_price": 1.34217,
+              "sma": 1.34583,
+              "z_score": -0.53,
+              "rsi": 63.3,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 36.7,
+              "bb_width_pct": 2.04,
+              "atr_pct": 0.39,
+              "volume_ratio": 1.0,
+              "momentum_pct": -0.17,
+              "roc_pct": -0.08,
+              "composite_signal": -0.15,
+              "reversal_probability": 44.7,
+              "continuation_probability": 55.3,
+              "deviation_from_mean": -0.272
+            }
+          ],
+          "regime": {
+            "regime": "NORMAL",
+            "description": "Condicoes de mercado normais \u2014 seguir estrutura"
+          }
+        },
+        "ml_predictor": {
+          "agent": "ml_predictor",
+          "weight": 0.2,
+          "symbol": "GBPUSD",
+          "timestamp": "2026-06-05T01:01:48.244192+00:00",
+          "ml_direction": "BEARISH",
+          "ml_confidence": 64,
+          "prob_up": 0.351,
+          "prob_down": 0.649,
+          "bias": "BEARISH",
+          "confidence": 64,
+          "model_accuracy": 0.51,
+          "features": {
+            "retorno": -0.000148,
+            "volatilidade": 0.000107,
+            "distancia_sma": -7.7e-05,
+            "rsi_14": 41.82,
+            "volume": 0.0
+          }
+        }
+      },
+      "decision_matrix": {
+        "news_macro": {
+          "weight": 0.25,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "volatility_alert": false,
+          "pre_news": false,
+          "post_news": false,
+          "news_sentiment": 0,
+          "relevant_events": []
+        },
+        "session_intel": {
+          "weight": 0.1,
+          "bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "in_kill_zone": true,
+          "is_optimal_hour": false,
+          "recommended_strategy": "Retorno a Media",
+          "active_sessions": [
+            "Sessao Asiatica"
+          ]
+        },
+        "bias_trend": {
+          "weight": 0.3,
+          "bias": "RANGING",
+          "confidence": 95,
+          "structure": {
+            "H4": "RANGING",
+            "H1": "RANGING",
+            "D1": "RANGING"
+          },
+          "trend_strength": {
+            "H4": 20,
+            "H1": 20,
+            "D1": 20
+          }
+        },
+        "quant_stats": {
+          "weight": 0.15,
+          "bias": "BULLISH",
+          "confidence": 64,
+          "regime": {
+            "regime": "NORMAL",
+            "description": "Condicoes de mercado normais \u2014 seguir estrutura"
+          },
+          "max_reversal_prob": 45.0,
+          "max_reversal_tf": "5 minutos"
+        },
+        "ml_predictor": {
+          "weight": 0.2,
+          "bias": "BEARISH",
+          "confidence": 64,
+          "prob_up": 0.351,
+          "prob_down": 0.649,
+          "model_accuracy": 0.51,
+          "features": {
+            "retorno": -0.000148,
+            "volatilidade": 0.000107,
+            "distancia_sma": -7.7e-05,
+            "rsi_14": 41.82,
+            "volume": 0.0
+          }
+        }
+      },
+      "final_direction": "NEUTRAL",
+      "final_confidence": 50,
+      "summary": "Vies NEUTRO para GBPUSD \u2014 aguardar Setup | ATENCAO: Kill Zone ativa \u2014 cuidado com spreads e manipulacao",
+      "recommendations": [
+        "H4: Estrutura RANGING, forca 20/100",
+        "BOS (Break of Structure) detectado no H4",
+        "D1: Estrutura RANGING, forca 20/100",
+        "3 Order Blocks ativos no Diario"
+      ],
+      "alerts": [
+        "KILL ZONE: Asia Kill Zone"
+      ],
+      "session_info": {
+        "in_kill_zone": true,
+        "volatility_alert": false,
+        "optimal_hour": false
+      },
+      "risk_guardian": {
+        "agent": "risk_guardian",
+        "weight": 0.0,
+        "symbol": "GBPUSD",
+        "calibration": {
+          "max_daily_drawdown": 4.0,
+          "max_total_drawdown": 8.0,
+          "spread_multiplier": 2.5,
+          "base_risk_pct": 1.2,
+          "max_lot": 15.0
+        },
+        "timestamp": "2026-06-05T01:01:51.206443+00:00",
+        "current_price": 1.34,
+        "atr_pct": 0.0006,
+        "atr_pips": 5.79,
+        "equity": {
+          "current_equity": 100000.0,
+          "peak_equity": 100000.0,
+          "current_drawdown_pct": 0,
+          "daily_drawdown_pct": 0,
+          "remaining_drawdown_pct": 9.0,
+          "remaining_daily_pct": 4.5,
+          "max_drawdown_limit": 9.0,
+          "max_daily_limit": 4.5,
+          "risk_level": "LOW",
+          "lot_reduction_factor": 1.0,
+          "prop_firm": "FTMO",
+          "profit_target_pct": 10.0,
+          "profit_progress_pct": 0
+        },
+        "spread": {
+          "symbol": "GBPUSD",
+          "current_spread": 11.38,
+          "avg_spread": 11.38,
+          "spread_std": 0,
+          "max_allowed": 28.46,
+          "atr_pips": 5.788,
+          "blocked": false,
+          "spread_ratio": 0.4,
+          "reason": null,
+          "data_points": 1
+        },
+        "trading_allowed": true,
+        "block_reasons": [],
+        "lot_sizing_example": {
+          "suggested_lot": 1.92,
+          "raw_lot": 1.92,
+          "risk_amount": 960.0,
+          "sl_pips": 50.0,
+          "structure_multiplier": 1.0,
+          "confidence_multiplier": 1.2,
+          "equity_reduction": 1.0,
+          "structure_type": "FVG",
+          "risk_per_trade_pct": 0.8
+        }
+      }
+    },
+    "full_SP500": {
+      "symbol": "SP500",
+      "timestamp": "2026-06-05T01:01:53.151385+00:00",
+      "orchestrator": "Intel Engine",
+      "agent_results": {
+        "session_intel": {
+          "agent": "session_intel",
+          "weight": 0.15,
+          "timestamp": "2026-06-05T01:01:38.269751+00:00",
+          "symbol": "SP500",
+          "current_utc_hour": 1.02,
+          "current_time": "01:01 UTC",
+          "session_bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "active_sessions": [
+            {
+              "key": "asia",
+              "name": "Sessao Asiatica",
+              "name_en": "Asian Session",
+              "open_utc": 0,
+              "close_utc": 9,
+              "open_label": "00:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "MEAN_REVERSION",
+              "strategy_label": "Retorno a Media / Consolidacao",
+              "relative_volume": "MEDIO",
+              "description": "Baixa volatilidade, movimentos de consolidacao. Ideal para scalping em pares JPY, AUD, NZD.",
+              "is_active": true,
+              "time_until_open": 22.983333333333334,
+              "time_until_close": 7.983333333333333
+            },
+            {
+              "key": "london",
+              "name": "Sessao Londres",
+              "name_en": "London Session",
+              "open_utc": 7,
+              "close_utc": 16,
+              "open_label": "07:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "ALTO",
+              "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "ny",
+              "name": "Sessao Nova York",
+              "name_en": "New York Session",
+              "open_utc": 12,
+              "close_utc": 21,
+              "open_label": "12:00 UTC",
+              "close_label": "21:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "MUITO_ALTO",
+              "description": "Maior liquidez do dia. Sobreposicao com Londres (12-16 UTC) gera os maiores movimentos.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 19.983333333333334
+            },
+            {
+              "key": "london_ny_overlap",
+              "name": "Sobreposicao Londres-NY",
+              "name_en": "London-NY Overlap",
+              "open_utc": 12,
+              "close_utc": 16,
+              "open_label": "12:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "MOMENTUM",
+              "strategy_label": "Momentum / Rompimento Agressivo",
+              "relative_volume": "MAXIMO",
+              "description": "Pico de volume global. Maior probabilidade de movimentos direcionais fortes.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "asia_london_overlap",
+              "name": "Sobreposicao Asia-Londres",
+              "name_en": "Asia-London Overlap",
+              "open_utc": 7,
+              "close_utc": 9,
+              "open_label": "07:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "TRANSITION",
+              "strategy_label": "Transicao / Preparacao",
+              "relative_volume": "MEDIO_ALTO",
+              "description": "Transicao da Asia para Londres. Possivel aumento de volatilidade com a abertura europeia.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 7.983333333333333
+            }
+          ],
+          "in_kill_zone": true,
+          "active_kill_zones": [
+            {
+              "name": "Asia Kill Zone",
+              "open_utc": 0,
+              "close_utc": 1.5,
+              "label": "00:00-01:30 UTC (primeiros 90 min Asia)"
+            }
+          ],
+          "recommended_strategy": {
+            "name": "Retorno a Media",
+            "indicators": [
+              "RSI",
+              "Bollinger Bands",
+              "Z-Score"
+            ],
+            "risk_level": "BAIXO",
+            "best_for": "Sessoes de baixa liquidez (Asia, finais de sessao)"
+          },
+          "is_optimal_hour": false,
+          "is_suboptimal_hour": true,
+          "optimal_hours": {
+            "best": [
+              12,
+              13,
+              14,
+              15,
+              16
+            ],
+            "worst": [
+              22,
+              23,
+              0,
+              1,
+              2
+            ],
+            "reason": "Indices seguem horario de NY"
+          },
+          "reasoning": [
+            "Asia Kill Zone ativa \u2014 00:00-01:30 UTC (primeiros 90 min Asia)",
+            "ATENCAO: Alta manipulacao de preco nos primeiros minutos. Evitar entradas emocionais."
+          ],
+          "next_session_open": {
+            "key": "london",
+            "name": "Sessao Londres",
+            "name_en": "London Session",
+            "open_utc": 7,
+            "close_utc": 16,
+            "open_label": "07:00 UTC",
+            "close_label": "16:00 UTC",
+            "strategy": "BREAKOUT",
+            "strategy_label": "Breakout / Rompimento",
+            "relative_volume": "ALTO",
+            "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+            "is_active": false,
+            "time_until_open": 5.983333333333333,
+            "time_until_close": 14.983333333333334
+          }
+        },
+        "news_macro": {
+          "agent": "news_macro",
+          "weight": 0.3,
+          "timestamp": "2026-06-05T01:01:38.201878+00:00",
+          "symbol": "SP500",
+          "currency": "USD",
+          "volatility_alert": false,
+          "volatility_detail": "Nenhum evento de alto impacto iminente. Mercado livre para operar.",
+          "pre_news": false,
+          "post_news": false,
+          "total_impact_score": 0,
+          "macro_impact_score": 0,
+          "news_sentiment": 0,
+          "news_label": "NEUTRO",
+          "deviation_detail": null,
+          "relevant_events": [],
+          "inference": {
+            "bias": "NEUTRO",
+            "confidence": 50,
+            "action": "ANALYZE",
+            "reasoning": [
+              "Sem desvio significativo no calendario economico. Noticias neutras para o ativo."
+            ]
+          }
+        },
+        "bias_trend": {
+          "agent": "bias_trend",
+          "weight": 0.35,
+          "timestamp": "2026-06-05T01:01:45.315710+00:00",
+          "symbol": "SP500",
+          "bias": "BULLISH",
+          "confidence": 95,
+          "timeframes": {
+            "H4": {
+              "structure": "BULLISH",
+              "trend_strength": 15,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 31,
+              "swing_lows": 31,
+              "active_fvg": 0,
+              "active_order_blocks": 2,
+              "nearest_fvg": null,
+              "current_price": 7559.25,
+              "sma20": 7566.7375,
+              "sma50": 7582.255,
+              "sma200": 7567.23875
+            },
+            "H1": {
+              "structure": "BULLISH",
+              "trend_strength": 15,
+              "bos_detected": true,
+              "choch_detected": false,
+              "swing_highs": 17,
+              "swing_lows": 20,
+              "active_fvg": 0,
+              "active_order_blocks": 3,
+              "nearest_fvg": null,
+              "current_price": 7559.25,
+              "sma20": 7566.7375,
+              "sma50": 7582.255,
+              "sma200": 7559.25
+            },
+            "D1": {
+              "structure": "BULLISH",
+              "trend_strength": 72.7,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 10,
+              "swing_lows": 12,
+              "active_fvg": 0,
+              "active_order_blocks": 3,
+              "nearest_fvg": null,
+              "current_price": 7559.25,
+              "sma20": 7495.375,
+              "sma50": 7169.445,
+              "sma200": 7559.25
+            }
+          },
+          "inference": {
+            "direction": "BULLISH",
+            "confidence": 95,
+            "action": "STRONG_BUY",
+            "reasoning": [
+              "H4: Estrutura BULLISH, forca 15/100",
+              "BOS (Break of Structure) detectado no H4",
+              "D1: Estrutura BULLISH, forca 72.7/100",
+              "3 Order Blocks ativos no Diario"
+            ],
+            "key_levels": []
+          }
+        },
+        "quant_stats": {
+          "agent": "quant_stats",
+          "weight": 0.2,
+          "timestamp": "2026-06-05T01:01:46.808474+00:00",
+          "symbol": "SP500",
+          "bias": "BULLISH",
+          "confidence": 83,
+          "total_bias_score": 0.4125,
+          "avg_volatility_pct": 0.315,
+          "avg_volume_ratio": 0.34,
+          "max_reversal_tf": "Diario",
+          "max_reversal_probability": 44.4,
+          "max_continuation_tf": "15 minutos",
+          "max_continuation_probability": 98.8,
+          "timeframes": [
+            {
+              "tf": "5 minutos",
+              "tf_weight": 0.25,
+              "current_price": 7559.25,
+              "sma": 7569.7375,
+              "z_score": -1.52,
+              "rsi": 12.9,
+              "status": "ESTICADO_BAIXA",
+              "strength": 30.4,
+              "bb_position_pct": 12.0,
+              "bb_width_pct": 0.36,
+              "atr_pct": 0.05,
+              "volume_ratio": 0.82,
+              "momentum_pct": -0.07,
+              "roc_pct": -0.13,
+              "composite_signal": 0.75,
+              "reversal_probability": 1.3,
+              "continuation_probability": 98.7,
+              "deviation_from_mean": -0.139
+            },
+            {
+              "tf": "15 minutos",
+              "tf_weight": 0.3,
+              "current_price": 7559.25,
+              "sma": 7583.8,
+              "z_score": -1.65,
+              "rsi": 12.2,
+              "status": "ESTICADO_BAIXA",
+              "strength": 33.0,
+              "bb_position_pct": 8.7,
+              "bb_width_pct": 0.78,
+              "atr_pct": 0.07,
+              "volume_ratio": 0.2,
+              "momentum_pct": -0.23,
+              "roc_pct": -0.29,
+              "composite_signal": 0.75,
+              "reversal_probability": 1.2,
+              "continuation_probability": 98.8,
+              "deviation_from_mean": -0.324
+            },
+            {
+              "tf": "1 hora",
+              "tf_weight": 0.25,
+              "current_price": 7559.25,
+              "sma": 7566.7375,
+              "z_score": -0.32,
+              "rsi": 54.4,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 41.9,
+              "bb_width_pct": 1.23,
+              "atr_pct": 0.21,
+              "volume_ratio": 0.3,
+              "momentum_pct": -0.6,
+              "roc_pct": -0.0,
+              "composite_signal": 0.0,
+              "reversal_probability": 43.8,
+              "continuation_probability": 56.2,
+              "deviation_from_mean": -0.099
+            },
+            {
+              "tf": "Diario",
+              "tf_weight": 0.2,
+              "current_price": 7559.25,
+              "sma": 7495.375,
+              "z_score": 0.8,
+              "rsi": 53.7,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 70.1,
+              "bb_width_pct": 4.24,
+              "atr_pct": 0.93,
+              "volume_ratio": 0.02,
+              "momentum_pct": -0.3,
+              "roc_pct": 1.44,
+              "composite_signal": 0.0,
+              "reversal_probability": 44.4,
+              "continuation_probability": 55.6,
+              "deviation_from_mean": 0.852
+            }
+          ],
+          "regime": {
+            "regime": "NORMAL",
+            "description": "Condicoes de mercado normais \u2014 seguir estrutura"
+          }
+        },
+        "ml_predictor": {
+          "agent": "ml_predictor",
+          "weight": 0.2,
+          "symbol": "SP500",
+          "timestamp": "2026-06-05T01:01:50.382262+00:00",
+          "ml_direction": "BULLISH",
+          "ml_confidence": 64,
+          "prob_up": 0.6467,
+          "prob_down": 0.3533,
+          "bias": "BULLISH",
+          "confidence": 64,
+          "model_accuracy": 0.48,
+          "features": {
+            "retorno": -0.000397,
+            "volatilidade": 0.000992,
+            "distancia_sma": -0.001786,
+            "rsi_14": 12.18,
+            "volume": 2718.0
+          }
+        }
+      },
+      "decision_matrix": {
+        "session_intel": {
+          "weight": 0.1,
+          "bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "in_kill_zone": true,
+          "is_optimal_hour": false,
+          "recommended_strategy": "Retorno a Media",
+          "active_sessions": [
+            "Sessao Asiatica"
+          ]
+        },
+        "news_macro": {
+          "weight": 0.25,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "volatility_alert": false,
+          "pre_news": false,
+          "post_news": false,
+          "news_sentiment": 0,
+          "relevant_events": []
+        },
+        "bias_trend": {
+          "weight": 0.3,
+          "bias": "BULLISH",
+          "confidence": 95,
+          "structure": {
+            "H4": "BULLISH",
+            "H1": "BULLISH",
+            "D1": "BULLISH"
+          },
+          "trend_strength": {
+            "H4": 15,
+            "H1": 15,
+            "D1": 72.7
+          }
+        },
+        "quant_stats": {
+          "weight": 0.15,
+          "bias": "BULLISH",
+          "confidence": 83,
+          "regime": {
+            "regime": "NORMAL",
+            "description": "Condicoes de mercado normais \u2014 seguir estrutura"
+          },
+          "max_reversal_prob": 44.4,
+          "max_reversal_tf": "Diario"
+        },
+        "ml_predictor": {
+          "weight": 0.2,
+          "bias": "BULLISH",
+          "confidence": 64,
+          "prob_up": 0.6467,
+          "prob_down": 0.3533,
+          "model_accuracy": 0.48,
+          "features": {
+            "retorno": -0.000397,
+            "volatilidade": 0.000992,
+            "distancia_sma": -0.001786,
+            "rsi_14": 12.18,
+            "volume": 2718.0
+          }
+        }
+      },
+      "final_direction": "STRONG_BUY",
+      "final_confidence": 93,
+      "summary": "Vies COMPRA para SP500 (score +0.54, confianca 93.0%) | ATENCAO: Kill Zone ativa \u2014 cuidado com spreads e manipulacao",
+      "recommendations": [
+        "H4: Estrutura BULLISH, forca 15/100",
+        "BOS (Break of Structure) detectado no H4",
+        "D1: Estrutura BULLISH, forca 72.7/100",
+        "3 Order Blocks ativos no Diario"
+      ],
+      "alerts": [
+        "KILL ZONE: Asia Kill Zone"
+      ],
+      "session_info": {
+        "in_kill_zone": true,
+        "volatility_alert": false,
+        "optimal_hour": false
+      },
+      "risk_guardian": {
+        "agent": "risk_guardian",
+        "weight": 0.0,
+        "symbol": "SP500",
+        "calibration": {
+          "max_daily_drawdown": 5.0,
+          "max_total_drawdown": 10.0,
+          "spread_multiplier": 3.0,
+          "base_risk_pct": 0.8,
+          "max_lot": 5.0
+        },
+        "timestamp": "2026-06-05T01:01:53.151385+00:00",
+        "current_price": 7560.25,
+        "atr_pct": 0.0021,
+        "atr_pips": 21.09,
+        "equity": {
+          "current_equity": 100000.0,
+          "peak_equity": 100000.0,
+          "current_drawdown_pct": 0,
+          "daily_drawdown_pct": 0,
+          "remaining_drawdown_pct": 9.0,
+          "remaining_daily_pct": 4.5,
+          "max_drawdown_limit": 9.0,
+          "max_daily_limit": 4.5,
+          "risk_level": "LOW",
+          "lot_reduction_factor": 1.0,
+          "prop_firm": "FTMO",
+          "profit_target_pct": 10.0,
+          "profit_progress_pct": 0
+        },
+        "spread": {
+          "symbol": "SP500",
+          "current_spread": 24.59,
+          "avg_spread": 24.59,
+          "spread_std": 0,
+          "max_allowed": 73.76,
+          "atr_pips": 21.0925,
+          "blocked": false,
+          "spread_ratio": 0.33,
+          "reason": null,
+          "data_points": 1
+        },
+        "trading_allowed": true,
+        "block_reasons": [],
+        "lot_sizing_example": {
+          "suggested_lot": 1.92,
+          "raw_lot": 1.92,
+          "risk_amount": 960.0,
+          "sl_pips": 50.0,
+          "structure_multiplier": 1.0,
+          "confidence_multiplier": 1.2,
+          "equity_reduction": 1.0,
+          "structure_type": "FVG",
+          "risk_per_trade_pct": 0.8
+        }
+      }
+    },
+    "full_USDJPY": {
+      "symbol": "USDJPY",
+      "timestamp": "2026-06-05T01:01:53.197303+00:00",
+      "orchestrator": "Intel Engine",
+      "agent_results": {
+        "news_macro": {
+          "agent": "news_macro",
+          "weight": 0.3,
+          "timestamp": "2026-06-05T01:01:38.192676+00:00",
+          "symbol": "USDJPY",
+          "currency": "JPY",
+          "volatility_alert": false,
+          "volatility_detail": "Nenhum evento de alto impacto iminente. Mercado livre para operar.",
+          "pre_news": false,
+          "post_news": false,
+          "total_impact_score": 0,
+          "macro_impact_score": 0,
+          "news_sentiment": 0,
+          "news_label": "NEUTRO",
+          "deviation_detail": null,
+          "relevant_events": [],
+          "inference": {
+            "bias": "NEUTRO",
+            "confidence": 50,
+            "action": "ANALYZE",
+            "reasoning": [
+              "Sem desvio significativo no calendario economico. Noticias neutras para o ativo."
+            ]
+          }
+        },
+        "session_intel": {
+          "agent": "session_intel",
+          "weight": 0.15,
+          "timestamp": "2026-06-05T01:01:38.236363+00:00",
+          "symbol": "USDJPY",
+          "current_utc_hour": 1.02,
+          "current_time": "01:01 UTC",
+          "session_bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "active_sessions": [
+            {
+              "key": "asia",
+              "name": "Sessao Asiatica",
+              "name_en": "Asian Session",
+              "open_utc": 0,
+              "close_utc": 9,
+              "open_label": "00:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "MEAN_REVERSION",
+              "strategy_label": "Retorno a Media / Consolidacao",
+              "relative_volume": "MEDIO",
+              "description": "Baixa volatilidade, movimentos de consolidacao. Ideal para scalping em pares JPY, AUD, NZD.",
+              "is_active": true,
+              "time_until_open": 22.983333333333334,
+              "time_until_close": 7.983333333333333
+            },
+            {
+              "key": "london",
+              "name": "Sessao Londres",
+              "name_en": "London Session",
+              "open_utc": 7,
+              "close_utc": 16,
+              "open_label": "07:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "ALTO",
+              "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "ny",
+              "name": "Sessao Nova York",
+              "name_en": "New York Session",
+              "open_utc": 12,
+              "close_utc": 21,
+              "open_label": "12:00 UTC",
+              "close_label": "21:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "MUITO_ALTO",
+              "description": "Maior liquidez do dia. Sobreposicao com Londres (12-16 UTC) gera os maiores movimentos.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 19.983333333333334
+            },
+            {
+              "key": "london_ny_overlap",
+              "name": "Sobreposicao Londres-NY",
+              "name_en": "London-NY Overlap",
+              "open_utc": 12,
+              "close_utc": 16,
+              "open_label": "12:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "MOMENTUM",
+              "strategy_label": "Momentum / Rompimento Agressivo",
+              "relative_volume": "MAXIMO",
+              "description": "Pico de volume global. Maior probabilidade de movimentos direcionais fortes.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "asia_london_overlap",
+              "name": "Sobreposicao Asia-Londres",
+              "name_en": "Asia-London Overlap",
+              "open_utc": 7,
+              "close_utc": 9,
+              "open_label": "07:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "TRANSITION",
+              "strategy_label": "Transicao / Preparacao",
+              "relative_volume": "MEDIO_ALTO",
+              "description": "Transicao da Asia para Londres. Possivel aumento de volatilidade com a abertura europeia.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 7.983333333333333
+            }
+          ],
+          "in_kill_zone": true,
+          "active_kill_zones": [
+            {
+              "name": "Asia Kill Zone",
+              "open_utc": 0,
+              "close_utc": 1.5,
+              "label": "00:00-01:30 UTC (primeiros 90 min Asia)"
+            }
+          ],
+          "recommended_strategy": {
+            "name": "Retorno a Media",
+            "indicators": [
+              "RSI",
+              "Bollinger Bands",
+              "Z-Score"
+            ],
+            "risk_level": "BAIXO",
+            "best_for": "Sessoes de baixa liquidez (Asia, finais de sessao)"
+          },
+          "is_optimal_hour": true,
+          "is_suboptimal_hour": false,
+          "optimal_hours": {
+            "best": [
+              0,
+              1,
+              2,
+              7,
+              8
+            ],
+            "worst": [
+              16,
+              17,
+              18,
+              19,
+              20
+            ],
+            "reason": "JPY tem maior liquidez na Asia e inicio de Londres"
+          },
+          "reasoning": [
+            "Asia Kill Zone ativa \u2014 00:00-01:30 UTC (primeiros 90 min Asia)",
+            "ATENCAO: Alta manipulacao de preco nos primeiros minutos. Evitar entradas emocionais."
+          ],
+          "next_session_open": {
+            "key": "london",
+            "name": "Sessao Londres",
+            "name_en": "London Session",
+            "open_utc": 7,
+            "close_utc": 16,
+            "open_label": "07:00 UTC",
+            "close_label": "16:00 UTC",
+            "strategy": "BREAKOUT",
+            "strategy_label": "Breakout / Rompimento",
+            "relative_volume": "ALTO",
+            "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+            "is_active": false,
+            "time_until_open": 5.983333333333333,
+            "time_until_close": 14.983333333333334
+          }
+        },
+        "bias_trend": {
+          "agent": "bias_trend",
+          "weight": 0.35,
+          "timestamp": "2026-06-05T01:01:45.640095+00:00",
+          "symbol": "USDJPY",
+          "bias": "BULLISH",
+          "confidence": 95,
+          "timeframes": {
+            "H4": {
+              "structure": "BULLISH",
+              "trend_strength": 65.0,
+              "bos_detected": false,
+              "choch_detected": false,
+              "swing_highs": 41,
+              "swing_lows": 50,
+              "active_fvg": 0,
+              "active_order_blocks": 1,
+              "nearest_fvg": null,
+              "current_price": 159.95599,
+              "sma20": 159.9279,
+              "sma50": 159.92196,
+              "sma200": 159.52722
+            },
+            "H1": {
+              "structure": "BULLISH",
+              "trend_strength": 65.0,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 22,
+              "swing_lows": 20,
+              "active_fvg": 0,
+              "active_order_blocks": 2,
+              "nearest_fvg": null,
+              "current_price": 159.95599,
+              "sma20": 159.9279,
+              "sma50": 159.92196,
+              "sma200": 159.52722
+            },
+            "D1": {
+              "structure": "BULLISH",
+              "trend_strength": 50.0,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 14,
+              "swing_lows": 10,
+              "active_fvg": 1,
+              "active_order_blocks": 0,
+              "nearest_fvg": {
+                "type": "BULLISH_FVG",
+                "gap_high": 158.18299865722656,
+                "gap_low": 158.30499267578125,
+                "size": 0.1219940185546875,
+                "timestamp": "2026-05-14 00:00:00",
+                "distance_from_price": 1.65901
+              },
+              "current_price": 159.964,
+              "sma20": 158.87405,
+              "sma50": 158.86502,
+              "sma200": 159.964
+            }
+          },
+          "inference": {
+            "direction": "BULLISH",
+            "confidence": 95,
+            "action": "STRONG_BUY",
+            "reasoning": [
+              "H4: Estrutura BULLISH, forca 65.0/100",
+              "D1: Estrutura BULLISH, forca 50.0/100"
+            ],
+            "key_levels": []
+          }
+        },
+        "quant_stats": {
+          "agent": "quant_stats",
+          "weight": 0.2,
+          "timestamp": "2026-06-05T01:01:47.189525+00:00",
+          "symbol": "USDJPY",
+          "bias": "BULLISH",
+          "confidence": 64,
+          "total_bias_score": 0.175,
+          "avg_volatility_pct": 0.08,
+          "avg_volume_ratio": 1.0,
+          "max_reversal_tf": "Diario",
+          "max_reversal_probability": 54.9,
+          "max_continuation_tf": "15 minutos",
+          "max_continuation_probability": 97.1,
+          "timeframes": [
+            {
+              "tf": "5 minutos",
+              "tf_weight": 0.25,
+              "current_price": 159.95599,
+              "sma": 159.974,
+              "z_score": -1.35,
+              "rsi": 38.6,
+              "status": "ESTICADO_BAIXA",
+              "strength": 27.1,
+              "bb_position_pct": 16.2,
+              "bb_width_pct": 0.03,
+              "atr_pct": 0.02,
+              "volume_ratio": 1.0,
+              "momentum_pct": 0.0,
+              "roc_pct": -0.01,
+              "composite_signal": 0.4,
+              "reversal_probability": 45.0,
+              "continuation_probability": 55.0,
+              "deviation_from_mean": -0.011
+            },
+            {
+              "tf": "15 minutos",
+              "tf_weight": 0.3,
+              "current_price": 159.957,
+              "sma": 159.9966,
+              "z_score": -1.59,
+              "rsi": 28.8,
+              "status": "ESTICADO_BAIXA",
+              "strength": 31.9,
+              "bb_position_pct": 10.1,
+              "bb_width_pct": 0.06,
+              "atr_pct": 0.02,
+              "volume_ratio": 1.0,
+              "momentum_pct": -0.02,
+              "roc_pct": -0.05,
+              "composite_signal": 0.75,
+              "reversal_probability": 2.9,
+              "continuation_probability": 97.1,
+              "deviation_from_mean": -0.025
+            },
+            {
+              "tf": "1 hora",
+              "tf_weight": 0.25,
+              "current_price": 159.964,
+              "sma": 159.9283,
+              "z_score": 0.51,
+              "rsi": 59.9,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 62.6,
+              "bb_width_pct": 0.18,
+              "atr_pct": 0.05,
+              "volume_ratio": 1.0,
+              "momentum_pct": -0.04,
+              "roc_pct": 0.03,
+              "composite_signal": 0.0,
+              "reversal_probability": 44.9,
+              "continuation_probability": 55.1,
+              "deviation_from_mean": 0.022
+            },
+            {
+              "tf": "Diario",
+              "tf_weight": 0.2,
+              "current_price": 159.963,
+              "sma": 158.874,
+              "z_score": 1.24,
+              "rsi": 75.3,
+              "status": "ESTICADO_ALTA",
+              "strength": 24.8,
+              "bb_position_pct": 81.0,
+              "bb_width_pct": 2.21,
+              "atr_pct": 0.23,
+              "volume_ratio": 1.0,
+              "momentum_pct": 0.44,
+              "roc_pct": 0.59,
+              "composite_signal": -0.75,
+              "reversal_probability": 54.9,
+              "continuation_probability": 45.1,
+              "deviation_from_mean": 0.685
+            }
+          ],
+          "regime": {
+            "regime": "NORMAL",
+            "description": "Condicoes de mercado normais \u2014 seguir estrutura"
+          }
+        },
+        "ml_predictor": {
+          "agent": "ml_predictor",
+          "weight": 0.2,
+          "symbol": "USDJPY",
+          "timestamp": "2026-06-05T01:01:50.222697+00:00",
+          "ml_direction": "BULLISH",
+          "ml_confidence": 61,
+          "prob_up": 0.6151,
+          "prob_down": 0.3849,
+          "bias": "BULLISH",
+          "confidence": 61,
+          "model_accuracy": 0.57,
+          "features": {
+            "retorno": -2.5e-05,
+            "volatilidade": 0.000138,
+            "distancia_sma": -0.000151,
+            "rsi_14": 28.85,
+            "volume": 0.0
+          }
+        }
+      },
+      "decision_matrix": {
+        "news_macro": {
+          "weight": 0.25,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "volatility_alert": false,
+          "pre_news": false,
+          "post_news": false,
+          "news_sentiment": 0,
+          "relevant_events": []
+        },
+        "session_intel": {
+          "weight": 0.1,
+          "bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "in_kill_zone": true,
+          "is_optimal_hour": true,
+          "recommended_strategy": "Retorno a Media",
+          "active_sessions": [
+            "Sessao Asiatica"
+          ]
+        },
+        "bias_trend": {
+          "weight": 0.3,
+          "bias": "BULLISH",
+          "confidence": 95,
+          "structure": {
+            "H4": "BULLISH",
+            "H1": "BULLISH",
+            "D1": "BULLISH"
+          },
+          "trend_strength": {
+            "H4": 65.0,
+            "H1": 65.0,
+            "D1": 50.0
+          }
+        },
+        "quant_stats": {
+          "weight": 0.15,
+          "bias": "BULLISH",
+          "confidence": 64,
+          "regime": {
+            "regime": "NORMAL",
+            "description": "Condicoes de mercado normais \u2014 seguir estrutura"
+          },
+          "max_reversal_prob": 54.9,
+          "max_reversal_tf": "Diario"
+        },
+        "ml_predictor": {
+          "weight": 0.2,
+          "bias": "BULLISH",
+          "confidence": 61,
+          "prob_up": 0.6151,
+          "prob_down": 0.3849,
+          "model_accuracy": 0.57,
+          "features": {
+            "retorno": -2.5e-05,
+            "volatilidade": 0.000138,
+            "distancia_sma": -0.000151,
+            "rsi_14": 28.85,
+            "volume": 0.0
+          }
+        }
+      },
+      "final_direction": "STRONG_BUY",
+      "final_confidence": 90,
+      "summary": "Vies COMPRA para USDJPY (score +0.50, confianca 90.24000000000001%) | ATENCAO: Kill Zone ativa \u2014 cuidado com spreads e manipulacao",
+      "recommendations": [
+        "H4: Estrutura BULLISH, forca 65.0/100",
+        "D1: Estrutura BULLISH, forca 50.0/100"
+      ],
+      "alerts": [
+        "KILL ZONE: Asia Kill Zone"
+      ],
+      "session_info": {
+        "in_kill_zone": true,
+        "volatility_alert": false,
+        "optimal_hour": true
+      },
+      "risk_guardian": {
+        "agent": "risk_guardian",
+        "weight": 0.0,
+        "symbol": "USDJPY",
+        "calibration": {
+          "max_daily_drawdown": 4.0,
+          "max_total_drawdown": 8.0,
+          "spread_multiplier": 2.5,
+          "base_risk_pct": 1.2,
+          "max_lot": 15.0
+        },
+        "timestamp": "2026-06-05T01:01:53.196282+00:00",
+        "current_price": 159.96,
+        "atr_pct": 0.0005,
+        "atr_pips": 4.51,
+        "equity": {
+          "current_equity": 100000.0,
+          "peak_equity": 100000.0,
+          "current_drawdown_pct": 0,
+          "daily_drawdown_pct": 0,
+          "remaining_drawdown_pct": 9.0,
+          "remaining_daily_pct": 4.5,
+          "max_drawdown_limit": 9.0,
+          "max_daily_limit": 4.5,
+          "risk_level": "LOW",
+          "lot_reduction_factor": 1.0,
+          "prop_firm": "FTMO",
+          "profit_target_pct": 10.0,
+          "profit_progress_pct": 0
+        },
+        "spread": {
+          "symbol": "USDJPY",
+          "current_spread": 9.12,
+          "avg_spread": 9.12,
+          "spread_std": 0,
+          "max_allowed": 22.81,
+          "atr_pips": 4.5102,
+          "blocked": false,
+          "spread_ratio": 0.4,
+          "reason": null,
+          "data_points": 1
+        },
+        "trading_allowed": true,
+        "block_reasons": [],
+        "lot_sizing_example": {
+          "suggested_lot": 1.92,
+          "raw_lot": 1.92,
+          "risk_amount": 960.0,
+          "sl_pips": 50.0,
+          "structure_multiplier": 1.0,
+          "confidence_multiplier": 1.2,
+          "equity_reduction": 1.0,
+          "structure_type": "FVG",
+          "risk_per_trade_pct": 0.8
+        }
+      }
+    },
+    "full_BTCUSD": {
+      "symbol": "BTCUSD",
+      "timestamp": "2026-06-05T01:01:53.271359+00:00",
+      "orchestrator": "Intel Engine",
+      "agent_results": {
+        "session_intel": {
+          "agent": "session_intel",
+          "weight": 0.15,
+          "timestamp": "2026-06-05T01:01:38.179288+00:00",
+          "symbol": "BTCUSD",
+          "current_utc_hour": 1.02,
+          "current_time": "01:01 UTC",
+          "session_bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "active_sessions": [
+            {
+              "key": "asia",
+              "name": "Sessao Asiatica",
+              "name_en": "Asian Session",
+              "open_utc": 0,
+              "close_utc": 9,
+              "open_label": "00:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "MEAN_REVERSION",
+              "strategy_label": "Retorno a Media / Consolidacao",
+              "relative_volume": "MEDIO",
+              "description": "Baixa volatilidade, movimentos de consolidacao. Ideal para scalping em pares JPY, AUD, NZD.",
+              "is_active": true,
+              "time_until_open": 22.983333333333334,
+              "time_until_close": 7.983333333333333
+            },
+            {
+              "key": "london",
+              "name": "Sessao Londres",
+              "name_en": "London Session",
+              "open_utc": 7,
+              "close_utc": 16,
+              "open_label": "07:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "ALTO",
+              "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "ny",
+              "name": "Sessao Nova York",
+              "name_en": "New York Session",
+              "open_utc": 12,
+              "close_utc": 21,
+              "open_label": "12:00 UTC",
+              "close_label": "21:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "MUITO_ALTO",
+              "description": "Maior liquidez do dia. Sobreposicao com Londres (12-16 UTC) gera os maiores movimentos.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 19.983333333333334
+            },
+            {
+              "key": "london_ny_overlap",
+              "name": "Sobreposicao Londres-NY",
+              "name_en": "London-NY Overlap",
+              "open_utc": 12,
+              "close_utc": 16,
+              "open_label": "12:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "MOMENTUM",
+              "strategy_label": "Momentum / Rompimento Agressivo",
+              "relative_volume": "MAXIMO",
+              "description": "Pico de volume global. Maior probabilidade de movimentos direcionais fortes.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "asia_london_overlap",
+              "name": "Sobreposicao Asia-Londres",
+              "name_en": "Asia-London Overlap",
+              "open_utc": 7,
+              "close_utc": 9,
+              "open_label": "07:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "TRANSITION",
+              "strategy_label": "Transicao / Preparacao",
+              "relative_volume": "MEDIO_ALTO",
+              "description": "Transicao da Asia para Londres. Possivel aumento de volatilidade com a abertura europeia.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 7.983333333333333
+            }
+          ],
+          "in_kill_zone": true,
+          "active_kill_zones": [
+            {
+              "name": "Asia Kill Zone",
+              "open_utc": 0,
+              "close_utc": 1.5,
+              "label": "00:00-01:30 UTC (primeiros 90 min Asia)"
+            }
+          ],
+          "recommended_strategy": {
+            "name": "Retorno a Media",
+            "indicators": [
+              "RSI",
+              "Bollinger Bands",
+              "Z-Score"
+            ],
+            "risk_level": "BAIXO",
+            "best_for": "Sessoes de baixa liquidez (Asia, finais de sessao)"
+          },
+          "is_optimal_hour": false,
+          "is_suboptimal_hour": false,
+          "optimal_hours": {
+            "best": [
+              12,
+              13,
+              14,
+              15,
+              16
+            ],
+            "worst": [
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "reason": "BTC opera 24/7 mas tem maior volume em NY"
+          },
+          "reasoning": [
+            "Asia Kill Zone ativa \u2014 00:00-01:30 UTC (primeiros 90 min Asia)",
+            "ATENCAO: Alta manipulacao de preco nos primeiros minutos. Evitar entradas emocionais."
+          ],
+          "next_session_open": {
+            "key": "london",
+            "name": "Sessao Londres",
+            "name_en": "London Session",
+            "open_utc": 7,
+            "close_utc": 16,
+            "open_label": "07:00 UTC",
+            "close_label": "16:00 UTC",
+            "strategy": "BREAKOUT",
+            "strategy_label": "Breakout / Rompimento",
+            "relative_volume": "ALTO",
+            "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+            "is_active": false,
+            "time_until_open": 5.983333333333333,
+            "time_until_close": 14.983333333333334
+          }
+        },
+        "news_macro": {
+          "agent": "news_macro",
+          "weight": 0.3,
+          "timestamp": "2026-06-05T01:01:38.151559+00:00",
+          "symbol": "BTCUSD",
+          "currency": "USD",
+          "volatility_alert": false,
+          "volatility_detail": "Nenhum evento de alto impacto iminente. Mercado livre para operar.",
+          "pre_news": false,
+          "post_news": false,
+          "total_impact_score": 0,
+          "macro_impact_score": 0,
+          "news_sentiment": 0,
+          "news_label": "NEUTRO",
+          "deviation_detail": null,
+          "relevant_events": [],
+          "inference": {
+            "bias": "NEUTRO",
+            "confidence": 50,
+            "action": "ANALYZE",
+            "reasoning": [
+              "Sem desvio significativo no calendario economico. Noticias neutras para o ativo."
+            ]
+          }
+        },
+        "bias_trend": {
+          "agent": "bias_trend",
+          "weight": 0.35,
+          "timestamp": "2026-06-05T01:01:45.085280+00:00",
+          "symbol": "BTCUSD",
+          "bias": "RANGING",
+          "confidence": 68,
+          "timeframes": {
+            "H4": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": false,
+              "choch_detected": false,
+              "swing_highs": 38,
+              "swing_lows": 44,
+              "active_fvg": 0,
+              "active_order_blocks": 2,
+              "nearest_fvg": null,
+              "current_price": 63145.05078,
+              "sma20": 63568.16191,
+              "sma50": 65016.65664,
+              "sma200": 70853.62248
+            },
+            "H1": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": false,
+              "choch_detected": false,
+              "swing_highs": 19,
+              "swing_lows": 21,
+              "active_fvg": 0,
+              "active_order_blocks": 5,
+              "nearest_fvg": null,
+              "current_price": 63143.0,
+              "sma20": 63568.05937,
+              "sma50": 65016.61562,
+              "sma200": 70853.61223
+            },
+            "D1": {
+              "structure": "BEARISH",
+              "trend_strength": 67.8,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 20,
+              "swing_lows": 19,
+              "active_fvg": 1,
+              "active_order_blocks": 4,
+              "nearest_fvg": {
+                "type": "BEARISH_FVG",
+                "gap_low": 64009.67578125,
+                "gap_high": 63828.00390625,
+                "size": 181.671875,
+                "timestamp": "2026-06-03 00:00:00",
+                "distance_from_price": 722.00391
+              },
+              "current_price": 63106.0,
+              "sma20": 74012.16562,
+              "sma50": 76649.63422,
+              "sma200": 63106.0
+            }
+          },
+          "inference": {
+            "direction": "RANGING",
+            "confidence": 68,
+            "action": "HOLD",
+            "reasoning": [
+              "H4: Estrutura RANGING, forca 20/100",
+              "D1: Estrutura BEARISH, forca 67.8/100",
+              "4 Order Blocks ativos no Diario"
+            ],
+            "key_levels": []
+          }
+        },
+        "quant_stats": {
+          "agent": "quant_stats",
+          "weight": 0.2,
+          "timestamp": "2026-06-05T01:01:46.078733+00:00",
+          "symbol": "BTCUSD",
+          "bias": "BULLISH",
+          "confidence": 89,
+          "total_bias_score": 0.4825,
+          "avg_volatility_pct": 1.327,
+          "avg_volume_ratio": 0.47,
+          "max_reversal_tf": "1 hora",
+          "max_reversal_probability": 43.9,
+          "max_continuation_tf": "Diario",
+          "max_continuation_probability": 98.8,
+          "timeframes": [
+            {
+              "tf": "5 minutos",
+              "tf_weight": 0.25,
+              "current_price": 63145.05078,
+              "sma": 63560.52812,
+              "z_score": -2.3,
+              "rsi": 37.3,
+              "status": "SOBREVENDIDO",
+              "strength": 45.9,
+              "bb_position_pct": -7.4,
+              "bb_width_pct": 1.14,
+              "atr_pct": 0.24,
+              "volume_ratio": 0.0,
+              "momentum_pct": -0.96,
+              "roc_pct": -0.7,
+              "composite_signal": 0.65,
+              "reversal_probability": 3.7,
+              "continuation_probability": 96.3,
+              "deviation_from_mean": -0.654
+            },
+            {
+              "tf": "15 minutos",
+              "tf_weight": 0.3,
+              "current_price": 63106.0,
+              "sma": 63514.70371,
+              "z_score": -1.39,
+              "rsi": 35.2,
+              "status": "ESTICADO_BAIXA",
+              "strength": 27.7,
+              "bb_position_pct": 15.3,
+              "bb_width_pct": 1.86,
+              "atr_pct": 0.46,
+              "volume_ratio": 0.0,
+              "momentum_pct": -0.7,
+              "roc_pct": -0.93,
+              "composite_signal": 0.4,
+              "reversal_probability": 43.6,
+              "continuation_probability": 56.4,
+              "deviation_from_mean": -0.643
+            },
+            {
+              "tf": "1 hora",
+              "tf_weight": 0.25,
+              "current_price": 63106.0,
+              "sma": 63566.20937,
+              "z_score": -0.9,
+              "rsi": 45.3,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 27.5,
+              "bb_width_pct": 3.22,
+              "atr_pct": 1.21,
+              "volume_ratio": 0.0,
+              "momentum_pct": -0.54,
+              "roc_pct": -0.92,
+              "composite_signal": 0.0,
+              "reversal_probability": 43.9,
+              "continuation_probability": 56.1,
+              "deviation_from_mean": -0.724
+            },
+            {
+              "tf": "Diario",
+              "tf_weight": 0.2,
+              "current_price": 63106.0,
+              "sma": 74012.16562,
+              "z_score": -2.43,
+              "rsi": 11.6,
+              "status": "SOBREVENDIDO",
+              "strength": 48.7,
+              "bb_position_pct": -10.8,
+              "bb_width_pct": 24.22,
+              "atr_pct": 3.4,
+              "volume_ratio": 1.86,
+              "momentum_pct": -14.44,
+              "roc_pct": -18.34,
+              "composite_signal": 1.0,
+              "reversal_probability": 1.2,
+              "continuation_probability": 98.8,
+              "deviation_from_mean": -14.736
+            }
+          ],
+          "regime": {
+            "regime": "EXTREMO",
+            "description": "Preco em zona extrema no Diario (Z=-2.4) \u2014 alta prob. de reversao"
+          }
+        },
+        "ml_predictor": {
+          "agent": "ml_predictor",
+          "weight": 0.2,
+          "symbol": "BTCUSD",
+          "timestamp": "2026-06-05T01:01:50.139059+00:00",
+          "ml_direction": "BULLISH",
+          "ml_confidence": 59,
+          "prob_up": 0.5964,
+          "prob_down": 0.4036,
+          "bias": "BULLISH",
+          "confidence": 59,
+          "model_accuracy": 0.51,
+          "features": {
+            "retorno": -0.003685,
+            "volatilidade": 0.003313,
+            "distancia_sma": -0.005647,
+            "rsi_14": 35.4,
+            "volume": 0.0
+          }
+        }
+      },
+      "decision_matrix": {
+        "session_intel": {
+          "weight": 0.1,
+          "bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "in_kill_zone": true,
+          "is_optimal_hour": false,
+          "recommended_strategy": "Retorno a Media",
+          "active_sessions": [
+            "Sessao Asiatica"
+          ]
+        },
+        "news_macro": {
+          "weight": 0.25,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "volatility_alert": false,
+          "pre_news": false,
+          "post_news": false,
+          "news_sentiment": 0,
+          "relevant_events": []
+        },
+        "bias_trend": {
+          "weight": 0.3,
+          "bias": "RANGING",
+          "confidence": 68,
+          "structure": {
+            "H4": "RANGING",
+            "H1": "RANGING",
+            "D1": "BEARISH"
+          },
+          "trend_strength": {
+            "H4": 20,
+            "H1": 20,
+            "D1": 67.8
+          }
+        },
+        "quant_stats": {
+          "weight": 0.15,
+          "bias": "BULLISH",
+          "confidence": 89,
+          "regime": {
+            "regime": "EXTREMO",
+            "description": "Preco em zona extrema no Diario (Z=-2.4) \u2014 alta prob. de reversao"
+          },
+          "max_reversal_prob": 43.9,
+          "max_reversal_tf": "1 hora"
+        },
+        "ml_predictor": {
+          "weight": 0.2,
+          "bias": "BULLISH",
+          "confidence": 59,
+          "prob_up": 0.5964,
+          "prob_down": 0.4036,
+          "model_accuracy": 0.51,
+          "features": {
+            "retorno": -0.003685,
+            "volatilidade": 0.003313,
+            "distancia_sma": -0.005647,
+            "rsi_14": 35.4,
+            "volume": 0.0
+          }
+        }
+      },
+      "final_direction": "BUY",
+      "final_confidence": 68,
+      "summary": "Vies COMPRA para BTCUSD (score +0.25, confianca 67.605%) | ATENCAO: Kill Zone ativa \u2014 cuidado com spreads e manipulacao",
+      "recommendations": [
+        "H4: Estrutura RANGING, forca 20/100",
+        "D1: Estrutura BEARISH, forca 67.8/100",
+        "4 Order Blocks ativos no Diario"
+      ],
+      "alerts": [
+        "KILL ZONE: Asia Kill Zone",
+        "EXTREMO: Preco em zona extrema no Diario (Z=-2.4) \u2014 alta prob. de reversao"
+      ],
+      "session_info": {
+        "in_kill_zone": true,
+        "volatility_alert": false,
+        "optimal_hour": false
+      },
+      "risk_guardian": {
+        "agent": "risk_guardian",
+        "weight": 0.0,
+        "symbol": "BTCUSD",
+        "calibration": {
+          "max_daily_drawdown": 6.0,
+          "max_total_drawdown": 12.0,
+          "spread_multiplier": 4.0,
+          "base_risk_pct": 0.5,
+          "max_lot": 3.0
+        },
+        "timestamp": "2026-06-05T01:01:53.271359+00:00",
+        "current_price": 63120.91,
+        "atr_pct": 0.0121,
+        "atr_pips": 121.18,
+        "equity": {
+          "current_equity": 100000.0,
+          "peak_equity": 100000.0,
+          "current_drawdown_pct": 0,
+          "daily_drawdown_pct": 0,
+          "remaining_drawdown_pct": 9.0,
+          "remaining_daily_pct": 4.5,
+          "max_drawdown_limit": 9.0,
+          "max_daily_limit": 4.5,
+          "risk_level": "LOW",
+          "lot_reduction_factor": 1.0,
+          "prop_firm": "FTMO",
+          "profit_target_pct": 10.0,
+          "profit_progress_pct": 0
+        },
+        "spread": {
+          "symbol": "BTCUSD",
+          "current_spread": 151.87,
+          "avg_spread": 151.87,
+          "spread_std": 0,
+          "max_allowed": 607.5,
+          "atr_pips": 121.179,
+          "blocked": false,
+          "spread_ratio": 0.25,
+          "reason": null,
+          "data_points": 1
+        },
+        "trading_allowed": true,
+        "block_reasons": [],
+        "lot_sizing_example": {
+          "suggested_lot": 1.92,
+          "raw_lot": 1.92,
+          "risk_amount": 960.0,
+          "sl_pips": 50.0,
+          "structure_multiplier": 1.0,
+          "confidence_multiplier": 1.2,
+          "equity_reduction": 1.0,
+          "structure_type": "FVG",
+          "risk_per_trade_pct": 0.8
+        }
+      }
+    },
+    "full_US30": {
+      "symbol": "US30",
+      "timestamp": "2026-06-05T01:01:53.487699+00:00",
+      "orchestrator": "Intel Engine",
+      "agent_results": {
+        "session_intel": {
+          "agent": "session_intel",
+          "weight": 0.15,
+          "timestamp": "2026-06-05T01:01:38.244675+00:00",
+          "symbol": "US30",
+          "current_utc_hour": 1.02,
+          "current_time": "01:01 UTC",
+          "session_bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "active_sessions": [
+            {
+              "key": "asia",
+              "name": "Sessao Asiatica",
+              "name_en": "Asian Session",
+              "open_utc": 0,
+              "close_utc": 9,
+              "open_label": "00:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "MEAN_REVERSION",
+              "strategy_label": "Retorno a Media / Consolidacao",
+              "relative_volume": "MEDIO",
+              "description": "Baixa volatilidade, movimentos de consolidacao. Ideal para scalping em pares JPY, AUD, NZD.",
+              "is_active": true,
+              "time_until_open": 22.983333333333334,
+              "time_until_close": 7.983333333333333
+            },
+            {
+              "key": "london",
+              "name": "Sessao Londres",
+              "name_en": "London Session",
+              "open_utc": 7,
+              "close_utc": 16,
+              "open_label": "07:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "ALTO",
+              "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "ny",
+              "name": "Sessao Nova York",
+              "name_en": "New York Session",
+              "open_utc": 12,
+              "close_utc": 21,
+              "open_label": "12:00 UTC",
+              "close_label": "21:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "MUITO_ALTO",
+              "description": "Maior liquidez do dia. Sobreposicao com Londres (12-16 UTC) gera os maiores movimentos.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 19.983333333333334
+            },
+            {
+              "key": "london_ny_overlap",
+              "name": "Sobreposicao Londres-NY",
+              "name_en": "London-NY Overlap",
+              "open_utc": 12,
+              "close_utc": 16,
+              "open_label": "12:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "MOMENTUM",
+              "strategy_label": "Momentum / Rompimento Agressivo",
+              "relative_volume": "MAXIMO",
+              "description": "Pico de volume global. Maior probabilidade de movimentos direcionais fortes.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "asia_london_overlap",
+              "name": "Sobreposicao Asia-Londres",
+              "name_en": "Asia-London Overlap",
+              "open_utc": 7,
+              "close_utc": 9,
+              "open_label": "07:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "TRANSITION",
+              "strategy_label": "Transicao / Preparacao",
+              "relative_volume": "MEDIO_ALTO",
+              "description": "Transicao da Asia para Londres. Possivel aumento de volatilidade com a abertura europeia.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 7.983333333333333
+            }
+          ],
+          "in_kill_zone": true,
+          "active_kill_zones": [
+            {
+              "name": "Asia Kill Zone",
+              "open_utc": 0,
+              "close_utc": 1.5,
+              "label": "00:00-01:30 UTC (primeiros 90 min Asia)"
+            }
+          ],
+          "recommended_strategy": {
+            "name": "Retorno a Media",
+            "indicators": [
+              "RSI",
+              "Bollinger Bands",
+              "Z-Score"
+            ],
+            "risk_level": "BAIXO",
+            "best_for": "Sessoes de baixa liquidez (Asia, finais de sessao)"
+          },
+          "is_optimal_hour": false,
+          "is_suboptimal_hour": true,
+          "optimal_hours": {
+            "best": [
+              12,
+              13,
+              14,
+              15,
+              16
+            ],
+            "worst": [
+              22,
+              23,
+              0,
+              1,
+              2
+            ],
+            "reason": "Indices seguem horario de NY"
+          },
+          "reasoning": [
+            "Asia Kill Zone ativa \u2014 00:00-01:30 UTC (primeiros 90 min Asia)",
+            "ATENCAO: Alta manipulacao de preco nos primeiros minutos. Evitar entradas emocionais."
+          ],
+          "next_session_open": {
+            "key": "london",
+            "name": "Sessao Londres",
+            "name_en": "London Session",
+            "open_utc": 7,
+            "close_utc": 16,
+            "open_label": "07:00 UTC",
+            "close_label": "16:00 UTC",
+            "strategy": "BREAKOUT",
+            "strategy_label": "Breakout / Rompimento",
+            "relative_volume": "ALTO",
+            "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+            "is_active": false,
+            "time_until_open": 5.983333333333333,
+            "time_until_close": 14.983333333333334
+          }
+        },
+        "news_macro": {
+          "agent": "news_macro",
+          "weight": 0.3,
+          "timestamp": "2026-06-05T01:01:38.182421+00:00",
+          "symbol": "US30",
+          "currency": "USD",
+          "volatility_alert": false,
+          "volatility_detail": "Nenhum evento de alto impacto iminente. Mercado livre para operar.",
+          "pre_news": false,
+          "post_news": false,
+          "total_impact_score": 0,
+          "macro_impact_score": 0,
+          "news_sentiment": 0,
+          "news_label": "NEUTRO",
+          "deviation_detail": null,
+          "relevant_events": [],
+          "inference": {
+            "bias": "NEUTRO",
+            "confidence": 50,
+            "action": "ANALYZE",
+            "reasoning": [
+              "Sem desvio significativo no calendario economico. Noticias neutras para o ativo."
+            ]
+          }
+        },
+        "bias_trend": {
+          "agent": "bias_trend",
+          "weight": 0.35,
+          "timestamp": "2026-06-05T01:01:44.160370+00:00",
+          "symbol": "US30",
+          "bias": "BULLISH",
+          "confidence": 95,
+          "timeframes": {
+            "H4": {
+              "structure": "BULLISH",
+              "trend_strength": 66.3,
+              "bos_detected": true,
+              "choch_detected": false,
+              "swing_highs": 25,
+              "swing_lows": 31,
+              "active_fvg": 0,
+              "active_order_blocks": 0,
+              "nearest_fvg": null,
+              "current_price": 51613.0,
+              "sma20": 51335.1,
+              "sma50": 51202.0,
+              "sma200": 50926.065
+            },
+            "H1": {
+              "structure": "BULLISH",
+              "trend_strength": 51.3,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 16,
+              "swing_lows": 18,
+              "active_fvg": 0,
+              "active_order_blocks": 1,
+              "nearest_fvg": null,
+              "current_price": 51618.0,
+              "sma20": 51335.35,
+              "sma50": 51202.1,
+              "sma200": 51618.0
+            },
+            "D1": {
+              "structure": "BULLISH",
+              "trend_strength": 62.4,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 13,
+              "swing_lows": 16,
+              "active_fvg": 1,
+              "active_order_blocks": 5,
+              "nearest_fvg": {
+                "type": "BULLISH_FVG",
+                "gap_high": 51418.0,
+                "gap_low": 51593.0,
+                "size": 175.0,
+                "timestamp": "2026-06-03 00:00:00",
+                "distance_from_price": 25.0
+              },
+              "current_price": 51618.0,
+              "sma20": 50351.35,
+              "sma50": 49136.5,
+              "sma200": 51618.0
+            }
+          },
+          "inference": {
+            "direction": "BULLISH",
+            "confidence": 95,
+            "action": "STRONG_BUY",
+            "reasoning": [
+              "H4: Estrutura BULLISH, forca 66.3/100",
+              "BOS (Break of Structure) detectado no H4",
+              "D1: Estrutura BULLISH, forca 62.4/100",
+              "5 Order Blocks ativos no Diario"
+            ],
+            "key_levels": []
+          }
+        },
+        "quant_stats": {
+          "agent": "quant_stats",
+          "weight": 0.2,
+          "timestamp": "2026-06-05T01:01:46.666273+00:00",
+          "symbol": "US30",
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "total_bias_score": -0.085,
+          "avg_volatility_pct": 0.355,
+          "avg_volume_ratio": 0.27,
+          "max_reversal_tf": "5 minutos",
+          "max_reversal_probability": 45.0,
+          "max_continuation_tf": "1 hora",
+          "max_continuation_probability": 65.0,
+          "timeframes": [
+            {
+              "tf": "5 minutos",
+              "tf_weight": 0.25,
+              "current_price": 51618.0,
+              "sma": 51634.5,
+              "z_score": -0.76,
+              "rsi": 30.8,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 30.9,
+              "bb_width_pct": 0.17,
+              "atr_pct": 0.03,
+              "volume_ratio": 0.58,
+              "momentum_pct": -0.01,
+              "roc_pct": 0.01,
+              "composite_signal": 0.15,
+              "reversal_probability": 45.0,
+              "continuation_probability": 55.0,
+              "deviation_from_mean": -0.032
+            },
+            {
+              "tf": "15 minutos",
+              "tf_weight": 0.3,
+              "current_price": 51618.0,
+              "sma": 51659.25,
+              "z_score": -1.32,
+              "rsi": 38.2,
+              "status": "ESTICADO_BAIXA",
+              "strength": 26.3,
+              "bb_position_pct": 17.1,
+              "bb_width_pct": 0.24,
+              "atr_pct": 0.04,
+              "volume_ratio": 0.23,
+              "momentum_pct": -0.09,
+              "roc_pct": -0.07,
+              "composite_signal": 0.4,
+              "reversal_probability": 44.8,
+              "continuation_probability": 55.2,
+              "deviation_from_mean": -0.08
+            },
+            {
+              "tf": "1 hora",
+              "tf_weight": 0.25,
+              "current_price": 51616.0,
+              "sma": 51335.25,
+              "z_score": 0.8,
+              "rsi": 80.2,
+              "status": "NEUTRO",
+              "strength": 10,
+              "bb_position_pct": 70.0,
+              "bb_width_pct": 2.74,
+              "atr_pct": 0.24,
+              "volume_ratio": 0.26,
+              "momentum_pct": -0.12,
+              "roc_pct": 0.16,
+              "composite_signal": -0.5,
+              "reversal_probability": 35.0,
+              "continuation_probability": 65.0,
+              "deviation_from_mean": 0.547
+            },
+            {
+              "tf": "Diario",
+              "tf_weight": 0.2,
+              "current_price": 51616.0,
+              "sma": 50351.25,
+              "z_score": 1.95,
+              "rsi": 66.0,
+              "status": "ESTICADO_ALTA",
+              "strength": 39.0,
+              "bb_position_pct": 98.8,
+              "bb_width_pct": 5.15,
+              "atr_pct": 1.11,
+              "volume_ratio": 0.03,
+              "momentum_pct": 1.72,
+              "roc_pct": 3.04,
+              "composite_signal": -0.4,
+              "reversal_probability": 41.6,
+              "continuation_probability": 58.4,
+              "deviation_from_mean": 2.512
+            }
+          ],
+          "regime": {
+            "regime": "NORMAL",
+            "description": "Condicoes de mercado normais \u2014 seguir estrutura"
+          }
+        },
+        "ml_predictor": {
+          "agent": "ml_predictor",
+          "weight": 0.2,
+          "symbol": "US30",
+          "timestamp": "2026-06-05T01:01:50.535845+00:00",
+          "ml_direction": "BULLISH",
+          "ml_confidence": 59,
+          "prob_up": 0.5984,
+          "prob_down": 0.4016,
+          "bias": "BULLISH",
+          "confidence": 59,
+          "model_accuracy": 0.44,
+          "features": {
+            "retorno": -9.7e-05,
+            "volatilidade": 0.000504,
+            "distancia_sma": -0.000474,
+            "rsi_14": 38.37,
+            "volume": 222.0
+          }
+        }
+      },
+      "decision_matrix": {
+        "session_intel": {
+          "weight": 0.1,
+          "bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "in_kill_zone": true,
+          "is_optimal_hour": false,
+          "recommended_strategy": "Retorno a Media",
+          "active_sessions": [
+            "Sessao Asiatica"
+          ]
+        },
+        "news_macro": {
+          "weight": 0.25,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "volatility_alert": false,
+          "pre_news": false,
+          "post_news": false,
+          "news_sentiment": 0,
+          "relevant_events": []
+        },
+        "bias_trend": {
+          "weight": 0.3,
+          "bias": "BULLISH",
+          "confidence": 95,
+          "structure": {
+            "H4": "BULLISH",
+            "H1": "BULLISH",
+            "D1": "BULLISH"
+          },
+          "trend_strength": {
+            "H4": 66.3,
+            "H1": 51.3,
+            "D1": 62.4
+          }
+        },
+        "quant_stats": {
+          "weight": 0.15,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "regime": {
+            "regime": "NORMAL",
+            "description": "Condicoes de mercado normais \u2014 seguir estrutura"
+          },
+          "max_reversal_prob": 45.0,
+          "max_reversal_tf": "5 minutos"
+        },
+        "ml_predictor": {
+          "weight": 0.2,
+          "bias": "BULLISH",
+          "confidence": 59,
+          "prob_up": 0.5984,
+          "prob_down": 0.4016,
+          "model_accuracy": 0.44,
+          "features": {
+            "retorno": -9.7e-05,
+            "volatilidade": 0.000504,
+            "distancia_sma": -0.000474,
+            "rsi_14": 38.37,
+            "volume": 222.0
+          }
+        }
+      },
+      "final_direction": "STRONG_BUY",
+      "final_confidence": 82,
+      "summary": "Vies COMPRA para US30 (score +0.40, confianca 82.24%) | ATENCAO: Kill Zone ativa \u2014 cuidado com spreads e manipulacao",
+      "recommendations": [
+        "H4: Estrutura BULLISH, forca 66.3/100",
+        "BOS (Break of Structure) detectado no H4",
+        "D1: Estrutura BULLISH, forca 62.4/100",
+        "5 Order Blocks ativos no Diario"
+      ],
+      "alerts": [
+        "KILL ZONE: Asia Kill Zone"
+      ],
+      "session_info": {
+        "in_kill_zone": true,
+        "volatility_alert": false,
+        "optimal_hour": false
+      },
+      "risk_guardian": {
+        "agent": "risk_guardian",
+        "weight": 0.0,
+        "symbol": "US30",
+        "calibration": {
+          "max_daily_drawdown": 5.0,
+          "max_total_drawdown": 10.0,
+          "spread_multiplier": 3.0,
+          "base_risk_pct": 0.8,
+          "max_lot": 5.0
+        },
+        "timestamp": "2026-06-05T01:01:53.487699+00:00",
+        "current_price": 51619.0,
+        "atr_pct": 0.0024,
+        "atr_pips": 23.57,
+        "equity": {
+          "current_equity": 100000.0,
+          "peak_equity": 100000.0,
+          "current_drawdown_pct": 0,
+          "daily_drawdown_pct": 0,
+          "remaining_drawdown_pct": 9.0,
+          "remaining_daily_pct": 4.5,
+          "max_drawdown_limit": 9.0,
+          "max_daily_limit": 4.5,
+          "risk_level": "LOW",
+          "lot_reduction_factor": 1.0,
+          "prop_firm": "FTMO",
+          "profit_target_pct": 10.0,
+          "profit_progress_pct": 0
+        },
+        "spread": {
+          "symbol": "US30",
+          "current_spread": 27.87,
+          "avg_spread": 27.87,
+          "spread_std": 0,
+          "max_allowed": 83.6,
+          "atr_pips": 23.5655,
+          "blocked": false,
+          "spread_ratio": 0.33,
+          "reason": null,
+          "data_points": 1
+        },
+        "trading_allowed": true,
+        "block_reasons": [],
+        "lot_sizing_example": {
+          "suggested_lot": 1.92,
+          "raw_lot": 1.92,
+          "risk_amount": 960.0,
+          "sl_pips": 50.0,
+          "structure_multiplier": 1.0,
+          "confidence_multiplier": 1.2,
+          "equity_reduction": 1.0,
+          "structure_type": "FVG",
+          "risk_per_trade_pct": 0.8
+        }
+      }
+    },
+    "full_ETHUSD": {
+      "symbol": "ETHUSD",
+      "timestamp": "2026-06-05T01:01:53.672229+00:00",
+      "orchestrator": "Intel Engine",
+      "agent_results": {
+        "news_macro": {
+          "agent": "news_macro",
+          "weight": 0.3,
+          "timestamp": "2026-06-05T01:01:38.182927+00:00",
+          "symbol": "ETHUSD",
+          "currency": "USD",
+          "volatility_alert": false,
+          "volatility_detail": "Nenhum evento de alto impacto iminente. Mercado livre para operar.",
+          "pre_news": false,
+          "post_news": false,
+          "total_impact_score": 0,
+          "macro_impact_score": 0,
+          "news_sentiment": 0,
+          "news_label": "NEUTRO",
+          "deviation_detail": null,
+          "relevant_events": [],
+          "inference": {
+            "bias": "NEUTRO",
+            "confidence": 50,
+            "action": "ANALYZE",
+            "reasoning": [
+              "Sem desvio significativo no calendario economico. Noticias neutras para o ativo."
+            ]
+          }
+        },
+        "session_intel": {
+          "agent": "session_intel",
+          "weight": 0.15,
+          "timestamp": "2026-06-05T01:01:38.233361+00:00",
+          "symbol": "ETHUSD",
+          "current_utc_hour": 1.02,
+          "current_time": "01:01 UTC",
+          "session_bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "active_sessions": [
+            {
+              "key": "asia",
+              "name": "Sessao Asiatica",
+              "name_en": "Asian Session",
+              "open_utc": 0,
+              "close_utc": 9,
+              "open_label": "00:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "MEAN_REVERSION",
+              "strategy_label": "Retorno a Media / Consolidacao",
+              "relative_volume": "MEDIO",
+              "description": "Baixa volatilidade, movimentos de consolidacao. Ideal para scalping em pares JPY, AUD, NZD.",
+              "is_active": true,
+              "time_until_open": 22.983333333333334,
+              "time_until_close": 7.983333333333333
+            },
+            {
+              "key": "london",
+              "name": "Sessao Londres",
+              "name_en": "London Session",
+              "open_utc": 7,
+              "close_utc": 16,
+              "open_label": "07:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "ALTO",
+              "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "ny",
+              "name": "Sessao Nova York",
+              "name_en": "New York Session",
+              "open_utc": 12,
+              "close_utc": 21,
+              "open_label": "12:00 UTC",
+              "close_label": "21:00 UTC",
+              "strategy": "BREAKOUT",
+              "strategy_label": "Breakout / Rompimento",
+              "relative_volume": "MUITO_ALTO",
+              "description": "Maior liquidez do dia. Sobreposicao com Londres (12-16 UTC) gera os maiores movimentos.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 19.983333333333334
+            },
+            {
+              "key": "london_ny_overlap",
+              "name": "Sobreposicao Londres-NY",
+              "name_en": "London-NY Overlap",
+              "open_utc": 12,
+              "close_utc": 16,
+              "open_label": "12:00 UTC",
+              "close_label": "16:00 UTC",
+              "strategy": "MOMENTUM",
+              "strategy_label": "Momentum / Rompimento Agressivo",
+              "relative_volume": "MAXIMO",
+              "description": "Pico de volume global. Maior probabilidade de movimentos direcionais fortes.",
+              "is_active": false,
+              "time_until_open": 10.983333333333334,
+              "time_until_close": 14.983333333333334
+            },
+            {
+              "key": "asia_london_overlap",
+              "name": "Sobreposicao Asia-Londres",
+              "name_en": "Asia-London Overlap",
+              "open_utc": 7,
+              "close_utc": 9,
+              "open_label": "07:00 UTC",
+              "close_label": "09:00 UTC",
+              "strategy": "TRANSITION",
+              "strategy_label": "Transicao / Preparacao",
+              "relative_volume": "MEDIO_ALTO",
+              "description": "Transicao da Asia para Londres. Possivel aumento de volatilidade com a abertura europeia.",
+              "is_active": false,
+              "time_until_open": 5.983333333333333,
+              "time_until_close": 7.983333333333333
+            }
+          ],
+          "in_kill_zone": true,
+          "active_kill_zones": [
+            {
+              "name": "Asia Kill Zone",
+              "open_utc": 0,
+              "close_utc": 1.5,
+              "label": "00:00-01:30 UTC (primeiros 90 min Asia)"
+            }
+          ],
+          "recommended_strategy": {
+            "name": "Retorno a Media",
+            "indicators": [
+              "RSI",
+              "Bollinger Bands",
+              "Z-Score"
+            ],
+            "risk_level": "BAIXO",
+            "best_for": "Sessoes de baixa liquidez (Asia, finais de sessao)"
+          },
+          "is_optimal_hour": false,
+          "is_suboptimal_hour": false,
+          "optimal_hours": {
+            "best": [
+              12,
+              13,
+              14,
+              15,
+              16
+            ],
+            "worst": [
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "reason": "ETH segue padrao similar ao BTC"
+          },
+          "reasoning": [
+            "Asia Kill Zone ativa \u2014 00:00-01:30 UTC (primeiros 90 min Asia)",
+            "ATENCAO: Alta manipulacao de preco nos primeiros minutos. Evitar entradas emocionais."
+          ],
+          "next_session_open": {
+            "key": "london",
+            "name": "Sessao Londres",
+            "name_en": "London Session",
+            "open_utc": 7,
+            "close_utc": 16,
+            "open_label": "07:00 UTC",
+            "close_label": "16:00 UTC",
+            "strategy": "BREAKOUT",
+            "strategy_label": "Breakout / Rompimento",
+            "relative_volume": "ALTO",
+            "description": "Alta liquidez nos pares EUR, GBP. Inicio do verdadeiro volume europeu.",
+            "is_active": false,
+            "time_until_open": 5.983333333333333,
+            "time_until_close": 14.983333333333334
+          }
+        },
+        "bias_trend": {
+          "agent": "bias_trend",
+          "weight": 0.35,
+          "timestamp": "2026-06-05T01:01:45.006811+00:00",
+          "symbol": "ETHUSD",
+          "bias": "RANGING",
+          "confidence": 62,
+          "timeframes": {
+            "H4": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": false,
+              "choch_detected": false,
+              "swing_highs": 36,
+              "swing_lows": 48,
+              "active_fvg": 0,
+              "active_order_blocks": 2,
+              "nearest_fvg": null,
+              "current_price": 1750.20996,
+              "sma20": 1772.31851,
+              "sma50": 1814.645,
+              "sma200": 1955.09695
+            },
+            "H1": {
+              "structure": "RANGING",
+              "trend_strength": 20,
+              "bos_detected": false,
+              "choch_detected": false,
+              "swing_highs": 20,
+              "swing_lows": 27,
+              "active_fvg": 0,
+              "active_order_blocks": 5,
+              "nearest_fvg": null,
+              "current_price": 1750.94995,
+              "sma20": 1772.35551,
+              "sma50": 1814.6598,
+              "sma200": 1955.10065
+            },
+            "D1": {
+              "structure": "BEARISH",
+              "trend_strength": 91.1,
+              "bos_detected": true,
+              "choch_detected": true,
+              "swing_highs": 18,
+              "swing_lows": 20,
+              "active_fvg": 1,
+              "active_order_blocks": 3,
+              "nearest_fvg": {
+                "type": "BEARISH_FVG",
+                "gap_low": 1771.3145751953125,
+                "gap_high": 1770.92236328125,
+                "size": 0.3922119140625,
+                "timestamp": "2026-06-03 00:00:00",
+                "distance_from_price": 20.41235
+              },
+              "current_price": 1750.51001,
+              "sma20": 2037.68956,
+              "sma50": 2205.15496,
+              "sma200": 1750.51001
+            }
+          },
+          "inference": {
+            "direction": "RANGING",
+            "confidence": 62,
+            "action": "HOLD",
+            "reasoning": [
+              "H4: Estrutura RANGING, forca 20/100",
+              "D1: Estrutura BEARISH, forca 91.1/100",
+              "3 Order Blocks ativos no Diario"
+            ],
+            "key_levels": []
+          }
+        },
+        "quant_stats": {
+          "agent": "quant_stats",
+          "weight": 0.2,
+          "timestamp": "2026-06-05T01:01:47.178462+00:00",
+          "symbol": "ETHUSD",
+          "bias": "BULLISH",
+          "confidence": 95,
+          "total_bias_score": 0.62,
+          "avg_volatility_pct": 1.585,
+          "avg_volume_ratio": 0.45,
+          "max_reversal_tf": "1 hora",
+          "max_reversal_probability": 43.3,
+          "max_continuation_tf": "Diario",
+          "max_continuation_probability": 98.6,
+          "timeframes": [
+            {
+              "tf": "5 minutos",
+              "tf_weight": 0.25,
+              "current_price": 1750.94995,
+              "sma": 1766.323,
+              "z_score": -2.82,
+              "rsi": 31.5,
+              "status": "SOBREVENDIDO",
+              "strength": 56.5,
+              "bb_position_pct": -20.6,
+              "bb_width_pct": 1.23,
+              "atr_pct": 0.29,
+              "volume_ratio": 0.08,
+              "momentum_pct": -1.15,
+              "roc_pct": -0.63,
+              "composite_signal": 0.65,
+              "reversal_probability": 3.1,
+              "continuation_probability": 96.9,
+              "deviation_from_mean": -0.87
+            },
+            {
+              "tf": "15 minutos",
+              "tf_weight": 0.3,
+              "current_price": 1750.51001,
+              "sma": 1768.0905,
+              "z_score": -2.14,
+              "rsi": 33.1,
+              "status": "SOBREVENDIDO",
+              "strength": 42.9,
+              "bb_position_pct": -3.6,
+              "bb_width_pct": 1.85,
+              "atr_pct": 0.48,
+              "volume_ratio": 0.03,
+              "momentum_pct": -1.19,
+              "roc_pct": -1.44,
+              "composite_signal": 0.65,
+              "reversal_probability": 3.3,
+              "continuation_probability": 96.7,
+              "deviation_from_mean": -0.994
+            },
+            {
+              "tf": "1 hora",
+              "tf_weight": 0.25,
+              "current_price": 1750.19995,
+              "sma": 1772.31801,
+              "z_score": -1.32,
+              "rsi": 42.5,
+              "status": "ESTICADO_BAIXA",
+              "strength": 26.3,
+              "bb_position_pct": 17.1,
+              "bb_width_pct": 3.79,
+              "atr_pct": 1.28,
+              "volume_ratio": 0.03,
+              "momentum_pct": -0.87,
+              "roc_pct": -1.46,
+              "composite_signal": 0.25,
+              "reversal_probability": 43.3,
+              "continuation_probability": 56.7,
+              "deviation_from_mean": -1.248
+            },
+            {
+              "tf": "Diario",
+              "tf_weight": 0.2,
+              "current_price": 1750.19995,
+              "sma": 2037.67405,
+              "z_score": -2.53,
+              "rsi": 14.3,
+              "status": "SOBREVENDIDO",
+              "strength": 50.5,
+              "bb_position_pct": -13.2,
+              "bb_width_pct": 22.34,
+              "atr_pct": 4.29,
+              "volume_ratio": 1.68,
+              "momentum_pct": -13.33,
+              "roc_pct": -17.11,
+              "composite_signal": 1.0,
+              "reversal_probability": 1.4,
+              "continuation_probability": 98.6,
+              "deviation_from_mean": -14.108
+            }
+          ],
+          "regime": {
+            "regime": "EXTREMO",
+            "description": "Preco em zona extrema no Diario (Z=-2.5) \u2014 alta prob. de reversao"
+          }
+        },
+        "ml_predictor": {
+          "agent": "ml_predictor",
+          "weight": 0.2,
+          "symbol": "ETHUSD",
+          "timestamp": "2026-06-05T01:01:50.531315+00:00",
+          "ml_direction": "BULLISH",
+          "ml_confidence": 50,
+          "prob_up": 0.501,
+          "prob_down": 0.499,
+          "bias": "BULLISH",
+          "confidence": 50,
+          "model_accuracy": 0.5,
+          "features": {
+            "retorno": -0.004597,
+            "volatilidade": 0.004407,
+            "distancia_sma": -0.009318,
+            "rsi_14": 32.74,
+            "volume": 8685568.0
+          }
+        }
+      },
+      "decision_matrix": {
+        "news_macro": {
+          "weight": 0.25,
+          "bias": "NEUTRO",
+          "confidence": 50,
+          "volatility_alert": false,
+          "pre_news": false,
+          "post_news": false,
+          "news_sentiment": 0,
+          "relevant_events": []
+        },
+        "session_intel": {
+          "weight": 0.1,
+          "bias": "KILL_ZONE_ATIVA",
+          "confidence": 85,
+          "in_kill_zone": true,
+          "is_optimal_hour": false,
+          "recommended_strategy": "Retorno a Media",
+          "active_sessions": [
+            "Sessao Asiatica"
+          ]
+        },
+        "bias_trend": {
+          "weight": 0.3,
+          "bias": "RANGING",
+          "confidence": 62,
+          "structure": {
+            "H4": "RANGING",
+            "H1": "RANGING",
+            "D1": "BEARISH"
+          },
+          "trend_strength": {
+            "H4": 20,
+            "H1": 20,
+            "D1": 91.1
+          }
+        },
+        "quant_stats": {
+          "weight": 0.15,
+          "bias": "BULLISH",
+          "confidence": 95,
+          "regime": {
+            "regime": "EXTREMO",
+            "description": "Preco em zona extrema no Diario (Z=-2.5) \u2014 alta prob. de reversao"
+          },
+          "max_reversal_prob": 43.3,
+          "max_reversal_tf": "1 hora"
+        },
+        "ml_predictor": {
+          "weight": 0.2,
+          "bias": "BULLISH",
+          "confidence": 50,
+          "prob_up": 0.501,
+          "prob_down": 0.499,
+          "model_accuracy": 0.5,
+          "features": {
+            "retorno": -0.004597,
+            "volatilidade": 0.004407,
+            "distancia_sma": -0.009318,
+            "rsi_14": 32.74,
+            "volume": 8685568.0
+          }
+        }
+      },
+      "final_direction": "BUY",
+      "final_confidence": 67,
+      "summary": "Vies COMPRA para ETHUSD (score +0.24, confianca 66.975%) | ATENCAO: Kill Zone ativa \u2014 cuidado com spreads e manipulacao",
+      "recommendations": [
+        "H4: Estrutura RANGING, forca 20/100",
+        "D1: Estrutura BEARISH, forca 91.1/100",
+        "3 Order Blocks ativos no Diario"
+      ],
+      "alerts": [
+        "KILL ZONE: Asia Kill Zone",
+        "EXTREMO: Preco em zona extrema no Diario (Z=-2.5) \u2014 alta prob. de reversao"
+      ],
+      "session_info": {
+        "in_kill_zone": true,
+        "volatility_alert": false,
+        "optimal_hour": false
+      },
+      "risk_guardian": {
+        "agent": "risk_guardian",
+        "weight": 0.0,
+        "symbol": "ETHUSD",
+        "calibration": {
+          "max_daily_drawdown": 6.0,
+          "max_total_drawdown": 12.0,
+          "spread_multiplier": 4.0,
+          "base_risk_pct": 0.5,
+          "max_lot": 3.0
+        },
+        "timestamp": "2026-06-05T01:01:53.672229+00:00",
+        "current_price": 1749.7,
+        "atr_pct": 0.0128,
+        "atr_pips": 127.96,
+        "equity": {
+          "current_equity": 100000.0,
+          "peak_equity": 100000.0,
+          "current_drawdown_pct": 0,
+          "daily_drawdown_pct": 0,
+          "remaining_drawdown_pct": 9.0,
+          "remaining_daily_pct": 4.5,
+          "max_drawdown_limit": 9.0,
+          "max_daily_limit": 4.5,
+          "risk_level": "LOW",
+          "lot_reduction_factor": 1.0,
+          "prop_firm": "FTMO",
+          "profit_target_pct": 10.0,
+          "profit_progress_pct": 0
+        },
+        "spread": {
+          "symbol": "ETHUSD",
+          "current_spread": 181.38,
+          "avg_spread": 181.38,
+          "spread_std": 0,
+          "max_allowed": 725.51,
+          "atr_pips": 127.9649,
+          "blocked": false,
+          "spread_ratio": 0.25,
+          "reason": null,
+          "data_points": 1
+        },
+        "trading_allowed": true,
+        "block_reasons": [],
+        "lot_sizing_example": {
+          "suggested_lot": 1.92,
+          "raw_lot": 1.92,
+          "risk_amount": 960.0,
+          "sl_pips": 50.0,
+          "structure_multiplier": 1.0,
+          "confidence_multiplier": 1.2,
+          "equity_reduction": 1.0,
+          "structure_type": "FVG",
+          "risk_per_trade_pct": 0.8
+        }
+      }
+    }
+  },
+  "ttl": {
+    "full_XAUUSD": 1780630238.145496,
+    "full_EURUSD": 1780621310.573706,
+    "full_GBPUSD": 1780621311.206443,
+    "full_SP500": 1780621313.151385,
+    "full_USDJPY": 1780621313.197303,
+    "full_BTCUSD": 1780621313.271359,
+    "full_US30": 1780621313.487699,
+    "full_ETHUSD": 1780621313.672229
+  },
+  "updated": "2026-06-05T00:30:38.145496"
+}

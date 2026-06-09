@@ -7,7 +7,7 @@ import {
     TrendingUp, Activity, Target, Zap, History, Calendar,
     ShieldCheck, Sparkles, Brain, Clock, BarChart3, ArrowUpRight,
     Info, HelpCircle, CheckCircle2, AlertTriangle, User, Cpu,
-    RefreshCw, CircleDot, Eye, Bot
+    RefreshCw, CircleDot, Eye, Bot, Crown, Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -97,27 +97,22 @@ export const PerformanceAnalytics: React.FC = () => {
 
     const hasData = data.assets.length > 0;
 
-    const groupedOrigins = (() => {
-        const robotOrigins = ['Alpha Robot', 'Gold Scalper', 'Supreme Engine', 'Omni Probabilistic', 'Social Trading'];
-        const robo = data.origins.filter(o => robotOrigins.includes(o.name));
-        const sinais = data.origins.filter(o => o.name === 'Sinais');
-        const manual = data.origins.filter(o => o.name === 'Manual');
+    const ORIGIN_CONFIG: Record<string, { icon: any; color: string; gradient: string }> = {
+        'Manual': { icon: User, color: '#94A3B8', gradient: 'from-slate-500 to-slate-400' },
+        'Alpha Robot': { icon: Brain, color: '#818CF8', gradient: 'from-indigo-500 to-purple-600' },
+        'Gold Scalper': { icon: TrendingUp, color: '#F59E0B', gradient: 'from-amber-500 to-orange-600' },
+        'Supreme Engine': { icon: Crown, color: '#10B981', gradient: 'from-emerald-500 to-teal-600' },
+        'Omni Probabilistic': { icon: Activity, color: '#EC4899', gradient: 'from-pink-500 to-rose-600' },
+        'Social Trading': { icon: Users, color: '#06B6D4', gradient: 'from-cyan-500 to-blue-600' },
+        'Sinais': { icon: Zap, color: '#FBBF24', gradient: 'from-amber-500 to-yellow-600' },
+    };
 
-        const aggregate = (items: typeof data.origins) => {
-            const profit = items.reduce((s, o) => s + o.profit, 0);
-            const trades = items.reduce((s, o) => s + o.trades, 0);
-            const totalWins = items.reduce((s, o) => s + (o.winRate / 100) * o.trades, 0);
-            const winRate = trades > 0 ? Number(((totalWins / trades) * 100).toFixed(1)) : 0;
-            const profitFactor = items.length > 0 ? Number((items.reduce((s, o) => s + o.profitFactor, 0) / items.length).toFixed(2)) : 0;
-            return { profit, trades, winRate, profitFactor };
-        };
-
-        return [
-            { name: 'Manual', icon: User, color: '#94A3B8', gradient: 'from-slate-500 to-slate-400', ...aggregate(manual) },
-            { name: 'Robô', icon: Brain, color: '#818CF8', gradient: 'from-indigo-500 to-purple-600', ...aggregate(robo) },
-            { name: 'Sinais', icon: Zap, color: '#FBBF24', gradient: 'from-amber-500 to-orange-600', ...aggregate(sinais) },
-        ];
-    })();
+    const groupedOrigins = data.origins
+        .filter(o => o.trades > 0 || o.name === 'Manual' || o.name === 'Sinais')
+        .map(o => {
+            const cfg = ORIGIN_CONFIG[o.name] || { icon: Bot, color: '#64748b', gradient: 'from-slate-600 to-slate-500' };
+            return { ...o, ...cfg };
+        });
 
     const totalWinsCount = data.assets.reduce((sum, a) => sum + Math.round((a.winRate / 100) * a.trades), 0);
     const totalLossesCount = Math.max(0, totalTrades - totalWinsCount);
@@ -474,46 +469,75 @@ export const PerformanceAnalytics: React.FC = () => {
                         <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-8 flex items-center gap-2">
                             <Zap className="text-amber-400" size={20} /> Comparativo de Origem
                         </h3>
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
                             {groupedOrigins.map((origin, idx) => {
-                                const Icon = origin.icon;
+                                const IconEl = origin.icon;
+                                const avgTrade = origin.trades > 0 ? (origin.profit / origin.trades) : 0;
+                                const bestOrigin = [...groupedOrigins].sort((a, b) => b.profit - a.profit)[0];
+                                const isBest = origin.profit >= bestOrigin.profit && origin.trades > 0;
                                 return (
-                                    <div key={origin.name} className="relative group">
-                                        <div className={`absolute -inset-0.5 bg-gradient-to-r ${origin.gradient} rounded-2xl opacity-20 group-hover:opacity-40 transition duration-500 blur-sm`} />
-                                        <div className="relative bg-slate-950/60 p-6 rounded-2xl border border-white/5 flex flex-col items-center text-center backdrop-blur-sm">
-                                            <div className="p-4 rounded-full mb-4" style={{ backgroundColor: `${origin.color}15`, color: origin.color }}>
-                                                <Icon size={24} />
-                                            </div>
-                                            <h4 className="text-white font-black italic uppercase tracking-tighter">{origin.name}</h4>
-                                            <div className="mt-4 space-y-2 w-full">
-                                                <div className="text-3xl font-black italic" style={{ color: origin.profit >= 0 ? '#34d399' : '#ef4444' }}>
-                                                    ${origin.profit.toFixed(2)}
+                                    <motion.div key={origin.name} whileHover={{ y: -4 }} className="relative group">
+                                        <div className={`absolute -inset-0.5 bg-gradient-to-r ${origin.gradient} rounded-2xl opacity-10 group-hover:opacity-25 transition duration-500 blur-sm`} />
+                                        <div className="relative bg-slate-950/60 p-5 rounded-2xl border border-white/5 backdrop-blur-sm h-full">
+                                            {isBest && (
+                                                <div className="absolute top-3 right-3 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full text-[7px] font-black text-emerald-400 uppercase tracking-widest">
+                                                    Líder
                                                 </div>
-                                                <div className="flex items-center justify-center gap-4 text-[10px] font-black uppercase tracking-wider">
-                                                    <span className={origin.winRate >= 50 ? 'text-emerald-400' : 'text-red-400'}>
-                                                        {origin.winRate}% Acerto
+                                            )}
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="p-2.5 rounded-xl" style={{ backgroundColor: `${origin.color}15`, color: origin.color }}>
+                                                    <IconEl size={18} />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-white font-black italic uppercase tracking-tighter text-sm">{origin.name}</h4>
+                                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                                                        {origin.trades > 0 ? origin.trades + ' trades' : 'Sem dados'}
                                                     </span>
-                                                    <span className="text-slate-600">|</span>
-                                                    <span className="text-slate-400">{origin.trades} Trades</span>
-                                                    <span className="text-slate-600">|</span>
-                                                    <span className="text-slate-400">PF {origin.profitFactor}</span>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-3">
+                                                <div className="flex items-end justify-between">
+                                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">P&L</span>
+                                                    <span className="text-xl font-black italic" style={{ color: origin.trades === 0 ? '#64748b' : origin.profit >= 0 ? '#34d399' : '#ef4444' }}>
+                                                        {origin.trades > 0 ? '$' + origin.profit.toFixed(2) : '---'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-end justify-between">
+                                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Médio/Trade</span>
+                                                    <span className="text-xs font-black" style={{ color: origin.trades === 0 ? '#64748b' : avgTrade >= 0 ? '#34d399' : '#ef4444' }}>
+                                                        {origin.trades > 0 ? '$' + avgTrade.toFixed(2) : '---'}
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
+                                                    <div>
+                                                        <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Acerto</p>
+                                                        <p className={`text-sm font-black ${origin.trades === 0 ? 'text-slate-500' : origin.winRate >= 50 ? 'text-emerald-400' : origin.winRate > 0 ? 'text-amber-400' : 'text-red-400'}`}>
+                                                            {origin.trades > 0 ? origin.winRate.toFixed(1) + '%' : '---'}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest">PF</p>
+                                                        <p className={`text-sm font-black ${origin.trades === 0 || origin.profitFactor === 0 ? 'text-slate-500' : origin.profitFactor >= 1.5 ? 'text-emerald-400' : origin.profitFactor >= 1 ? 'text-amber-400' : 'text-red-400'}`}>
+                                                            {origin.trades > 0 ? origin.profitFactor.toFixed(2) : '---'}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 );
                             })}
                         </div>
-                        <div className="h-[220px]">
+                        <div className="h-[200px]">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={groupedOrigins} layout="vertical" margin={{ left: 50, right: 60 }}>
+                                <BarChart data={[...groupedOrigins].sort((a, b) => b.profit - a.profit)} layout="vertical" margin={{ left: 60, right: 60 }}>
                                     <XAxis type="number" hide />
-                                    <YAxis dataKey="name" type="category" stroke="#64748b" fontSize={12} fontWeight="bold" width={80} />
+                                    <YAxis dataKey="name" type="category" stroke="#64748b" fontSize={11} fontWeight="bold" width={90} />
                                     <Tooltip cursor={{ fill: 'transparent' }}
                                         contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '1rem' }}
                                         formatter={(value: number) => [`$${value.toFixed(2)}`, 'Lucro']} />
-                                    <Bar dataKey="profit" radius={[0, 4, 4, 0]} barSize={24}>
-                                        {groupedOrigins.map((entry) => (
+                                    <Bar dataKey="profit" radius={[0, 4, 4, 0]} barSize={20}>
+                                        {[...groupedOrigins].sort((a, b) => b.profit - a.profit).map((entry) => (
                                             <Cell key={entry.name} fill={entry.color} />
                                         ))}
                                     </Bar>

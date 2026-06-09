@@ -216,7 +216,7 @@ export const SwingTraderPanel: React.FC = () => {
                                 disabled={isBacktesting}
                                 className={`px-5 py-2.5 rounded-2xl border font-black text-[10px] uppercase tracking-widest transition-all ${isBacktesting
                                     ? 'bg-slate-800 text-slate-500 border-slate-700'
-                                    : 'bg-amber-500/10 text-amber-500 border-amber-500/30 hover:bg-amber-500 hover:text-black'}`}
+                                    : 'bg-amber-500/10 text-amber-500 border-amber-500/30 hover:bg-amber-500 hover:text-white'}`}
                             >
                                 {isBacktesting ? 'Processando...' : `Testar ${sym}`}
                             </button>

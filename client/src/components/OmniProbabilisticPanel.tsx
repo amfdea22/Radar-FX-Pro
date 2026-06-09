@@ -573,8 +573,8 @@ export const OmniProbabilisticPanel: React.FC = () => {
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs italic ${
-                                            index === 0 ? 'bg-amber-500 text-black' : 
-                                            index === 1 ? 'bg-slate-300 text-black' : 'bg-slate-800 text-slate-400'
+                                            index === 0 ? 'bg-amber-500 text-white' : 
+                                            index === 1 ? 'bg-slate-300 text-white' : 'bg-slate-800 text-slate-400'
                                         }`}>
                                             {index + 1}º
                                         </div>

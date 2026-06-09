@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "activeSymbols": [
+    "XAUUSD",
+    "BTCUSD",
+    "EURUSD",
+    "GBPUSD",
+    "ETHUSD"
+  ],
+  "timeframe": "H1",
+  "maxDailyTrades": 10,
+  "baseLot": 0.01,
+  "maxLotMultiplier": 2,
+  "minConfidence": 55,
+  "useAdaptiveLearning": true,
+  "useRegimeDetection": true,
+  "useSentimentAnalysis": true,
+  "maxConsecutiveLosses": 3,
+  "dailyStopLoss": 50,
+  "dailyTakeProfit": 100,
+  "telegramAlerts": true,
+  "cooldownMinutes": 15
+}

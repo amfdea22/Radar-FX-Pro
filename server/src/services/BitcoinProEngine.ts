@@ -2,6 +2,7 @@ import axios from 'axios';
 import { MarketDataService } from './MarketDataService';
 import { AlertEngine } from './AlertEngine';
 import { SymbolLockService } from './SymbolLockService';
+import { TradeNotificationBot } from './TradeNotificationBot';
 
 interface BitcoinProSettings {
     enabled: boolean;
@@ -416,7 +417,7 @@ export class BitcoinProEngine {
                 AlertEngine.addAlert('GUARDIAN', 'INFO', 'BitcoinPro', `${action} BTC: ${currentPrice} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)} | Score: ${analysis.entryScore}`);
 
                 try {
-                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    
                     TradeNotificationBot.notifyTradeOpened('Bitcoin Pro', this.settings.symbol, action, this.settings.lotSize, currentPrice, sl, tp);
                 } catch (e) { /* notif fail */ }
 
@@ -452,15 +453,18 @@ export class BitcoinProEngine {
 
         try {
             const currentPrice = await this.getCurrentPrice() || analysis.price;
+            const position = this.state.position;
+            if (!position) return;
+
             const resp = await axios.get(`${this.BRIDGE_URL}/positions`);
             const positions: any[] = resp.data || [];
-            const pos = positions.find((p: any) => p.ticket === this.state.position!.ticket);
+            const pos = positions.find((p: any) => p.ticket === position.ticket);
 
             if (!pos) {
                 let result: 'WIN' | 'LOSS' = 'LOSS';
                 let profit = -this.settings.maxDailyLoss * 0.3;
 
-                const lastTrade = this.trades.find(t => t.entryTime === this.state.position!.time);
+                const lastTrade = this.trades.find(t => t.entryTime === position.time);
                 const hitTp = this.state.position.type === 'BUY'
                     ? this.state.position.tp <= currentPrice
                     : this.state.position.tp >= currentPrice;
@@ -481,7 +485,7 @@ export class BitcoinProEngine {
                 else this.state.dailyLoss += Math.abs(profit);
 
                 try {
-                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    
                     const dir = this.state.position?.type || (profit > 0 ? 'BUY' : 'SELL');
                     TradeNotificationBot.notifyTradeClosed('Bitcoin Pro', this.settings.symbol, dir, Math.round(profit * 100) / 100, result, hitTp ? 'Take Profit' : 'Stop Loss', this.settings.lotSize);
                 } catch (e) { /* notif fail */ }

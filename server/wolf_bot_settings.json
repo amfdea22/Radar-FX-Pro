@@ -1,0 +1,16 @@
+{
+  "enabled": false,
+  "symbol": "XAUUSD",
+  "lotSize": 0.01,
+  "riskPercent": 1,
+  "minRR": 2,
+  "swingPeriods": 5,
+  "breakevenPaddingPoints": 20,
+  "maxDailyLoss": 100,
+  "maxDailyProfit": 300,
+  "useTrailingStop": true,
+  "usePartialClose": true,
+  "tradingStartHour": 0,
+  "tradingEndHour": 23,
+  "timeframe": "M15"
+}

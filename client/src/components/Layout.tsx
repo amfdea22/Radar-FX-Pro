@@ -33,7 +33,9 @@ import {
     Calendar,
     Layers,
     FileText,
-    Lock
+    Lock,
+    FlaskConical,
+    Network
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -57,6 +59,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     const [isSpeedActive, setIsSpeedActive] = React.useState(false);
     const [isSupremeActive, setIsSupremeActive] = React.useState(false);
     const [isOmniActive, setIsOmniActive] = React.useState(false);
+    const [isWolfActive, setIsWolfActive] = React.useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
     const [collapsedSections, setCollapsedSections] = React.useState<Set<string>>(new Set());
@@ -73,9 +76,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     React.useEffect(() => {
         const checkStatus = async () => {
             try {
-                const [btcPro, shark, robot, crypto, gold, titan, swing, copy, speed, supreme, omni] = await Promise.all([
+                const [btcPro, shark, wolf, robot, crypto, gold, titan, swing, copy, speed, supreme, omni] = await Promise.all([
                     axios.get('/api/mt5/bitcoin-pro/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/shark-bot/status').catch(() => ({ data: { settings: { enabled: false } } })),
+                    axios.get('/api/mt5/wolf-bot/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/robot/status').catch(() => ({ data: { enabled: false } })),
                     axios.get('/api/mt5/crypto-ia/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/gold-scalper/status').catch(() => ({ data: { settings: { enabled: false } } })),
@@ -97,6 +101,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 setIsSpeedActive(speed.data?.settings?.enabled || false);
                 setIsSupremeActive(supreme.data?.settings?.enabled || false);
                 setIsOmniActive(omni.data?.settings?.enabled || false);
+                setIsWolfActive(wolf.data?.settings?.enabled || false);
             } catch (error) {
                 console.error('Failed to fetch robotic statuses');
             }
@@ -112,6 +117,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             items: [
                 { id: 'dashboard', icon: Layers, label: 'Dashboard' },
                 { id: 'cockpit', icon: LayoutDashboard, label: 'Sinais' },
+                { id: 'backtest', icon: FlaskConical, label: 'Backtest' },
                 { id: 'analytics', icon: BarChart2, label: 'Analytics' },
                 { id: 'ml', icon: Brain, label: 'ML Insights' },
             ]
@@ -126,6 +132,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             label: 'ROBÔS',
             items: [
                 { id: 'gold_scalper', icon: Target, label: 'Gold Scalper' },
+                { id: 'wolf_bot', icon: Target, label: 'Wolf Bot' },
                 { id: 'robot', icon: Cpu, label: 'Alpha Robot' },
                 { id: 'supreme', icon: Crown, label: 'Supreme IA' },
                 { id: 'bitcoin_pro', icon: Bitcoin, label: 'Bitcoin Pro' },
@@ -171,6 +178,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         {
             label: 'SISTEMA',
             items: [
+                { id: 'intel_engine', icon: Network, label: 'Intel Engine' },
                 { id: 'ai_monitoring', icon: Cpu, label: 'Monitoramento IA' },
                 { id: 'agent_ia', icon: Brain, label: 'Agente IA' },
                 { id: 'alerts', icon: Bell, label: 'Alertas' },
@@ -261,6 +269,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 )}
                                 {item.id === 'gold_scalper' && isGoldActive && (
                                     <div className={`w-[7px] h-[7px] rounded-full bg-amber-400 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '251, 191, 36', boxShadow: '0 0 6px rgba(251,191,36,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
+                                )}
+                                {item.id === 'wolf_bot' && isWolfActive && (
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-amber-400 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '245, 158, 11', boxShadow: '0 0 6px rgba(245,158,11,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'micro_sniper' && isTitanActive && (
                                     <div className={`w-[7px] h-[7px] rounded-full bg-indigo-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '99, 102, 241', boxShadow: '0 0 6px rgba(99,102,241,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>

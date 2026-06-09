@@ -61,6 +61,7 @@ const ENGINES: EngineInfo[] = [
     { id: 'recovery', name: 'Recovery Engine', emoji: '🔄' },
     { id: 'guardian', name: 'Trade Guardian', emoji: '🛡️' },
     { id: 'copy-trader', name: 'CopyTrader', emoji: '📋' },
+    { id: 'wolf-bot', name: 'Wolf Bot', emoji: '🐺' },
 ];
 
 const REPORT_ENGINES = [
@@ -71,7 +72,7 @@ const REPORT_ENGINES = [
     { id: 'recovery', name: 'Recovery Engine', reportUrl: '/api/mt5/recovery/status', symbol: '' },
 ];
 
-const ENGINE_MENU_ORDER = ['gold-scalper', 'micro-scalper', 'forex-scalper', 'swing-trader', 'robot', 'supreme', 'bitcoin-pro', 'shark-bot', 'crypto-ia', 'omni', 'motor-ia', 'agent-ia', 'recovery', 'guardian', 'copy-trader'];
+const ENGINE_MENU_ORDER = ['gold-scalper', 'micro-scalper', 'forex-scalper', 'swing-trader', 'robot', 'supreme', 'bitcoin-pro', 'shark-bot', 'wolf-bot', 'crypto-ia', 'omni', 'motor-ia', 'agent-ia', 'recovery', 'guardian', 'copy-trader'];
 
 export class TradeNotificationBot {
     private static SETTINGS_PATH = path.resolve(process.cwd(), 'bot_settings.json');
@@ -270,7 +271,7 @@ export class TradeNotificationBot {
                 '',
                 `<i>${new Date().toLocaleString('pt-BR')}</i>`
             ].filter(l => l).join('\n');
-            TelegramService.sendMessage(msg);
+            TelegramService.sendMessage(msg).catch((err: any) => console.warn('notifyTradeOpened fail', err));
         }, 500);
     }
 
@@ -305,7 +306,7 @@ export class TradeNotificationBot {
                 '',
                 `<i>${new Date().toLocaleString('pt-BR')}</i>`
             ].join('\n');
-            TelegramService.sendMessage(msg);
+            TelegramService.sendMessage(msg).catch((err: any) => console.warn('notifyTradeClosed fail', err));
         }, 500);
     }
 
@@ -1094,8 +1095,7 @@ export class TradeNotificationBot {
             if (resp.data?.status === 'success' || resp.data?.order_id) {
                 await reply(`✅ <b>ORDEM ENVIADA</b>\n   ${direction === 'BUY' ? '🟢 COMPRA' : '🔴 VENDA'} ${escapeHtml(symbol)}\n   Lote: ${lot}\n   Ticket: #${resp.data.order_id}`);
                 try {
-                    const { TradeNotificationBot: Bot } = require('./TradeNotificationBot');
-                    Bot.notifyTradeOpened('Manual (Telegram)', symbol, direction, lot, 0, 0, 0);
+                    TradeNotificationBot.notifyTradeOpened('Manual (Telegram)', symbol, direction, lot, 0, 0, 0);
                 } catch (e) {
                     console.error('Erro ao notificar trade manual', e);
                 }

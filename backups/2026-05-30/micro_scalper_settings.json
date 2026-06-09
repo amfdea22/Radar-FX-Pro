@@ -1,0 +1,18 @@
+{
+    "enabled": false,
+    "symbol": "BTCUSD",
+    "lotBase": 0.01,
+    "lotMultiplier": 1.2,
+    "gridStepPips": 80,
+    "maxLevels": 10,
+    "targetProfitUSD": 1.5,
+    "stopLossUSD": 50,
+    "rsiPeriod": 7,
+    "rsiOverbought": 75,
+    "rsiOversold": 25,
+    "magic": 888111,
+    "trendFilterM1": true,
+    "trendFilterM5": true,
+    "quickTP": true,
+    "sniperMode": true
+}

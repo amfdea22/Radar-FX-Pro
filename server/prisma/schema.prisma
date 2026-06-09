@@ -28,19 +28,29 @@ model Trade {
 }
 
 model Signal {
-  id         Int      @id @default(autoincrement())
-  symbol     String
-  setup      String
-  type       String
-  confidence Float
-  entryPrice Float?
-  sl         Float?
-  tp         Float?
-  status     String   @default("active")
-  strategy   String?
-  engine     String?
-  createdAt  DateTime @default(now())
-  closedAt   DateTime?
+    id              Int      @id @default(autoincrement())
+    symbol          String
+    asset           String?
+    setup           String
+    type            String
+    confidence      Float
+    entryPrice      Float?
+    sl              Float?
+    tp              Float?
+    volumePower     Float?
+    timeframe       String?
+    category        String?
+    isInstitutional Boolean  @default(false)
+    details         String?
+    status          String   @default("active")
+    strategy        String?
+    engine          String?
+    createdAt       DateTime @default(now())
+    closedAt        DateTime?
+
+    @@index([symbol, createdAt])
+    @@index([setup, createdAt])
+    @@index([category, createdAt])
 }
 
 model StrategyStats {
@@ -74,6 +84,47 @@ model Setting {
   id    Int    @id @default(autoincrement())
   key   String @unique
   value String
+}
+
+model HistoricalBar {
+  id        Int      @id @default(autoincrement())
+  symbol    String
+  timeframe String
+  time      DateTime
+  open      Float
+  high      Float
+  low       Float
+  close     Float
+  volume    Float
+  tickVolume Float?
+  spread    Float?
+  source    String   @default("auto")
+  createdAt DateTime @default(now())
+
+  @@unique([symbol, timeframe, time])
+  @@index([symbol, timeframe])
+}
+
+model BacktestRun {
+  id              Int      @id @default(autoincrement())
+  jobId           String   @unique
+  strategy        String
+  symbol          String?
+  timeframe       String?
+  initialCapital  Float
+  finalBalance    Float
+  totalTrades     Int
+  winTrades       Int
+  lossTrades      Int
+  winRate         Float
+  totalPnl        Float
+  totalReturn     Float
+  profitFactor    Float
+  maxDrawdown     Float
+  config          String   @default("{}")
+  status          String   @default("completed")
+  error           String?
+  runAt           DateTime @default(now())
 }
 
 model JournalEntry {

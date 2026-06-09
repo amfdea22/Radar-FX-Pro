@@ -4,7 +4,7 @@ import {
     BarChart3, Settings2, Activity, BrainCircuit, Cpu,
     Trophy, RefreshCw, Percent, TrendingUp, Flame, DollarSign,
     Eye, Layers, TrendingDown, Gauge, ArrowUpDown, Crosshair,
-    Shield, CircleDot
+    Shield, CircleDot, Search, Bitcoin, Star
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -111,7 +111,13 @@ function GaugeChart({ value, max, label, color }: { value: number; max: number; 
     );
 }
 
-const SYMBOLS = ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD'];
+const SYMBOL_CATEGORIES = [
+    { label: 'Forex', icon: 'forex', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'USDCHF', 'EURGBP', 'EURJPY', 'GBPJPY'] },
+    { label: 'Metais', icon: 'metal', symbols: ['XAUUSD', 'XAGUSD'] },
+    { label: 'Cripto', icon: 'crypto', symbols: ['BTCUSD', 'ETHUSD', 'SOLUSD'] },
+    { label: 'Índices', icon: 'index', symbols: ['US100Cash', 'US30Cash', 'US500', 'GER40Cash'] },
+] as const;
+const ALL_SYMBOLS = SYMBOL_CATEGORIES.flatMap(c => c.symbols);
 
 export const RobotControlPanel: React.FC = () => {
     const [settings, setSettings] = useState<RobotSettings | null>(null);
@@ -127,6 +133,7 @@ export const RobotControlPanel: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [syncing, setSyncing] = useState(false);
+    const [symbolSearch, setSymbolSearch] = useState('');
 
     useEffect(() => {
         const fetchStatus = async () => {
@@ -586,24 +593,65 @@ export const RobotControlPanel: React.FC = () => {
                     {/* SYMBOLS */}
                     <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-violet-500/10 p-8 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"></div>
-                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
-                            <CircleDot className="text-violet-500" size={18} /> Símbolos Monitorados
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-4 flex items-center gap-2">
+                            <CircleDot className="text-violet-500" size={18} /> Ativos para Operar
+                            <span className="text-[10px] font-black text-slate-500 ml-2">({settings.symbols.length} selecionados)</span>
                         </h3>
-                        <div className="flex gap-2 flex-wrap">
-                            {SYMBOLS.map(s => (
-                                <button key={s}
-                                    onClick={() => {
-                                        const current = settings.symbols;
-                                        const updated = current.includes(s) ? current.filter(x => x !== s) : [...current, s];
-                                        if (updated.length > 0) updateSettings({ symbols: updated });
-                                    }}
-                                    className={`px-3 py-2 rounded-xl border text-[10px] font-black tracking-wide transition-all ${settings.symbols.includes(s)
-                                        ? 'bg-violet-500/20 border-violet-500/30 text-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.2)]'
-                                        : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
-                                    {s}
-                                </button>
-                            ))}
+                        <div className="relative mb-4">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <input type="text" value={symbolSearch} onChange={e => setSymbolSearch(e.target.value)}
+                                placeholder="Buscar ativo..."
+                                className="w-full bg-slate-800/50 border border-white/5 rounded-xl pl-9 pr-3 py-2 text-[11px] font-medium text-white placeholder-slate-600 outline-none focus:border-violet-500/30 transition-all" />
                         </div>
+                        <div className="space-y-3">
+                            {SYMBOL_CATEGORIES.map(cat => {
+                                const filtered = cat.symbols.filter(s => !symbolSearch || s.toLowerCase().includes(symbolSearch.toLowerCase()));
+                                if (filtered.length === 0) return null;
+                                const catIcon = cat.icon === 'forex' ? <DollarSign size={14} /> : cat.icon === 'metal' ? <Star size={14} /> : cat.icon === 'crypto' ? <Bitcoin size={14} /> : <BarChart3 size={14} />;
+                                const allSelected = filtered.every(s => settings.symbols.includes(s));
+                                const anySelected = filtered.some(s => settings.symbols.includes(s));
+                                return (
+                                    <div key={cat.label}>
+                                        <div className="flex items-center gap-2 mb-2 text-slate-500">
+                                            {catIcon}
+                                            <span className="text-[9px] font-black uppercase tracking-widest">{cat.label}</span>
+                                            <div className="ml-auto flex gap-1">
+                                                <button onClick={() => {
+                                                    const current = new Set(settings.symbols);
+                                                    filtered.forEach(s => current.add(s));
+                                                    updateSettings({ symbols: Array.from(current) });
+                                                }} className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border transition-all ${allSelected ? 'bg-violet-500/20 border-violet-500/30 text-violet-400' : 'bg-slate-800/50 border-white/5 text-slate-500 hover:text-slate-300'}`}>TODOS</button>
+                                                <button onClick={() => {
+                                                    const current = new Set(settings.symbols);
+                                                    filtered.forEach(s => current.delete(s));
+                                                    const arr = Array.from(current);
+                                                    if (arr.length > 0) updateSettings({ symbols: arr });
+                                                }} className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border transition-all ${anySelected && !allSelected ? 'bg-red-500/20 border-red-500/30 text-red-400' : 'bg-slate-800/50 border-white/5 text-slate-500 hover:text-slate-300'}`}>LIMPAR</button>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-1.5 flex-wrap">
+                                            {filtered.map(s => {
+                                                const selected = settings.symbols.includes(s);
+                                                return (
+                                                    <button key={s} onClick={() => {
+                                                        const updated = selected ? settings.symbols.filter(x => x !== s) : [...settings.symbols, s];
+                                                        if (updated.length > 0) updateSettings({ symbols: updated });
+                                                    }}
+                                                        className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-bold tracking-wide transition-all ${selected
+                                                            ? 'bg-violet-500/20 border-violet-500/30 text-violet-400 shadow-[0_0_8px_rgba(139,92,246,0.2)]'
+                                                            : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
+                                                        {s}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {symbolSearch && ALL_SYMBOLS.filter(s => s.toLowerCase().includes(symbolSearch.toLowerCase())).length === 0 && (
+                            <p className="text-[10px] text-slate-500 text-center py-4">Nenhum ativo encontrado</p>
+                        )}
                     </div>
 
                     {/* TRADE REPORT */}

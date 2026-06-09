@@ -1,0 +1,69 @@
+================================================================================
+  WOLF BOT — RELATORIO DE BACKTEST
+  Estrategia: SMC + Wyckoff + FVG 50% + Scale-Out (60/40) + BE+Custos
+  Data: 2026-06-08 01:35
+  Dados: synthetic (sintetico)
+================================================================================
+
+---------------------------------- PARAMETROS ----------------------------------
+  Simbolo:           XAUUSD
+  Timeframe:         1h
+  Barras:            3000 (2026-02-03 ate 2026-06-08)
+  Capital Inicial:   $10,000.00
+  Volume Fixo:       0.1 lots
+  Swing Period:      10
+  Min R:R:           2.5
+  BE Padding:        20 pips
+  Comissao:          $3.00/lot
+  Alavancagem:       1:100
+
+------------------------------ PERFORMANCE GERAL -------------------------------
+  Total Trades:      6 (parciais: 0)
+  Trades Principais: 6
+  Wins:              4
+  Losses:            2
+  Win Rate:          66.7%
+  Lucro Total:       $181.44
+  Retorno:           1.81%
+  Profit Factor:     2.19
+  Avg Win:           $83.44
+  Avg Loss:          $76.17
+  Max Drawdown:      2.21%
+  DD em $:           $229.69
+  Sharpe Ratio:      5.63
+  Saldo Final:       $10180.53
+
+--------------------------------- DISTRIBUICAO ---------------------------------
+  Maior Win:         $115.70
+  Maior Loss:        $-91.40
+  Media PnL:         $30.24
+  Mediana PnL:       $51.64
+  Desvio Padrao:     $85.29
+
+------------------------------- CURVA DE EQUITY --------------------------------
+  Equity Inicial:    $10000.00
+  Equity Final:      $10180.53
+  Pico Maximo:       $10410.22
+  Vale Minimo:       $9900.47
+  Drawdown Medio:    0.43%
+  Drawdown Maximo:   2.21%
+
+---------------------------------- BE+CUSTOS -----------------------------------
+  Acionamentos:      2
+  PnL Apos BE:       $103.28
+
+------------------------------- TABELA DE TRADES -------------------------------
+    #  Dir    Entrada      Saida    Vol        PnL    Res Conf
+  --------------------------------------------------------------
+    1 SELL    2325.34    2306.06   0.06     115.70    WIN   C
+    2 SELL    2325.34    2325.14   0.04       0.80    WIN   C
+    3  BUY    2321.64    2340.78   0.06     114.79    WIN   C
+    4  BUY    2321.64    2347.26   0.04     102.48    WIN   C
+    5  BUY    2510.48    2495.25   0.06     -91.40   LOSS   C
+    6  BUY    2510.48    2495.25   0.04     -60.93   LOSS   C
+  --------------------------------------------------------------
+                           TOTAL            181.44
+
+================================================================================
+  FIM DO RELATORIO
+================================================================================

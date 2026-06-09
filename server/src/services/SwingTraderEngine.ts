@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { SymbolLockService } from './SymbolLockService';
+import { TradeNotificationBot } from './TradeNotificationBot';
 
 // ========== INTERFACES ==========
 interface SwingSettings {
@@ -482,7 +483,7 @@ export class SwingTraderEngine {
                 this.state.lastTradeTime[symbol] = Date.now();
                 this.addLog(`✅ SWING TRADE ABERTO [${symbol}] ${side} @ ${price.toFixed(2)} | SL:${sl.toFixed(2)} TP:${tp.toFixed(2)} | Score:${score}`, 'TRADE');
                 try {
-                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    
                     TradeNotificationBot.notifyTradeOpened('Swing IA', symbol, side, lot, price, sl, tp);
                 } catch (e) {}
             } else {

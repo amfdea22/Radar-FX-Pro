@@ -137,17 +137,15 @@ export class DisciplineEngine {
             };
         } catch (error: any) {
             console.error('❌ DisciplineEngine Error:', error.message);
-            const now = BridgeClient.getServerTime();
-            const isRecentReset = this.settings.resetTimestamp && (now - this.settings.resetTimestamp < 60);
-
+            // Bridge offline — não bloqueia o usuário, apenas retorna zerado
             return {
                 profit: 0,
                 tradeCount: 0,
                 consecutiveLosses: 0,
                 limits: this.settings,
-                isSafe: isRecentReset,
-                isLocked: !isRecentReset,
-                reason: isRecentReset ? null : 'ERRO DE SINCRONIZAÇÃO MT5',
+                isSafe: true,
+                isLocked: false,
+                reason: null,
                 history: { today: { profit: 0, tradeCount: 0, winRate: 0 }, d3: { profit: 0, tradeCount: 0, winRate: 0 }, w1: { profit: 0, tradeCount: 0, winRate: 0 }, m1: { profit: 0, tradeCount: 0, winRate: 0 } }
             };
         }

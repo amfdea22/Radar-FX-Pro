@@ -203,6 +203,7 @@ export class ReportEngine {
 
             sortedHistory.forEach((t: any) => {
                 const netProfit = t.profit + (t.commission || 0) + (t.swap || 0);
+                if (netProfit === 0) return;
                 // By Asset
                 const asset = t.symbol;
                 const aData = assetMap.get(asset) || { p: 0, w: 0, t: 0, wp: 0, lp: 0 };
@@ -251,7 +252,7 @@ export class ReportEngine {
                 else if (t.magic === 9999 || comment.includes('GOLD SCALPER') || ((symbol.includes('GOLD') || symbol.includes('XAU')) && comment.includes('L1'))) {
                     origin = 'Gold Scalper';
                 }
-                else if (comment.includes('SIGNAL') || comment.includes('INTELLIGENCE')) {
+                else if (comment.includes('SIG') || comment.includes('SINAL') || comment.includes('SIGNAL') || comment.includes('INTELLIGENCE')) {
                     origin = 'Sinais';
                 }
                 else if (t.magic === 8888 || t.magic === 88881 || comment.includes('ROBOT') || comment.includes('ALPHA')) {

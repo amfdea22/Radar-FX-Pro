@@ -1,0 +1,26 @@
+[
+  {
+    "symbol": "XAUUSD",
+    "direction": "SELL",
+    "regime": "LOW_VOLATILITY",
+    "confidence": 60,
+    "success": false,
+    "timestamp": 1780629505103
+  },
+  {
+    "symbol": "XAUUSD",
+    "direction": "BUY",
+    "regime": "NEUTRAL",
+    "confidence": 60,
+    "success": false,
+    "timestamp": 1780971344040
+  },
+  {
+    "symbol": "XAUUSD",
+    "direction": "BUY",
+    "regime": "LOW_VOLATILITY",
+    "confidence": 55,
+    "success": false,
+    "timestamp": 1780971380770
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "totalSent": 4099,
+  "totalFailed": 26,
+  "byErrorType": {
+    "429": 12,
+    "retry": 26,
+    "unknown": 14
+  },
+  "byCommand": {
+    "/allstatus": 1,
+    "/trades": 1,
+    "/relatorio": 2
+  },
+  "startedAt": 1779842437638
+}

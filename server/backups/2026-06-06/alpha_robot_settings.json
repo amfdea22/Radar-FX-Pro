@@ -1,0 +1,23 @@
+{
+  "enabled": false,
+  "minConfidence": 85,
+  "maxTradesPerDay": 10,
+  "defaultLot": 0.01,
+  "onlyInstitutional": true,
+  "autoBreakEven": true,
+  "autoTrailing": true,
+  "tradesPer15Min": 3,
+  "tradeLimitInterval": "1h",
+  "preferredTimeframe": "H1",
+  "useInstitutionalAnalysis": true,
+  "useMLSignals": true,
+  "maxRiskPerTrade": 1,
+  "trailingActivation": 0.5,
+  "breakevenActivation": 0.3,
+  "atrMultiplierSL": 1.5,
+  "atrMultiplierTP": 3.5,
+  "entryScoreThreshold": 70,
+  "symbols": [
+    "BTCUSD"
+  ]
+}

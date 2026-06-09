@@ -1,0 +1,12 @@
+{
+  "enabled": false,
+  "minConfidence": 80,
+  "maxTradesPerDay": 10,
+  "defaultLot": 0.01,
+  "onlyInstitutional": true,
+  "autoBreakEven": true,
+  "autoTrailing": true,
+  "tradesPer15Min": 3,
+  "tradeLimitInterval": "15m",
+  "preferredTimeframe": "M15"
+}

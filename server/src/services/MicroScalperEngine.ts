@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { SymbolLockService } from './SymbolLockService';
+import { TradeNotificationBot } from './TradeNotificationBot';
 
 interface MicroSettings {
     enabled: boolean;
@@ -385,21 +386,26 @@ export class MicroScalperEngine {
                 const currentPrice = isBuy ? tick.bid : tick.ask;
                 const profitPct = isBuy ? (currentPrice - entryPrice) / entryPrice : (entryPrice - currentPrice) / entryPrice;
                 const sl = order.sl || 0;
-                const tpTarget = this.settings.targetProfitUSD * 0.01; // ~1% do alvo como referência
+                const volume = order.volume || 0.01;
+                const contractSize = this.settings.symbol?.includes('BTC') ? 1 : (this.settings.symbol?.includes('XAU') ? 100 : 100000);
+                const tickValue = this.settings.symbol?.includes('BTC') ? 1 : (this.settings.symbol?.includes('XAU') ? 0.01 : 0.00001);
+                const targetProfitPct = this.settings.targetProfitUSD > 0 && entryPrice > 0
+                    ? (this.settings.targetProfitUSD * 2) / (entryPrice * volume * contractSize * tickValue)
+                    : 0.0075;
 
                 // Breakeven: se atingiu 50% do TP, move SL para entrada
-                if (profitPct > 0 && profitPct >= tpTarget * 0.5) {
+                if (profitPct > 0 && targetProfitPct > 0 && profitPct >= targetProfitPct * 0.5) {
                     const bePrice = isBuy ? entryPrice + 0.01 : entryPrice - 0.01;
                     if ((isBuy && sl < entryPrice) || (!isBuy && sl > entryPrice)) {
                         await axios.post(`${this.BRIDGE_URL}/update_order`, {
                             ticket: order.ticket,
                             sl: Math.round(bePrice * 100) / 100,
                         }, { timeout: 3000 });
-                        this.addLog(`🔒 Breakeven ativado ticket #${order.ticket} (${(profitPct * 100).toFixed(2)}%)`, 'TRADE');
+                        this.addLog(`Breakeven ativado ticket #${order.ticket} (${(profitPct * 100).toFixed(2)}%)`, 'TRADE');
                     }
                 }
                 // Trailing: após 100% do TP, trail a 25% do movimento
-                if (profitPct > 0 && profitPct >= tpTarget) {
+                if (profitPct > 0 && targetProfitPct > 0 && profitPct >= targetProfitPct) {
                     const trailDist = profitPct * 0.25;
                     const newSl = isBuy ? currentPrice * (1 - trailDist) : currentPrice * (1 + trailDist);
                     if ((isBuy && newSl > sl) || (!isBuy && (sl === 0 || newSl < sl))) {
@@ -407,7 +413,7 @@ export class MicroScalperEngine {
                             ticket: order.ticket,
                             sl: Math.round(newSl * 100) / 100,
                         }, { timeout: 3000 });
-                        this.addLog(`📐 Trailing atualizado ticket #${order.ticket} — SL: ${Math.round(newSl * 100) / 100}`, 'TRADE');
+                        this.addLog(`Trailing atualizado ticket #${order.ticket} (${(profitPct * 100).toFixed(2)}%)`, 'TRADE');
                     }
                 }
             }
@@ -442,7 +448,7 @@ export class MicroScalperEngine {
                     const tickResp = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.settings.symbol] });
                     const tick = tickResp.data?.[this.settings.symbol];
                     const price = side === 'BUY' ? tick?.ask || 0 : tick?.bid || 0;
-                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    
                     TradeNotificationBot.notifyTradeOpened('Micro Sniper', this.settings.symbol, side, lot, price, 0, 0);
                 } catch (e) {}
             } else {

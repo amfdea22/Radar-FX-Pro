@@ -1,0 +1,109 @@
+{
+  "metrics": {
+    "total_trades": 6,
+    "win_trades": 2,
+    "loss_trades": 4,
+    "win_rate": 33.33,
+    "total_pnl": -100.52,
+    "total_return": -1.01,
+    "avg_win": 148.93,
+    "avg_loss": 99.6,
+    "profit_factor": 0.75,
+    "max_drawdown": 4.73,
+    "max_drawdown_value": 476.28,
+    "final_balance": 9898.58,
+    "initial_capital": 10000.0,
+    "sharpe_ratio": -1.82,
+    "avg_bars_held": 0
+  },
+  "trades": [
+    {
+      "ticket": 1,
+      "symbol": "XAUUSD",
+      "action": "BUY",
+      "entry_time": "2025-06-23T21:00:00",
+      "exit_time": "2025-06-24T03:00:00",
+      "entry_price": 3344.53,
+      "exit_price": 3325.78893,
+      "volume": 0.06,
+      "pnl": -112.45,
+      "balance": 9887.25,
+      "comment": "WOLF_S1_B",
+      "magic": 7777
+    },
+    {
+      "ticket": 2,
+      "symbol": "XAUUSD",
+      "action": "BUY",
+      "entry_time": "2025-06-23T21:00:00",
+      "exit_time": "2025-06-24T03:00:00",
+      "entry_price": 3344.53,
+      "exit_price": 3325.78893,
+      "volume": 0.04,
+      "pnl": -74.96,
+      "balance": 9812.29,
+      "comment": "WOLF_S2_B",
+      "magic": 7777
+    },
+    {
+      "ticket": 3,
+      "symbol": "XAUUSD",
+      "action": "SELL",
+      "entry_time": "2025-12-25T21:00:00",
+      "exit_time": "2025-12-26T11:00:00",
+      "entry_price": 4518.74,
+      "exit_price": 4539.83643,
+      "volume": 0.06,
+      "pnl": -126.58,
+      "balance": 9685.41,
+      "comment": "WOLF_S1_A",
+      "magic": 7777
+    },
+    {
+      "ticket": 4,
+      "symbol": "XAUUSD",
+      "action": "SELL",
+      "entry_time": "2025-12-25T21:00:00",
+      "exit_time": "2025-12-26T11:00:00",
+      "entry_price": 4518.74,
+      "exit_price": 4539.83643,
+      "volume": 0.04,
+      "pnl": -84.39,
+      "balance": 9601.02,
+      "comment": "WOLF_S2_A",
+      "magic": 7777
+    },
+    {
+      "ticket": 5,
+      "symbol": "XAUUSD",
+      "action": "BUY",
+      "entry_time": "2026-01-13T16:00:00",
+      "exit_time": "2026-01-13T23:00:00",
+      "entry_price": 4580.64,
+      "exit_price": 4630.15,
+      "volume": 0.06,
+      "pnl": 297.06,
+      "balance": 9897.78,
+      "comment": "WOLF_S1_B",
+      "magic": 7777
+    },
+    {
+      "ticket": 6,
+      "symbol": "XAUUSD",
+      "action": "BUY",
+      "entry_time": "2026-01-13T16:00:00",
+      "exit_time": "2026-01-16T11:00:00",
+      "entry_price": 4580.64,
+      "exit_price": 4580.84,
+      "volume": 0.04,
+      "pnl": 0.8,
+      "balance": 9898.58,
+      "comment": "WOLF_S2_B [BE+CUSTOS]",
+      "magic": 7777
+    }
+  ],
+  "config": {
+    "bars": 6705,
+    "source": "litefinance"
+  }
+}

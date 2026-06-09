@@ -1,0 +1,62 @@
+================================================================================
+  WOLF BOT — RELATORIO DE BACKTEST
+  Estrategia: SMC + Wyckoff + FVG 50% + Scale-Out + BE+Custos
+  Data: 2026-06-08 11:50
+================================================================================
+
+============================= PARAMETROS DO TESTE ==============================
+  Simbolo:           XAUUSD
+  Timeframe:         1h
+  Capital Inicial:   $10000.00
+  Volume Fixo:       0.1 lots
+  Swing Period:      15
+  Min R:R:           2.0
+  BE Padding:        20 pips
+  Comissao:          $3.0/lot
+  Alavancagem:       1:100
+
+============================ RESUMO DE PERFORMANCE =============================
+  Total Trades:      4 (parciais: 0)
+  Trades Principais: 4
+  Wins:              0
+  Losses:            4
+  Win Rate:          0.0%
+  Lucro Total:       $-246.14
+  Retorno:           -2.46%
+  Profit Factor:     0.00
+  Avg Win:           $0.00
+  Avg Loss:          $61.54
+  Max Drawdown:      4.09%
+  DD Value:          $415.44
+  Sharpe Ratio:      -19.40
+  Saldo Final:       $9753.26
+
+========================== DISTRIBUICAO DE RESULTADOS ==========================
+  Maior Win:         $-10.93
+  Maior Loss:        $-131.29
+  Media PnL:         $-61.53
+  Mediana PnL:       $-51.96
+  Desvio Padrao:     $50.35
+  Trades Positivos:  0
+  Trades Negativos:  4
+
+=============================== CURVA DE EQUITY ================================
+  Equity Inicial:    $10000.00
+  Equity Final:      $9753.26
+  Pico Maximo:       $10168.70
+  Vale Minimo:       $9753.26
+  Drawdown Medio:    3.53%
+
+=============================== TABELA DE TRADES ===============================
+    # Acao    Entrada      Saida  Volume        PnL Result Parcial  Conf
+  ------------------------------------------------------------------------
+    1 SELL    4518.67    4540.55    0.06    -131.29   LOSS             A
+    2 SELL    4518.67    4540.55    0.04     -87.53   LOSS             A
+    3  BUY    4586.18    4583.45    0.06     -16.39   LOSS             A
+    4  BUY    4586.18    4583.45    0.04     -10.93   LOSS             A
+  ------------------------------------------------------------------------
+                           TOTAL            -246.14
+
+================================================================================
+  FIM DO RELATORIO
+================================================================================

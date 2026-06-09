@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Bitcoin, Activity, Zap, TrendingUp, Target, Globe, CircleDot, Shield, Crosshair, Cpu, Users, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -74,6 +74,7 @@ export const CryptoIntelligenceHub: React.FC = () => {
     const [masters, setMasters] = useState<any[]>([]);
     const [cryptoIAStatus, setCryptoIAStatus] = useState<any>(null);
     const [networkStatus, setNetworkStatus] = useState('scanning');
+    const lastSignalCountRef = useRef(0);
     const [executingId, setExecutingId] = useState<string | null>(null);
     const [orderResult, setOrderResult] = useState<{ id: string, success: boolean, message: string } | null>(null);
     const [manualSettings, setManualSettings] = useState<Record<string, { lot: number, tp: number, sl: number }>>({});
@@ -104,14 +105,13 @@ export const CryptoIntelligenceHub: React.FC = () => {
                         price: s.price_entry,
                         time: formatTimeAgo(s.timestamp)
                     }));
-                const newSignals = filtered;
-
-                // Alerta sonoro para novos sinais cripto
-                if (newSignals.length > signals.length && signals.length > 0) {
+                // Alerta sonoro para novos sinais cripto (usando ref para evitar stale closure)
+                if (filtered.length > lastSignalCountRef.current && lastSignalCountRef.current > 0) {
                     SoundService.playNotification();
                 }
+                lastSignalCountRef.current = filtered.length;
 
-                setSignals(newSignals);
+                setSignals(filtered);
             } catch (error) {
                 console.error("Failed to fetch crypto signals", error);
             }

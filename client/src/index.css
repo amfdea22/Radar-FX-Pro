@@ -113,6 +113,13 @@
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
 
+/* Neon Yellow Scrollbar for Dropdowns */
+.black-scrollbar::-webkit-scrollbar { width: 6px; }
+.black-scrollbar::-webkit-scrollbar-track { background: #020617; border-radius: 10px; }
+.black-scrollbar::-webkit-scrollbar-thumb { background: #eab308; border-radius: 10px; border: 1px solid #1e293b; }
+.black-scrollbar::-webkit-scrollbar-thumb:hover { background: #facc15; }
+.black-scrollbar { scrollbar-width: thin; scrollbar-color: #eab308 #020617; }
+
 /* Slide-in animation for drawer */
 @keyframes slide-in {
     from { transform: translateX(-100%); }

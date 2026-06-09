@@ -207,7 +207,7 @@ export const TradingPanel: React.FC = () => {
                 symbol,
                 action,
                 lot,
-                comment: `MANUAL | Quick Trade | ${action} ${symbol}`
+                comment: `MANUAL ${action} ${symbol}`
             });
 
             const trade = {

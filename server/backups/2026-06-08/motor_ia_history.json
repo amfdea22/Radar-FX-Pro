@@ -1,0 +1,41 @@
+{
+  "executions": [
+    {
+      "id": "317459714",
+      "time": 1780629237101,
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "lotSize": 0.01,
+      "entryPrice": 4441.28,
+      "stopLoss": 4466.9333333333325,
+      "takeProfit": 4389.823333333333,
+      "confidence": 60,
+      "strategy": "Motor IA Adaptive",
+      "marketRegime": "LOW_VOLATILITY",
+      "tags": [
+        "LOW_VOLATILITY",
+        "WR50"
+      ],
+      "exitPrice": null,
+      "exitTime": null,
+      "profit": -0.1,
+      "result": "LOSS",
+      "exitReason": "Desconhecido"
+    }
+  ],
+  "state": {
+    "isReady": true,
+    "marketRegime": "LOW_VOLATILITY",
+    "dailyTrades": 0,
+    "dailyPnl": 0,
+    "consecutiveWins": 1,
+    "consecutiveLosses": 0,
+    "activePositions": 0,
+    "totalTrades": 1,
+    "totalWins": 0,
+    "totalLosses": 1,
+    "totalProfit": -0.1,
+    "lastResetDate": "2026-06-08",
+    "lastTradeTime": 1780629237101
+  }
+}

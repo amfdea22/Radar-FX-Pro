@@ -1,0 +1,74 @@
+================================================================================
+  WOLF BOT — RELATORIO DE BACKTEST
+  Estrategia: SMC + Wyckoff + FVG 50% + Scale-Out + BE+Custos
+  Data: 2026-06-08 11:52
+================================================================================
+
+============================= PARAMETROS DO TESTE ==============================
+  Simbolo:           XAUUSD
+  Timeframe:         1h
+  Capital Inicial:   $10000.00
+  Volume Fixo:       0.1 lots
+  Swing Period:      5
+  Min R:R:           2.0
+  BE Padding:        20 pips
+  Comissao:          $3.0/lot
+  Alavancagem:       1:100
+
+============================ RESUMO DE PERFORMANCE =============================
+  Total Trades:      8 (parciais: 0)
+  Trades Principais: 8
+  Wins:              8
+  Losses:            0
+  Win Rate:          100.0%
+  Lucro Total:       $5886.74
+  Retorno:           58.87%
+  Profit Factor:     999.99
+  Avg Win:           $735.84
+  Avg Loss:          $0.00
+  Max Drawdown:      34.96%
+  DD Value:          $8148.96
+  Sharpe Ratio:      6.78
+  Saldo Final:       $15885.54
+
+========================== DISTRIBUICAO DE RESULTADOS ==========================
+  Maior Win:         $5295.28
+  Maior Loss:        $0.80
+  Media PnL:         $735.84
+  Mediana PnL:       $94.86
+  Desvio Padrao:     $1723.79
+  Trades Positivos:  8
+  Trades Negativos:  0
+
+============================== ANALISE BE+CUSTOS ===============================
+  Total BE+Custos:   2 acionamentos
+  PnL Apos BE:       $148.26
+
+=============================== CURVA DE EQUITY ================================
+  Equity Inicial:    $10000.00
+  Equity Final:      $15887.84
+  Pico Maximo:       $23306.96
+  Vale Minimo:       $10000.00
+  Drawdown Medio:    10.61%
+
+=============================== TABELA DE TRADES ===============================
+    # Acao    Entrada      Saida  Volume        PnL Result Parcial  Conf
+  ------------------------------------------------------------------------
+    1 SELL    3397.52    3380.44    0.06     102.48    WIN             C
+    2 SELL    3397.52    3367.54    0.04     119.93    WIN             C
+    3  BUY    3345.52    3357.60    0.06      72.48    WIN             C
+    4  BUY    3345.52    3345.72    0.04       0.80    WIN             C
+    5  BUY    3366.04    3376.22    0.06      61.08    WIN             C
+    6  BUY    3366.04    3402.90    0.04     147.46    WIN             C
+    7  BUY    3442.99    3464.80    0.04      87.23    WIN             C
+    8  BUY    3442.99    4325.54    0.06    5295.28    WIN             C
+  ------------------------------------------------------------------------
+                           TOTAL            5886.74
+
+============================= TRADES COM BE+CUSTOS =============================
+  Ticket 4: BUY PnL=$0.80 WOLF_S2_C [BE+CUSTOS]
+  Ticket 6: BUY PnL=$147.46 WOLF_S2_C [BE+CUSTOS]
+
+================================================================================
+  FIM DO RELATORIO
+================================================================================

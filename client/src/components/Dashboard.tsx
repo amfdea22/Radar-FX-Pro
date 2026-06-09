@@ -4,6 +4,7 @@ import {
     Shield, Wallet, Bot, CircleDot, RefreshCw, Cpu, Eye
 } from 'lucide-react';
 import { SignalScanner } from './SignalScanner';
+import { TradingViewSignalsCard } from './TradingViewSignalsCard';
 import { DisciplinePanel } from './DisciplinePanel';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -141,6 +142,9 @@ export const Dashboard: React.FC<{ onNewTrade: () => void }> = ({ onNewTrade }) 
                     </div>
                 </div>
             </div>
+
+            {/* TRADINGVIEW SIGNALS */}
+            <TradingViewSignalsCard />
 
             {/* ACCOUNT INFO */}
             {account && (

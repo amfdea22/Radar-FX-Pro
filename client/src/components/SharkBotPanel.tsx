@@ -1,22 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Zap, TrendingUp, Target, Cpu, Shield, DollarSign, BarChart3, Crosshair, CircleDot, Terminal } from 'lucide-react';
+import { Activity, Zap, TrendingUp, Target, Cpu, Shield, DollarSign, BarChart3, Crosshair, CircleDot, Terminal, LineChart, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { EquityChart } from './EquityChart';
 
 interface SharkBotStatus {
     settings: { enabled: boolean; symbol: string; timeframe: string; lotSize: number; maxDailyLoss: number; maxDailyProfit: number; riskPercent: number; fvgMinAtrRatio: number; maxSpread: number; minVolume: number; tradingStartHour: number; tradingEndHour: number; useLimitOrders: boolean; useTrailingStop: boolean; usePartialClose: boolean; useMultiTimeframe: boolean };
     state: { position: any | null; dailyProfit: number; dailyLoss: number };
+    account: { balance: number; equity: number; margin: number; marginFree: number };
     isRunning: boolean;
     marginOk: boolean;
     lastAnalysis: {
         price: number; atr: number; swingHigh: number; swingLow: number;
         nivel50: number; sma50: number; fvgCount: number; bos: boolean;
-        setupCount: number; setups: { entradaLimit: number; stopLoss: number; gapSize: number }[]; setupsSell: { entradaLimit: number; stopLoss: number; gapSize: number }[];
+        setupCount: number; setups: { entradaLimit: number; stopLoss: number; gapSize: number; grade?: 'A' | 'B' | 'C' }[]; setupsSell: { entradaLimit: number; stopLoss: number; gapSize: number; grade?: 'A' | 'B' | 'C' }[];
         htTrend?: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
     } | null;
     trades: any[];
     operationLog: Array<{ time: string; action: string; details: string }>;
     performance: { totalTrades: number; wins: number; losses: number; winRate: number; totalProfit: number; avgWin: number; avgLoss: number; profitFactor: number };
+    breakdown?: {
+        buy: { total: number; wins: number; losses: number; winRate: number };
+        sell: { total: number; wins: number; losses: number; winRate: number };
+        gradeA: { total: number; wins: number; losses: number; winRate: number };
+        gradeB: { total: number; wins: number; losses: number; winRate: number };
+        gradeC: { total: number; wins: number; losses: number; winRate: number };
+        timeframe: string;
+    };
 }
 
 function SharkLogo() {
@@ -91,7 +101,7 @@ function FvgDepthChart({ nivel50, swingLow, swingHigh, price, fvgs, htTrend }: {
     );
 }
 
-const SYMBOLS = ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD', 'XAGUSD', 'WTI', 'SP500'];
+const SYMBOLS = ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD', 'XAGUSD', 'WTI', 'SP500', 'USDJPY', 'US30Cash', 'US100Cash', 'US500Cash', 'GER40Cash', 'UK100', 'AUS200', 'EURJPY', 'EURGBP', 'OIL', 'BRENT', 'SOLUSD', 'ADAUSD', 'MATICUSD'];
 const TIMEFRAMES = ['M15', 'M30', 'H1', 'H4'];
 
 interface TradeRecord {
@@ -127,6 +137,21 @@ export const SharkBotPanel: React.FC = () => {
     const [soundEnabled, setSoundEnabled] = useState(true);
     const prevTradeCount = useRef(0);
     const terminalRef = useRef<HTMLDivElement>(null);
+    const audioCtxRef = useRef<AudioContext | null>(null);
+
+    const playSound = (isWin: boolean) => {
+        if (!soundEnabled) return;
+        try {
+            if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+            const ctx = audioCtxRef.current;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.value = isWin ? 880 : 440;
+            gain.gain.value = 0.1;
+            osc.start(); osc.stop(ctx.currentTime + 0.15);
+        } catch { }
+    };
 
     const fetchStatus = async () => {
         try {
@@ -146,19 +171,10 @@ export const SharkBotPanel: React.FC = () => {
             setUseTrailingStop(data.settings.useTrailingStop);
             setUsePartialClose(data.settings.usePartialClose);
             setUseMultiTimeframe(data.settings.useMultiTimeframe);
-            // C16: som quando novo trade aparece
-            if (soundEnabled && data.trades && data.trades.length > prevTradeCount.current) {
+            if (data.trades && data.trades.length > prevTradeCount.current) {
                 const lastTrade = data.trades[0];
                 if (lastTrade && (lastTrade.result === 'WIN' || lastTrade.result === 'LOSS')) {
-                    try {
-                        const ctx = new AudioContext();
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        osc.connect(gain); gain.connect(ctx.destination);
-                        osc.frequency.value = lastTrade.result === 'WIN' ? 880 : 440;
-                        gain.gain.value = 0.1;
-                        osc.start(); osc.stop(ctx.currentTime + 0.15);
-                    } catch { }
+                    playSound(lastTrade.result === 'WIN');
                 }
             }
             prevTradeCount.current = data.trades?.length || 0;
@@ -170,11 +186,10 @@ export const SharkBotPanel: React.FC = () => {
     };
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            fetchStatus();
-        }, 500);
+        fetchStatus();
+        const timer = setInterval(fetchStatus, 5000);
         fetchHistory();
-        const histTimer = setInterval(fetchHistory, 15000);
+        const histTimer = setInterval(fetchHistory, 30000);
         return () => { clearInterval(timer); clearInterval(histTimer); };
     }, []);
 
@@ -232,6 +247,48 @@ export const SharkBotPanel: React.FC = () => {
                             <div className={`w-2 h-2 rounded-full animate-pulse ${status?.isRunning ? 'bg-emerald-500' : 'bg-slate-500'}`} />
                             <span className="text-[10px] font-black uppercase">{status?.isRunning ? 'Live' : 'Offline'}</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* SALDO / ACCOUNT */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-emerald-500/10 p-5 flex items-center gap-4">
+                    <div className="p-3 bg-emerald-500/20 text-emerald-500 rounded-xl">
+                        <DollarSign size={18} />
+                    </div>
+                    <div>
+                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Saldo</p>
+                        <p className="text-xl font-black text-white italic">${(status?.account?.balance ?? 0).toFixed(2)}</p>
+                    </div>
+                </div>
+                <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-cyan-500/10 p-5 flex items-center gap-4">
+                    <div className="p-3 bg-cyan-500/20 text-cyan-500 rounded-xl">
+                        <LineChart size={18} />
+                    </div>
+                    <div>
+                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Equity</p>
+                        <p className="text-xl font-black text-white italic">${(status?.account?.equity ?? 0).toFixed(2)}</p>
+                    </div>
+                </div>
+                <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-indigo-500/10 p-5 flex items-center gap-4">
+                    <div className="p-3 bg-indigo-500/20 text-indigo-500 rounded-xl">
+                        <AlertTriangle size={18} />
+                    </div>
+                    <div>
+                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Margem Livre</p>
+                        <p className="text-xl font-black text-white italic">${(status?.account?.marginFree ?? 0).toFixed(2)}</p>
+                    </div>
+                </div>
+                <div className={`bg-slate-900/40 backdrop-blur-xl rounded-2xl border p-5 flex items-center gap-4 ${(status?.state?.dailyProfit ?? 0) >= 0 ? 'border-emerald-500/10' : 'border-red-500/10'}`}>
+                    <div className={`p-3 rounded-xl ${(status?.state?.dailyProfit ?? 0) >= 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
+                        <BarChart3 size={18} />
+                    </div>
+                    <div>
+                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">P&L Diário</p>
+                        <p className={`text-xl font-black italic ${(status?.state?.dailyProfit ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            ${(status?.state?.dailyProfit ?? 0) >= 0 ? '+' : ''}{(status?.state?.dailyProfit ?? 0).toFixed(2)}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -432,7 +489,15 @@ export const SharkBotPanel: React.FC = () => {
                                                         <div>
                                                             <div className="flex items-center gap-2 mb-0.5">
                                                                 <span className="text-base font-black text-white italic tracking-tight">FVG Sell #{a.setupsSell.length - i}</span>
+                                                                 <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-slate-800 text-amber-400 border border-amber-500/20">{status?.settings?.symbol || 'XAUUSD'}</span>
                                                                 <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30">LIMIT SELL</span>
+                                                                {s.grade && (
+                                                                    <span className={`px-1.5 py-0.5 rounded text-[7px] font-black tracking-widest border ${
+                                                                        s.grade === 'A' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                                                        s.grade === 'B' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                                                                        'bg-red-500/20 text-red-400 border-red-500/30'
+                                                                    }`}>{s.grade}</span>
+                                                                )}
                                                                 {dist >= 0 && (
                                                                     <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">Na Zona!</span>
                                                                 )}
@@ -473,7 +538,15 @@ export const SharkBotPanel: React.FC = () => {
                                                         <div>
                                                             <div className="flex items-center gap-2 mb-0.5">
                                                                 <span className="text-base font-black text-white italic tracking-tight">FVG Buy #{a.setups.length - i}</span>
+                                                                 <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-slate-800 text-amber-400 border border-amber-500/20">{status?.settings?.symbol || 'XAUUSD'}</span>
                                                                 <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-cyan-500/20 text-cyan-500 border border-cyan-500/30">LIMIT BUY</span>
+                                                                {s.grade && (
+                                                                    <span className={`px-1.5 py-0.5 rounded text-[7px] font-black tracking-widest border ${
+                                                                        s.grade === 'A' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                                                        s.grade === 'B' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                                                                        'bg-red-500/20 text-red-400 border-red-500/30'
+                                                                    }`}>{s.grade}</span>
+                                                                )}
                                                                 {dist <= 0 && (
                                                                     <span className="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 animate-pulse">Na Zona!</span>
                                                                 )}
@@ -599,6 +672,24 @@ export const SharkBotPanel: React.FC = () => {
                             </div>
                             <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
                                 <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Perda Máx Diária</span>
+                                    <span className="text-sm font-black text-red-400">${status?.settings?.maxDailyLoss || 50}</span>
+                                </div>
+                                <input type="range" min={10} max={500} step={10} value={status?.settings?.maxDailyLoss || 50}
+                                    onChange={e => saveSettings({ maxDailyLoss: Number(e.target.value) })}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-red-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg" />
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Lucro Máx Diário</span>
+                                    <span className="text-sm font-black text-emerald-400">${status?.settings?.maxDailyProfit || 100}</span>
+                                </div>
+                                <input type="range" min={20} max={1000} step={10} value={status?.settings?.maxDailyProfit || 100}
+                                    onChange={e => saveSettings({ maxDailyProfit: Number(e.target.value) })}
+                                    className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-emerald-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg" />
+                            </div>
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
                                     <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Horário Trading (UTC)</span>
                                     <span className="text-sm font-black text-cyan-400">{tradingStart}h - {tradingEnd}h</span>
                                 </div>
@@ -694,6 +785,75 @@ export const SharkBotPanel: React.FC = () => {
                         </div>
                     )}
 
+                    {/* BREAKDOWN BY DIRECTION & GRADE */}
+                    {status?.breakdown && (
+                        <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-cyan-500/10 p-8 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
+                            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                                <BarChart3 className="text-cyan-500" size={18} /> Breakdown
+                                <span className="text-[8px] font-bold text-slate-500 ml-1">({status.breakdown.timeframe})</span>
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">Direção</p>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-black text-cyan-400">BUY</span>
+                                            <span className={`text-xs font-black ${status.breakdown.buy.winRate >= 50 ? 'text-emerald-400' : 'text-red-400'}`}>{status.breakdown.buy.total > 0 ? `${status.breakdown.buy.winRate.toFixed(0)}% (${status.breakdown.buy.wins}/${status.breakdown.buy.total})` : '—'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-black text-red-400">SELL</span>
+                                            <span className={`text-xs font-black ${status.breakdown.sell.winRate >= 50 ? 'text-emerald-400' : 'text-red-400'}`}>{status.breakdown.sell.total > 0 ? `${status.breakdown.sell.winRate.toFixed(0)}% (${status.breakdown.sell.wins}/${status.breakdown.sell.total})` : '—'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">Por Score</p>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest border bg-emerald-500/20 text-emerald-400 border-emerald-500/30">A</span>
+                                            <span className="text-xs font-black text-white">{status.breakdown.gradeA.total > 0 ? `${status.breakdown.gradeA.winRate.toFixed(0)}% (${status.breakdown.gradeA.wins}/${status.breakdown.gradeA.total})` : '—'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest border bg-amber-500/20 text-amber-400 border-amber-500/30">B</span>
+                                            <span className="text-xs font-black text-white">{status.breakdown.gradeB.total > 0 ? `${status.breakdown.gradeB.winRate.toFixed(0)}% (${status.breakdown.gradeB.wins}/${status.breakdown.gradeB.total})` : '—'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest border bg-red-500/20 text-red-400 border-red-500/30">C</span>
+                                            <span className="text-xs font-black text-white">{status.breakdown.gradeC.total > 0 ? `${status.breakdown.gradeC.winRate.toFixed(0)}% (${status.breakdown.gradeC.wins}/${status.breakdown.gradeC.total})` : '—'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* EQUITY CHART */}
+                    {status?.trades && status.trades.length > 1 && (
+                        <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-cyan-500/10 p-8 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
+                            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                                <LineChart className="text-cyan-500" size={18} /> Equity
+                            </h3>
+                            <div className="h-48">
+                                <EquityChart
+                                    data={(() => {
+                                        let equity = 10000;
+                                        const balance = 10000;
+                                        const points: { time: string; equity: number; balance: number }[] = [];
+                                        status.trades.slice().reverse().forEach((t: any, i: number) => {
+                                            equity += (t.profit || 0);
+                                            points.push({ time: `T${i + 1}`, equity: Math.round(equity * 100) / 100, balance: Math.round((balance + (t.profit || 0)) * 100) / 100 });
+                                        });
+                                        return points;
+                                    })()}
+                                    symbol={symbol}
+                                    timeframe="all"
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     {/* ACTIVE POSITION */}
                     {status?.state?.position ? (
                         <div className={`bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border p-8 relative overflow-hidden shadow-[0_0_30px_rgba(52,211,153,0.08)] ${status.state.position.type === 'BUY' ? 'border-emerald-500/20' : 'border-red-500/20'}`}>
@@ -701,6 +861,7 @@ export const SharkBotPanel: React.FC = () => {
                             <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
                                 <DollarSign className={status.state.position.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'} size={18} />
                                 Posição Ativa
+                                <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">{status?.settings?.symbol}</span>
                                 <span className={`text-[8px] font-black px-2 py-0.5 rounded border ${status.state.position.type === 'BUY' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
                                     {status.state.position.type}
                                 </span>
@@ -818,23 +979,25 @@ export const SharkBotPanel: React.FC = () => {
                         <div className="divide-y divide-white/5">
                             {history.map((t, i) => (
                                 <div key={i} className="flex items-center gap-4 px-6 py-3 hover:bg-white/[0.02] transition-colors">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${t.result === 'WIN' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                                        {t.result === 'WIN' ? 'W' : 'L'}
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${t.result === 'WIN' ? 'bg-emerald-500/20 text-emerald-400' : t.result === 'LOSS' && t.profit < 0 ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                                        {t.result === 'WIN' ? 'W' : t.result === 'LOSS' && t.profit < 0 ? 'L' : '-'}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-0.5">
                                             <span className={`text-xs font-black ${t.direction === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
                                                 {t.direction === 'BUY' ? 'COMPRA' : 'VENDA'}
                                             </span>
-                                            <span className="text-[9px] text-slate-600">${t.entryPrice.toFixed(2)} → ${t.exitPrice.toFixed(2)}</span>
+                                            <span className="text-[9px] text-slate-600">
+                                                ${t.entryPrice.toFixed(2)} → {t.exitPrice ? '$' + t.exitPrice.toFixed(2) : '---'}
+                                            </span>
                                         </div>
                                         <div className="text-[9px] text-slate-600">
                                             {new Date(t.entryTime).toLocaleDateString('pt-BR')} • FVG: ${t.fvgSize.toFixed(2)} • Gap: ${t.gapSize.toFixed(2)}
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`text-sm font-black ${t.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            {t.profit >= 0 ? '+' : ''}{t.profit.toFixed(2)}
+                                        <span className={`text-sm font-black ${t.profit > 0 ? 'text-emerald-400' : t.profit < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                                            {t.profit > 0 ? '+' : ''}{t.profit.toFixed(2)}
                                         </span>
                                     </div>
                                 </div>

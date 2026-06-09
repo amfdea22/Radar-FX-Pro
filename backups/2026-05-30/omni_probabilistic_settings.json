@@ -1,0 +1,15 @@
+{
+    "enabled": false,
+    "symbols": ["EURUSD", "GBPUSD", "XAUUSD", "BTCUSD"],
+    "strategy": "MHI1",
+    "timeframe": "M1",
+    "defaultLot": 0.01,
+    "useMartingale": true,
+    "martingaleLevels": 1,
+    "martingaleMultiplier": 2.0,
+    "useTrendFilter": true,
+    "useRSIFilter": true,
+    "minRSITreshold": 30,
+    "maxRSITreshold": 70,
+    "magic": 999111
+}

@@ -4,6 +4,7 @@ import path from 'path';
 import { AlertEngine } from './AlertEngine';
 import { SymbolLockService } from './SymbolLockService';
 import { DisciplineEngine } from './DisciplineEngine';
+import { TradeNotificationBot } from './TradeNotificationBot';
 
 interface MotorIASettings {
     enabled: boolean;
@@ -127,8 +128,10 @@ export class MotorIAEngine {
             isRunning: this.isRunning,
             executions: this.executions.slice(-50).reverse(),
             regime: this.regimeHistory.slice(-10).reverse(),
+            regimeBySymbol: { ...this.regimeBySymbol },
             learningStats: this.computeLearningStats(),
             performance: this.computePerformance(),
+            learningInsights: this.getLearningInsights(),
         };
     }
 
@@ -167,6 +170,7 @@ export class MotorIAEngine {
         this.loadSettings();
         this.loadHistory();
         this.loadLearning();
+        this.state.isReady = true;
         this.isRunning = true;
         console.log('🧠 MotorIA: Cérebro de Inteligência Artificial INICIADO');
         this.loop();
@@ -255,28 +259,48 @@ export class MotorIAEngine {
         }
     }
 
+    private static regimeBySymbol: Record<string, string> = {};
+    private static symbolRegimeHistory: Record<string, RegimeData[]> = {};
+
     private static async detectMarketRegime() {
         if (!this.settings.useRegimeDetection) return;
         try {
-            const bars = await this.fetchBars('XAUUSD', 'H1', 100);
-            if (!bars || bars.length < 30) return;
-            const closes = bars.map((b: any) => b.close);
-            const returns = closes.slice(1).map((c: any, i: number) => (c - closes[i]) / closes[i] * 100);
-            const mean = returns.reduce((a: number, b: number) => a + b, 0) / returns.length;
-            const variance = returns.reduce((a: number, b: number) => a + (b - mean) ** 2, 0) / returns.length;
-            const volatility = Math.sqrt(variance);
-            const sma20 = closes.slice(-20).reduce((a: number, b: number) => a + b, 0) / 20;
-            const sma50 = closes.slice(-50).reduce((a: number, b: number) => a + b, 0) / 50;
-            const price = closes[closes.length - 1];
-            let regime = 'NEUTRAL';
-            if (volatility > 1.5) regime = 'HIGH_VOLATILITY';
-            else if (volatility < 0.5) regime = 'LOW_VOLATILITY';
-            if (price > sma20 && sma20 > sma50) regime = 'BULLISH';
-            else if (price < sma20 && sma20 < sma50) regime = 'BEARISH';
-            this.state.marketRegime = regime;
-            const trend = price > sma50 ? 'UP' : price < sma50 ? 'DOWN' : 'SIDEWAYS';
-            this.regimeHistory.push({ regime, volatility, trend, strength: Math.abs(mean) });
-            if (this.regimeHistory.length > 100) this.regimeHistory.shift();
+            const allSymbols = this.settings.activeSymbols.length > 0 ? this.settings.activeSymbols : ['XAUUSD'];
+            let compositeRegime = 'NEUTRAL';
+            const volSum = { count: 0, value: 0 };
+
+            for (const symbol of allSymbols) {
+                const bars = await this.fetchBars(symbol, 'H1', 100);
+                if (!bars || bars.length < 30) continue;
+                const closes = bars.map((b: any) => b.close);
+                const returns = closes.slice(1).map((c: any, i: number) => (c - closes[i]) / closes[i] * 100);
+                const mean = returns.reduce((a: number, b: number) => a + b, 0) / returns.length;
+                const variance = returns.reduce((a: number, b: number) => a + (b - mean) ** 2, 0) / returns.length;
+                const volatility = Math.sqrt(variance);
+                const sma20 = closes.slice(-20).reduce((a: number, b: number) => a + b, 0) / 20;
+                const sma50 = closes.slice(-50).reduce((a: number, b: number) => a + b, 0) / 50;
+                const price = closes[closes.length - 1];
+                let regime = 'NEUTRAL';
+                if (volatility > 1.5) regime = 'HIGH_VOLATILITY';
+                else if (volatility < 0.5) regime = 'LOW_VOLATILITY';
+                if (price > sma20 && sma20 > sma50) regime = 'BULLISH';
+                else if (price < sma20 && sma20 < sma50) regime = 'BEARISH';
+                this.regimeBySymbol[symbol] = regime;
+
+                const trend = price > sma50 ? 'UP' : price < sma50 ? 'DOWN' : 'SIDEWAYS';
+                if (!this.symbolRegimeHistory[symbol]) this.symbolRegimeHistory[symbol] = [];
+                this.symbolRegimeHistory[symbol].push({ regime, volatility, trend, strength: Math.abs(mean) });
+                if (this.symbolRegimeHistory[symbol].length > 50) this.symbolRegimeHistory[symbol].shift();
+
+                volSum.count++;
+                volSum.value += volatility;
+            }
+
+            const avgVol = volSum.count > 0 ? volSum.value / volSum.count : 0;
+            if (avgVol > 1.5) compositeRegime = 'HIGH_VOLATILITY';
+            else if (avgVol < 0.5) compositeRegime = 'LOW_VOLATILITY';
+            else compositeRegime = 'NEUTRAL';
+            this.state.marketRegime = compositeRegime;
         } catch (e) { }
     }
 
@@ -291,8 +315,8 @@ export class MotorIAEngine {
         if (!bars || bars.length < period + 1) return 0;
         const trs: number[] = [];
         for (let i = 1; i < Math.min(bars.length, period + 5); i++) {
-            const high = bars[i].h, low = bars[i].l;
-            const prevClose = bars[i - 1].c;
+            const high = bars[i].high, low = bars[i].low;
+            const prevClose = bars[i - 1].close;
             trs.push(Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose)));
         }
         if (trs.length === 0) return 0;
@@ -305,25 +329,18 @@ export class MotorIAEngine {
             const trades: any[] = Array.isArray(resp.data) ? resp.data : [];
             const recentTrades = trades.filter(t => t.magic === 999001).slice(-50);
 
-            let totalLosses = 0;
-            let totalWins = 0;
-            let lossStreak = 0;
-            let maxLossStreak = 0;
+            if (recentTrades.length === 0) return;
 
-            for (const t of recentTrades) {
+            const reversed = [...recentTrades].reverse();
+            let wins = 0, losses = 0;
+            for (const t of reversed) {
                 const profit = (t.profit || 0) + (t.commission || 0) + (t.swap || 0);
-                if (profit > 0) { totalWins++; lossStreak = 0; }
-                else if (profit < 0) { totalLosses++; lossStreak++; if (lossStreak > maxLossStreak) maxLossStreak = lossStreak; }
-            }
-
-            this.state.consecutiveLosses = maxLossStreak;
-            this.state.consecutiveWins = 0;
-
-            for (const t of recentTrades.reverse()) {
-                const profit = (t.profit || 0) + (t.commission || 0) + (t.swap || 0);
-                if (profit > 0) { this.state.consecutiveWins++; }
+                if (profit > 0) { wins++; losses = 0; }
+                else if (profit < 0) { losses++; wins = 0; }
                 else break;
             }
+            this.state.consecutiveWins = wins;
+            this.state.consecutiveLosses = losses;
         } catch (e) { }
     }
 
@@ -433,7 +450,7 @@ export class MotorIAEngine {
 
             if (this.settings.telegramAlerts) {
                 try {
-                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    
                     TradeNotificationBot.notifyTradeClosed('Motor IA', exec.symbol, exec.direction, exec.profit || 0, exec.result, exec.exitReason, exec.lotSize);
                 } catch (e) { }
             }
@@ -455,9 +472,18 @@ export class MotorIAEngine {
         this.saveLearning();
     }
 
+    private static INTEL_ENGINE_URL = process.env.INTEL_ENGINE_URL || 'http://127.0.0.1:5004';
+
+    private static async fetchIntelAnalysis(symbol: string): Promise<any | null> {
+        try {
+            const resp = await axios.post(`${this.INTEL_ENGINE_URL}/api/intel-engine/analyze`, { symbol, force_refresh: false }, { timeout: 8000 });
+            return resp.data;
+        } catch { return null; }
+    }
+
     private static async scanRecoveryOpportunities() {
         if (this.state.dailyTrades >= this.settings.maxDailyTrades) return;
-        if (this.state.consecutiveLosses >= this.settings.maxConsecutiveLosses && this.settings.useAdaptiveLearning) {
+        if (this.state.consecutiveLosses >= this.settings.maxConsecutiveLosses) {
             console.log(`🧠 MotorIA: ${this.state.consecutiveLosses}x perdas consecutivas — pausando recuperação`);
             return;
         }
@@ -468,26 +494,30 @@ export class MotorIAEngine {
 
         const regime = this.state.marketRegime;
         const learning = this.learningData;
+        const totalSamples = learning.length;
         const regimeSamples = learning.filter(l => l.regime === regime);
         const regimeWinRate = regimeSamples.length > 0
             ? regimeSamples.filter(l => l.success).length / regimeSamples.length * 100
             : 50;
+        const explorationBonus = totalSamples < 5 ? 40 : 0;
         const confidence = Math.min(95, Math.max(10,
             (regimeWinRate * 0.4) +
             (this.state.consecutiveWins > 2 ? 20 : 0) +
             (this.state.consecutiveLosses > 0 ? 15 : 0) +
-            (regime === 'BULLISH' ? 10 : regime === 'BEARISH' ? 5 : 0)
+            (regime === 'BULLISH' ? 10 : regime === 'BEARISH' ? 5 : 0) +
+            explorationBonus
         ));
 
         if (confidence < this.settings.minConfidence) return;
+        if (totalSamples < 5 && this.state.totalTrades >= 3) return;
         if (Date.now() - this.state.lastTradeTime < this.settings.cooldownMinutes * 60 * 1000) return;
 
         for (const symbol of this.settings.activeSymbols) {
             const bars = await this.fetchBars(symbol, this.settings.timeframe, 30);
             if (!bars || bars.length < 20) continue;
-            const price = bars[bars.length - 1].c;
-            const sma10 = bars.slice(-10).reduce((a: number, b: any) => a + b.c, 0) / 10;
-            const sma20 = bars.slice(-20).reduce((a: number, b: any) => a + b.c, 0) / 20;
+            const price = bars[bars.length - 1].close;
+            const sma10 = bars.slice(-10).reduce((a: number, b: any) => a + b.close, 0) / 10;
+            const sma20 = bars.slice(-20).reduce((a: number, b: any) => a + b.close, 0) / 20;
             const atr = this.calcATR(bars, 14);
             if (atr <= 0) continue;
 
@@ -495,7 +525,33 @@ export class MotorIAEngine {
             if (!direction) continue;
             if (this.state.consecutiveLosses >= 2 && confidence < 65) continue;
 
-            const lot = Math.round(this.settings.baseLot * (1 + (confidence - 50) / 100) * 100) / 100;
+            let effectiveConfidence = confidence;
+            let effectiveRegime = regime;
+            let intelSignal: any = null;
+
+            const intel = await this.fetchIntelAnalysis(symbol);
+            if (intel && intel.final_confidence) {
+                intelSignal = intel;
+                effectiveConfidence = Math.round((confidence * 0.4) + (intel.final_confidence * 0.6));
+                effectiveRegime = this.regimeBySymbol[symbol] || regime;
+            }
+
+            if (intelSignal?.risk_guardian?.trading_allowed === false) {
+                console.log(`🧠 MotorIA: Intel Engine bloqueou trade em ${symbol} — risco excessivo`);
+                continue;
+            }
+
+            const intelDirection = intelSignal?.final_direction;
+            if (intelDirection && intelDirection !== direction && intelSignal?.final_confidence >= 70) {
+                console.log(`🧠 MotorIA: Intel Engine discorda (${intelDirection} ${intelSignal.final_confidence}%) — ignorando ${symbol}`);
+                continue;
+            }
+
+            const symbolRegime = this.regimeBySymbol[symbol] || regime;
+            const tags = [symbolRegime, `WR${regimeWinRate.toFixed(0)}`];
+            if (intelSignal) tags.push(`ML${intelSignal.final_confidence}`);
+
+            const lot = Math.round(this.settings.baseLot * (1 + (effectiveConfidence - 50) / 100) * 100) / 100;
             const slDist = atr * 1.2;
             const tpDist = slDist * 2;
             const sl = direction === 'BUY' ? price - slDist : price + slDist;
@@ -504,8 +560,8 @@ export class MotorIAEngine {
             await this.executeTrade({
                 symbol, direction, lotSize: Math.min(lot, this.settings.baseLot * this.settings.maxLotMultiplier),
                 entryPrice: price, stopLoss: sl, takeProfit: tp,
-                confidence, strategy: 'Motor IA Adaptive',
-                marketRegime: regime, tags: [regime, `WR${regimeWinRate.toFixed(0)}`],
+                confidence: effectiveConfidence, strategy: 'Motor IA Adaptive',
+                marketRegime: effectiveRegime, tags,
             });
             break;
         }
@@ -556,7 +612,7 @@ export class MotorIAEngine {
 
             if (this.settings.telegramAlerts) {
                 try {
-                    const { TradeNotificationBot } = require('./TradeNotificationBot');
+                    
                     TradeNotificationBot.notifyTradeOpened('Motor IA', params.symbol, params.direction, params.lotSize, params.entryPrice, params.stopLoss, params.takeProfit);
                 } catch (e) { }
             }

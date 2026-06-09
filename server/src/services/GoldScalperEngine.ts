@@ -222,13 +222,13 @@ export class GoldScalperEngine {
         } catch (e: any) { return { success: false, message: e.message }; }
     }
 
-    static start() {
+    static async start() {
         if (this.isRunning) return;
         this.isRunning = true;
         this.loadSettings();
         this.loadTradeHistory();
         this.loadLearningState();
-        this.resolveGoldSymbol();
+        await this.resolveGoldSymbol();
         console.log('🚀 Gold Scalper Engine: Iniciando...');
         this.fetchMacroIndicators(); // Chamada imediata para não esperar 5 minutos
         setInterval(() => this.mainCycle(), 3000);
@@ -246,15 +246,11 @@ export class GoldScalperEngine {
                     } else {
                         this.isKillZone = false;
                     }
-                } catch (e) { }
+                } catch (e) {
+                    console.warn('GoldScalper: discipline sync error', e);
+                }
             }
         }, 10000);
-    }
-
-    private static loadSettings() {
-        if (fs.existsSync(this.SETTINGS_PATH)) {
-            try { this.settings = { ...this.settings, ...JSON.parse(fs.readFileSync(this.SETTINGS_PATH, 'utf-8')) }; } catch (e) { }
-        }
     }
 
     private static saveSettings() { try { fs.writeFileSync(this.SETTINGS_PATH, JSON.stringify(this.settings, null, 2)); } catch (e) { } }
@@ -409,9 +405,13 @@ export class GoldScalperEngine {
                         });
                         if (smcResp.data) this.currentSMCData = smcResp.data;
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.warn('GoldScalper: SMC levels error', e);
+                }
             }
-        } catch (e) { }
+        } catch (e) {
+            console.warn('GoldScalper: macro indicators error', e);
+        }
     }
 
     private static async mainCycle() {
@@ -482,7 +482,9 @@ export class GoldScalperEngine {
                  if (Math.random() < 0.1) console.log(`📊 Gold Scalper Cycle: Spread ${this.currentSpread} | IA Score: ${this.calculateNeuroScore()}% | MicroTrend: ${this.getMicroTrend()}`);
             }
             if (!await this.processBasket(robotPositions)) await this.checkNewOpenings(tick, pos);
-        } catch (e) { } finally { this.isProcessingCycle = false; }
+        } catch (e) {
+            console.warn('GoldScalper: mainCycle error', e);
+        } finally { this.isProcessingCycle = false; }
     }
 
     private static async checkNewOpenings(tick: any, pos: GoldPosition[]) {
@@ -1358,7 +1360,17 @@ export class GoldScalperEngine {
                     return true;
                 });
                 this.totalProfitAllTime = this.tradeHistory.reduce((s, t) => s + t.profit, 0);
-            } catch (e) { }
+            } catch (e) {
+                console.warn('GoldScalper: load trade history error', e);
+            }
+        }
+    }
+
+    private static loadSettings() {
+        if (fs.existsSync(this.SETTINGS_PATH)) {
+            try { this.settings = { ...this.settings, ...JSON.parse(fs.readFileSync(this.SETTINGS_PATH, 'utf-8')) }; } catch (e) {
+                console.warn('GoldScalper: load settings error', e);
+            }
         }
     }
     private static saveTradeHistory() { fs.writeFileSync(this.HISTORY_PATH, JSON.stringify({ trades: this.tradeHistory, totalProfitAllTime: this.totalProfitAllTime }, null, 2)); }

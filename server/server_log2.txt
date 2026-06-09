@@ -1,0 +1,474 @@
+📡 AlertEngine: Alert added [GUARDIAN] - Sistema Radar-FX Online
+📡 AlertEngine: Alert added [MARKET] - Sincronização em Tempo Real Ativa
+Server v1.1 [CLEAN] running at http://0.0.0.0:3015
+✅ Bridge MT5 conectada: Pepperstone-Demo (conta 61527033, saldo $52.5)
+🚀 Iniciando motores de trading...
+🛡️ Guardian: Persisted settings loaded
+🛡️ Alpha Guardian: Scalper Grid & Protection service ACTIVE
+🤖 Alpha Robot: Settings loaded
+🤖 Alpha Robot: History loaded (200 trades)
+🤖 Alpha Robot v2: Institutional Engine ACTIVE
+📡 CopyTrader Engine: Institutional Replication ACTIVE
+👑 Alpha Supreme: Persisted settings loaded
+👑 Alpha Supreme: History loaded (299 trades)
+👑 Alpha Supreme Brain: INICIALIZADO
+🚀 Gold Scalper Engine: Iniciando...
+₿ BitcoinPro: Iniciando robô estratégia 50/200 + RSI...
+🏦 CryptoIA Institutional: Iniciando motor com análise Wyckoff + VWAP + Order Blocks...
+⚡ Titan Micro-Sniper: Engine v2.0 ONLINE (Bridge :5555 | 1s Cycle)
+📈 Swing Trader IA v1.0 ONLINE (60s Cycle) | Symbols: GOLD, BTCUSD
+⚡ Speed Scalper Engine ONLINE | Magic: 777111
+[23:35:13] 🌌 Omni [SUCCESS]: Omni Engine: Serviço Probabilístico Universal INICIADO
+🦈 SharkBot: Robô SMC Institucional iniciado...
+📱 TradeNotificationBot: Iniciado (ativo)
+📱 TradeNotificationBot: Resumo diário agendado para 25/05/2026, 18:00:00
+⚡ Todos os motores iniciados com sucesso!
+🔍 CryptoIA: Resolvendo símbolos no broker...
+⚠️ CryptoIA: MATICUSD não resolvido
+✅ CryptoIA: SHIBUSD -> SHBUSD
+⚠️ CryptoIA: XMRUSD não resolvido
+⚠️ CryptoIA: ZECUSD não resolvido
+⚠️ CryptoIA: EOSUSD não resolvido
+⚠️ CryptoIA: DAIUSD não resolvido
+⚠️ CryptoIA: USDCUSD não resolvido
+⚠️ CryptoIA: USDTUSD não resolvido
+[Titan Sniper] ⛓️ Grid nível 2 (1293/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+📡 AlertEngine: Alert added [GUARDIAN] - Break-Even Ativado
+[SpeedScalper] 🔄 Ciclo diário resetado.
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1293/80 pips). Lote: 0.01
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1296/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1288/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SwingTrader] 🔄 Reset diário executado.
+[SwingTrader] 🔍 Iniciando Swing Analysis MTF...
+[SwingTrader] ⚠️ Erro ao analisar GOLD: Dados insuficientes para GOLD
+[SwingTrader] ✅ Análise concluída: 1 ativos monitorados.
+[Titan Sniper] ⛓️ Grid nível 2 (1288/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1292/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1292/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1292/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1293/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1293/80 pips). Lote: 0.01
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1293/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1314/80 pips). Lote: 0.01
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1315/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1314/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1315/80 pips). Lote: 0.01
+📊 Gold Scalper Cycle: Spread 36 | IA Score: 74% | MicroTrend: FLAT
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1315/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+📊 Gold Scalper Cycle: Spread 36 | IA Score: 74% | MicroTrend: FLAT
+[Titan Sniper] ⛓️ Grid nível 2 (1317/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1317/80 pips). Lote: 0.01
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1317/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1318/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+📊 Gold Scalper Cycle: Spread 36 | IA Score: 74% | MicroTrend: FLAT
+[Titan Sniper] ⛓️ Grid nível 2 (1319/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1298/80 pips). Lote: 0.01
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1298/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1298/80 pips). Lote: 0.01
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1308/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1306/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1305/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1304/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1306/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1306/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1306/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[SpeedScalper] Falha ao abrir ordem SELL em GBPUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1326/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1338/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[SpeedScalper] Falha ao abrir ordem SELL em EURUSD
+[Titan Sniper] ⛓️ Grid nível 2 (1338/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1338/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1338/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1338/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1338/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1338/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1340/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1340/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1340/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1328/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1328/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1340/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1340/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1328/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1339/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1336/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1336/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1336/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1325/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1325/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1301/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1301/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1301/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1301/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1301/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1301/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SwingTrader] 🔍 Iniciando Swing Analysis MTF...
+[SwingTrader] ⚠️ Erro ao analisar GOLD: Dados insuficientes para GOLD
+[SwingTrader] ✅ Análise concluída: 1 ativos monitorados.
+[Titan Sniper] ⛓️ Grid nível 2 (1302/80 pips). Lote: 0.01
+📊 Gold Scalper Cycle: Spread 36 | IA Score: 59% | MicroTrend: FLAT
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1302/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1302/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1286/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1314/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1314/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1298/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1298/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1299/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1296/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1302/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1305/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1305/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1314/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1313/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1314/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1313/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1312/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1312/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1312/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+📊 Gold Scalper Cycle: Spread 36 | IA Score: 59% | MicroTrend: FLAT
+[Titan Sniper] ⛓️ Grid nível 2 (1311/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1312/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1314/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1313/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1313/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1313/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1313/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1313/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1313/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+📊 Gold Scalper Cycle: Spread 36 | IA Score: 59% | MicroTrend: FLAT
+[Titan Sniper] ⛓️ Grid nível 2 (1312/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1314/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1314/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1303/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1303/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1302/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1335/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1335/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1335/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+📊 Gold Scalper Cycle: Spread 36 | IA Score: 59% | MicroTrend: FLAT
+[Titan Sniper] ⛓️ Grid nível 2 (1334/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1334/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1334/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1333/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+📊 Gold Scalper Cycle: Spread 36 | IA Score: 59% | MicroTrend: FLAT
+[Titan Sniper] ⛓️ Grid nível 2 (1333/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1334/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1334/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1312/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1320/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1327/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1324/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1311/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1311/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1311/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1311/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1311/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1311/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1311/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1306/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+📊 Gold Scalper Cycle: Spread 36 | IA Score: 59% | MicroTrend: FLAT
+[Titan Sniper] ⛓️ Grid nível 2 (1307/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1310/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1312/80 pips). Lote: 0.01
+[SwingTrader] 🔍 Iniciando Swing Analysis MTF...
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[SwingTrader] ⚠️ Erro ao analisar GOLD: Dados insuficientes para GOLD
+[SwingTrader] ✅ Análise concluída: 1 ativos monitorados.
+[Titan Sniper] ⛓️ Grid nível 2 (1310/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1310/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1283/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1283/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1295/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1298/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1299/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1301/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1301/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1304/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1311/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1310/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1308/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1334/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1334/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1334/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1332/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1333/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1333/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1333/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1343/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1345/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1345/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1335/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1335/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1335/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1335/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1345/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1345/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1345/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1343/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1343/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1343/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1343/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1322/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1322/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1322/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1322/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1322/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1322/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)
+[Titan Sniper] ⛓️ Grid nível 2 (1322/80 pips). Lote: 0.01
+[Titan Sniper] ❌ Erro ao enviar ordem: MT5 Error: No money (Code: 10019)

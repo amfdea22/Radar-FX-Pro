@@ -1,9 +1,9 @@
 {
-  "dailyStopLoss": 1000,
-  "dailyTakeProfit": 2000,
+  "dailyStopLoss": 30,
+  "dailyTakeProfit": 50,
   "maxTradesPerDay": 10,
   "maxConsecutiveLosses": 3,
-  "resetTimestamp": 1779566708,
+  "resetTimestamp": 1780950700,
   "manualStopLossUSD": 5,
   "manualTakeProfitUSD": 10
 }

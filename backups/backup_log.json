@@ -1,0 +1,387 @@
+[
+  {
+    "file": "alpha_robot_settings.json",
+    "timestamp": "2026-05-30T14:07:25.637Z",
+    "size": 255
+  },
+  {
+    "file": "alpha_robot_history.json",
+    "timestamp": "2026-05-30T14:07:25.639Z",
+    "size": 83
+  },
+  {
+    "file": "crypto_ia_settings.json",
+    "timestamp": "2026-05-30T14:07:25.642Z",
+    "size": 308
+  },
+  {
+    "file": "crypto_ia_data.json",
+    "timestamp": "2026-05-30T14:07:25.644Z",
+    "size": 19391
+  },
+  {
+    "file": "shark_bot_settings.json",
+    "timestamp": "2026-05-30T14:07:25.647Z",
+    "size": 195
+  },
+  {
+    "file": "forex_scalper_settings.json",
+    "timestamp": "2026-05-30T14:07:25.649Z",
+    "size": 556
+  },
+  {
+    "file": "micro_scalper_settings.json",
+    "timestamp": "2026-05-30T14:07:25.651Z",
+    "size": 380
+  },
+  {
+    "file": "omni_probabilistic_settings.json",
+    "timestamp": "2026-05-30T14:07:25.653Z",
+    "size": 367
+  },
+  {
+    "file": "telegram_settings.json",
+    "timestamp": "2026-05-30T14:07:25.655Z",
+    "size": 63
+  },
+  {
+    "file": "trading_journal.json",
+    "timestamp": "2026-05-30T14:07:25.656Z",
+    "size": 2
+  },
+  {
+    "file": "discipline_settings.json",
+    "timestamp": "2026-05-30T14:07:25.659Z",
+    "size": 201
+  },
+  {
+    "file": "guardian_settings.json",
+    "timestamp": "2026-05-30T14:07:25.661Z",
+    "size": 267
+  },
+  {
+    "file": "alpha_robot_settings.json",
+    "timestamp": "2026-05-30T14:10:06.265Z",
+    "size": 255
+  },
+  {
+    "file": "alpha_robot_history.json",
+    "timestamp": "2026-05-30T14:10:06.269Z",
+    "size": 93642
+  },
+  {
+    "file": "gold_scalper_history.json",
+    "timestamp": "2026-05-30T14:10:06.271Z",
+    "size": 260844
+  },
+  {
+    "file": "crypto_ia_settings.json",
+    "timestamp": "2026-05-30T14:10:06.273Z",
+    "size": 308
+  },
+  {
+    "file": "crypto_ia_data.json",
+    "timestamp": "2026-05-30T14:10:06.275Z",
+    "size": 19391
+  },
+  {
+    "file": "shark_bot_settings.json",
+    "timestamp": "2026-05-30T14:10:06.277Z",
+    "size": 195
+  },
+  {
+    "file": "forex_scalper_settings.json",
+    "timestamp": "2026-05-30T14:10:06.280Z",
+    "size": 556
+  },
+  {
+    "file": "micro_scalper_settings.json",
+    "timestamp": "2026-05-30T14:10:06.282Z",
+    "size": 380
+  },
+  {
+    "file": "omni_probabilistic_settings.json",
+    "timestamp": "2026-05-30T14:10:06.284Z",
+    "size": 367
+  },
+  {
+    "file": "telegram_settings.json",
+    "timestamp": "2026-05-30T14:10:06.285Z",
+    "size": 63
+  },
+  {
+    "file": "trading_journal.json",
+    "timestamp": "2026-05-30T14:10:06.287Z",
+    "size": 2
+  },
+  {
+    "file": "discipline_settings.json",
+    "timestamp": "2026-05-30T14:10:06.289Z",
+    "size": 201
+  },
+  {
+    "file": "guardian_settings.json",
+    "timestamp": "2026-05-30T14:10:06.291Z",
+    "size": 267
+  },
+  {
+    "file": "alpha_robot_settings.json",
+    "timestamp": "2026-05-30T14:13:01.883Z",
+    "size": 255
+  },
+  {
+    "file": "alpha_robot_history.json",
+    "timestamp": "2026-05-30T14:13:01.884Z",
+    "size": 93688
+  },
+  {
+    "file": "gold_scalper_history.json",
+    "timestamp": "2026-05-30T14:13:01.886Z",
+    "size": 260844
+  },
+  {
+    "file": "crypto_ia_settings.json",
+    "timestamp": "2026-05-30T14:13:01.887Z",
+    "size": 308
+  },
+  {
+    "file": "crypto_ia_data.json",
+    "timestamp": "2026-05-30T14:13:01.889Z",
+    "size": 19391
+  },
+  {
+    "file": "shark_bot_settings.json",
+    "timestamp": "2026-05-30T14:13:01.891Z",
+    "size": 195
+  },
+  {
+    "file": "forex_scalper_settings.json",
+    "timestamp": "2026-05-30T14:13:01.893Z",
+    "size": 556
+  },
+  {
+    "file": "micro_scalper_settings.json",
+    "timestamp": "2026-05-30T14:13:01.895Z",
+    "size": 380
+  },
+  {
+    "file": "omni_probabilistic_settings.json",
+    "timestamp": "2026-05-30T14:13:01.896Z",
+    "size": 367
+  },
+  {
+    "file": "telegram_settings.json",
+    "timestamp": "2026-05-30T14:13:01.898Z",
+    "size": 63
+  },
+  {
+    "file": "trading_journal.json",
+    "timestamp": "2026-05-30T14:13:01.900Z",
+    "size": 2
+  },
+  {
+    "file": "discipline_settings.json",
+    "timestamp": "2026-05-30T14:13:01.902Z",
+    "size": 201
+  },
+  {
+    "file": "guardian_settings.json",
+    "timestamp": "2026-05-30T14:13:01.903Z",
+    "size": 267
+  },
+  {
+    "file": "alpha_robot_settings.json",
+    "timestamp": "2026-05-30T14:39:19.141Z",
+    "size": 255
+  },
+  {
+    "file": "alpha_robot_history.json",
+    "timestamp": "2026-05-30T14:39:19.143Z",
+    "size": 93641
+  },
+  {
+    "file": "gold_scalper_history.json",
+    "timestamp": "2026-05-30T14:39:19.145Z",
+    "size": 260844
+  },
+  {
+    "file": "crypto_ia_settings.json",
+    "timestamp": "2026-05-30T14:39:19.147Z",
+    "size": 308
+  },
+  {
+    "file": "crypto_ia_data.json",
+    "timestamp": "2026-05-30T14:39:19.149Z",
+    "size": 19391
+  },
+  {
+    "file": "shark_bot_settings.json",
+    "timestamp": "2026-05-30T14:39:19.151Z",
+    "size": 195
+  },
+  {
+    "file": "forex_scalper_settings.json",
+    "timestamp": "2026-05-30T14:39:19.152Z",
+    "size": 556
+  },
+  {
+    "file": "micro_scalper_settings.json",
+    "timestamp": "2026-05-30T14:39:19.155Z",
+    "size": 380
+  },
+  {
+    "file": "omni_probabilistic_settings.json",
+    "timestamp": "2026-05-30T14:39:19.157Z",
+    "size": 367
+  },
+  {
+    "file": "telegram_settings.json",
+    "timestamp": "2026-05-30T14:39:19.158Z",
+    "size": 63
+  },
+  {
+    "file": "trading_journal.json",
+    "timestamp": "2026-05-30T14:39:19.159Z",
+    "size": 2
+  },
+  {
+    "file": "discipline_settings.json",
+    "timestamp": "2026-05-30T14:39:19.162Z",
+    "size": 201
+  },
+  {
+    "file": "guardian_settings.json",
+    "timestamp": "2026-05-30T14:39:19.165Z",
+    "size": 267
+  },
+  {
+    "file": "alpha_robot_settings.json",
+    "timestamp": "2026-05-30T15:39:19.143Z",
+    "size": 255
+  },
+  {
+    "file": "alpha_robot_history.json",
+    "timestamp": "2026-05-30T15:39:19.146Z",
+    "size": 93688
+  },
+  {
+    "file": "gold_scalper_history.json",
+    "timestamp": "2026-05-30T15:39:19.148Z",
+    "size": 260844
+  },
+  {
+    "file": "crypto_ia_settings.json",
+    "timestamp": "2026-05-30T15:39:19.150Z",
+    "size": 308
+  },
+  {
+    "file": "crypto_ia_data.json",
+    "timestamp": "2026-05-30T15:39:19.151Z",
+    "size": 19391
+  },
+  {
+    "file": "shark_bot_settings.json",
+    "timestamp": "2026-05-30T15:39:19.153Z",
+    "size": 195
+  },
+  {
+    "file": "forex_scalper_settings.json",
+    "timestamp": "2026-05-30T15:39:19.155Z",
+    "size": 556
+  },
+  {
+    "file": "micro_scalper_settings.json",
+    "timestamp": "2026-05-30T15:39:19.156Z",
+    "size": 380
+  },
+  {
+    "file": "omni_probabilistic_settings.json",
+    "timestamp": "2026-05-30T15:39:19.158Z",
+    "size": 367
+  },
+  {
+    "file": "telegram_settings.json",
+    "timestamp": "2026-05-30T15:39:19.160Z",
+    "size": 63
+  },
+  {
+    "file": "trading_journal.json",
+    "timestamp": "2026-05-30T15:39:19.162Z",
+    "size": 2
+  },
+  {
+    "file": "discipline_settings.json",
+    "timestamp": "2026-05-30T15:39:19.164Z",
+    "size": 201
+  },
+  {
+    "file": "guardian_settings.json",
+    "timestamp": "2026-05-30T15:39:19.166Z",
+    "size": 267
+  },
+  {
+    "file": "alpha_robot_settings.json",
+    "timestamp": "2026-05-30T16:13:52.081Z",
+    "size": 255
+  },
+  {
+    "file": "alpha_robot_history.json",
+    "timestamp": "2026-05-30T16:13:52.089Z",
+    "size": 93677
+  },
+  {
+    "file": "gold_scalper_history.json",
+    "timestamp": "2026-05-30T16:13:52.091Z",
+    "size": 260844
+  },
+  {
+    "file": "crypto_ia_settings.json",
+    "timestamp": "2026-05-30T16:13:52.092Z",
+    "size": 308
+  },
+  {
+    "file": "crypto_ia_data.json",
+    "timestamp": "2026-05-30T16:13:52.094Z",
+    "size": 19391
+  },
+  {
+    "file": "shark_bot_settings.json",
+    "timestamp": "2026-05-30T16:13:52.096Z",
+    "size": 195
+  },
+  {
+    "file": "forex_scalper_settings.json",
+    "timestamp": "2026-05-30T16:13:52.098Z",
+    "size": 556
+  },
+  {
+    "file": "micro_scalper_settings.json",
+    "timestamp": "2026-05-30T16:13:52.099Z",
+    "size": 380
+  },
+  {
+    "file": "omni_probabilistic_settings.json",
+    "timestamp": "2026-05-30T16:13:52.104Z",
+    "size": 367
+  },
+  {
+    "file": "telegram_settings.json",
+    "timestamp": "2026-05-30T16:13:52.105Z",
+    "size": 63
+  },
+  {
+    "file": "trading_journal.json",
+    "timestamp": "2026-05-30T16:13:52.107Z",
+    "size": 2
+  },
+  {
+    "file": "discipline_settings.json",
+    "timestamp": "2026-05-30T16:13:52.109Z",
+    "size": 201
+  },
+  {
+    "file": "guardian_settings.json",
+    "timestamp": "2026-05-30T16:13:52.111Z",
+    "size": 267
+  }
+]

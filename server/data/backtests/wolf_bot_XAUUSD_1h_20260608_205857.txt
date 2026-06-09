@@ -1,0 +1,125 @@
+================================================================================
+  WOLF BOT — RELATORIO DE BACKTEST
+  Estrategia: SMC + Wyckoff + FVG 50% + Scale-Out + BE+Custos
+  Data: 2026-06-08 20:58
+================================================================================
+
+============================= PARAMETROS DO TESTE ==============================
+  Simbolo:           XAUUSD
+  Timeframe:         1h
+  Capital Inicial:   $10000.00
+  Volume Fixo:       0.1 lots
+  Swing Period:      5
+  Min R:R:           2.0
+  BE Padding:        20 pips
+  Comissao:          $3.0/lot
+  Alavancagem:       1:100
+
+============================ RESUMO DE PERFORMANCE =============================
+  Total Trades:      54 (parciais: 0)
+  Trades Principais: 54
+  Wins:              22
+  Losses:            32
+  Win Rate:          40.7%
+  Lucro Total:       $6019.07
+  Retorno:           60.19%
+  Profit Factor:     25.16
+  Avg Win:           $284.92
+  Avg Loss:          $7.79
+  Max Drawdown:      34.68%
+  DD Value:          $8148.96
+  Sharpe Ratio:      2.51
+  Saldo Final:       $16015.59
+
+========================== DISTRIBUICAO DE RESULTADOS ==========================
+  Maior Win:         $5233.70
+  Maior Loss:        $-29.31
+  Media PnL:         $111.46
+  Mediana PnL:       $-3.19
+  Desvio Padrao:     $704.61
+  Trades Positivos:  22
+  Trades Negativos:  32
+
+============================== ANALISE BE+CUSTOS ===============================
+  Total BE+Custos:   7 acionamentos
+  PnL Apos BE:       $312.06
+
+=============================== CURVA DE EQUITY ================================
+  Equity Inicial:    $10000.00
+  Equity Final:      $16019.22
+  Pico Maximo:       $23498.58
+  Vale Minimo:       $9946.74
+  Drawdown Medio:    10.58%
+
+=============================== TABELA DE TRADES ===============================
+    # Acao    Entrada      Saida  Volume        PnL Result Parcial  Conf
+  ------------------------------------------------------------------------
+    1 SELL    3383.41    3383.54    0.02      -0.27   LOSS             C
+    2 SELL    3383.41    3383.54    0.01      -0.13   LOSS             C
+    3 SELL    3383.41    3387.71    0.02      -8.59   LOSS             C
+    4 SELL    3383.41    3387.71    0.01      -4.30   LOSS             C
+    5  BUY    3370.11    3379.91    0.02      19.60    WIN             C
+    6  BUY    3370.11    3391.95    0.01      21.84    WIN             C
+    7  BUY    3375.45    3379.91    0.02       8.92    WIN             C
+    8  BUY    3375.45    3375.65    0.01       0.20    WIN             C
+    9 SELL    3395.98    3399.55    0.02      -7.14   LOSS             C
+   10 SELL    3395.98    3399.55    0.01      -3.57   LOSS             C
+   11 SELL    3401.82    3407.39    0.02     -11.15   LOSS             C
+   12 SELL    3401.82    3407.39    0.01      -5.57   LOSS             C
+   13  BUY    3375.45    3374.96    0.02      -0.97   LOSS             C
+   14  BUY    3375.45    3374.96    0.01      -0.49   LOSS             C
+   15  BUY    3388.22    3404.26    0.02      32.08    WIN             C
+   16  BUY    3388.22    3388.42    0.01       0.20    WIN             C
+   17  BUY    3375.45    3360.80    0.02     -29.31   LOSS             C
+   18  BUY    3375.45    3360.80    0.01     -14.65   LOSS             C
+   19  BUY    3351.38    3344.71    0.02     -13.35   LOSS             C
+   20  BUY    3351.38    3344.71    0.01      -6.67   LOSS             C
+   21  BUY    3351.38    3339.30    0.02     -24.15   LOSS             C
+   22  BUY    3351.38    3339.30    0.01     -12.08   LOSS             C
+   23  BUY    3345.52    3357.60    0.06      72.48    WIN             A
+   24  BUY    3345.52    3345.72    0.04       0.80    WIN             A
+   25  BUY    3344.07    3357.98    0.06      83.46    WIN             B
+   26  BUY    3344.07    3344.27    0.04       0.80    WIN             B
+   27 SELL    3352.89    3358.89    0.02     -11.99   LOSS             C
+   28 SELL    3352.89    3358.89    0.01      -6.00   LOSS             C
+   29 SELL    3358.53    3363.87    0.02     -10.68   LOSS             C
+   30 SELL    3358.53    3363.87    0.01      -5.34   LOSS             C
+   31 SELL    3376.97    3349.75    0.02      54.44    WIN             C
+   32 SELL    3376.97    3349.11    0.01      27.86    WIN             C
+   33  BUY    3343.73    3337.54    0.02     -12.38   LOSS             C
+   34  BUY    3343.73    3337.54    0.01      -6.19   LOSS             C
+   35 SELL    3355.60    3341.25    0.06      86.10    WIN             B
+   36 SELL    3355.60    3323.79    0.04     127.23    WIN             B
+   37 SELL    3355.60    3323.50    0.02      64.20    WIN             C
+   38 SELL    3355.60    3320.23    0.01      35.37    WIN             C
+   39  BUY    3315.03    3311.71    0.02      -6.65   LOSS             C
+   40  BUY    3315.03    3311.71    0.01      -3.32   LOSS             C
+   41  BUY    3311.42    3345.31    0.02      67.78    WIN             C
+   42  BUY    3311.42    3346.84    0.01      35.42    WIN             C
+   43 SELL    3344.51    3348.16    0.02      -7.30   LOSS             C
+   44 SELL    3344.51    3348.16    0.01      -3.65   LOSS             C
+   45 SELL    3378.85    3383.18    0.02      -8.66   LOSS             C
+   46 SELL    3378.85    3383.18    0.01      -4.33   LOSS             C
+   47  BUY    3366.04    3376.22    0.06      61.08    WIN             B
+   48  BUY    3366.04    3402.90    0.04     147.46    WIN             B
+   49 SELL    3408.82    3411.89    0.02      -6.15   LOSS             C
+   50 SELL    3408.82    3411.89    0.01      -3.07   LOSS             C
+   51 SELL    3450.10    3453.79    0.02      -7.39   LOSS             C
+   52 SELL    3450.10    3453.79    0.01      -3.69   LOSS             C
+   53  BUY    3442.99    3464.80    0.04      87.23    WIN             A
+   54  BUY    3442.99    4315.27    0.06    5233.70    WIN             A
+  ------------------------------------------------------------------------
+                           TOTAL            6019.07
+
+============================= TRADES COM BE+CUSTOS =============================
+  Ticket 8: BUY PnL=$0.20 WOLF_S2_C [BE+CUSTOS]
+  Ticket 16: BUY PnL=$0.20 WOLF_S2_C [BE+CUSTOS]
+  Ticket 24: BUY PnL=$0.80 WOLF_S2_A [BE+CUSTOS]
+  Ticket 26: BUY PnL=$0.80 WOLF_S2_B [BE+CUSTOS]
+  Ticket 36: SELL PnL=$127.23 WOLF_S2_B [BE+CUSTOS]
+  Ticket 38: SELL PnL=$35.37 WOLF_S2_C [BE+CUSTOS]
+  Ticket 48: BUY PnL=$147.46 WOLF_S2_B [BE+CUSTOS]
+
+================================================================================
+  FIM DO RELATORIO
+================================================================================

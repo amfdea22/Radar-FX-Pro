@@ -4,7 +4,7 @@ $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Path
 $TASKS = @(
     @{Name="RadarFX-Bridge"; Command="python"; Args="`"$ROOT\bridge\mt5_bridge.py`""; Description="MT5 Python Bridge (porta 5555)"},
     @{Name="RadarFX-Server"; Command="cmd.exe"; Args="/c cd /d `"$ROOT\server`" && npm run dev"; Description="Node.js API Server (porta 3015)"},
-    @{Name="RadarFX-Client"; Command="cmd.exe"; Args="/c cd /d `"$ROOT\client`" && npm run dev"; Description="Vite Frontend (porta 3006)"},
+    @{Name="RadarFX-Client"; Command="cmd.exe"; Args="/c cd /d `"$ROOT\client`" && npm run dev"; Description="Vite Frontend (porta 3015 via Express)"},
     @{Name="RadarFX-Watchdog"; Command="cmd.exe"; Args="/c `"$ROOT\watchdog.bat`""; Description="Monitor de processos (30s loop)"}
 )
 

@@ -1,5 +1,5 @@
 {
-  "enabled": true,
+  "enabled": false,
   "minConfidence": 85,
   "maxTradesPerDay": 10,
   "defaultLot": 0.01,
@@ -7,8 +7,8 @@
   "autoBreakEven": true,
   "autoTrailing": true,
   "tradesPer15Min": 3,
-  "tradeLimitInterval": "15m",
-  "preferredTimeframe": "M15",
+  "tradeLimitInterval": "1h",
+  "preferredTimeframe": "H1",
   "useInstitutionalAnalysis": true,
   "useMLSignals": true,
   "maxRiskPerTrade": 1,
@@ -19,9 +19,6 @@
   "entryScoreThreshold": 70,
   "symbols": [
     "XAUUSD",
-    "BTCUSD",
-    "ETHUSD",
-    "EURUSD",
-    "GBPUSD"
+    "US500"
   ]
 }

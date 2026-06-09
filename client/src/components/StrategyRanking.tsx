@@ -205,8 +205,8 @@ export const StrategyRanking: React.FC = () => {
                                             />
                                         )}
                                         {/* Ranking Badge */}
-                                        <div className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center font-black text-xs z-20 ${index === 0 ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/40' :
-                                            index === 1 ? 'bg-slate-300 text-black' :
+                                        <div className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center font-black text-xs z-20 ${index === 0 ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/40' :
+                                            index === 1 ? 'bg-slate-300 text-white' :
                                                 index === 2 ? 'bg-orange-600 text-white' : 'bg-slate-800 text-slate-400'
                                         }`}>
                                             {index + 1}º
@@ -380,8 +380,8 @@ export const StrategyRanking: React.FC = () => {
                                         <div className="flex flex-col lg:flex-row lg:items-center gap-8 relative z-10">
                                             <div className="flex items-center gap-6 lg:w-1/3">
                                                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl italic relative ${
-                                                    index === 0 ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/40' :
-                                                    index === 1 ? 'bg-slate-300 text-black border border-slate-400/20' :
+                                                    index === 0 ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/40' :
+                                                    index === 1 ? 'bg-slate-300 text-white border border-slate-400/20' :
                                                         'bg-orange-700 text-white border border-orange-400/20'
                                                 }`}>
                                                     {index + 1}º

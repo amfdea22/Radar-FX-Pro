@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Activity, TrendingUp, TrendingDown, Target, Shield, BarChart3, Crosshair, Cpu, BrainCircuit, Zap, DollarSign, Percent, RefreshCw, CircleDot } from 'lucide-react';
+import { Activity, TrendingUp, TrendingDown, Target, Shield, BarChart3, Crosshair, Cpu, BrainCircuit, Zap, DollarSign, Percent, RefreshCw, CircleDot, Radio, ChevronDown, AlertTriangle, Terminal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimeframeSignal {
@@ -30,8 +30,20 @@ const DIRECTION_CFG: Record<string, { icon: string; label: string; gradient: str
     NEUTRAL: { icon: '◆', label: 'NEUTRO', gradient: 'from-slate-400 via-slate-500 to-zinc-600', glow: 'shadow-slate-500/25' },
 };
 
+const ROBOTS_LIST = [
+    { id: 'shark-bot', name: 'SharkBot', icon: '🦈', color: 'from-cyan-400 to-cyan-300' },
+    { id: 'gold-scalper', name: 'Gold Scalper', icon: '⚡', color: 'from-amber-400 to-yellow-300' },
+    { id: 'motor-ia', name: 'Motor IA', icon: '🧠', color: 'from-violet-400 to-purple-300' },
+    { id: 'crypto-ia', name: 'Crypto IA', icon: '₿', color: 'from-orange-400 to-amber-300' },
+    { id: 'alpha-robot', name: 'Alpha Robot', icon: 'α', color: 'from-emerald-400 to-teal-300' },
+    { id: 'supreme', name: 'Supreme', icon: '♛', color: 'from-rose-400 to-pink-300' },
+    { id: 'recovery', name: 'Recovery', icon: '↺', color: 'from-blue-400 to-indigo-300' },
+    { id: 'bitcoin-pro', name: 'Bitcoin Pro', icon: '₿', color: 'from-yellow-400 to-orange-300' },
+];
+
 const TABS = [
     { key: 'sinais', label: 'Sinais', icon: '◈' },
+    { key: 'robos', label: 'Robôs', icon: '⚙' },
     { key: 'risco', label: 'Risco', icon: '♠' },
     { key: 'noticias', label: 'Notícias', icon: '◆' },
     { key: 'historico', label: 'Hit Rate', icon: '▲' },
@@ -173,6 +185,14 @@ function BarSparkline({ values, color = '#34d399', height = 24 }: { values: numb
     );
 }
 
+interface RobotStatus {
+    isRunning?: boolean;
+    settings?: { enabled?: boolean; symbol?: string; lotSize?: number };
+    state?: { position?: any | null; dailyProfit?: number; dailyLoss?: number };
+    performance?: { totalTrades?: number; wins?: number; losses?: number; winRate?: number; totalProfit?: number; profitFactor?: number };
+    trades?: any[];
+}
+
 export default function MLInsightsPanel() {
     const [report, setReport] = useState<FullReport | null>(null);
     const [monteCarlo, setMonteCarlo] = useState<MonteCarlo | null>(null);
@@ -180,9 +200,12 @@ export default function MLInsightsPanel() {
     const [settings, setSettings] = useState<MLSettings | null>(null);
     const [performance, setPerformance] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'sinais' | 'risco' | 'noticias' | 'historico' | 'config' | 'performance'>('sinais');
+    const [activeTab, setActiveTab] = useState<'sinais' | 'robos' | 'risco' | 'noticias' | 'historico' | 'config' | 'performance'>('sinais');
     const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
     const [selectedFilter, setSelectedFilter] = useState<string>('all');
+    const [selectedRobot, setSelectedRobot] = useState<string>('shark-bot');
+    const [robotStatus, setRobotStatus] = useState<RobotStatus | null>(null);
+    const [robotLogs, setRobotLogs] = useState<string[]>([]);
 
     const fetchAll = useCallback(async () => {
         const [r, mc, h, s, p] = await Promise.all([
@@ -200,7 +223,21 @@ export default function MLInsightsPanel() {
         setLoading(false);
     }, [selectedSymbol]);
 
+    const fetchRobotStatus = useCallback(async () => {
+        const data = await fetch(`/api/mt5/${selectedRobot}/status`).then(r => r.json()).catch(() => null);
+        if (data) {
+            setRobotStatus(data);
+            if (data.operationLog) setRobotLogs(data.operationLog.slice(-30));
+        }
+    }, [selectedRobot]);
+
     useEffect(() => { fetchAll(); const i = setInterval(fetchAll, 30000); return () => clearInterval(i); }, [fetchAll]);
+
+    useEffect(() => {
+        fetchRobotStatus();
+        const i = setInterval(fetchRobotStatus, 10000);
+        return () => clearInterval(i);
+    }, [fetchRobotStatus]);
 
     const updateSettings = async (patch: Partial<MLSettings>) => {
         try {
@@ -429,7 +466,8 @@ export default function MLInsightsPanel() {
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
-                        <TrendingUp className="text-emerald-500" size={18} /> Regime de Mercado
+                        <TrendingUp className="text-emerald-500" size={18} /> Regime
+                        {prediction && <span className="text-sm font-black text-slate-500 ml-1">· {prediction.symbol}</span>}
                     </h3>
                     <svg width="44" height="22" viewBox="0 0 44 22">
                         <circle cx="22" cy="11" r="9.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
@@ -452,6 +490,146 @@ export default function MLInsightsPanel() {
                         <p className="text-xl font-black text-white italic tabular-nums">{r.strength.toFixed(1)}</p>
                     </div>
                 </div>
+            </div>
+        );
+    };
+
+    const renderRobotMonitor = () => {
+        const robot = ROBOTS_LIST.find(r => r.id === selectedRobot);
+        const perf = robotStatus?.performance;
+        const pos = robotStatus?.state?.position;
+        return (
+            <div className="space-y-4">
+                {/* Robot selector */}
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    {ROBOTS_LIST.map(r => {
+                        const sel = r.id === selectedRobot;
+                        return (
+                            <button key={r.id} onClick={() => setSelectedRobot(r.id)}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border ${
+                                    sel ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.2)]' : 'bg-slate-800/50 border-slate-700/50 text-slate-500 hover:bg-slate-700/50'}`}>
+                                <span>{r.icon}</span>
+                                <span className={`${sel ? `bg-gradient-to-r ${r.color} bg-clip-text text-transparent` : ''}`}>{r.name}</span>
+                                {sel && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {!robotStatus ? (
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/10 p-12 text-center">
+                        <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mx-auto mb-3" />
+                        <p className="text-base font-bold text-slate-400">Conectando ao {robot?.name}...</p>
+                    </div>
+                ) : (
+                    <>
+                        {/* Status cards */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 p-4">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Status</p>
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full animate-pulse ${robotStatus.isRunning ? 'bg-emerald-500' : 'bg-slate-500'}`} />
+                                    <span className={`text-sm font-black ${robotStatus.isRunning ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                        {robotStatus.isRunning ? 'Online' : 'Offline'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 p-4">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Ativo</p>
+                                <p className="text-sm font-black text-white">{robotStatus.settings?.symbol || '—'}</p>
+                            </div>
+                            <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 p-4">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Trades</p>
+                                <p className="text-sm font-black text-white">{perf?.totalTrades || 0}</p>
+                            </div>
+                            <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 p-4">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">P&L</p>
+                                <p className={`text-sm font-black ${(perf?.totalProfit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                    ${(perf?.totalProfit || 0).toFixed(2)}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Performance */}
+                        {perf && perf.totalTrades > 0 && (
+                            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/10 p-6 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
+                                <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-4 flex items-center gap-2">
+                                    <BarChart3 className="text-emerald-500" size={18} /> Performance
+                                </h3>
+                                <div className="grid grid-cols-4 gap-3">
+                                    <div className="bg-slate-950/40 p-3 rounded-2xl border border-white/5 text-center">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Win Rate</p>
+                                        <p className={`text-lg font-black italic ${perf.winRate >= 60 ? 'text-emerald-400' : perf.winRate >= 40 ? 'text-amber-400' : 'text-red-400'}`}>{perf.winRate?.toFixed(0) || 0}%</p>
+                                    </div>
+                                    <div className="bg-slate-950/40 p-3 rounded-2xl border border-white/5 text-center">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Wins</p>
+                                        <p className="text-lg font-black text-emerald-400">{perf.wins || 0}</p>
+                                    </div>
+                                    <div className="bg-slate-950/40 p-3 rounded-2xl border border-white/5 text-center">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Losses</p>
+                                        <p className="text-lg font-black text-red-400">{perf.losses || 0}</p>
+                                    </div>
+                                    <div className="bg-slate-950/40 p-3 rounded-2xl border border-white/5 text-center">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">PF</p>
+                                        <p className={`text-lg font-black italic ${(perf.profitFactor || 0) >= 1.5 ? 'text-emerald-400' : 'text-amber-400'}`}>{perf.profitFactor?.toFixed(2) || '—'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Active Position */}
+                        {pos ? (
+                            <div className={`bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border p-6 relative overflow-hidden ${pos.type === 'BUY' ? 'border-emerald-500/20' : 'border-red-500/20'}`}>
+                                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+                                <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-4 flex items-center gap-2">
+                                    <Target className={pos.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'} size={18} />
+                                    Posição Ativa · <span className={pos.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'}>{pos.type}</span>
+                                </h3>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="bg-slate-950/40 p-3 rounded-2xl border border-white/5">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase">Entrada</p>
+                                        <p className="text-base font-black text-white">{pos.price?.toFixed(2) || '—'}</p>
+                                    </div>
+                                    <div className="bg-slate-950/40 p-3 rounded-2xl border border-white/5">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase">SL</p>
+                                        <p className="text-base font-black text-red-400">{pos.sl?.toFixed(2) || '—'}</p>
+                                    </div>
+                                    <div className="bg-slate-950/40 p-3 rounded-2xl border border-white/5">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase">TP</p>
+                                        <p className="text-base font-black text-emerald-400">{pos.tp?.toFixed(2) || '—'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/5 p-8 text-center">
+                                <Target size={28} className="text-slate-700 mx-auto mb-2" />
+                                <p className="text-sm font-bold text-slate-500">Nenhuma posição ativa</p>
+                            </div>
+                        )}
+
+                        {/* Live logs */}
+                        {robotLogs.length > 0 && (
+                            <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white/5 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
+                                <div className="flex items-center gap-2 px-5 py-3 border-b border-white/5">
+                                    <Terminal size={14} className="text-emerald-400" />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Terminal</span>
+                                    <span className="text-[8px] text-slate-600">últimos eventos</span>
+                                </div>
+                                <div className="h-40 overflow-y-auto p-4 font-mono text-[10px] space-y-1 bg-slate-950/20">
+                                    {robotLogs.map((log: any, i: number) => (
+                                        <div key={i} className="flex gap-2 items-start">
+                                            <span className="text-slate-600 shrink-0">[{log.time || ''}]</span>
+                                            <span className="text-emerald-500/70 shrink-0 font-black uppercase">[{log.action || ''}]</span>
+                                            <span className="text-slate-300">{log.details || ''}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
         );
     };
@@ -1015,12 +1193,31 @@ export default function MLInsightsPanel() {
                             <span>{tab.label}</span>
                         </button>
                     ))}
+                    {/* Robot selector dropdown */}
+                    <div className="relative ml-2">
+                        <select value={selectedRobot} onChange={e => setSelectedRobot(e.target.value)}
+                            className="appearance-none bg-slate-800/80 border border-white/10 rounded-xl px-3 py-2 pr-8 text-[10px] font-black text-white uppercase tracking-wider outline-none focus:border-emerald-500/50 cursor-pointer">
+                            {ROBOTS_LIST.map(r => (
+                                <option key={r.id} value={r.id}>{r.icon} {r.name}</option>
+                            ))}
+                        </select>
+                        <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                    </div>
+                    {robotStatus && (
+                        <div className="flex items-center gap-2 ml-1">
+                            <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${(robotStatus.isRunning || robotStatus.settings?.enabled) ? 'bg-emerald-500' : 'bg-slate-500'}`} />
+                            <span className={`text-[9px] font-black ${(robotStatus.isRunning || robotStatus.settings?.enabled) ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {robotStatus?.settings?.symbol || ''}
+                            </span>
+                        </div>
+                    )}
                     {report?.timestamp && <span className="text-[10px] font-mono text-slate-500 ml-auto mr-1">{new Date(report.timestamp).toLocaleTimeString('pt-BR')}</span>}
                 </div>
             </div>
 
             {/* CONTENT */}
             {activeTab === 'sinais' && <div className="space-y-6">{renderSymbolSelector()}{renderPredictionCard()}{renderRegime()}</div>}
+            {activeTab === 'robos' && renderRobotMonitor()}
             {activeTab === 'risco' && renderRisk()}
             {activeTab === 'noticias' && renderNews()}
             {activeTab === 'historico' && renderHistory()}

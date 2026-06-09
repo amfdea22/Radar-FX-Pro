@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
     Settings, User, Key, Globe, Save, RefreshCw,
     CheckCircle2, AlertCircle, Shield, Briefcase, Send,
-    Cpu
+    Cpu, TrendingUp, Copy, Trash2, ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { TelegramSettingsModal } from './TelegramSettingsModal';
+import { TradingViewWidget } from './TradingViewWidget';
+import { useTvAlerts } from '../hooks/useTvAlerts';
 
 interface Profile {
     name: string;
@@ -50,6 +52,30 @@ export const SystemSettings: React.FC = () => {
     const [server, setServer] = useState('Pepperstone-Demo');
     const [isConnecting, setIsConnecting] = useState(false);
     const [isTelegramOpen, setIsTelegramOpen] = useState(false);
+
+    const [tvSymbol, setTvSymbol] = useState('XAUUSD');
+    const [tvInterval, setTvInterval] = useState<'1' | '5' | '15' | '30' | '60' | '240' | 'D' | 'W' | 'M'>('60');
+    const [tvCopied, setTvCopied] = useState(false);
+
+    const tvSymbols = [
+        { sym: 'XAUUSD', name: 'Ouro' },
+        { sym: 'XAGUSD', name: 'Prata' },
+        { sym: 'EURUSD', name: 'Euro/Dólar' },
+        { sym: 'GBPUSD', name: 'Libra/Dólar' },
+        { sym: 'USDJPY', name: 'Dólar/Iene' },
+        { sym: 'USDCAD', name: 'Dólar/Canadense' },
+        { sym: 'AUDUSD', name: 'Australiano/Dólar' },
+        { sym: 'BTCUSD', name: 'Bitcoin' },
+        { sym: 'ETHUSD', name: 'Ethereum' },
+        { sym: 'SOLUSD', name: 'Solana' },
+        { sym: 'SP500', name: 'S&P 500' },
+        { sym: 'US30', name: 'Dow Jones' },
+        { sym: 'NAS100', name: 'Nasdaq' },
+        { sym: 'UK100', name: 'FTSE 100' },
+    ];
+
+    const { alerts: tvAlerts, clearAlerts: clearTvAlerts } = useTvAlerts();
+    const webhookUrl = `${window.location.origin}/api/tradingview/webhook`;
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -124,7 +150,7 @@ export const SystemSettings: React.FC = () => {
                     </div>
                     <div>
                         <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg flex items-center gap-3 flex-wrap">
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-600">Alpha</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-600">Radar</span>
                             Control Center
                             <span className="px-2 py-1 rounded-lg text-xs tracking-widest uppercase bg-lime-500/10 border border-lime-500/20 text-lime-500">
                                 v1.1.2
@@ -371,6 +397,106 @@ export const SystemSettings: React.FC = () => {
                             <Send size={16} />
                             Configurar Notificações
                         </button>
+                    </div>
+                </div>
+
+                {/* TradingView Section */}
+                <div className="md:col-span-2 bg-slate-900/60 backdrop-blur-2xl p-6 lg:p-8 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"></div>
+
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+                            <TrendingUp size={22} className="text-blue-400" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-black text-white italic tracking-tighter uppercase">TradingView Sync</h2>
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Gráfico em tempo real + Webhook de Alertas</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                        <div className="space-y-2">
+                            <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Ativo</label>
+                            <select
+                                value={tvSymbol}
+                                onChange={e => setTvSymbol(e.target.value)}
+                                className="w-full bg-slate-950/80 border border-white/5 rounded-2xl p-3 text-white font-black text-xs outline-none focus:border-blue-500/30 transition-all appearance-none cursor-pointer"
+                            >
+                                {tvSymbols.map(s => (
+                                    <option key={s.sym} value={s.sym}>{s.sym} - {s.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Timeframe</label>
+                            <select
+                                value={tvInterval}
+                                onChange={e => setTvInterval(e.target.value as any)}
+                                className="w-full bg-slate-950/80 border border-white/5 rounded-2xl p-3 text-white font-black text-xs outline-none focus:border-blue-500/30 transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="1">1 minuto</option>
+                                <option value="5">5 minutos</option>
+                                <option value="15">15 minutos</option>
+                                <option value="30">30 minutos</option>
+                                <option value="60">1 hora</option>
+                                <option value="240">4 horas</option>
+                                <option value="D">Diário</option>
+                                <option value="W">Semanal</option>
+                                <option value="M">Mensal</option>
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Webhook URL</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={webhookUrl}
+                                    className="flex-1 bg-slate-950/80 border border-white/5 rounded-2xl p-3 text-blue-400 font-mono text-[10px] outline-none truncate"
+                                />
+                                <button
+                                    onClick={() => { navigator.clipboard.writeText(webhookUrl); setTvCopied(true); setTimeout(() => setTvCopied(false), 2000); }}
+                                    className="p-3 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-2xl hover:bg-blue-500/20 transition-all"
+                                >
+                                    {tvCopied ? <CheckCircle2 size={16} className="text-emerald-400" /> : <Copy size={16} />}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mb-4 bg-slate-950/30 rounded-2xl border border-blue-500/10 overflow-hidden">
+                        <TradingViewWidget symbol={tvSymbol} interval={tvInterval} height={450} />
+                    </div>
+
+                    <div className="bg-slate-950/40 rounded-2xl border border-white/5 p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                <ExternalLink size={14} className="text-blue-400" />
+                                Alertas Recebidos
+                                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[9px]">{tvAlerts.length}</span>
+                            </h3>
+                            {tvAlerts.length > 0 && (
+                                <button onClick={clearTvAlerts} className="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl hover:bg-red-500/20 transition-all text-[9px] font-black uppercase tracking-widest">
+                                    <Trash2 size={12} /> Limpar
+                                </button>
+                            )}
+                        </div>
+                        {tvAlerts.length === 0 ? (
+                            <p className="text-[10px] text-slate-500 text-center py-4">Nenhum alerta recebido. Configure o webhook no TradingView para começar.</p>
+                        ) : (
+                            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                                {tvAlerts.map((a: any) => (
+                                    <div key={a.id} className="flex items-center gap-3 px-3 py-2 bg-slate-900/60 rounded-xl border border-white/5">
+                                        <span className={`text-[10px] font-black uppercase ${a.direction === 'buy' || a.direction === 'long' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            {a.direction === 'buy' || a.direction === 'long' ? 'COMPRA' : 'VENDA'}
+                                        </span>
+                                        <span className="text-xs font-black text-white">{a.symbol}</span>
+                                        <span className="text-[10px] font-mono text-slate-400">@{a.price.toFixed(2)}</span>
+                                        <span className="text-[8px] text-slate-500 ml-auto">{new Date(a.timestamp).toLocaleTimeString('pt-BR')}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 

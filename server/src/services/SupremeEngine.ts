@@ -7,6 +7,7 @@ import path from 'path';
 import { MarketService } from './MarketService';
 import { BridgeClient } from './BridgeClient';
 import { SymbolLockService } from './SymbolLockService';
+import { TradeNotificationBot } from './TradeNotificationBot';
 
 export interface TradeRecord {
     id: string;
@@ -57,6 +58,8 @@ export class SupremeEngine {
         wins: 0,
         losses: 0
     };
+
+    private static isExecuting = false;
 
     static start() {
         this.loadSettings();
@@ -161,7 +164,7 @@ export class SupremeEngine {
                     newTradesCount++;
                     if (this.settings.nakamotoActive || this.settings.intelligence7Active) {
                         try {
-                            const { TradeNotificationBot } = require('./TradeNotificationBot');
+                            
                             const dir = t.type === 0 ? 'BUY' : 'SELL';
                             TradeNotificationBot.notifyTradeClosed('Supreme', t.symbol, dir, realProfit, realProfit >= 0 ? 'WIN' : 'LOSS', 'Auto', t.volume);
                         } catch (e) { /* notif fail */ }
@@ -294,9 +297,12 @@ export class SupremeEngine {
             const hasForexSignal = activeSignals.some((s: any) => s.setup === 'Intelligence 7');
 
             if (hasCryptoSignal && hasForexSignal) {
+                if (this.isExecuting) return;
+                this.isExecuting = true;
                 const bestSignal = activeSignals.sort((a, b) => b.confidence - a.confidence)[0];
                 this.addLog(`[Híbrido] Confluência Detectada! Operando ${bestSignal.symbol}.`, 'success');
-                this.executeSupremeTrade(bestSignal.symbol, `SUPREME_${bestSignal.type}`, `Confluência Multi-Algoritmo (${bestSignal.setup})`);
+                await this.executeSupremeTrade(bestSignal.symbol, `SUPREME_${bestSignal.type}`, `Confluência Multi-Algoritmo (${bestSignal.setup})`);
+                this.isExecuting = false;
             } else {
                 if (Math.random() > 0.9) {
                     this.addLog(`[Varredura] Aguardando sobreposição de algoritmos (Cripto/Forex)...`, 'info');
@@ -312,8 +318,11 @@ export class SupremeEngine {
                 const isIntel7Signal = this.settings.intelligence7Active && signal.setup === 'Intelligence 7';
 
                 if (isNakamotoSignal || isIntel7Signal) {
+                    if (this.isExecuting) { this.addLog('[Isolado] Já executando, pulando...', 'warn'); continue; }
+                    this.isExecuting = true;
                     this.addLog(`[Isolado] Executando sinal de alta probabilidade: ${signal.symbol}`, 'info');
-                    this.executeSupremeTrade(signal.symbol, `SUPREME_ISO_${signal.type}`, `Execução isolada de ${signal.setup}`);
+                    await this.executeSupremeTrade(signal.symbol, `SUPREME_ISO_${signal.type}`, `Execução isolada de ${signal.setup}`);
+                    this.isExecuting = false;
                 }
             }
         }
@@ -363,7 +372,7 @@ export class SupremeEngine {
                 if (resp.data?.status === 'success' || resp.data?.ticket) {
                     SymbolLockService.acquire(symbol, 'Supreme', resp.data?.ticket || resp.data?.order_id || 0, action);
                     try {
-                        const { TradeNotificationBot } = require('./TradeNotificationBot');
+                        
                         TradeNotificationBot.notifyTradeOpened('Supreme', symbol, action, lot, price, sl, tp);
                     } catch (e) { /* notif fail */ }
                 }

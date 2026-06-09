@@ -296,7 +296,7 @@ const TrendClock: React.FC<{ m1: string, m5: string, m5Strength: number }> = ({ 
                         onClick={() => setMode(m)}
                         className={`px-3 py-1 rounded-lg text-[8px] font-black tracking-widest transition-all ${
                             mode === m 
-                                ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)]' 
+                                ? 'bg-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)]' 
                                 : 'text-slate-500 hover:text-slate-300'
                         }`}
                     >
@@ -507,9 +507,10 @@ export const GoldScalperPanel: React.FC = () => {
         try {
             const resp = await axios.get('/api/mt5/gold-scalper/status');
             setStatus(resp.data);
-            setLoading(false);
         } catch (err) {
             console.error('Gold Scalper fetch error:', err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -2035,7 +2036,7 @@ export const GoldScalperPanel: React.FC = () => {
                             <button
                                 onClick={() => updateSetting('smartNeuroIA', !s.smartNeuroIA)}
                                 className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${s.smartNeuroIA
-                                    ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]'
+                                    ? 'bg-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.4)]'
                                     : 'bg-slate-800 text-slate-500 border border-slate-700 hover:border-slate-500'} `}
                             >
                                 {s.smartNeuroIA ? 'IA ATIVA' : 'IA OFF'}
@@ -2058,7 +2059,7 @@ export const GoldScalperPanel: React.FC = () => {
                             <button
                                 onClick={() => updateSetting('sniperMode', !s.sniperMode)}
                                 className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${s.sniperMode
-                                    ? 'bg-trader-cyan text-black shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                                    ? 'bg-trader-cyan text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]'
                                     : 'bg-slate-800 text-slate-500 border border-slate-700 hover:border-slate-500'} `}
                             >
                                 {s.sniperMode ? 'SNIPER ATIVO' : 'SNIPER OFF'}
@@ -2086,7 +2087,7 @@ export const GoldScalperPanel: React.FC = () => {
                                 <button
                                     onClick={() => updateSettings({ strategy: 'USD', smcOnly: false, swingTrendFilter: false })}
                                     className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${s.strategy === 'USD'
-                                        ? 'bg-blue-500 text-black shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                                        ? 'bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]'
                                         : 'bg-slate-800 text-slate-500 border border-slate-700 hover:border-slate-500'} `}
                                 >
                                     USD
@@ -2094,7 +2095,7 @@ export const GoldScalperPanel: React.FC = () => {
                                 <button
                                     onClick={() => updateSettings({ strategy: 'SMC', smcOnly: false, swingTrendFilter: false })}
                                     className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${s.strategy === 'SMC'
-                                        ? 'bg-violet-500 text-black shadow-[0_0_20px_rgba(139,92,246,0.4)]'
+                                        ? 'bg-violet-500 text-white shadow-[0_0_20px_rgba(139,92,246,0.4)]'
                                         : 'bg-slate-800 text-slate-500 border border-slate-700 hover:border-slate-500'} `}
                                 >
                                     SMC
@@ -2102,7 +2103,7 @@ export const GoldScalperPanel: React.FC = () => {
                                 <button
                                     onClick={() => updateSettings({ strategy: 'SMC', smcOnly: true, swingTrendFilter: true })}
                                     className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${s.strategy === 'SMC' && s.smcOnly && s.swingTrendFilter
-                                        ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]'
+                                        ? 'bg-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.4)]'
                                         : 'bg-slate-800 text-slate-500 border border-slate-700 hover:border-slate-500'} `}
                                 >
                                     SMC+MA200
@@ -2574,7 +2575,7 @@ export const GoldScalperPanel: React.FC = () => {
                                 <div className="flex flex-col">
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm font-black text-white italic tracking-tighter uppercase">Neuro Convergence v4.0</span>
-                                        <span className="px-1.5 py-0.5 bg-amber-500 text-black text-[8px] font-black rounded uppercase">Premium</span>
+                                        <span className="px-1.5 py-0.5 bg-amber-500 text-white text-[8px] font-black rounded uppercase">Premium</span>
                                     </div>
                                     <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">Auto-ajuste institucional, travas de abertura e grade adaptativa.</p>
                                 </div>
@@ -2582,7 +2583,7 @@ export const GoldScalperPanel: React.FC = () => {
                             <button
                                 onClick={() => updateSetting('neuroConvergence', !s.neuroConvergence)}
                                 className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl ${s.neuroConvergence 
-                                    ? 'bg-amber-500 text-black shadow-amber-500/20 hover:scale-105 active:scale-95' 
+                                    ? 'bg-amber-500 text-white shadow-amber-500/20 hover:scale-105 active:scale-95' 
                                     : 'bg-slate-800 text-slate-500 border border-slate-700 hover:text-slate-300'}`}
                             >
                                 {s.neuroConvergence ? 'ATIVADO' : 'DESATIVADO'}

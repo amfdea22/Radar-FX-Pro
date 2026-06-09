@@ -145,7 +145,7 @@ export const SwingTerminal: React.FC = () => {
                         </div>
                         <button
                             type="submit"
-                            className="bg-amber-600 hover:bg-amber-500 text-black px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all shadow-lg shadow-amber-900/20 active:scale-95 shrink-0"
+                            className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all shadow-lg shadow-amber-900/20 active:scale-95 shrink-0"
                         >
                             Execute
                         </button>

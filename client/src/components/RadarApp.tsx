@@ -29,7 +29,8 @@ import {
     GripHorizontal,
     Bitcoin,
     Crown,
-    Sigma
+    Sigma,
+    FlaskConical
 } from 'lucide-react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { TradingPanel } from './TradingPanel';
@@ -37,11 +38,13 @@ import { StrategyReportHub } from './StrategyReportHub';
 import { TradingJournal } from './TradingJournal';
 import { MobileHome } from './MobileHome';
 import { SignalScanner } from './SignalScanner';
+import { TradingViewSignalsCard } from './TradingViewSignalsCard';
 import { PerformanceAnalytics } from './PerformanceAnalytics';
 import MLInsightsPanel from './MLInsightsPanel';
 import { Statistics } from './Statistics';
 import { RiskManagement } from './RiskManagement';
 import { AgentIAPanel } from './AgentIAPanel';
+import { BacktestPanel } from './BacktestPanel';
 import { ForexScalperPanel } from './ForexScalperPanel';
 import { MicroScalperPanel } from './MicroScalperPanel';
 import { SwingTraderPanel } from './SwingTraderPanel';
@@ -51,8 +54,9 @@ const SharkBotPanel = React.lazy(() => import('./SharkBotPanel').then(m => ({ de
 const RobotControlPanel = React.lazy(() => import('./RobotControlPanel').then(m => ({ default: m.RobotControlPanel })));
 const CryptoIntelligenceHub = React.lazy(() => import('./CryptoIntelligenceHub').then(m => ({ default: m.CryptoIntelligenceHub })));
 const BitcoinProPanel = React.lazy(() => import('./BitcoinProPanel').then(m => ({ default: m.BitcoinProPanel })));
+const WolfBotPanel = React.lazy(() => import('./WolfBotPanel').then(m => ({ default: m.WolfBotPanel })));
 
-type TabType = 'home' | 'intelligence' | 'robot' | 'trade' | 'management' | 'bitcoin_pro' | 'crypto' | 'gold_scalper' | 'micro_sniper' | 'swing_ia' | 'copy' | 'speed_scalper' | 'supreme' | 'analytics' | 'ml' | 'agent_ia' | 'ai_monitoring' | 'alerts' | 'settings' | 'risk' | 'financial' | 'statistics' | 'strategy_reports' | 'journal' | 'simulator' | 'costs' | 'analysis' | 'omni' | 'ranking';
+type TabType = 'home' | 'intelligence' | 'signals' | 'robot' | 'trade' | 'management' | 'backtest' | 'bitcoin_pro' | 'crypto' | 'gold_scalper' | 'micro_sniper' | 'swing_ia' | 'copy' | 'speed_scalper' | 'supreme' | 'analytics' | 'ml' | 'agent_ia' | 'ai_monitoring' | 'alerts' | 'settings' | 'risk' | 'financial' | 'statistics' | 'strategy_reports' | 'journal' | 'simulator' | 'costs' | 'analysis' | 'omni' | 'ranking';
 
 interface RadarAppProps {
     onOverrideDevice?: (mode: 'auto' | 'mobile' | 'tablet' | 'desktop') => void;
@@ -61,8 +65,8 @@ interface RadarAppProps {
 export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
     const [activeTab, setActiveTab] = useState<TabType>('home');
     const [intelTab, setIntelTab] = useState<'signals' | 'crypto' | 'ml'>('crypto');
-    const [robotTab, setRobotTab] = useState<'alpha' | 'gold' | 'speed' | 'titan' | 'swing' | 'bitcoin_pro' | 'shark_bot'>('gold');
-    const [manageTab, setManageTab] = useState<'reports' | 'journal' | 'stats' | 'risk' | 'agent'>('reports');
+    const [robotTab, setRobotTab] = useState<'alpha' | 'gold' | 'speed' | 'titan' | 'swing' | 'bitcoin_pro' | 'shark_bot' | 'wolf'>('gold');
+    const [manageTab, setManageTab] = useState<'reports' | 'journal' | 'stats' | 'risk' | 'agent' | 'backtest'>('reports');
     const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
     const [isConnectivityOpen, setIsConnectivityOpen] = useState(false);
     const [accountData, setAccountData] = useState<any>(null);
@@ -109,12 +113,13 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
         }
     };
 
-    const tabOrder: TabType[] = ['home', 'intelligence', 'robot', 'trade', 'management'];
+    const tabOrder: TabType[] = ['home', 'intelligence', 'signals', 'robot', 'trade', 'management'];
     const menuItems: { id: TabType; icon: any; label: string }[] = [
         { id: 'home', icon: LayoutGrid, label: 'Home' },
         { id: 'intelligence', icon: Brain, label: 'Intel' },
         { id: 'robot', icon: Bot, label: 'Robôs' },
         { id: 'trade', icon: Activity, label: 'Trade' },
+        { id: 'signals', icon: Zap, label: 'Sinais' },
         { id: 'management', icon: BarChart3, label: 'Gestão' },
     ];
 
@@ -137,6 +142,7 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
 
     const robotOptions = [
         { id: 'bitcoin_pro', label: 'BTC Pro', icon: Bitcoin },
+        { id: 'wolf', label: 'Wolf', icon: Target },
         { id: 'shark_bot', label: 'Shark', icon: Zap },
         { id: 'gold', label: 'Gold', icon: Target },
         { id: 'speed', label: 'Speed', icon: Zap },
@@ -166,6 +172,7 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
                 })}
             </div>
             {robotTab === 'alpha' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><RobotControlPanel /></React.Suspense>}
+            {robotTab === 'wolf' && <React.Suspense fallback={<div className="text-amber-400 text-xs p-4">Carregando Wolf Bot...</div>}><WolfBotPanel /></React.Suspense>}
             {robotTab === 'gold' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando Gold Scalper...</div>}><GoldScalperPanel /></React.Suspense>}
             {robotTab === 'speed' && <ForexScalperPanel />}
             {robotTab === 'titan' && <MicroScalperPanel />}
@@ -205,8 +212,21 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
                             </button>
                         </div>
                         {intelTab === 'crypto' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><CryptoIntelligenceHub /></React.Suspense>}
-                        {intelTab === 'signals' && <SignalScanner />}
+                        {intelTab === 'signals' && <><SignalScanner /><TradingViewSignalsCard /></>}
                         {intelTab === 'ml' && <MLInsightsPanel />}
+                    </div>
+                );
+            case 'signals':
+                return (
+                    <div className="p-3 md:p-4 space-y-5 md:space-y-6">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                                <Zap size={18} className="text-amber-500" />
+                            </div>
+                            <h2 className="text-lg font-black uppercase tracking-tighter italic text-white">Sinais</h2>
+                        </div>
+                        <TradingViewSignalsCard />
+                        <SignalScanner />
                     </div>
                 );
             case 'trade':
@@ -245,12 +265,19 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
                             >
                                 <span className="flex items-center justify-center gap-2"><Brain size={14} /> Agente</span>
                             </button>
+                            <button
+                                onClick={() => setManageTab('backtest')}
+                                className={`flex-none md:flex-1 py-3 px-4 md:px-5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${manageTab === 'backtest' ? 'bg-violet-500/20 text-violet-400 border border-violet-500/20' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                <span className="flex items-center justify-center gap-2"><FlaskConical size={14} /> Backtest</span>
+                            </button>
                         </div>
                         {manageTab === 'reports' && <StrategyReportHub />}
                         {manageTab === 'stats' && <Statistics />}
                         {manageTab === 'risk' && <RiskManagement />}
                         {manageTab === 'journal' && <TradingJournal />}
                         {manageTab === 'agent' && <AgentIAPanel />}
+                        {manageTab === 'backtest' && <BacktestPanel />}
                     </div>
                 );
             default:

@@ -367,26 +367,24 @@ def ensure_connected():
     return mt5.account_info() is not None
 
 def sanitize_comment(comment):
-    """Sanitiza o comentário para garantir compatibilidade com MT5 (máx 31 chars + AlfaSimples)."""
+    """Sanitiza o comentário para garantir compatibilidade com MT5 (máx 30 chars, apenas ASCII)."""
     if comment is None:
         return "Radar-FX"
-    
+
     try:
-        # Converte para string
-        text = str(comment).strip()
-        
-        # Filtra apenas caracteres seguros (alfanuméricos, espaços, hifens e underscores)
-        # Muitos corretores falham com '|', ':', '#', etc.
         import re
-        clean = re.sub(r'[^a-zA-Z0-9\s\-_]', '', text)
+        text = str(comment).strip()
+        # Remove tudo que não for ASCII letra, dígito, espaço, hífen ou underscore
+        clean = re.sub(r'[^a-zA-Z0-9 \-_]', '', text)
+        # Colapsa espaços múltiplos em um único
+        clean = re.sub(r' +', ' ', clean).strip()
     except Exception:
-        clean = "Radar-FX"
-    
-    if not clean or clean.strip() == "":
         return "Radar-FX"
-        
-    # Truncar para 31 caracteres (limite absoluto do MT5)
-    return clean.strip()[:31]
+
+    if not clean:
+        return "Radar-FX"
+
+    return clean[:30]
 
 @app.route('/health', methods=['GET'])
 def health():

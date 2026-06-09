@@ -1,0 +1,70 @@
+{
+  "VSA No Supply": {
+    "signalsEmitted": 8,
+    "lastEmitted": "2026-06-09T03:50:00.078Z"
+  },
+  "Shark Hunt XAU": {
+    "signalsEmitted": 25,
+    "lastEmitted": "2026-06-09T03:51:26.452Z"
+  },
+  "Alpha Confluence": {
+    "signalsEmitted": 23,
+    "lastEmitted": "2026-06-09T03:51:26.437Z"
+  },
+  "VSA No Demand": {
+    "signalsEmitted": 14,
+    "lastEmitted": "2026-06-09T03:51:26.461Z"
+  },
+  "VSA Shakeout": {
+    "signalsEmitted": 1,
+    "lastEmitted": "2026-06-09T03:15:11.008Z"
+  },
+  "VSA Upthrust": {
+    "signalsEmitted": 4,
+    "lastEmitted": "2026-06-09T03:16:25.658Z"
+  },
+  "Crypto Whale Hunt": {
+    "signalsEmitted": 11,
+    "lastEmitted": "2026-06-09T03:17:31.947Z"
+  },
+  "Squeeze Breakout": {
+    "signalsEmitted": 18,
+    "lastEmitted": "2026-06-09T03:49:59.997Z"
+  },
+  "Altcoin Sniper": {
+    "signalsEmitted": 8,
+    "lastEmitted": "2026-06-09T03:50:02.629Z"
+  },
+  "Alpha Shark": {
+    "signalsEmitted": 11,
+    "lastEmitted": "2026-06-09T03:50:02.639Z"
+  },
+  "Alpha Scalper Grid": {
+    "signalsEmitted": 3,
+    "lastEmitted": "2026-06-09T03:49:58.078Z"
+  },
+  "Alpha Index Pro": {
+    "signalsEmitted": 5,
+    "lastEmitted": "2026-06-09T03:16:58.991Z"
+  },
+  "Golden Rejection": {
+    "signalsEmitted": 2,
+    "lastEmitted": "2026-06-09T03:50:02.622Z"
+  },
+  "Smart Momentum": {
+    "signalsEmitted": 5,
+    "lastEmitted": "2026-06-09T03:50:01.631Z"
+  },
+  "Alpha Nakamoto": {
+    "signalsEmitted": 1,
+    "lastEmitted": "2026-06-09T03:17:31.950Z"
+  },
+  "Ethereum Core": {
+    "signalsEmitted": 1,
+    "lastEmitted": "2026-06-09T03:30:57.552Z"
+  },
+  "Golden Whale Hunter": {
+    "signalsEmitted": 1,
+    "lastEmitted": "2026-06-09T03:49:58.130Z"
+  }
+}

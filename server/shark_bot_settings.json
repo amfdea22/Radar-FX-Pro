@@ -1,10 +1,18 @@
 {
-  "enabled": true,
+  "enabled": false,
   "symbol": "XAUUSD",
   "timeframe": "H1",
   "lotSize": 0.01,
   "maxDailyLoss": 50,
   "maxDailyProfit": 100,
   "riskPercent": 1,
-  "fvgMinAtrRatio": 0.5
+  "fvgMinAtrRatio": 0.3,
+  "maxSpread": 30,
+  "minVolume": 0,
+  "tradingStartHour": 1,
+  "tradingEndHour": 23,
+  "useLimitOrders": false,
+  "useTrailingStop": true,
+  "usePartialClose": true,
+  "useMultiTimeframe": true
 }

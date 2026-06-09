@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # ─── API Principal (Node.js + Frontend Estático) ───────────────
+  api:
+    build: .
+    container_name: radar-fx-api
+    ports:
+      - "3015:3015"
+    volumes:
+      - ./server/data:/app/server/data
+      - ./server/logs:/app/server/logs
+    environment:
+      - NODE_ENV=production
+      - PORT=3015
+      - JWT_SECRET=${JWT_SECRET}
+      - MT5_BRIDGE_URL=${MT5_BRIDGE_URL}
+      - BRIDGE_API_KEY=${BRIDGE_API_KEY}
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - biometric
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3015/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ─── Biometria (Python Flask - WebAuthn) ──────────────────────
+  biometric:
+    build:
+      context: ./server/python
+      dockerfile: Dockerfile.biometric
+    container_name: radar-fx-biometric
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./server/data:/app/server/data
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/biometria/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ─── Nginx (Proxy Reverso + SSL) ──────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: radar-fx-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl/live:/etc/ssl/live:ro
+      - ./ssl/archive:/etc/ssl/archive:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ─── Certbot (SSL Automático - opcional) ──────────────────────
+  certbot:
+    image: certbot/certbot
+    container_name: radar-fx-certbot
+    volumes:
+      - ./ssl/live:/etc/letsencrypt/live
+      - ./ssl/archive:/etc/letsencrypt/archive
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    profiles:
+      - ssl-only
+
+volumes:
+  server-data:

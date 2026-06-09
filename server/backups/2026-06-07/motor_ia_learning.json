@@ -1,0 +1,10 @@
+[
+  {
+    "symbol": "XAUUSD",
+    "direction": "SELL",
+    "regime": "LOW_VOLATILITY",
+    "confidence": 60,
+    "success": false,
+    "timestamp": 1780629505103
+  }
+]

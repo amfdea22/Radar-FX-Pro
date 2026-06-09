@@ -1,0 +1,12 @@
+{
+  "trailingStopPoints": 100,
+  "trailingStepPoints": 30,
+  "enableGrid": false,
+  "gridDistancePoints": 300,
+  "gridMultiplier": 1.5,
+  "maxGridLevels": 5,
+  "enableBreakEven": true,
+  "breakEvenTriggerPoints": 150,
+  "basketTargetProfit": 10,
+  "trailingPoints": 100
+}

@@ -1,0 +1,556 @@
+================================================================================
+  WOLF BOT — RELATORIO DE BACKTEST
+  Estrategia: SMC + Wyckoff + FVG 50% + Scale-Out + BE+Custos
+  Data: 2026-06-08 23:01
+================================================================================
+
+============================= PARAMETROS DO TESTE ==============================
+  Simbolo:           EURUSD
+  Timeframe:         1h
+  Capital Inicial:   $10000.00
+  Volume Fixo:       0.1 lots
+  Swing Period:      5
+  Min R:R:           2.0
+  BE Padding:        20 pips
+  Comissao:          $3.0/lot
+  Alavancagem:       1:100
+
+============================ RESUMO DE PERFORMANCE =============================
+  Total Trades:      450 (parciais: 0)
+  Trades Principais: 450
+  Wins:              146
+  Losses:            304
+  Win Rate:          32.4%
+  Lucro Total:       $1043.22
+  Retorno:           10.43%
+  Profit Factor:     2.96
+  Avg Win:           $10.78
+  Avg Loss:          $1.75
+  Max Drawdown:      0.88%
+  DD Value:          $90.73
+  Sharpe Ratio:      4.38
+  Saldo Final:       $11012.32
+
+========================== DISTRIBUICAO DE RESULTADOS ==========================
+  Maior Win:         $65.28
+  Maior Loss:        $-13.09
+  Media PnL:         $2.32
+  Mediana PnL:       $-0.69
+  Desvio Padrao:     $8.40
+  Trades Positivos:  146
+  Trades Negativos:  304
+
+============================== ANALISE BE+CUSTOS ===============================
+  Total BE+Custos:   42 acionamentos
+  PnL Apos BE:       $284.19
+
+=============================== CURVA DE EQUITY ================================
+  Equity Inicial:    $10000.00
+  Equity Final:      $11012.43
+  Pico Maximo:       $11021.87
+  Vale Minimo:       $9963.08
+  Drawdown Medio:    0.18%
+
+=============================== TABELA DE TRADES ===============================
+    # Acao    Entrada      Saida  Volume        PnL Result Parcial  Conf
+  ------------------------------------------------------------------------
+    1  BUY       1.16       1.16    0.02      -5.25   LOSS             C
+    2  BUY       1.16       1.16    0.01      -2.63   LOSS             C
+    3  BUY       1.16       1.16    0.02      -1.58   LOSS             C
+    4  BUY       1.16       1.16    0.01      -0.79   LOSS             C
+    5 SELL       1.16       1.16    0.06      -9.64   LOSS             B
+    6 SELL       1.16       1.16    0.04      -6.43   LOSS             B
+    7 SELL       1.17       1.17    0.06      -5.90   LOSS             B
+    8 SELL       1.17       1.17    0.04      -3.93   LOSS             B
+    9 SELL       1.17       1.16    0.02      31.96    WIN             C
+   10 SELL       1.17       1.16    0.01      16.49    WIN             C
+   11  BUY       1.16       1.17    0.02      18.30    WIN             C
+   12  BUY       1.16       1.17    0.01       9.46    WIN             C
+   13  BUY       1.16       1.17    0.02       2.44    WIN             C
+   14  BUY       1.16       1.17    0.01       2.00    WIN             C
+   15 SELL       1.17       1.17    0.06      -7.51   LOSS             A
+   16 SELL       1.17       1.17    0.04      -5.01   LOSS             A
+   17  BUY       1.17       1.17    0.02      -0.30   LOSS             C
+   18  BUY       1.17       1.17    0.01      -0.15   LOSS             C
+   19  BUY       1.16       1.16    0.02      -3.03   LOSS             C
+   20  BUY       1.16       1.16    0.01      -1.51   LOSS             C
+   21  BUY       1.16       1.16    0.02      -4.16   LOSS             C
+   22  BUY       1.16       1.16    0.01      -2.08   LOSS             C
+   23  BUY       1.16       1.16    0.02      -2.27   LOSS             C
+   24  BUY       1.16       1.16    0.01      -1.13   LOSS             C
+   25  BUY       1.16       1.17    0.02      11.78    WIN             C
+   26  BUY       1.16       1.17    0.01       6.91    WIN             C
+   27 SELL       1.18       1.18    0.06      -5.36   LOSS             B
+   28 SELL       1.18       1.18    0.04      -3.57   LOSS             B
+   29 SELL       1.18       1.17    0.02      14.20    WIN             C
+   30 SELL       1.18       1.17    0.01       7.39    WIN             C
+   31 SELL       1.17       1.17    0.06      23.04    WIN             B
+   32 SELL       1.17       1.17    0.04      21.63    WIN             B
+   33  BUY       1.17       1.17    0.02      -2.04   LOSS             C
+   34  BUY       1.17       1.17    0.01      -1.02   LOSS             C
+   35  BUY       1.17       1.17    0.02       6.08    WIN             C
+   36  BUY       1.17       1.17    0.01       2.00    WIN             C
+   37 SELL       1.17       1.17    0.02      -2.87   LOSS             C
+   38 SELL       1.17       1.17    0.01      -1.43   LOSS             C
+   39 SELL       1.18       1.18    0.02      -2.24   LOSS             C
+   40 SELL       1.18       1.18    0.01      -1.12   LOSS             C
+   41 SELL       1.18       1.18    0.02      -0.92   LOSS             C
+   42 SELL       1.18       1.18    0.01      -0.46   LOSS             C
+   43 SELL       1.18       1.18    0.02      -1.16   LOSS             C
+   44 SELL       1.18       1.18    0.01      -0.58   LOSS             C
+   45 SELL       1.19       1.19    0.02      -1.80   LOSS             C
+   46 SELL       1.19       1.19    0.01      -0.90   LOSS             C
+   47  BUY       1.18       1.18    0.02      -1.40   LOSS             C
+   48  BUY       1.18       1.18    0.01      -0.70   LOSS             C
+   49  BUY       1.18       1.18    0.02      -1.94   LOSS             C
+   50  BUY       1.18       1.18    0.01      -0.97   LOSS             C
+   51  BUY       1.18       1.17    0.02      -2.56   LOSS             C
+   52  BUY       1.18       1.17    0.01      -1.28   LOSS             C
+   53  BUY       1.17       1.18    0.02      13.46    WIN             C
+   54  BUY       1.17       1.18    0.01       7.02    WIN             C
+   55 SELL       1.18       1.18    0.02       8.22    WIN             C
+   56 SELL       1.18       1.18    0.01       4.40    WIN             C
+   57  BUY       1.17       1.17    0.02      -1.87   LOSS             C
+   58  BUY       1.17       1.17    0.01      -0.93   LOSS             C
+   59  BUY       1.17       1.17    0.06      -4.87   LOSS             B
+   60  BUY       1.17       1.17    0.04      -3.25   LOSS             B
+   61  BUY       1.16       1.18    0.06      65.28    WIN             A
+   62  BUY       1.16       1.18    0.04      45.39    WIN             A
+   63  BUY       1.17       1.18    0.06      18.72    WIN             B
+   64  BUY       1.17       1.18    0.04       8.00    WIN             B
+   65  BUY       1.17       1.18    0.06      37.14    WIN             B
+   66  BUY       1.17       1.17    0.04       8.00    WIN             B
+   67  BUY       1.17       1.17    0.02      -0.88   LOSS             C
+   68  BUY       1.17       1.17    0.01      -0.44   LOSS             C
+   69  BUY       1.17       1.16    0.02      -3.59   LOSS             C
+   70  BUY       1.17       1.16    0.01      -1.80   LOSS             C
+   71  BUY       1.16       1.16    0.02      -1.06   LOSS             C
+   72  BUY       1.16       1.16    0.01      -0.53   LOSS             C
+   73  BUY       1.16       1.16    0.02      -0.99   LOSS             C
+   74  BUY       1.16       1.16    0.01      -0.50   LOSS             C
+   75  BUY       1.16       1.16    0.02      -1.51   LOSS             C
+   76  BUY       1.16       1.16    0.01      -0.76   LOSS             C
+   77  BUY       1.16       1.16    0.06      -3.20   LOSS             B
+   78  BUY       1.16       1.16    0.04      -2.13   LOSS             B
+   79  BUY       1.16       1.15    0.02      -1.20   LOSS             C
+   80  BUY       1.16       1.15    0.01      -0.60   LOSS             C
+   81 SELL       1.16       1.16    0.02       4.10    WIN             C
+   82 SELL       1.16       1.16    0.01       2.00    WIN             C
+   83 SELL       1.16       1.16    0.02      -0.72   LOSS             C
+   84 SELL       1.16       1.16    0.01      -0.36   LOSS             C
+   85  BUY       1.16       1.16    0.02       0.56    WIN             C
+   86  BUY       1.16       1.17    0.01       2.00    WIN             C
+   87 SELL       1.17       1.17    0.02      -2.07   LOSS             C
+   88 SELL       1.17       1.17    0.01      -1.03   LOSS             C
+   89 SELL       1.17       1.17    0.02      -1.28   LOSS             C
+   90 SELL       1.17       1.17    0.01      -0.64   LOSS             C
+   91  BUY       1.17       1.16    0.02      -1.82   LOSS             C
+   92  BUY       1.17       1.16    0.01      -0.91   LOSS             C
+   93  BUY       1.17       1.16    0.02      -2.84   LOSS             C
+   94  BUY       1.17       1.16    0.01      -1.42   LOSS             C
+   95  BUY       1.16       1.16    0.02      -2.66   LOSS             C
+   96  BUY       1.16       1.16    0.01      -1.33   LOSS             C
+   97  BUY       1.16       1.16    0.02      -2.03   LOSS             C
+   98  BUY       1.16       1.16    0.01      -1.01   LOSS             C
+   99  BUY       1.16       1.16    0.02      -0.35   LOSS             C
+  100  BUY       1.16       1.16    0.01      -0.18   LOSS             C
+  101  BUY       1.16       1.16    0.06      13.38    WIN             A
+  102  BUY       1.16       1.16    0.04       8.00    WIN             A
+  103 SELL       1.17       1.17    0.02      -0.45   LOSS             C
+  104 SELL       1.17       1.17    0.01      -0.22   LOSS             C
+  105  BUY       1.16       1.17    0.02       2.68    WIN             C
+  106  BUY       1.16       1.17    0.01       2.95    WIN             C
+  107 SELL       1.17       1.16    0.06      33.72    WIN             B
+  108 SELL       1.17       1.16    0.04      22.71    WIN             B
+  109  BUY       1.16       1.16    0.02      -3.83   LOSS             C
+  110  BUY       1.16       1.16    0.01      -1.91   LOSS             C
+  111  BUY       1.15       1.15    0.02      -1.72   LOSS             C
+  112  BUY       1.15       1.15    0.01      -0.86   LOSS             C
+  113  BUY       1.15       1.15    0.02      -1.22   LOSS             C
+  114  BUY       1.15       1.15    0.01      -0.61   LOSS             C
+  115  BUY       1.15       1.15    0.06      -2.89   LOSS             B
+  116  BUY       1.15       1.15    0.04      -1.93   LOSS             B
+  117  BUY       1.15       1.15    0.02      -0.92   LOSS             C
+  118  BUY       1.15       1.15    0.01      -0.46   LOSS             C
+  119  BUY       1.15       1.15    0.02      -2.13   LOSS             C
+  120  BUY       1.15       1.15    0.01      -1.06   LOSS             C
+  121  BUY       1.15       1.15    0.02       2.46    WIN             C
+  122  BUY       1.15       1.15    0.01       2.00    WIN             C
+  123 SELL       1.15       1.15    0.02      -0.64   LOSS             C
+  124 SELL       1.15       1.15    0.01      -0.32   LOSS             C
+  125 SELL       1.15       1.15    0.02      -0.17   LOSS             C
+  126 SELL       1.15       1.15    0.01      -0.09   LOSS             C
+  127 SELL       1.16       1.16    0.02      -4.45   LOSS             C
+  128 SELL       1.16       1.16    0.01      -2.23   LOSS             C
+  129 SELL       1.16       1.16    0.06      -3.24   LOSS             A
+  130 SELL       1.16       1.16    0.04      -2.16   LOSS             A
+  131 SELL       1.16       1.16    0.02      -1.09   LOSS             C
+  132 SELL       1.16       1.16    0.01      -0.55   LOSS             C
+  133  BUY       1.16       1.16    0.02      -1.00   LOSS             C
+  134  BUY       1.16       1.16    0.01      -0.50   LOSS             C
+  135  BUY       1.16       1.16    0.02       8.46    WIN             C
+  136  BUY       1.16       1.16    0.01       2.00    WIN             C
+  137 SELL       1.16       1.16    0.06      14.52    WIN             B
+  138 SELL       1.16       1.16    0.04      13.77    WIN             B
+  139 SELL       1.16       1.16    0.06      14.52    WIN             B
+  140 SELL       1.16       1.16    0.04      13.85    WIN             B
+  141  BUY       1.16       1.16    0.02      -1.58   LOSS             C
+  142  BUY       1.16       1.16    0.01      -0.79   LOSS             C
+  143  BUY       1.16       1.16    0.02      -1.47   LOSS             C
+  144  BUY       1.16       1.16    0.01      -0.73   LOSS             C
+  145  BUY       1.16       1.16    0.02      -1.25   LOSS             C
+  146  BUY       1.16       1.16    0.01      -0.62   LOSS             C
+  147 SELL       1.16       1.16    0.02       2.10    WIN             C
+  148 SELL       1.16       1.16    0.01       2.00    WIN             C
+  149  BUY       1.16       1.16    0.02      -0.94   LOSS             C
+  150  BUY       1.16       1.16    0.01      -0.47   LOSS             C
+  151  BUY       1.15       1.15    0.02      -1.22   LOSS             C
+  152  BUY       1.15       1.15    0.01      -0.61   LOSS             C
+  153  BUY       1.15       1.15    0.02      -0.95   LOSS             C
+  154  BUY       1.15       1.15    0.01      -0.48   LOSS             C
+  155  BUY       1.15       1.15    0.02       5.24    WIN             C
+  156  BUY       1.15       1.15    0.01       2.00    WIN             C
+  157  BUY       1.15       1.15    0.06      23.40    WIN             B
+  158  BUY       1.15       1.15    0.04       8.00    WIN             B
+  159  BUY       1.15       1.16    0.02       7.70    WIN             C
+  160  BUY       1.15       1.16    0.01       4.26    WIN             C
+  161 SELL       1.16       1.16    0.06      -5.00   LOSS             A
+  162 SELL       1.16       1.16    0.04      -3.34   LOSS             A
+  163 SELL       1.16       1.16    0.02      -2.99   LOSS             C
+  164 SELL       1.16       1.16    0.01      -1.50   LOSS             C
+  165 SELL       1.16       1.16    0.02      -1.68   LOSS             C
+  166 SELL       1.16       1.16    0.01      -0.84   LOSS             C
+  167 SELL       1.16       1.16    0.02      -1.38   LOSS             C
+  168 SELL       1.16       1.16    0.01      -0.69   LOSS             C
+  169 SELL       1.16       1.16    0.02      -1.00   LOSS             C
+  170 SELL       1.16       1.16    0.01      -0.50   LOSS             C
+  171 SELL       1.16       1.16    0.02      -1.10   LOSS             C
+  172 SELL       1.16       1.16    0.01      -0.55   LOSS             C
+  173 SELL       1.17       1.17    0.02      -1.20   LOSS             C
+  174 SELL       1.17       1.17    0.01      -0.60   LOSS             C
+  175 SELL       1.17       1.17    0.02      -0.77   LOSS             C
+  176 SELL       1.17       1.17    0.01      -0.38   LOSS             C
+  177 SELL       1.17       1.17    0.02      -0.82   LOSS             C
+  178 SELL       1.17       1.17    0.01      -0.41   LOSS             C
+  179  BUY       1.17       1.16    0.02      -2.31   LOSS             C
+  180  BUY       1.17       1.16    0.01      -1.16   LOSS             C
+  181 SELL       1.17       1.17    0.06      15.48    WIN             B
+  182 SELL       1.17       1.16    0.04      12.29    WIN             B
+  183  BUY       1.16       1.16    0.02      -0.58   LOSS             C
+  184  BUY       1.16       1.16    0.01      -0.29   LOSS             C
+  185  BUY       1.16       1.16    0.06      -2.68   LOSS             B
+  186  BUY       1.16       1.16    0.04      -1.79   LOSS             B
+  187  BUY       1.16       1.16    0.06      -0.16   LOSS             B
+  188  BUY       1.16       1.16    0.04      -0.11   LOSS             B
+  189  BUY       1.16       1.17    0.06      19.56    WIN             B
+  190  BUY       1.16       1.16    0.04       8.00    WIN             B
+  191  BUY       1.16       1.17    0.06      17.16    WIN             B
+  192  BUY       1.16       1.17    0.04      13.92    WIN             B
+  193 SELL       1.17       1.17    0.02      -1.38   LOSS             C
+  194 SELL       1.17       1.17    0.01      -0.69   LOSS             C
+  195 SELL       1.17       1.17    0.02      -0.99   LOSS             C
+  196 SELL       1.17       1.17    0.01      -0.49   LOSS             C
+  197 SELL       1.18       1.18    0.02      -1.30   LOSS             C
+  198 SELL       1.18       1.18    0.01      -0.65   LOSS             C
+  199 SELL       1.18       1.18    0.02      -1.05   LOSS             C
+  200 SELL       1.18       1.18    0.01      -0.52   LOSS             C
+  201  BUY       1.17       1.18    0.06      15.48    WIN             B
+  202  BUY       1.17       1.18    0.04      14.79    WIN             B
+  203 SELL       1.18       1.18    0.02      -1.18   LOSS             C
+  204 SELL       1.18       1.18    0.01      -0.59   LOSS             C
+  205 SELL       1.18       1.17    0.02      11.94    WIN             C
+  206 SELL       1.18       1.17    0.01       6.35    WIN             C
+  207  BUY       1.17       1.17    0.02      -3.68   LOSS             C
+  208  BUY       1.17       1.17    0.01      -1.84   LOSS             C
+  209  BUY       1.17       1.17    0.02      -0.78   LOSS             C
+  210  BUY       1.17       1.17    0.01      -0.39   LOSS             C
+  211 SELL       1.17       1.17    0.06       2.94    WIN             B
+  212 SELL       1.17       1.17    0.04       8.00    WIN             B
+  213  BUY       1.17       1.17    0.02       3.02    WIN             C
+  214  BUY       1.17       1.17    0.01       2.00    WIN             C
+  215  BUY       1.17       1.17    0.02       5.54    WIN             C
+  216  BUY       1.17       1.17    0.01       2.00    WIN             C
+  217  BUY       1.17       1.17    0.02       4.40    WIN             C
+  218  BUY       1.17       1.17    0.01       3.10    WIN             C
+  219  BUY       1.17       1.17    0.02       4.40    WIN             C
+  220  BUY       1.17       1.18    0.01       4.21    WIN             C
+  221  BUY       1.17       1.17    0.02       4.40    WIN             C
+  222  BUY       1.17       1.18    0.01       5.47    WIN             C
+  223 SELL       1.18       1.18    0.02      -1.09   LOSS             C
+  224 SELL       1.18       1.18    0.01      -0.54   LOSS             C
+  225 SELL       1.18       1.18    0.02      -0.87   LOSS             C
+  226 SELL       1.18       1.18    0.01      -0.43   LOSS             C
+  227 SELL       1.18       1.18    0.02       8.84    WIN             C
+  228 SELL       1.18       1.18    0.01       4.68    WIN             C
+  229  BUY       1.18       1.18    0.06      18.72    WIN             B
+  230  BUY       1.18       1.18    0.04       8.00    WIN             B
+  231 SELL       1.18       1.18    0.02       4.56    WIN             C
+  232 SELL       1.18       1.18    0.01       2.00    WIN             C
+  233  BUY       1.18       1.17    0.02      -1.96   LOSS             C
+  234  BUY       1.18       1.17    0.01      -0.98   LOSS             C
+  235  BUY       1.18       1.17    0.02      -2.27   LOSS             C
+  236  BUY       1.18       1.17    0.01      -1.13   LOSS             C
+  237 SELL       1.17       1.18    0.06     -13.09   LOSS             B
+  238 SELL       1.17       1.18    0.04      -8.73   LOSS             B
+  239  BUY       1.17       1.17    0.02      -0.53   LOSS             C
+  240  BUY       1.17       1.17    0.01      -0.27   LOSS             C
+  241  BUY       1.17       1.17    0.06      -4.30   LOSS             B
+  242  BUY       1.17       1.17    0.04      -2.87   LOSS             B
+  243  BUY       1.17       1.17    0.02      -1.19   LOSS             C
+  244  BUY       1.17       1.17    0.01      -0.60   LOSS             C
+  245  BUY       1.17       1.17    0.02       7.20    WIN             C
+  246  BUY       1.17       1.17    0.01       7.54    WIN             C
+  247  BUY       1.17       1.17    0.06       8.64    WIN             B
+  248  BUY       1.17       1.17    0.04      11.14    WIN             B
+  249 SELL       1.17       1.17    0.06       6.00    WIN             B
+  250 SELL       1.17       1.17    0.04      12.52    WIN             B
+  251  BUY       1.17       1.17    0.02      -2.31   LOSS             C
+  252  BUY       1.17       1.17    0.01      -1.16   LOSS             C
+  253  BUY       1.17       1.17    0.02      -2.79   LOSS             C
+  254  BUY       1.17       1.17    0.01      -1.39   LOSS             C
+  255  BUY       1.17       1.17    0.02      -0.78   LOSS             C
+  256  BUY       1.17       1.17    0.01      -0.39   LOSS             C
+  257  BUY       1.16       1.16    0.02      -1.00   LOSS             C
+  258  BUY       1.16       1.16    0.01      -0.50   LOSS             C
+  259  BUY       1.16       1.16    0.02      -0.83   LOSS             C
+  260  BUY       1.16       1.16    0.01      -0.42   LOSS             C
+  261  BUY       1.16       1.16    0.02      -0.95   LOSS             C
+  262  BUY       1.16       1.16    0.01      -0.48   LOSS             C
+  263  BUY       1.16       1.17    0.02       8.88    WIN             C
+  264  BUY       1.16       1.17    0.01       4.73    WIN             C
+  265 SELL       1.17       1.17    0.02      -2.50   LOSS             C
+  266 SELL       1.17       1.17    0.01      -1.25   LOSS             C
+  267 SELL       1.17       1.16    0.02      15.16    WIN             C
+  268 SELL       1.17       1.16    0.01       7.81    WIN             C
+  269  BUY       1.16       1.16    0.02      -1.01   LOSS             C
+  270  BUY       1.16       1.16    0.01      -0.50   LOSS             C
+  271 SELL       1.16       1.16    0.02       1.34    WIN             C
+  272 SELL       1.16       1.16    0.01       2.00    WIN             C
+  273  BUY       1.16       1.16    0.06      -3.12   LOSS             B
+  274  BUY       1.16       1.16    0.04      -2.08   LOSS             B
+  275 SELL       1.16       1.16    0.02      -2.61   LOSS             C
+  276 SELL       1.16       1.16    0.01      -1.30   LOSS             C
+  277 SELL       1.17       1.17    0.02      -1.53   LOSS             C
+  278 SELL       1.17       1.17    0.01      -0.76   LOSS             C
+  279 SELL       1.17       1.18    0.02      -1.45   LOSS             C
+  280 SELL       1.17       1.18    0.01      -0.73   LOSS             C
+  281 SELL       1.18       1.18    0.02      -1.76   LOSS             C
+  282 SELL       1.18       1.18    0.01      -0.88   LOSS             C
+  283 SELL       1.19       1.19    0.02      -2.18   LOSS             C
+  284 SELL       1.19       1.19    0.01      -1.09   LOSS             C
+  285 SELL       1.19       1.19    0.06      -5.16   LOSS             A
+  286 SELL       1.19       1.19    0.04      -3.44   LOSS             A
+  287 SELL       1.20       1.20    0.06      -6.18   LOSS             A
+  288 SELL       1.20       1.20    0.04      -4.12   LOSS             A
+  289 SELL       1.20       1.20    0.06      -6.79   LOSS             B
+  290 SELL       1.20       1.20    0.04      -4.53   LOSS             B
+  291 SELL       1.20       1.19    0.06      38.64    WIN             B
+  292 SELL       1.20       1.19    0.04      28.68    WIN             B
+  293  BUY       1.19       1.19    0.02      -1.17   LOSS             C
+  294  BUY       1.19       1.19    0.01      -0.58   LOSS             C
+  295  BUY       1.19       1.19    0.02      -0.24   LOSS             C
+  296  BUY       1.19       1.19    0.01      -0.12   LOSS             C
+  297  BUY       1.19       1.18    0.02      -3.77   LOSS             C
+  298  BUY       1.19       1.18    0.01      -1.89   LOSS             C
+  299 SELL       1.18       1.18    0.02      -3.01   LOSS             C
+  300 SELL       1.18       1.18    0.01      -1.50   LOSS             C
+  301 SELL       1.18       1.18    0.02       6.12    WIN             C
+  302 SELL       1.18       1.18    0.01       3.07    WIN             C
+  303  BUY       1.18       1.18    0.02      -2.14   LOSS             C
+  304  BUY       1.18       1.18    0.01      -1.07   LOSS             C
+  305  BUY       1.18       1.18    0.02      11.26    WIN             C
+  306  BUY       1.18       1.18    0.01       5.99    WIN             C
+  307 SELL       1.19       1.19    0.02      -0.08   LOSS             C
+  308 SELL       1.19       1.19    0.01      -0.04   LOSS             C
+  309 SELL       1.19       1.19    0.02      -2.12   LOSS             C
+  310 SELL       1.19       1.19    0.01      -1.06   LOSS             C
+  311  BUY       1.19       1.19    0.06       9.24    WIN             A
+  312  BUY       1.19       1.19    0.04       8.00    WIN             A
+  313  BUY       1.19       1.19    0.02      -4.49   LOSS             C
+  314  BUY       1.19       1.19    0.01      -2.25   LOSS             C
+  315  BUY       1.19       1.18    0.02      -2.47   LOSS             C
+  316  BUY       1.19       1.18    0.01      -1.23   LOSS             C
+  317 SELL       1.18       1.18    0.01       2.02    WIN             C
+  318 SELL       1.18       1.19    0.02      -2.02   LOSS             C
+  319 SELL       1.19       1.18    0.02       9.16    WIN             C
+  320 SELL       1.19       1.18    0.01       5.22    WIN             C
+  321  BUY       1.18       1.18    0.06      -3.99   LOSS             B
+  322  BUY       1.18       1.18    0.04      -2.66   LOSS             B
+  323  BUY       1.18       1.17    0.06      -2.96   LOSS             B
+  324  BUY       1.18       1.17    0.04      -1.97   LOSS             B
+  325  BUY       1.17       1.18    0.06      39.48    WIN             B
+  326  BUY       1.17       1.18    0.04      27.59    WIN             B
+  327  BUY       1.18       1.18    0.02       4.66    WIN             C
+  328  BUY       1.18       1.18    0.01       2.00    WIN             C
+  329  BUY       1.18       1.18    0.06      -0.53   LOSS             B
+  330  BUY       1.18       1.18    0.04      -0.36   LOSS             B
+  331  BUY       1.18       1.18    0.06      10.56    WIN             B
+  332  BUY       1.18       1.18    0.04       8.00    WIN             B
+  333  BUY       1.18       1.18    0.02      -1.45   LOSS             C
+  334  BUY       1.18       1.18    0.01      -0.73   LOSS             C
+  335  BUY       1.18       1.17    0.02      -5.60   LOSS             C
+  336  BUY       1.18       1.17    0.01      -2.80   LOSS             C
+  337  BUY       1.17       1.17    0.02      -2.11   LOSS             C
+  338  BUY       1.17       1.17    0.01      -1.06   LOSS             C
+  339  BUY       1.17       1.17    0.02      -2.33   LOSS             C
+  340  BUY       1.17       1.17    0.01      -1.17   LOSS             C
+  341  BUY       1.16       1.16    0.02      -1.75   LOSS             C
+  342  BUY       1.16       1.16    0.01      -0.88   LOSS             C
+  343  BUY       1.15       1.15    0.02      -2.42   LOSS             C
+  344  BUY       1.15       1.15    0.01      -1.21   LOSS             C
+  345 SELL       1.16       1.17    0.02      -2.46   LOSS             C
+  346 SELL       1.16       1.17    0.01      -1.23   LOSS             C
+  347 SELL       1.17       1.16    0.02       8.82    WIN             C
+  348 SELL       1.17       1.16    0.01       2.00    WIN             C
+  349  BUY       1.16       1.16    0.02      -0.32   LOSS             C
+  350  BUY       1.16       1.16    0.01      -0.16   LOSS             C
+  351 SELL       1.16       1.15    0.01       9.66    WIN             C
+  352 SELL       1.16       1.16    0.02      -9.66   LOSS             C
+  353 SELL       1.16       1.15    0.02      20.94    WIN             C
+  354 SELL       1.16       1.15    0.01      14.68    WIN             C
+  355  BUY       1.15       1.15    0.02      -1.13   LOSS             C
+  356  BUY       1.15       1.15    0.01      -0.57   LOSS             C
+  357  BUY       1.15       1.14    0.02      -0.47   LOSS             C
+  358  BUY       1.15       1.14    0.01      -0.23   LOSS             C
+  359  BUY       1.15       1.15    0.02       5.28    WIN             C
+  360  BUY       1.15       1.15    0.01       3.35    WIN             C
+  361 SELL       1.15       1.15    0.02      -3.95   LOSS             C
+  362 SELL       1.15       1.15    0.01      -1.98   LOSS             C
+  363 SELL       1.16       1.16    0.02      -0.93   LOSS             C
+  364 SELL       1.16       1.16    0.01      -0.47   LOSS             C
+  365 SELL       1.16       1.16    0.02      -0.02   LOSS             C
+  366 SELL       1.16       1.16    0.01      -0.01   LOSS             C
+  367 SELL       1.16       1.16    0.02      -5.35   LOSS             C
+  368 SELL       1.16       1.16    0.01      -2.68   LOSS             C
+  369 SELL       1.17       1.17    0.02      -2.15   LOSS             C
+  370 SELL       1.17       1.17    0.01      -1.08   LOSS             C
+  371 SELL       1.17       1.17    0.02      -2.54   LOSS             C
+  372 SELL       1.17       1.17    0.01      -1.27   LOSS             C
+  373 SELL       1.17       1.17    0.02      -1.36   LOSS             C
+  374 SELL       1.17       1.17    0.01      -0.68   LOSS             C
+  375 SELL       1.17       1.17    0.06      36.48    WIN             A
+  376 SELL       1.17       1.17    0.04      25.48    WIN             A
+  377 SELL       1.18       1.18    0.02      -1.44   LOSS             C
+  378 SELL       1.18       1.18    0.01      -0.72   LOSS             C
+  379 SELL       1.18       1.18    0.02      -1.11   LOSS             C
+  380 SELL       1.18       1.18    0.01      -0.56   LOSS             C
+  381 SELL       1.18       1.18    0.02      10.38    WIN             C
+  382 SELL       1.18       1.18    0.01       5.42    WIN             C
+  383  BUY       1.18       1.18    0.02      11.90    WIN             C
+  384  BUY       1.18       1.18    0.01       6.09    WIN             C
+  385 SELL       1.18       1.18    0.06      46.14    WIN             A
+  386 SELL       1.18       1.18    0.04      31.88    WIN             A
+  387  BUY       1.17       1.17    0.02      -0.83   LOSS             C
+  388  BUY       1.17       1.17    0.01      -0.41   LOSS             C
+  389  BUY       1.17       1.17    0.02      -5.15   LOSS             C
+  390  BUY       1.17       1.17    0.01      -2.57   LOSS             C
+  391  BUY       1.17       1.17    0.06      -2.26   LOSS             B
+  392  BUY       1.17       1.17    0.04      -1.51   LOSS             B
+  393  BUY       1.17       1.17    0.02       5.64    WIN             C
+  394  BUY       1.17       1.17    0.01       2.00    WIN             C
+  395  BUY       1.17       1.17    0.02       4.16    WIN             C
+  396  BUY       1.17       1.17    0.01       2.00    WIN             C
+  397  BUY       1.17       1.17    0.06      18.00    WIN             B
+  398  BUY       1.17       1.17    0.04       8.00    WIN             B
+  399  BUY       1.17       1.17    0.02       2.16    WIN             C
+  400  BUY       1.17       1.17    0.01       4.14    WIN             C
+  401  BUY       1.17       1.17    0.02      -0.90   LOSS             C
+  402  BUY       1.17       1.17    0.01      -0.45   LOSS             C
+  403 SELL       1.17       1.17    0.06       7.38    WIN             B
+  404 SELL       1.17       1.17    0.04       8.00    WIN             B
+  405  BUY       1.17       1.17    0.02      -2.57   LOSS             C
+  406  BUY       1.17       1.17    0.01      -1.28   LOSS             C
+  407 SELL       1.17       1.17    0.06       9.54    WIN             B
+  408 SELL       1.17       1.17    0.04       8.00    WIN             B
+  409 SELL       1.17       1.17    0.06      -9.35   LOSS             B
+  410 SELL       1.17       1.17    0.04      -6.23   LOSS             B
+  411 SELL       1.17       1.17    0.06      -2.02   LOSS             B
+  412 SELL       1.17       1.17    0.04      -1.35   LOSS             B
+  413 SELL       1.17       1.17    0.06      -0.22   LOSS             B
+  414 SELL       1.17       1.17    0.04      -0.15   LOSS             B
+  415 SELL       1.18       1.18    0.02      -1.83   LOSS             C
+  416 SELL       1.18       1.18    0.01      -0.92   LOSS             C
+  417 SELL       1.18       1.17    0.02      13.32    WIN             C
+  418 SELL       1.18       1.17    0.01       7.00    WIN             C
+  419 SELL       1.18       1.17    0.02       7.30    WIN             C
+  420 SELL       1.18       1.17    0.01       3.88    WIN             C
+  421 SELL       1.18       1.17    0.02      13.54    WIN             C
+  422 SELL       1.18       1.17    0.01       7.07    WIN             C
+  423  BUY       1.17       1.17    0.02      -0.40   LOSS             C
+  424  BUY       1.17       1.17    0.01      -0.20   LOSS             C
+  425  BUY       1.17       1.17    0.02      -1.04   LOSS             C
+  426  BUY       1.17       1.17    0.01      -0.52   LOSS             C
+  427  BUY       1.16       1.16    0.02      -0.93   LOSS             C
+  428  BUY       1.16       1.16    0.01      -0.46   LOSS             C
+  429  BUY       1.16       1.16    0.02      -1.43   LOSS             C
+  430  BUY       1.16       1.16    0.01      -0.72   LOSS             C
+  431  BUY       1.16       1.16    0.06      -3.87   LOSS             B
+  432  BUY       1.16       1.16    0.04      -2.58   LOSS             B
+  433  BUY       1.16       1.16    0.02      -1.82   LOSS             C
+  434  BUY       1.16       1.16    0.01      -0.91   LOSS             C
+  435  BUY       1.16       1.16    0.02      -1.00   LOSS             C
+  436  BUY       1.16       1.16    0.01      -0.50   LOSS             C
+  437  BUY       1.16       1.16    0.02      -1.07   LOSS             C
+  438  BUY       1.16       1.16    0.01      -0.54   LOSS             C
+  439  BUY       1.16       1.17    0.02      14.74    WIN             C
+  440  BUY       1.16       1.17    0.01       7.98    WIN             C
+  441 SELL       1.17       1.16    0.02      12.16    WIN             C
+  442 SELL       1.17       1.16    0.01       6.40    WIN             C
+  443  BUY       1.16       1.16    0.02      -0.39   LOSS             C
+  444  BUY       1.16       1.16    0.01      -0.20   LOSS             C
+  445  BUY       1.16       1.16    0.02      -2.77   LOSS             C
+  446  BUY       1.16       1.16    0.01      -1.39   LOSS             C
+  447  BUY       1.15       1.15    0.02      -1.59   LOSS             C
+  448  BUY       1.15       1.15    0.01      -0.80   LOSS             C
+  449  BUY       1.15       1.15    0.02       7.96    WIN             C
+  450  BUY       1.15       1.15    0.01       3.97    WIN             C
+  ------------------------------------------------------------------------
+                           TOTAL            1043.22
+
+============================= TRADES COM BE+CUSTOS =============================
+  Ticket 14: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 26: BUY PnL=$6.91 WOLF_S2_C [BE+CUSTOS]
+  Ticket 32: SELL PnL=$21.63 WOLF_S2_B [BE+CUSTOS]
+  Ticket 36: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 62: BUY PnL=$45.39 WOLF_S2_A [BE+CUSTOS]
+  Ticket 64: BUY PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 66: BUY PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 82: SELL PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 86: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 102: BUY PnL=$8.00 WOLF_S2_A [BE+CUSTOS]
+  Ticket 122: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 136: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 148: SELL PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 156: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 158: BUY PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 190: BUY PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 192: BUY PnL=$13.92 WOLF_S2_B [BE+CUSTOS]
+  Ticket 212: SELL PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 214: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 216: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 222: BUY PnL=$5.47 WOLF_S2_C [BE+CUSTOS]
+  Ticket 228: SELL PnL=$4.68 WOLF_S2_C [BE+CUSTOS]
+  Ticket 230: BUY PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 232: SELL PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 246: BUY PnL=$7.54 WOLF_S2_C [BE+CUSTOS]
+  Ticket 264: BUY PnL=$4.73 WOLF_S2_C [BE+CUSTOS]
+  Ticket 268: SELL PnL=$7.81 WOLF_S2_C [BE+CUSTOS]
+  Ticket 272: SELL PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 312: BUY PnL=$8.00 WOLF_S2_A [BE+CUSTOS]
+  Ticket 320: SELL PnL=$5.22 WOLF_S2_C [BE+CUSTOS]
+  Ticket 328: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 332: BUY PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 348: SELL PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 354: SELL PnL=$14.68 WOLF_S2_C [BE+CUSTOS]
+  Ticket 394: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 396: BUY PnL=$2.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 398: BUY PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 400: BUY PnL=$4.14 WOLF_S2_C [BE+CUSTOS]
+  Ticket 404: SELL PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 408: SELL PnL=$8.00 WOLF_S2_B [BE+CUSTOS]
+  Ticket 418: SELL PnL=$7.00 WOLF_S2_C [BE+CUSTOS]
+  Ticket 422: SELL PnL=$7.07 WOLF_S2_C [BE+CUSTOS]
+
+================================================================================
+  FIM DO RELATORIO
+================================================================================

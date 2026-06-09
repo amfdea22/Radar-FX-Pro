@@ -1,0 +1,10 @@
+{
+    "enabled": false,
+    "symbol": "XAUUSD",
+    "timeframe": "H1",
+    "lotSize": 0.01,
+    "maxDailyLoss": 50,
+    "maxDailyProfit": 100,
+    "riskPercent": 1.0,
+    "fvgMinAtrRatio": 0.5
+}
