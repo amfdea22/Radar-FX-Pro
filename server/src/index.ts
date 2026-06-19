@@ -1,11 +1,21 @@
-﻿import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 dotenv.config();
+
+// Global error handlers to prevent crash
+process.on('uncaughtException', (err) => {
+    console.error('💥 UNCAUGHT EXCEPTION:', err);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('💥 UNHANDLED REJECTION:', reason);
+});
 
 // Radar Station v1.1 - Emergency Reset Engine Active
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { spawn, ChildProcess } from 'child_process';
 import { SignalEngine } from './services/SignalEngine';
 import { TradeGuardian } from './services/TradeGuardian';
 import { DisciplineEngine } from './services/DisciplineEngine';
@@ -23,6 +33,7 @@ import { SupremeEngine } from './services/SupremeEngine';
 import { MarketService } from './services/MarketService';
 import { GoldScalperEngine } from './services/GoldScalperEngine';
 import { BitcoinProEngine } from './services/BitcoinProEngine';
+import { AuraQuantEngine } from './services/AuraQuantEngine';
 import { CryptoIAEngine } from './services/CryptoIAEngine';
 import { CorrelationService } from './services/CorrelationService';
 import { SharkBotEngine } from './services/SharkBotEngine';
@@ -32,11 +43,14 @@ import { SymbolLockService } from './services/SymbolLockService';
 import { DatabaseService } from './services/DatabaseService';
 import { MicroScalperEngine } from './services/MicroScalperEngine';
 import { SwingTraderEngine } from './services/SwingTraderEngine';
+import { SweepEngine } from './services/SweepEngine';
+import { SweepTradeMonitor } from './services/SweepTradeMonitor';
 import { SwingTraderSimulator } from './services/SwingTraderSimulator';
 import { ForexScalperEngine } from './services/ForexScalperEngine';
 import { OmniProbabilisticEngine } from './services/OmniProbabilisticEngine';
 import { JournalService } from './services/JournalService';
 import { SecurityAuditService } from './services/SecurityAuditService';
+import { z } from 'zod';
 
 import { AgentIAEngine } from './services/AgentIAEngine';
 import { MLInsightsService } from './services/MLInsightsService';
@@ -44,26 +58,41 @@ import { AIAnalystAgent } from './services/AIAnalystAgent';
 import { MLService } from './services/MLService';
 import { NLPService, NewsArticle } from './services/NLPService';
 import { MotorIAEngine } from './services/MotorIAEngine';
+import authRouter from './routes/auth';
+import { authenticateToken } from './middleware/auth';
 import { InfraService } from './services/InfraService';
 import { GoldScalperTradeMonitor } from './services/GoldScalperTradeMonitor';
 import { MAGIC_MAP } from './services/MagicMap';
 import { PatternDetector } from './services/PatternDetector';
+import { CopilotService } from './services/CopilotService';
 
 
-// Motores serÃ£o inicializados APÃ“S o servidor abrir a porta (veja app.listen)
+// Motores serão inicializados APÓS o servidor abrir a porta (veja app.listen)
 
-// Alertas de InicializaÃ§Ã£o para confirmar SincronizaÃ§Ã£o
+// Alertas de Inicialização para confirmar Sincronização
 AlertEngine.addAlert('GUARDIAN', 'INFO', 'Sistema Radar-FX Online', 'Motores Alpha sincronizados e monitorando o mercado.');
-AlertEngine.addAlert('MARKET', 'INFO', 'SincronizaÃ§Ã£o em Tempo Real Ativa', 'Aguardando confluÃªncias institucionais nos motores Alpha.');
+AlertEngine.addAlert('MARKET', 'INFO', 'Sincronização em Tempo Real Ativa', 'Aguardando confluências institucionais nos motores Alpha.');
 
 const app = express();
 
-// Heartbeat da Central de Alertas (MantÃ©m a percepÃ§Ã£o de Sincronia Viva)
+const APP_URL = process.env.APP_URL || 'http://localhost:3006';
+const WS_APP_URL = APP_URL.replace(/^http/, 'ws');
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            "script-src": ["'self'", "'unsafe-inline'", APP_URL],
+            "connect-src": ["'self'", APP_URL, WS_APP_URL],
+        },
+    },
+}));
+
+// Heartbeat da Central de Alertas (Mantém a percepção de Sincronia Viva)
 setInterval(() => {
-    AlertEngine.addAlert('MARKET', 'INFO', 'SincronizaÃ§Ã£o Ativa', 'Motores Alpha monitorando liquidez e confluÃªncias institucionais.');
+    AlertEngine.addAlert('MARKET', 'INFO', 'Sincronização Ativa', 'Motores Alpha monitorando liquidez e confluências institucionais.');
 }, 5 * 60000); // 5 minutos
 
-const port = process.env.PORT || 3015;
+const port = process.env.PORT || 3016;
 const MT5_BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
 const BRIDGE_API_KEY = process.env.BRIDGE_API_KEY || '';
 
@@ -73,8 +102,26 @@ bridgeAxios.interceptors.request.use(config => {
     return config;
 });
 
-app.use(cors());
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:3006,http://127.0.0.1:3006').split(',');
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin) || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+}));
 app.use(express.json());
+
+// Auth middleware — protege todas as rotas /api/* exceto as públicas
+const PUBLIC_API_PATHS = ['/api/auth', '/api/health', '/api/health/full', '/api/tradingview', '/api/system', '/api/intel-engine', '/api/telemetry', '/api/copilot'];
+app.use('/api', (req, res, next) => {
+  if (PUBLIC_API_PATHS.some(p => req.originalUrl.startsWith(p))) {
+    return next();
+  }
+  return authenticateToken(req as any, res, next);
+});
 
 const path = require('path');
 const clientDist = path.join(__dirname, '..', '..', 'client', 'dist');
@@ -201,6 +248,43 @@ app.post('/api/mt5/login', async (req, res) => {
     }
 });
 
+app.post('/api/mt5/disconnect', async (req, res) => {
+    try {
+        const response = await bridgeAxios.post('/disconnect');
+        res.json(response.data);
+    } catch (error: any) {
+        res.json({ success: true, message: 'Forçando desconexão...' });
+    }
+});
+
+app.get('/api/mt5/broker-info', async (req, res) => {
+    try {
+        const health = await bridgeAxios.get('/health');
+        if (health.data.connected === false) {
+            return res.json({
+                connected: false,
+                simulated: health.data.simulated || false,
+                last_error: health.data.last_error || '',
+                mt5_initialized: health.data.mt5_initialized || false,
+            });
+        }
+        const account = await bridgeAxios.get('/account');
+        res.json({
+            connected: true,
+            company: account.data.company || account.data.name || health.data.server || '',
+            server: health.data.server || account.data.server || '',
+            login: health.data.account || account.data.login || 0,
+            leverage: account.data.leverage || 0,
+            balance: health.data.balance || account.data.balance || 0,
+            currency: account.data.currency || 'USD',
+            brokerType: 'MT5',
+            simulated: health.data.simulated || false,
+        });
+    } catch {
+        res.json({ connected: false, simulated: false, last_error: 'Bridge offline' });
+    }
+});
+
 const SYMBOL_MAP_ORDER: Record<string, string> = {
     'GOLD': 'XAUUSD', 'WING': 'WIN$N', 'WDO': 'WDO$N',
     'US30': 'US30Cash', 'NAS100': 'US100Cash', 'GER40': 'GER40Cash',
@@ -210,14 +294,14 @@ app.post('/api/mt5/order', async (req, res) => {
     if (req.body.symbol && SYMBOL_MAP_ORDER[req.body.symbol.toUpperCase()]) {
         req.body.symbol = SYMBOL_MAP_ORDER[req.body.symbol.toUpperCase()];
     }
-    console.log(`âš¡ [ORDEM] Recebida requisiÃ§Ã£o para ${req.body.symbol} (${req.body.action})`);
+    console.log(`⚡ [ORDEM] Recebida requisição para ${req.body.symbol} (${req.body.action})`);
     try {
-        // ValidaÃ§Ã£o de Disciplina antes da Ordem
+        // Validação de Disciplina antes da Ordem
         const discipline = await DisciplineEngine.getDailyStatus();
         if (discipline.isLocked) {
-            console.warn(`ðŸ›¡ï¸ [GUARDIAN] Ordem bloqueada por disciplina: ${discipline.reason}`);
+            console.warn(`🛡️ [GUARDIAN] Ordem bloqueada por disciplina: ${discipline.reason}`);
             return res.status(403).json({
-                error: 'ALERTA DE DISCIPLINA: OperaÃ§Ãµes bloqueadas.',
+                error: 'ALERTA DE DISCIPLINA: Operações bloqueadas.',
                 reason: discipline.reason
             });
         }
@@ -225,9 +309,9 @@ app.post('/api/mt5/order', async (req, res) => {
         // Executar com retry inteligente via MarketService
         const orderResult = await MarketService.retryWhenOpen(req.body.symbol, async () => {
             const body = { ...req.body };
-            // SanitizaÃ§Ã£o Segura: Permite alfa, nÃºmeros, underscore, hÃ­fen e espaÃ§o simples
+            // Sanitização Segura: Permite alfa, números, underscore, hífen e espaço simples
             body.comment = String(body.comment || '').replace(/[^a-zA-Z0-9_\- ]/g, "").replace(/\s+/g, ' ').trim().substring(0, 30) || 'RadarFX';
-            console.log(`ðŸ›¡ï¸ [BRIDGE] Comment Sanitized: "${req.body.comment}" -> "${body.comment}"`);
+            console.log(`🛡️ [BRIDGE] Comment Sanitized: "${req.body.comment}" -> "${body.comment}"`);
             const response = await bridgeAxios.post('/order', body);
             return response.data;
         });
@@ -238,12 +322,12 @@ app.post('/api/mt5/order', async (req, res) => {
             syncTvAlert(req.body.symbol, req.body.action, price, req.body.comment || 'RadarFX', { ticket: orderResult.ticket });
         }
 
-        // Bloqueia sÃ­mbolo via SymbolLockService
+        // Bloqueia símbolo via SymbolLockService
         if (orderResult?.ticket) {
             SymbolLockService.acquire(req.body.symbol, 'Manual', orderResult.ticket, req.body.action);
         }
 
-        // CAPTURA DE AUDITORIA ALPHA (Async para nÃ£o atrasar a resposta)
+        // CAPTURA DE AUDITORIA ALPHA (Async para não atrasar a resposta)
         if (orderResult && (orderResult.ticket || orderResult.success !== false)) {
             setImmediate(async () => {
                 try {
@@ -268,7 +352,7 @@ app.post('/api/mt5/order', async (req, res) => {
                         orderTicket: orderResult.ticket
                     });
                 } catch (auditError) {
-                    console.error('âš ï¸ Alpha Audit: Failed to capture snapshot', auditError);
+                    console.error('⚠️ Alpha Audit: Failed to capture snapshot', auditError);
                 }
             });
         }
@@ -290,6 +374,8 @@ app.get('/api/mt5/account', async (req, res) => {
             margin: d.margin || 0,
             margin_free: d.margin_free || 0,
             profit: d.daily_profit || d.profit || 0,
+            daily_profit: d.daily_profit || 0,
+            daily_closed_profit: d.daily_closed_profit || 0,
             leverage: d.leverage || 100,
             currency: d.currency || 'USD',
             name: d.company || 'MT5',
@@ -325,7 +411,7 @@ app.get('/api/mt5/positions', async (req, res) => {
             return res.json(positions);
         }
     } catch {}
-    // Fallback: gerar posiÃ§Ãµes sintÃ©ticas do Gold Scalper
+    // Fallback: gerar posições sintéticas do Gold Scalper
     try {
         const gs = await GoldScalperEngine.getStatus();
         if (gs && gs.currentPrice > 0) {
@@ -439,8 +525,8 @@ app.get('/api/mt5/discipline', async (req, res) => {
         ]);
         const base = status || {
             profit: 0, tradeCount: 0, consecutiveLosses: 0,
-            limits: { dailyStopLoss: 30, dailyTakeProfit: 50, maxTradesPerDay: 10, maxConsecutiveLosses: 3, resetTimestamp: 0, manualStopLossUSD: 5, manualTakeProfitUSD: 10 },
-            isSafe: true, isLocked: false, reason: null,
+            limits: DisciplineEngine.getSettings(),
+            isSafe: false, isLocked: true, reason: 'Discipline offline',
             history: { today: { profit: 0, tradeCount: 0, winRate: 0 }, d3: { profit: 0, tradeCount: 0, winRate: 0 }, w1: { profit: 0, tradeCount: 0, winRate: 0 }, m1: { profit: 0, tradeCount: 0, winRate: 0 } },
             pulse: { guardian: { active: true, isSafe: true, settings: {} }, signals: { active: true, isSafe: true, lastUpdate: new Date().toISOString(), signalCount: 0 }, intelligence: { active: true, isSafe: true, engines: [], confidence: 'Medium' } },
             goldScalperDaily: gs?.netDailyProfit || 0,
@@ -460,6 +546,102 @@ app.post('/api/mt5/discipline/reset', async (req, res) => {
     await DisciplineEngine.reset();
     const status = await DisciplineEngine.getDailyStatus();
     res.json(status);
+});
+
+app.post('/api/mt5/discipline/force-unlock', async (req, res) => {
+    await DisciplineEngine.reset();
+    CryptoRiskEngine.resetDailyLimits();
+    console.log('🔓 Force unlock executado — todos os limites resetados.');
+    const status = await DisciplineEngine.getDailyStatus();
+    res.json({ ...status, forceUnlocked: true });
+});
+
+// --- DAILY REPORT (AGREGADO DE TODOS ROBÔS) ---
+app.get('/api/reports/daily', async (req, res) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        
+        const safeGetHistory = async (engine: any, name: string): Promise<{ trades: any[]; robot: string }> => {
+            try {
+                const status = await engine.getStatus();
+                const history = status.tradeHistory || status.trades || [];
+                const todayTrades = history.filter((t: any) => t.closeTime?.startsWith(today) || t.time?.startsWith(today));
+                return { trades: todayTrades.map((t: any) => ({ ...t, robot: name })), robot: name };
+            } catch {
+                return { trades: [], robot: name };
+            }
+        };
+
+        const results = await Promise.all([
+            safeGetHistory(AlphaRobotEngine, 'Alpha Robot'),
+            safeGetHistory(GoldScalperEngine, 'Gold Scalper'),
+            safeGetHistory(SweepEngine, 'Sweep H4 M15'),
+            safeGetHistory(SupremeEngine, 'Supreme IA'),
+            safeGetHistory(SharkBotEngine, 'Shark Bot'),
+            safeGetHistory(WolfBotEngine, 'Wolf Bot'),
+            safeGetHistory(BitcoinProEngine, 'Bitcoin Pro'),
+            safeGetHistory(CryptoIAEngine, 'Alpha Cripto'),
+            safeGetHistory(SwingTraderEngine, 'Day Swing IA'),
+            safeGetHistory(ForexScalperEngine, 'Forex Scalper'),
+            safeGetHistory(MicroScalperEngine, 'Micro Sniper'),
+            safeGetHistory(OmniProbabilisticEngine, 'Omni Prob'),
+            safeGetHistory(AuraQuantEngine, 'Aura Quant'),
+            safeGetHistory(RecoveryEngine, 'Recovery'),
+            safeGetHistory(CopyTraderEngine, 'Copy Trader'),
+            safeGetHistory(TradeGuardian, 'Trade Guardian'),
+        ]);
+
+        const allTrades = results.flatMap(r => r.trades);
+        allTrades.sort((a, b) => new Date(b.closeTime || b.time).getTime() - new Date(a.closeTime || a.time).getTime());
+
+        const totalTrades = allTrades.length;
+        const wins = allTrades.filter(t => t.profit > 0 || t.result === 'WIN').length;
+        const losses = allTrades.filter(t => t.profit < 0 || t.result === 'LOSS').length;
+        const totalProfit = allTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
+        const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0.0';
+        
+        const byRobot = allTrades.reduce((acc: any, t) => {
+            const name = t.robot || 'Unknown';
+            if (!acc[name]) acc[name] = { trades: 0, profit: 0, wins: 0, losses: 0 };
+            acc[name].trades++;
+            acc[name].profit += t.profit || 0;
+            if (t.profit > 0 || t.result === 'WIN') acc[name].wins++;
+            else acc[name].losses++;
+            return acc;
+        }, {});
+
+        const robotSummary = Object.entries(byRobot).map(([robot, data]: [string, any]) => ({
+            robot,
+            trades: data.trades,
+            profit: Number(data.profit.toFixed(2)),
+            wins: data.wins,
+            losses: data.losses,
+            winRate: data.trades > 0 ? ((data.wins / data.trades) * 100).toFixed(1) : '0.0'
+        }));
+
+        res.json({
+            date: today,
+            summary: { totalTrades, wins, losses, totalProfit: Number(totalProfit.toFixed(2)), winRate: parseFloat(winRate) },
+            byRobot: robotSummary,
+            trades: allTrades.map(t => ({
+                ticket: t.ticket,
+                robot: t.robot,
+                symbol: t.symbol,
+                direction: t.type || t.direction,
+                lot: t.lot || t.volume,
+                entryPrice: t.entryPrice || t.entry,
+                exitPrice: t.exitPrice || t.exit,
+                profit: t.profit,
+                result: t.result || (t.profit > 0 ? 'WIN' : 'LOSS'),
+                openTime: t.openTime,
+                closeTime: t.closeTime || t.time,
+                duration: t.duration,
+                closeReason: t.closeReason
+            }))
+        });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.get('/api/mt5/guardian/status', (req, res) => {
@@ -496,10 +678,17 @@ app.get('/api/mt5/risk-management', async (req, res) => {
             },
             discipline: disciplineRes ? {
                 dailyProfit: disciplineRes.profit || 0,
+                closedProfit: disciplineRes.closedProfit || 0,
+                floatingPL: disciplineRes.floatingPL || 0,
                 tradeCount: disciplineRes.tradeCount || 0,
                 consecutiveLosses: disciplineRes.consecutiveLosses || 0,
                 isSafe: disciplineRes.isSafe !== false,
                 isLocked: disciplineRes.isLocked || false,
+                isDailyStopHit: disciplineRes.isDailyStopHit || false,
+                isDailyTargetHit: disciplineRes.isDailyTargetHit || false,
+                isMaxTradesHit: disciplineRes.isMaxTradesHit || false,
+                isMaxConsecutiveLossesHit: disciplineRes.isMaxConsecutiveLossesHit || false,
+                reason: disciplineRes.reason || null,
                 limits: disciplineRes.limits || {}
             } : null,
             robots
@@ -540,6 +729,16 @@ app.get('/api/mt5/bitcoin-pro/status', (req, res) => {
 app.post('/api/mt5/bitcoin-pro/settings', (req, res) => {
     BitcoinProEngine.updateSettings(req.body);
     res.json({ status: 'success', statusData: BitcoinProEngine.getStatus() });
+});
+
+// --- AURA QUANT ENGINE ---
+app.get('/api/mt5/aura-quant/status', (req, res) => {
+    res.json(AuraQuantEngine.getStatus());
+});
+
+app.post('/api/mt5/aura-quant/settings', (req, res) => {
+    AuraQuantEngine.updateSettings(req.body);
+    res.json({ status: 'success', statusData: AuraQuantEngine.getStatus() });
 });
 
 // --- RECOVERY ENGINE ---
@@ -609,7 +808,7 @@ app.get('/api/mt5/wolf-bot/history', (req, res) => {
     res.json(WolfBotEngine.getHistory());
 });
 
-// --- FINANCEIRO & REPORTING & DIÃRIO ---
+// --- FINANCEIRO & REPORTING & DIÁRIO ---
 
 app.get('/api/mt5/reports', async (req, res) => {
     const reports = await ReportEngine.getPerformanceReports();
@@ -644,103 +843,6 @@ app.get('/api/mt5/reports/crypto', async (req, res) => {
 
 app.get('/api/mt5/alerts', (req, res) => {
     res.json(AlertEngine.getAlerts());
-});
-
-// --- TELEGRAM INTEGRATION ---
-
-import { TelegramService } from './services/TelegramService';
-import authRouter from './routes/auth';
-import { TradeNotificationBot } from './services/TradeNotificationBot';
-
-app.get('/api/mt5/telegram/settings', (req, res) => {
-    res.json(TelegramService.getSettings());
-});
-
-app.post('/api/mt5/telegram/settings', (req, res) => {
-    TelegramService.updateSettings(req.body);
-    if (req.body.enabled) {
-        TradeNotificationBot.updateSettings({ enabled: true });
-    }
-    res.json({ status: 'success', statusData: TelegramService.getSettings() });
-});
-
-app.post('/api/mt5/telegram/test', async (req, res) => {
-    const tg = TelegramService.getSettings();
-    if (!tg.enabled) {
-        return res.status(500).json({ status: 'error', message: 'Telegram estÃ¡ desabilitado. Ative a integraÃ§Ã£o antes de testar.' });
-    }
-    if (!tg.botToken || tg.botToken.length < 10) {
-        return res.status(500).json({ status: 'error', message: 'Token do Bot invÃ¡lido ou vazio. Verifique no @BotFather.' });
-    }
-    if (!tg.chatId) {
-        return res.status(500).json({ status: 'error', message: 'Chat ID vazio. Use @userinfobot para descobrir seu ID.' });
-    }
-    const success = await TelegramService.sendMessage("<b>TESTE | RADAR FX</b>\n\nSua integraÃ§Ã£o com o Telegram foi configurada com sucesso! VocÃª passarÃ¡ a receber notificaÃ§Ãµes de alvos atingidos e risco aqui na palma da sua mÃ£o! ðŸš€ðŸ“±");
-    if (success) {
-        res.json({ status: 'success' });
-    } else {
-        const reason = !tg.enabled ? 'desabilitado' : !tg.botToken ? 'token vazio' : !tg.chatId ? 'chatId vazio' : 'API do Telegram rejeitou';
-        res.status(500).json({ status: 'error', message: `Falha ao enviar mensagem (${reason}). Verifique Token e Chat ID.` });
-    }
-});
-
-// --- TRADE NOTIFICATION BOT ---
-
-app.get('/api/mt5/telegram/bot/settings', (req, res) => {
-    res.json(TradeNotificationBot.getSettings());
-});
-
-app.post('/api/mt5/telegram/bot/settings', (req, res) => {
-    TradeNotificationBot.updateSettings(req.body);
-    if (req.body.enabled) {
-        const tg = TelegramService.getSettings();
-        if (tg.botToken && tg.chatId) {
-            TelegramService.updateSettings({ enabled: true });
-        }
-    }
-    res.json({ success: true, settings: TradeNotificationBot.getSettings() });
-});
-
-app.post('/api/mt5/telegram/bot/test', async (req, res) => {
-    const success = await TradeNotificationBot.sendTestMessage();
-    if (success) {
-        res.json({ success: true });
-    } else {
-        res.status(500).json({ success: false, message: 'Falha ao enviar. Verifique token e chat ID nas configuraÃ§Ãµes do Telegram.' });
-    }
-});
-
-app.post('/api/mt5/telegram/bot/summary', async (req, res) => {
-    await TradeNotificationBot.sendDailySummary();
-    res.json({ success: true });
-});
-
-// Telegram Webhook endpoint (optional, if TELEGRAM_WEBHOOK_URL is set)
-app.post('/api/mt5/telegram/webhook', async (req, res) => {
-    try {
-        const updates = await TelegramService.processWebhookUpdate(req.body);
-        for (const upd of updates) {
-            await TradeNotificationBot.processUpdate(upd);
-        }
-        res.sendStatus(200);
-    } catch (e) {
-        console.error('âŒ Telegram webhook error', e);
-        res.sendStatus(200);
-    }
-});
-
-app.get('/api/mt5/telegram/analytics', (req, res) => {
-    res.json(TelegramService.getAnalytics());
-});
-
-app.post('/api/mt5/telegram/reset-backoff', (req, res) => {
-    TelegramService.resetBackoff();
-    res.json({ status: 'success' });
-});
-
-app.post('/api/mt5/telegram/webhook/setup', async (req, res) => {
-    const ok = await TelegramService.setWebhook();
-    res.json({ status: ok ? 'success' : 'error', message: ok ? 'Webhook configurado' : 'Falhou (verifique TELEGRAM_WEBHOOK_URL)' });
 });
 
 // --- TRADINGVIEW INTEGRATION ---
@@ -787,9 +889,9 @@ function createTvAlert(symbol: string, direction: string, price: number, strateg
     const dir = (direction || '').toLowerCase().trim();
     const prc = Number(price);
 
-    if (!sym) { console.warn('[TradingView] símbolo inválido'); return null; }
-    if (!VALID_DIRECTIONS.has(dir)) { console.warn(`[TradingView] direção inválida: ${direction}`); return null; }
-    if (isNaN(prc) || prc <= 0) { console.warn(`[TradingView] preço inválido: ${price}`); return null; }
+    if (!sym) { console.warn('[TradingView] s�mbolo inv�lido'); return null; }
+    if (!VALID_DIRECTIONS.has(dir)) { console.warn(`[TradingView] dire��o inv�lida: ${direction}`); return null; }
+    if (isNaN(prc) || prc <= 0) { console.warn(`[TradingView] pre�o inv�lido: ${price}`); return null; }
 
     return {
         id: `tv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -817,13 +919,16 @@ function syncTvAlert(symbol: string, direction: string, price: number, strategy:
 const webhookLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 30,
-    message: { error: 'Muitas requisições. Limite: 30/minuto.' },
+    message: { error: 'Muitas requisi��es. Limite: 30/minuto.' },
     standardHeaders: true,
     legacyHeaders: false,
 });
 
 function validateWebhookSecret(req: any, res: any, next: any) {
-    if (!TV_WEBHOOK_SECRET) return next();
+    if (!TV_WEBHOOK_SECRET) {
+        console.warn('[Webhook] ⚠ TV_WEBHOOK_SECRET não definida — webhooks sem autenticação!');
+        return next();
+    }
     const secret = req.headers['x-webhook-secret'] || req.headers['x-tv-secret'] || '';
     if (secret !== TV_WEBHOOK_SECRET) {
         return res.status(401).json({ error: 'Webhook secret inválido' });
@@ -837,7 +942,7 @@ app.post('/api/tradingview/webhook', webhookLimiter, validateWebhookSecret, (req
         const alert = createTvAlert(symbol, direction, price, strategy || 'webhook', req.body);
         if (!alert) {
             return res.status(400).json({
-                error: 'Payload inválido',
+                error: 'Payload inv�lido',
                 expected: { symbol: 'string', direction: 'buy|sell|long|short', price: 'number > 0', strategy: 'string (opcional)' },
                 received: req.body,
             });
@@ -856,7 +961,7 @@ app.post('/api/tradingview/webhook/execute', webhookLimiter, validateWebhookSecr
         const alert = createTvAlert(symbol, direction, price, strategy || 'webhook_exec', req.body);
         if (!alert) {
             return res.status(400).json({
-                error: 'Payload inválido',
+                error: 'Payload inv�lido',
                 expected: { symbol: 'string', direction: 'buy|sell|long|short', price: 'number > 0', lot: 'number (opcional)', strategy: 'string (opcional)' },
                 received: req.body,
             });
@@ -1093,7 +1198,7 @@ app.get('/api/mt5/pattern-detector/analyze', async (req, res) => {
         const candles = Array.isArray(resp.data?.candles) ? resp.data.candles
             : Array.isArray(resp.data) ? resp.data : [];
         if (!candles || candles.length < 10) {
-            return res.status(400).json({ error: 'Dados insuficientes para detectar padrões' });
+            return res.status(400).json({ error: 'Dados insuficientes para detectar padr�es' });
         }
         const analysis = PatternDetector.analyze(candles);
         res.json({ symbol, timeframe, candlesCount: candles.length, ...analysis });
@@ -1102,7 +1207,7 @@ app.get('/api/mt5/pattern-detector/analyze', async (req, res) => {
     }
 });
 
-// --- NLP ENGINE (Natural Language Processing para NotÃ­cias) ---
+// --- NLP ENGINE (Natural Language Processing para Notícias) ---
 app.get('/api/mt5/nlp/news', async (req, res) => {
     try {
         const symbols = (req.query.symbols as string || 'XAUUSD,BTCUSD').split(',').map(s => s.trim().toUpperCase());
@@ -1120,7 +1225,7 @@ app.get('/api/mt5/nlp/analyze', (req, res) => {
         const lang = (req.query.lang as string) || 'auto';
         if (!text) return res.status(400).json({ error: 'text parameter required' });
         const language: 'en' | 'pt' = lang === 'pt' ? 'pt' :
-            lang === 'auto' ? (/[à-úÀ-Ú]/.test(text) ? 'pt' : 'en') : 'en';
+            lang === 'auto' ? (/[�-��-�]/.test(text) ? 'pt' : 'en') : 'en';
         const result = NLPService.analyzeText(text, language);
         res.json(result);
     } catch (error: any) {
@@ -1145,7 +1250,7 @@ app.get('/api/mt5/nlp/keywords', (req, res) => {
         const lang = (req.query.lang as string) || 'auto';
         if (!text) return res.status(400).json({ error: 'text parameter required' });
         const language: 'en' | 'pt' = lang === 'pt' ? 'pt' :
-            lang === 'auto' ? (/[à-úÀ-Ú]/.test(text) ? 'pt' : 'en') : 'en';
+            lang === 'auto' ? (/[�-��-�]/.test(text) ? 'pt' : 'en') : 'en';
         const keywords = NLPService.extractKeywords(text, language);
         res.json({ keywords });
     } catch (error: any) {
@@ -1153,7 +1258,7 @@ app.get('/api/mt5/nlp/keywords', (req, res) => {
     }
 });
 
-// --- GOLD SCALPER ENGINE (Acesse as rotas em suas seÃ§Ãµes especÃ­ficas)
+// --- GOLD SCALPER ENGINE (Acesse as rotas em suas seções específicas)
 
 // --- CRYPTO IA ENGINE ---
 app.get('/api/mt5/crypto-ia/status', (req, res) => {
@@ -1179,6 +1284,7 @@ app.post('/api/mt5/crypto-ia/restart', async (req, res) => {
 // --- ALPHA ROBOT v2.0 ---
 app.get('/api/mt5/robot/report', async (req, res) => {
     try {
+        await AlphaRobotEngine.syncTradesFromMT5().catch(() => {});
         const report = await AlphaRobotEngine.getTradeReport();
         res.json(report);
     } catch (error) {
@@ -1264,6 +1370,9 @@ app.post('/api/mt5/gold-scalper/settings', (req, res) => {
 
 app.post('/api/mt5/gold-scalper/trade', async (req: any, res: any) => {
     const { direction } = req.body;
+    if (!direction || !['BUY', 'SELL'].includes(direction)) {
+        return res.status(400).json({ success: false, message: 'direction deve ser BUY ou SELL' });
+    }
     const result = await GoldScalperEngine.executeManualTrade(direction);
     res.json(result);
 });
@@ -1455,7 +1564,68 @@ app.get('/api/mt5/omni/history/full', async (req, res) => {
     }
 });
 
-// --- ROTAS DE CORRELAÃ‡ÃƒO (XAUUSD) ---
+// --- COPILOT RADAR FX ---
+app.post('/api/copilot/ask', async (req, res) => {
+    try {
+        const { message, sessionId, model, mode, symbol, timeframe } = req.body;
+        if (!message || !message.trim()) return res.status(400).json({ error: 'Mensagem obrigatória' });
+        const result = await CopilotService.ask(
+            sessionId || 'default',
+            message.trim(),
+            model,
+            mode || 'general',
+            symbol,
+            timeframe
+        );
+        res.json(result);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message || 'Erro no Copilot' });
+    }
+});
+
+// Streaming endpoint for Fox
+app.post('/api/copilot/ask/stream', async (req, res) => {
+    try {
+        const { message, sessionId, model, mode, symbol, timeframe } = req.body;
+        if (!message || !message.trim()) return res.status(400).json({ error: 'Mensagem obrigatória' });
+
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',
+        });
+
+        let fullContent = '';
+
+        await CopilotService.askStream(
+            sessionId || 'default',
+            message.trim(),
+            (token: string) => {
+                fullContent += token;
+                // Send each token as SSE
+                const escaped = token.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+                res.write(`data: ${escaped}\n\n`);
+            },
+            model,
+            mode || 'general',
+            symbol,
+            timeframe
+        );
+
+        res.write(`data: __FOX_DONE__\n\n`);
+        res.end();
+    } catch (error: any) {
+        // If headers already sent, write error to stream
+        try {
+            res.write(`data: __FOX_ERROR__:${error.message || 'Erro no Fox'}\n\n`);
+            res.write(`data: __FOX_DONE__\n\n`);
+            res.end();
+        } catch { /* ignore */ }
+    }
+});
+
+// --- ROTAS DE CORRELAÇÃO (XAUUSD) ---
 app.get('/api/mt5/correlation/xauusd', async (req, res) => {
     try {
         const period = req.query.period as string || '6mo';
@@ -1467,6 +1637,26 @@ app.get('/api/mt5/correlation/xauusd', async (req, res) => {
 });
 
 
+
+// --- ROTAS SWEEP H4 M15 ---
+app.get('/api/mt5/sweep/status', (req, res) => {
+    res.json(SweepEngine.getStatus());
+});
+
+app.post('/api/mt5/sweep/settings', (req, res) => {
+    SweepEngine.updateSettings(req.body);
+    res.json({ success: true, status: SweepEngine.getStatus() });
+});
+
+app.post('/api/mt5/sweep/reset', (req, res) => {
+    SweepEngine.resetDailyCounters();
+    res.json({ success: true });
+});
+
+app.get('/api/mt5/sweep/trade-monitor', async (req, res) => {
+    const data = await SweepTradeMonitor.refresh();
+    res.json(data);
+});
 
 // --- ROTAS SWING TRADER IA ---
 app.get('/api/mt5/swing-trader/status', (req, res) => {
@@ -1543,7 +1733,7 @@ app.get('/api/mt5/signals/history', async (req, res) => {
         });
         res.json(result);
     } catch (err: any) {
-        res.status(500).json({ error: 'Erro ao buscar histórico de sinais', details: err.message });
+        res.status(500).json({ error: 'Erro ao buscar hist�rico de sinais', details: err.message });
     }
 });
 
@@ -1576,11 +1766,11 @@ app.get('/api/mt5/debug/symbols', async (req, res) => {
         const symbols = Object.keys(bridgeResp.data);
         res.json({ count: symbols.length, symbols });
     } catch (err: any) {
-        res.status(500).json({ error: 'Falha ao buscar sÃ­mbolos', details: err.message });
+        res.status(500).json({ error: 'Falha ao buscar símbolos', details: err.message });
     }
 });
 
-// --- CATÃLOGO DE ESTRATÃ‰GIAS (fonte Ãºnica) ---
+// --- CATÁLOGO DE ESTRATÉGIAS (fonte única) ---
 app.get('/api/mt5/reports/catalog', async (req, res) => {
     try {
         const catalog = SignalEngine.getCatalog();
@@ -1590,7 +1780,7 @@ app.get('/api/mt5/reports/catalog', async (req, res) => {
     }
 });
 
-// --- RELATÃ“RIO DE ESTRATÃ‰GIAS COM DADOS REAIS ---
+// --- RELATÓRIO DE ESTRATÉGIAS COM DADOS REAIS ---
 app.get('/api/mt5/reports/strategies', async (req, res) => {
     try {
         const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
@@ -1603,14 +1793,14 @@ app.get('/api/mt5/reports/strategies', async (req, res) => {
 
 app.post('/api/mt5/reports/sync', async (req, res) => {
     try {
-        console.log('ðŸ”„ [Global Sync] Iniciando sincronizaÃ§Ã£o de todos os motores...');
+        console.log('🔄 [Global Sync] Iniciando sincronização de todos os motores...');
 
         // Frontend:
-        // - [x] Grid de Stats com 5 colunas (incluindo Meta e Stop visÃ­veis). [QuantumBitcoinPanel.tsx]
-        // - [x] Controles interativos para metas editÃ¡veis de TP e SL.
-        // - [x] BotÃ£o "Hard Reset Cesta" com confirmaÃ§Ã£o de seguranÃ§a.
+        // - [x] Grid de Stats com 5 colunas (incluindo Meta e Stop visíveis). [QuantumBitcoinPanel.tsx]
+        // - [x] Controles interativos para metas editáveis de TP e SL.
+        // - [x] Botão "Hard Reset Cesta" com confirmação de segurança.
         // - [x] Design Premium com feedback visual de zonas de risco (RSI).
-        // Sincroniza todos em paralelo para ser rÃ¡pido
+        // Sincroniza todos em paralelo para ser rápido
         const results = await Promise.allSettled([
             GoldScalperEngine.syncTradesFromMT5(),
             AlphaRobotEngine.syncTradesFromMT5(),
@@ -1620,13 +1810,13 @@ app.post('/api/mt5/reports/sync', async (req, res) => {
         const successful = results.filter(r => r.status === 'fulfilled').length;
         const failed = results.filter(r => r.status === 'rejected').length;
 
-        console.log(`âœ… [Global Sync] ConcluÃ­do. Sucesso: ${successful}, Falha: ${failed}`);
+        console.log(`✅ [Global Sync] Concluído. Sucesso: ${successful}, Falha: ${failed}`);
 
-        // Retorna o relatÃ³rio atualizado apÃ³s o sync
+        // Retorna o relatório atualizado após o sync
         const report = await SignalEngine.getStrategyReport();
         res.json({ status: 'success', successful, failed, report });
     } catch (error) {
-        console.error('âŒ [Global Sync] Erro crÃ­tico:', error);
+        console.error('❌ [Global Sync] Erro crítico:', error);
         res.status(500).json({ error: 'Failed to sync all reports' });
     }
 });
@@ -1670,7 +1860,8 @@ app.get('/api/mt5/global-report', async (req, res) => {
         const statusEndpoints = [
             { id: 'micro-scalper', name: 'Micro Sniper' },
             { id: 'forex-scalper', name: 'Speed Scalper' },
-            { id: 'swing-trader', name: 'Swing IA' },
+            { id: 'swing-trader', name: 'Day Swing IA' },
+            { id: 'sweep', name: 'Sweep H4 M15' },
             { id: 'bitcoin-pro', name: 'Bitcoin Pro' },
             { id: 'shark-bot', name: 'Shark Bot' },
             { id: 'crypto-ia', name: 'Crypto IA' },
@@ -1729,14 +1920,14 @@ app.get('/api/mt5/global-report', async (req, res) => {
             }
         }
 
-        // Busca posiÃ§Ãµes abertas DO BRIDGE para mostrar atividade atual
+        // Busca posições abertas DO BRIDGE para mostrar atividade atual
         let openPositions: any[] = [];
         try {
             const posResp = await bridgeAxios.get('/positions', { timeout: 5000 });
             openPositions = Array.isArray(posResp.data) ? posResp.data : [];
         } catch (e) {}
 
-        // Filtra apenas trades das Ãºltimas 2 horas para o "recentTrades"
+        // Filtra apenas trades das últimas 2 horas para o "recentTrades"
         const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
         const recentTrades = allTrades
             .filter(t => {
@@ -1866,15 +2057,68 @@ app.get('/api/mt5/audit/history', async (req, res) => {
 // --- SYSTEM CONFIG ---
 
 app.get('/api/system/config', (req, res) => {
-    res.json(ConfigService.getConfig());
+    const config = ConfigService.getConfig();
+    const maskedConfig = {
+        ...config,
+        polygonApiKey: config.polygonApiKey ? '••••••••••••••••' : '',
+    };
+    res.json(maskedConfig);
 });
 
 app.post('/api/system/config', (req, res) => {
-    const success = ConfigService.saveConfig(req.body);
-    res.json({ success });
+    try {
+        const configSchema = z.object({
+            polygonApiKey: z.string().optional(),
+            mt5BridgeUrl: z.string().url().optional(),
+            profile: z.object({
+                name: z.string().min(1, 'Nome é obrigatório'),
+                tradingStyle: z.enum(['SCALPER', 'DAY_TRADER', 'SWING']),
+                experience: z.string().min(1, 'Experiência é obrigatória'),
+            }).optional(),
+        });
+
+        const validatedData = configSchema.parse(req.body);
+        const success = ConfigService.saveConfig(validatedData);
+        res.json({ success });
+    } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: 'Validação falhou', details: error.errors });
+        }
+        res.status(500).json({ error: 'Erro interno ao salvar configurações' });
+    }
 });
 
-// --- INFRA (Backup, Logs, Health) ---
+// --- INFRA (Backup, Logs, Health, Disk) ---
+app.get('/api/system/health', async (req: any, res: any) => {
+    const execSync = require('child_process').execSync;
+    const srv = true;
+    const chk = (port: number): boolean => {
+        try { const o = execSync(`node -e "const h=require('http');h.get('http://127.0.0.1:${port}',r=>{r.resume();process.exit(0)}).on('error',()=>process.exit(1)).setTimeout(2000,function(){this.destroy();process.exit(1)})"`, { timeout: 5000, stdio: 'pipe' }); return true; } catch { return false; }
+    };
+    const cli = chk(3006); const brg = chk(5555);
+    let disk = { free: 0, total: 0, percent: 0 };
+    try {
+        const drive = require('child_process').execSync('wmic logicaldisk where name="C:" get size,freespace /format:csv', { encoding: 'utf8', timeout: 3000 });
+        const parts = drive.trim().split('\n')[1]?.split(',');
+        if (parts && parts.length >= 3) {
+            const free = parseInt(parts[1]); const total = parseInt(parts[2]);
+            disk = { free: Math.round(free / 1e9), total: Math.round(total / 1e9), percent: Math.round((1 - free / total) * 100) };
+        }
+    } catch {}
+    res.json({ ports: { server: srv, client: cli, bridge: brg }, disk });
+});
+
+app.get('/api/system/engines', (req, res) => {
+    const engines: Record<string, any> = {
+        GoldScalperEngine: { running: typeof GoldScalperEngine !== 'undefined' },
+        SweepEngine: { running: typeof SweepEngine !== 'undefined' },
+        MotorIAEngine: { running: typeof MotorIAEngine !== 'undefined' },
+        DisciplineEngine: { running: typeof DisciplineEngine !== 'undefined' },
+        CryptoRiskEngine: { running: typeof CryptoRiskEngine !== 'undefined' },
+    };
+    res.json(engines);
+});
+
 app.get('/api/system/backup', (req, res) => {
     res.json(InfraService.getBackupInfo());
 });
@@ -1921,30 +2165,10 @@ app.delete('/api/security/audit-logs', (req, res) => {
 });
 // --- BIOMETRIA PROXY (-> Python Flask :5001) ---
 
-const BIOMETRIC_URL = 'http://127.0.0.1:5001';
 const BACKTEST_URL = 'http://127.0.0.1:5003';
 const INTEL_ENGINE_URL = 'http://127.0.0.1:5004';
+let intelEngineProcess: ChildProcess | null = null;
 const TELEMETRY_URL = 'http://127.0.0.1:5006';
-
-app.all('/api/biometria/*', async (req, res) => {
-    try {
-        const path = req.url.replace('/api/biometria', '/api/biometria');
-        const url = `${BIOMETRIC_URL}${path}`;
-        const method = req.method.toLowerCase() as 'get' | 'post';
-        const config: any = { timeout: 10000 };
-        if (req.method === 'POST' || req.method === 'PUT') {
-            config.data = req.body;
-        }
-        const resp = await (axios as any)[method](url, config);
-        res.json(resp.data);
-    } catch (e: any) {
-        if (e.response) {
-            res.status(e.response.status).json(e.response.data);
-        } else {
-            res.status(502).json({ error: 'Biometric service unavailable', detail: e.message });
-        }
-    }
-});
 
 app.all('/api/backtest/*', async (req, res) => {
     try {
@@ -2097,23 +2321,24 @@ app.get('*', (req, res) => {
     }
 });
 
-app.listen(Number(port), '0.0.0.0', async () => {
+app.listen(Number(port), '0.0.0.0', () => {
     console.log(`Server v1.1 [CLEAN] running at http://0.0.0.0:${port}`);
 
-    // Verificar saÃºde da bridge MT5
-    try {
-        const health = await bridgeAxios.get('/health', { timeout: 5000 });
-        if (health.data?.status === 'connected') {
-            console.log(`âœ… Bridge MT5 conectada: ${health.data.server} (conta ${health.data.account}, saldo $${health.data.balance})`);
-        } else {
-            console.warn(`âš ï¸  Bridge MT5 respondendo mas NÃƒO conectada ao terminal. Verifique se o MT5 estÃ¡ aberto.`);
-        }
-    } catch (e: any) {
-        console.error(`âŒ Bridge MT5 NÃƒO RESPONDE em ${MT5_BRIDGE_URL}. Execute 'npm run python-bridge' ou 'start_all.bat'.`);
-        console.error(`   Erro: ${e.message}`);
-    }
+    // Verificar saúde da bridge MT5 (non-blocking)
+    bridgeAxios.get('/health', { timeout: 5000 })
+        .then(health => {
+            if (health.data?.status === 'connected') {
+                console.log(`✅ Bridge MT5 conectada: ${health.data.server} (conta ${health.data.account}, saldo $${health.data.balance})`);
+            } else {
+                console.warn(`⚠️  Bridge MT5 respondendo mas NÃO conectada ao terminal. Verifique se o MT5 está aberto.`);
+            }
+        })
+        .catch((e: any) => {
+            console.error(`❌ Bridge MT5 NÃO RESPONDE em ${MT5_BRIDGE_URL}. Execute 'npm run python-bridge' ou 'start_all.bat'.`);
+            console.error(`   Erro: ${e.message}`);
+        });
 
-    // MigraÃ§Ã£o assÃ­ncrona de JSON â†’ Prisma
+    // Migração assíncrona de JSON → Prisma
     (async () => {
         try {
             const fs = require('fs');
@@ -2136,47 +2361,99 @@ app.listen(Number(port), '0.0.0.0', async () => {
                 }
             }
         } catch (e) {
-            console.warn('âš ï¸ MigraÃ§Ã£o automÃ¡tica ignorada (primeira execuÃ§Ã£o ou sem dados)');
+            console.warn('⚠️ Migração automática ignorada (primeira execução ou sem dados)');
         }
     })();
 
-    // Inicializar servicÌ§os de infraestrutura e motores
-    console.log('ðŸš€ Iniciando servicÌ§os de infraestrutura...');
+    // Inicializar serviços de infraestrutura e motores
+    console.log('🚀 Iniciando serviços de infraestrutura...');
     AlertEngine.init();
     InfraService.init();
+    CopilotService.initMemory();
 
-    console.log('ðŸš€ Iniciando motores de trading...');
+    console.log('🚀 Iniciando Intel Engine (Python :5004)...');
+    (async () => {
+        try {
+            intelEngineProcess = spawn('C:\\Users\\Deah\\AppData\\Local\\Python\\bin\\python.exe', ['-m', 'server.python.ai_agents.intel_service', '5004'], {
+                cwd: path.resolve(__dirname, '../..'),
+                stdio: ['ignore', 'pipe', 'pipe'],
+            });
+            intelEngineProcess.stdout?.on('data', (d: Buffer) => process.stdout.write(`[Intel Engine] ${d.toString()}`));
+            intelEngineProcess.stderr?.on('data', (d: Buffer) => process.stderr.write(`[Intel Engine] ${d.toString()}`));
+            intelEngineProcess.on('exit', (code: number | null) => {
+                console.log(`ℹ️  Intel Engine encerrado (código ${code})`);
+                intelEngineProcess = null;
+            });
 
-    TradeGuardian.start();
-    AlphaRobotEngine.start();
-    WolfBotEngine.init();
-    CopyTraderEngine.start();
-    SupremeEngine.start();
+            // Poll health endpoint until ready
+            for (let attempt = 0; attempt < 30; attempt++) {
+                try {
+                    const h = await axios.get(`${INTEL_ENGINE_URL}/api/intel-engine/health`, { timeout: 2000 });
+                    if (h.data?.status === 'healthy') {
+                        console.log(`✅ Intel Engine online — ${h.data.agents_loaded} agentes, ${h.data.cache_entries} cache`);
+                        break;
+                    }
+                } catch { /* not yet */ }
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        } catch (e) {
+            console.error('❌ Falha ao iniciar Intel Engine:', (e as Error).message);
+        }
+    })();
+
+    console.log('🚀 Iniciando motores de trading...');
+
+    DisciplineEngine.init();
+    CryptoRiskEngine.resetDailyLimits();
+    setInterval(() => CryptoRiskEngine.resetDailyLimits(), 24 * 60 * 60 * 1000);
+
     GoldScalperEngine.start();
     GoldScalperTradeMonitor.start(3000);
-    MLService.init();
-    BitcoinProEngine.init();
-    CryptoIAEngine.init();
-    MicroScalperEngine.init();
-    SwingTraderEngine.init();
-    ForexScalperEngine.init();
-    OmniProbabilisticEngine.start();
-    SharkBotEngine.init();
-    RecoveryEngine.init();
+    SweepTradeMonitor.start(3000);
     MotorIAEngine.init();
-    TradeNotificationBot.start();
-    console.log('âš¡ Todos os motores iniciados com sucesso!');
+    SweepEngine.init();
+    // Motores desativados para reduzir carga:
+    // TradeGuardian.start();
+    // AlphaRobotEngine.start();
+    // WolfBotEngine.init();
+    // CopyTraderEngine.start();
+    // SupremeEngine.start();
+    // MLService.init();
+    // BitcoinProEngine.init();
+    // AuraQuantEngine.init();
+    // CryptoIAEngine.init();
+    // MicroScalperEngine.init();
+    // SwingTraderEngine.init();
+    // ForexScalperEngine.init();
+    OmniProbabilisticEngine.start();
+    // SharkBotEngine.init();
+    // RecoveryEngine.init();
+    console.log('⚡ Todos os motores iniciados com sucesso!');
 
     // Process shutdown handlers
     const shutdown = async (signal: string) => {
-        console.log(`\nâš ï¸  Recebido ${signal}. Iniciando desligamento gracioso...`);
-        const engines = [MotorIAEngine, GoldScalperEngine, CryptoIAEngine, AlphaRobotEngine, WolfBotEngine, SupremeEngine, RecoveryEngine, SharkBotEngine, BitcoinProEngine, MicroScalperEngine, SwingTraderEngine, ForexScalperEngine, OmniProbabilisticEngine, TradeGuardian, CopyTraderEngine];
+        console.log(`\n// Restart trigger 2⚠️  Recebido ${signal}. Iniciando desligamento gracioso...`);
+        const engines = [MotorIAEngine, GoldScalperEngine, CryptoIAEngine, AlphaRobotEngine, WolfBotEngine, SupremeEngine, RecoveryEngine, SharkBotEngine, BitcoinProEngine, AuraQuantEngine, MicroScalperEngine, SwingTraderEngine, SweepEngine, ForexScalperEngine, OmniProbabilisticEngine, TradeGuardian, CopyTraderEngine];
         for (const eng of engines) { try { (eng as any).stop?.(); } catch { /* ignore */ } }
+        if (intelEngineProcess) { try { intelEngineProcess.kill('SIGTERM'); } catch {} }
         try { await DatabaseService.disconnect(); } catch (e) { console.error('DB disconnect fail', e); }
-        console.log('âœ… Desligamento concluÃ­do.');
+        console.log('✅ Desligamento concluído.');
         process.exit(0);
     };
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
+
+    // SPA fallback (deve vir DEPOIS de todas as rotas de API)
+    app.get('*', (req, res) => {
+        if (!req.path.startsWith('/api')) {
+            res.sendFile(path.join(clientDist, 'index.html'));
+        }
+    });
+}).on('error', (err: any) => {
+    console.error('❌ HTTP Server error:', err.message);
+    if (err.code === 'EADDRINUSE') {
+        console.error(`   Porta ${port} já está em uso. Aguarde alguns minutos ou use outra porta.`);
+    }
+    process.exit(1);
 });
 

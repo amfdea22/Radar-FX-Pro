@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Fox } from './Fox';
 import {
     LayoutDashboard,
     BookOpen,
@@ -45,10 +46,12 @@ interface LayoutProps {
     setActiveTab: (tab: string) => void;
     isTablet?: boolean;
     onOverrideDevice?: (mode: 'auto' | 'mobile' | 'tablet' | 'desktop') => void;
+    onLogout?: () => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, isTablet, onOverrideDevice }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, isTablet, onOverrideDevice, onLogout }) => {
     const [isBitcoinProActive, setIsBitcoinProActive] = React.useState(false);
+    const [isAuraQuantActive, setIsAuraQuantActive] = React.useState(false);
     const [isSharkActive, setIsSharkActive] = React.useState(false);
     const [isRobotActive, setIsRobotActive] = React.useState(false);
     const [isCryptoActive, setIsCryptoActive] = React.useState(false);
@@ -60,6 +63,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     const [isSupremeActive, setIsSupremeActive] = React.useState(false);
     const [isOmniActive, setIsOmniActive] = React.useState(false);
     const [isWolfActive, setIsWolfActive] = React.useState(false);
+    const [isSweepActive, setIsSweepActive] = React.useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
     const [collapsedSections, setCollapsedSections] = React.useState<Set<string>>(new Set());
@@ -76,7 +80,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     React.useEffect(() => {
         const checkStatus = async () => {
             try {
-                const [btcPro, shark, wolf, robot, crypto, gold, titan, swing, copy, speed, supreme, omni] = await Promise.all([
+                const [btcPro, shark, wolf, robot, crypto, gold, titan, swing, copy, speed, supreme, omni, aura, sweep] = await Promise.all([
                     axios.get('/api/mt5/bitcoin-pro/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/shark-bot/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/wolf-bot/status').catch(() => ({ data: { settings: { enabled: false } } })),
@@ -88,9 +92,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                     axios.get('/api/mt5/copy-trader/status').catch(() => ({ data: { activeMasterId: null } })),
                     axios.get('/api/mt5/forex-scalper/status').catch(() => ({ data: { settings: { enabled: false } } })),
                     axios.get('/api/mt5/supreme/status').catch(() => ({ data: { settings: { enabled: false } } })),
-                    axios.get('/api/mt5/omni/status').catch(() => ({ data: { settings: { enabled: false } } }))
+                    axios.get('/api/mt5/omni/status').catch(() => ({ data: { settings: { enabled: false } } })),
+                    axios.get('/api/mt5/aura-quant/status').catch(() => ({ data: { settings: { enabled: false } } })),
+                    axios.get('/api/mt5/sweep/status').catch(() => ({ data: { settings: { enabled: false } } }))
                 ]);
                 setIsBitcoinProActive(btcPro.data?.settings?.enabled || false);
+                setIsAuraQuantActive(aura.data?.settings?.enabled || false);
                 setIsSharkActive(shark.data?.settings?.enabled || false);
                 setIsRobotActive(robot.data?.enabled || false);
                 setIsCryptoActive(crypto.data?.settings?.enabled || false);
@@ -102,6 +109,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 setIsSupremeActive(supreme.data?.settings?.enabled || false);
                 setIsOmniActive(omni.data?.settings?.enabled || false);
                 setIsWolfActive(wolf.data?.settings?.enabled || false);
+                setIsSweepActive(sweep.data?.settings?.enabled || sweep.data?.enabled || false);
+                console.warn('[Layout] Sweep Status Update:', sweep.data);
             } catch (error) {
                 console.error('Failed to fetch robotic statuses');
             }
@@ -132,14 +141,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             label: 'ROBÔS',
             items: [
                 { id: 'gold_scalper', icon: Target, label: 'Gold Scalper' },
+                { id: 'sweep', icon: TrendingUp, label: 'Sweep H4 M15' },
                 { id: 'wolf_bot', icon: Target, label: 'Wolf Bot' },
                 { id: 'robot', icon: Cpu, label: 'Alpha Robot' },
                 { id: 'supreme', icon: Crown, label: 'Supreme IA' },
                 { id: 'bitcoin_pro', icon: Bitcoin, label: 'Bitcoin Pro' },
+                { id: 'aura_quant', icon: Zap, label: 'Aura Quant' },
                 { id: 'shark_bot', icon: Zap, label: 'Shark Bot' },
                 { id: 'crypto', icon: Bitcoin, label: 'Alpha Cripto' },
                 { id: 'micro_sniper', icon: Zap, label: 'Micro Sniper' },
-                { id: 'swing_ia', icon: TrendingUp, label: 'Swing IA' },
+                { id: 'swing_ia', icon: TrendingUp, label: 'Day Swing IA' },
                 { id: 'speed_scalper', icon: Zap, label: 'Speed Scalper' },
                 { id: 'omni', icon: Sigma, label: 'Omni Prob' },
             ]
@@ -147,7 +158,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         {
             label: 'TRADING',
             items: [
-                { id: 'recovery', icon: Brain, label: 'Recovery' },
                 { id: 'motor_ia', icon: Brain, label: 'Motor IA' },
                 { id: 'trade', icon: Send, label: 'Operar' },
                 { id: 'copy', icon: Copy, label: 'Copy Trader' },
@@ -165,7 +175,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 { id: 'strategy_reports', icon: PieChart, label: 'Relatórios' },
                 { id: 'journal', icon: BookOpen, label: 'Diário' },
                 { id: 'simulator', icon: Box, label: 'Simulador' },
-                { id: 'costs', icon: Wallet, label: 'Custos' },
             ]
         },
         {
@@ -178,9 +187,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         {
             label: 'SISTEMA',
             items: [
-                { id: 'intel_engine', icon: Network, label: 'Intel Engine' },
+                { id: 'intel_engine', icon: Network, label: 'Multiagentes' },
                 { id: 'ai_monitoring', icon: Cpu, label: 'Monitoramento IA' },
                 { id: 'agent_ia', icon: Brain, label: 'Agente IA' },
+                { id: 'health', icon: Activity, label: 'Saúde' },
                 { id: 'alerts', icon: Bell, label: 'Alertas' },
                 { id: 'settings', icon: Settings, label: 'Ajustes' },
             ]
@@ -261,6 +271,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 {item.id === 'bitcoin_pro' && isBitcoinProActive && (
                                     <div className={`w-[7px] h-[7px] rounded-full bg-green-600 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '22, 163, 74', boxShadow: '0 0 6px rgba(22,163,74,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
+                                {item.id === 'aura_quant' && isAuraQuantActive && (
+                                    <div className={`w-[7px] h-[7px] rounded-full bg-violet-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '139, 92, 246', boxShadow: '0 0 6px rgba(139,92,246,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
+                                )}
                                 {item.id === 'shark_bot' && isSharkActive && (
                                     <div className={`w-[7px] h-[7px] rounded-full bg-cyan-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '6, 182, 212', boxShadow: '0 0 6px rgba(6,182,212,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
@@ -276,7 +289,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 {item.id === 'micro_sniper' && isTitanActive && (
                                     <div className={`w-[7px] h-[7px] rounded-full bg-indigo-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '99, 102, 241', boxShadow: '0 0 6px rgba(99,102,241,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
-                                {item.id === 'swing_ia' && isSwingActive && (
+                                 {item.id === 'sweep' && isSweepActive && (
+                                     <div className={`w-2 h-2 rounded-full bg-green-500 animate-pulse ${isSidebarCollapsed && !isTablet ? 'absolute -top-1 -right-1' : ''}`} />
+                                 )}
+                                 {item.id === 'swing_ia' && isSwingActive && (
                                     <div className={`w-[7px] h-[7px] rounded-full bg-yellow-500 ${isSidebarCollapsed && !isTablet ? 'absolute -top-0.5 -right-0.5' : ''}`} style={{ '--pulse-color': '234, 179, 8', boxShadow: '0 0 6px rgba(234,179,8,0.6)', animation: 'active-pulse 2s infinite' } as any}></div>
                                 )}
                                 {item.id === 'copy' && isCopyActive && (
@@ -400,13 +416,19 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                     <span className="text-[8px] font-black text-indigo-400 uppercase italic hidden sm:inline">Sniper</span>
                                 </div>
                             )}
-                            {isSwingActive && (
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
-                                    <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />
-                                    <span className="text-[8px] font-black text-yellow-400 uppercase italic hidden sm:inline">Swing</span>
-                                </div>
-                            )}
-                            {isCopyActive && (
+                             {isSwingActive && (
+                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
+                                     <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />
+                                     <span className="text-[8px] font-black text-yellow-400 uppercase italic hidden sm:inline">Swing</span>
+                                 </div>
+                             )}
+                             {isSweepActive && (
+                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-600/10 border border-green-600/20 rounded-full">
+                                     <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                                     <span className="text-[8px] font-black text-green-400 uppercase italic hidden sm:inline">Sweep</span>
+                                 </div>
+                             )}
+                             {isCopyActive && (
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full">
                                     <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-pulse" />
                                     <span className="text-[8px] font-black text-violet-400 uppercase italic hidden sm:inline">Copy</span>
@@ -540,13 +562,19 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 <span className="text-[9px] font-black text-indigo-400 uppercase italic">Sniper</span>
                             </div>
                         )}
-                        {isSwingActive && (
-                            <div className="flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
-                                <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></div>
-                                <span className="text-[9px] font-black text-yellow-400 uppercase italic">Swing</span>
-                            </div>
-                        )}
-                        {isCopyActive && (
+                         {isSwingActive && (
+                             <div className="flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
+                                 <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></div>
+                                 <span className="text-[9px] font-black text-yellow-400 uppercase italic">Swing</span>
+                             </div>
+                         )}
+                         {isSweepActive && (
+                             <div className="flex items-center gap-2 px-3 py-1 bg-green-600/10 border border-green-600/20 rounded-full">
+                                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                 <span className="text-[9px] font-black text-green-400 uppercase italic">Sweep</span>
+                             </div>
+                         )}
+                         {isCopyActive && (
                             <div className="flex items-center gap-2 px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full">
                                 <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-pulse"></div>
                                 <span className="text-[9px] font-black text-violet-400 uppercase italic">Copy</span>
@@ -581,13 +609,29 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                 </button>
                             </div>
                         )}
+                        {onLogout && (
+                            <button onClick={onLogout}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 hover:bg-red-500/20 text-[11px] font-semibold transition-all"
+                                title="Sair do sistema">
+                                <span className="hidden sm:inline">Sair</span>
+                            </button>
+                        )}
                     </div>
                 </header>
 
                 <section className="flex-1">
                     {children}
                 </section>
+
+                {/* Footer */}
+                <footer className="py-3 px-4 text-center border-t border-white/5">
+                    <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                        Copyright © Andréa França — TecHub Softawares em IA
+                    </p>
+                </footer>
             </main>
+
+            <Fox />
         </div>
     );
 };
