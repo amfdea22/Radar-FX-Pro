@@ -13,7 +13,6 @@ process.on('unhandledRejection', (reason) => {
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
-import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { spawn, ChildProcess } from 'child_process';
 import { SignalEngine } from './services/SignalEngine';
@@ -77,15 +76,6 @@ const app = express();
 
 const APP_URL = process.env.APP_URL || 'http://localhost:3006';
 const WS_APP_URL = APP_URL.replace(/^http/, 'ws');
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-            "script-src": ["'self'", "'unsafe-inline'", APP_URL],
-            "connect-src": ["'self'", APP_URL, WS_APP_URL],
-        },
-    },
-}));
 
 // Heartbeat da Central de Alertas (Mantém a percepção de Sincronia Viva)
 setInterval(() => {
@@ -112,7 +102,35 @@ app.use(cors({
     }
   },
 }));
-app.use(express.json());
+// Custom body parser para POST com body (compatibilidade Node.js v24)
+const readBody = (req: any): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        let body = '';
+        req.setEncoding('utf8');
+        req.on('data', (chunk: string) => { body += chunk; });
+        req.on('end', () => resolve(body));
+        req.on('error', reject);
+        req.resume();
+    });
+};
+
+app.use(async (req, res, next) => {
+    if (req.method === 'POST' && Number(req.headers['content-length'] || '0') > 0) {
+        try {
+            const raw = await readBody(req);
+            const ct = (req.headers['content-type'] || '').toLowerCase();
+            if (ct.includes('application/json')) {
+                try { req.body = JSON.parse(raw); } catch { req.body = raw; }
+            } else if (ct.includes('application/x-www-form-urlencoded')) {
+                const params = new URLSearchParams(raw);
+                req.body = Object.fromEntries(params.entries());
+            } else {
+                req.body = raw;
+            }
+        } catch { req.body = {}; }
+    }
+    next();
+});
 
 // Auth middleware — protege todas as rotas /api/* exceto as públicas
 const PUBLIC_API_PATHS = ['/api/auth', '/api/health', '/api/health/full', '/api/tradingview', '/api/system', '/api/intel-engine', '/api/telemetry', '/api/copilot'];
@@ -408,7 +426,10 @@ app.get('/api/mt5/positions', async (req, res) => {
         const response = await bridgeAxios.get('/positions');
         const positions = response.data;
         if (Array.isArray(positions) && positions.length > 0) {
-            return res.json(positions);
+            return res.json(positions.map((p: any) => ({
+                ...p,
+                engine: MAGIC_MAP[p.magic] || p.comment || `Magic ${p.magic}`,
+            })));
         }
     } catch {}
     // Fallback: gerar posições sintéticas do Gold Scalper
@@ -2085,6 +2106,41 @@ app.post('/api/system/config', (req, res) => {
             return res.status(400).json({ error: 'Validação falhou', details: error.errors });
         }
         res.status(500).json({ error: 'Erro interno ao salvar configurações' });
+    }
+});
+
+// --- KILL SWITCH: Desligar todos os robôs ---
+app.post('/api/system/engines/disable-all', (req, res) => {
+    try {
+        const engines = [
+            { name: 'Gold Scalper', fn: () => GoldScalperEngine.updateSettings({ enabled: false }) },
+            { name: 'Alpha Robot', fn: () => AlphaRobotEngine.updateSettings({ enabled: false }) },
+            { name: 'Omni', fn: () => OmniProbabilisticEngine.updateSettings({ enabled: false }) },
+            { name: 'Supreme', fn: () => SupremeEngine.updateSettings({ nakamotoActive: false, intelligence7Active: false }) },
+            { name: 'Shark Bot', fn: () => SharkBotEngine.updateSettings({ enabled: false }) },
+            { name: 'Wolf Bot', fn: () => WolfBotEngine.updateSettings({ enabled: false }) },
+            { name: 'Bitcoin Pro', fn: () => BitcoinProEngine.updateSettings({ enabled: false }) },
+            { name: 'Aura Quant', fn: () => AuraQuantEngine.updateSettings({ enabled: false }) },
+            { name: 'Crypto IA', fn: () => CryptoIAEngine.updateSettings({ enabled: false }) },
+            { name: 'Motor IA', fn: () => MotorIAEngine.updateSettings({ enabled: false }) },
+            { name: 'Recovery', fn: () => RecoveryEngine.updateSettings({ enabled: false }) },
+            { name: 'Micro Scalper', fn: () => MicroScalperEngine.updateSettings({ enabled: false }) },
+            { name: 'Swing Trader', fn: () => SwingTraderEngine.updateSettings({ enabled: false }) },
+            { name: 'Forex Scalper', fn: () => ForexScalperEngine.updateSettings({ enabled: false }) },
+            { name: 'Sweep', fn: () => SweepEngine.updateSettings({ enabled: false }) },
+        ];
+
+        const results: { name: string; success: boolean; error?: string }[] = [];
+        for (const e of engines) {
+            try { e.fn(); results.push({ name: e.name, success: true }); }
+            catch (err: any) { results.push({ name: e.name, success: false, error: err.message }); }
+        }
+
+        const successCount = results.filter(r => r.success).length;
+        console.log(`🔴 Kill Switch: ${successCount}/${results.length} robôs desligados`);
+        res.json({ success: true, disabled: successCount, total: results.length, details: results });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
     }
 });
 

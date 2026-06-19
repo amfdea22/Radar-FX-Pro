@@ -2,7 +2,36 @@ import express from 'express';
 import axios from 'axios';
 
 const app = express();
-app.use(express.json());
+
+// Custom body parser (compatibilidade Node.js v24)
+const readBody = (req: any): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        let body = '';
+        req.setEncoding('utf8');
+        req.on('data', (chunk: string) => { body += chunk; });
+        req.on('end', () => resolve(body));
+        req.on('error', reject);
+        req.resume();
+    });
+};
+
+app.use(async (req: any, res, next) => {
+    if (req.method === 'POST' && Number(req.headers['content-length'] || '0') > 0) {
+        try {
+            const raw = await readBody(req);
+            const ct = (req.headers['content-type'] || '').toLowerCase();
+            if (ct.includes('application/json')) {
+                try { req.body = JSON.parse(raw); } catch { req.body = raw; }
+            } else if (ct.includes('application/x-www-form-urlencoded')) {
+                const params = new URLSearchParams(raw);
+                req.body = Object.fromEntries(params.entries());
+            } else {
+                req.body = raw;
+            }
+        } catch { req.body = {}; }
+    }
+    next();
+});
 
 const PORT = 5555;
 const LITEFINANCE_BASE = 'https://api.litefinance.com/api/v1';
