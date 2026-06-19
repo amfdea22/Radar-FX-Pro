@@ -10,7 +10,6 @@ import { BridgeClient } from './BridgeClient';
 import { MarketDataService } from './MarketDataService';
 import { SymbolLockService } from './SymbolLockService';
 import { PolygonBar } from './PolygonService';
-import { TradeNotificationBot } from './TradeNotificationBot';
 
 // ──────────────────────────────────────────────
 // Interfaces
@@ -19,6 +18,7 @@ import { TradeNotificationBot } from './TradeNotificationBot';
 export interface TradeRecord {
     id: string;
     ticket: number;
+    symbol: string;
     type: 'BUY' | 'SELL';
     lot: number;
     entryPrice: number;
@@ -177,7 +177,7 @@ export class AlphaRobotEngine {
             const run = () => {
                 fn().finally(() => setTimeout(run, interval));
             };
-            setTimeout(run, interval);
+            run();
         };
 
         runLoop(() => this.processCycle(), 5000);
@@ -237,7 +237,7 @@ export class AlphaRobotEngine {
     static onEmergencyReset() {
         this.tradesThisWindow = 0;
         this.processedSignals.clear();
-        console.log('🤖 Alpha Robot: Emergency Reset');
+        console.log('🤖 Alpha Robot: Emergency Reset — contadores zerados.');
     }
 
     // ──────────────────────────────────────────────
@@ -373,6 +373,15 @@ export class AlphaRobotEngine {
 
     private static async runInstitutionalAnalysis() {
         if (!this.settings.enabled || !this.settings.useInstitutionalAnalysis) return;
+
+        // Clean stale entries for removed symbols
+        const activeSymbols = new Set(this.settings.symbols);
+        for (const sym of Object.keys(this.lastAnalysis)) {
+            if (!activeSymbols.has(sym)) delete this.lastAnalysis[sym];
+        }
+        for (const sym of Object.keys(this.lastBarsCache)) {
+            if (!activeSymbols.has(sym)) delete this.lastBarsCache[sym];
+        }
 
         for (const symbol of this.settings.symbols) {
             try {
@@ -882,8 +891,9 @@ export class AlphaRobotEngine {
     private static async getBarsSafe(symbol: string, limit: number, timeframe: string): Promise<PolygonBar[]> {
         try {
             const bars = await MarketDataService.getRecentBars(symbol, limit, timeframe);
-            this.lastBarsCache[symbol] = bars;
-            return [...bars].reverse();
+            const ordered = [...bars].reverse();
+            this.lastBarsCache[symbol] = ordered;
+            return ordered;
         } catch {
             return [];
         }
@@ -1038,6 +1048,8 @@ export class AlphaRobotEngine {
                     symbol: analysis.symbol,
                     action: analysis.direction,
                     lot,
+                    sl: analysis.sl,
+                    tp: analysis.tp,
                     magic: this.ROBOT_MAGIC,
                     comment: `AlphaInst ${analysis.wyckoffPhase} S${analysis.score}`.substring(0, 30)
                 });
@@ -1047,10 +1059,6 @@ export class AlphaRobotEngine {
             if (orderResult && (orderResult.status === 'success' || orderResult.ticket)) {
                 const ticket = orderResult.ticket || orderResult.order;
                 SymbolLockService.acquire(analysis.symbol, 'Alpha Robot', ticket, analysis.direction);
-
-                try {
-                    TradeNotificationBot.notifyTradeOpened('Alpha Robot', analysis.symbol, analysis.direction, lot, orderResult.price || 0, analysis.sl, analysis.tp);
-                } catch (e) { /* notif fail */ }
 
                 this.applySLTPWithRetry(ticket, analysis.sl, analysis.tp);
 
@@ -1156,7 +1164,6 @@ export class AlphaRobotEngine {
                 AlertEngine.addAlert('GUARDIAN', 'INFO', `Robo Alpha: ${signal.symbol} ${signal.type}`,
                     `Executado via ${signal.setup}`);
                 try {
-                    TradeNotificationBot.notifyTradeOpened('Alpha Robot', signal.symbol, signal.type, lot, orderResult.price || 0, signal.sl || 0, signal.tp || 0);
                 } catch (e) { /* notif fail */ }
 
                 if (signal.sl || signal.tp) {
@@ -1258,6 +1265,7 @@ export class AlphaRobotEngine {
                 const record: TradeRecord = {
                     id: `alpha_${ticket}_${t.time}`,
                     ticket,
+                    symbol: t.symbol || '',
                     type: t.type === 0 ? 'BUY' : 'SELL',
                     lot: t.volume || 0.01,
                     entryPrice: t.price_open || 0,
@@ -1282,8 +1290,6 @@ export class AlphaRobotEngine {
 
                 if (this.settings.enabled) {
                     try {
-                        
-                        TradeNotificationBot.notifyTradeClosed('Alpha Robot', t.symbol || 'Unknown', record.type, record.profit, record.result, record.closeReason, record.lot);
                     } catch (e) { /* notif fail */ }
                 }
             }

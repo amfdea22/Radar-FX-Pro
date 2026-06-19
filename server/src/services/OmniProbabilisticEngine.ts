@@ -5,7 +5,6 @@ import { DisciplineEngine } from './DisciplineEngine';
 import { SymbolLockService } from './SymbolLockService';
 import fs from 'fs';
 import path from 'path';
-import { TradeNotificationBot } from './TradeNotificationBot';
 
 export type ProbabilisticStrategy = 'MHI1' | 'MHI2' | 'MHI3' | 'TWIN_TOWERS' | 'CYCLE_OF_3' | 'SEVEN';
 
@@ -23,6 +22,27 @@ export interface OmniSettings {
     minRSITreshold: number;
     maxRSITreshold: number;
     magic: number;
+    // Dynamic entry
+    useDynamicEntry: boolean;
+    atrMultiplier: number;
+    minPipsFromLastEntry: number;
+    cooldownMinutesAfterLoss: number;
+    maxEntriesPerHour: number;
+    // Breakeven & trailing
+    useBreakeven: boolean;
+    useTrailing: boolean;
+    breakevenThreshold: number;
+    trailingLevel1Pct: number;
+    trailingLevel1Trail: number;
+    trailingLevel2Pct: number;
+    trailingLevel2Trail: number;
+    trailingLevel3Pct: number;
+    trailingLevel3Trail: number;
+    lockProfitPct: number;
+    lockProfitLockPct: number;
+    // Filters
+    maxSpread: number;
+    elephantCandleMultiplier: number;
 }
 
 export class OmniProbabilisticEngine {
@@ -33,6 +53,9 @@ export class OmniProbabilisticEngine {
     // Telemetria e Rastreamento
     private static processedQuadrants = new Set<string>();
     private static lastTickets = new Map<string, { ticket: number, level: number, action: 'BUY' | 'SELL' }>();
+    private static lastEntryPrices = new Map<string, { price: number, time: number }>();
+    private static cooldowns = new Map<string, number>();
+    private static entryCounters = new Map<string, { hour: number, count: number }>();
     private static logs: { time: string, msg: string, type: 'INFO' | 'SUCCESS' | 'ERROR' | 'WARN' }[] = [];
 
     private static settings: OmniSettings = {
@@ -41,22 +64,46 @@ export class OmniProbabilisticEngine {
         strategy: 'MHI1',
         timeframe: 'M1',
         defaultLot: 0.01,
-        useMartingale: true,
+        useMartingale: false,
         martingaleLevels: 1,
         martingaleMultiplier: 2.0,
         useTrendFilter: true,
         useRSIFilter: true,
         minRSITreshold: 30,
         maxRSITreshold: 70,
-        magic: 999111
+        magic: 999111,
+        useDynamicEntry: false,
+        atrMultiplier: 0.5,
+        minPipsFromLastEntry: 50,
+        cooldownMinutesAfterLoss: 240,
+        maxEntriesPerHour: 2,
+        breakevenThreshold: 0.015,
+        useBreakeven: true,
+        useTrailing: true,
+        trailingLevel1Pct: 0.05,
+        trailingLevel1Trail: 0.02,
+        trailingLevel2Pct: 0.10,
+        trailingLevel2Trail: 0.04,
+        trailingLevel3Pct: 0.15,
+        trailingLevel3Trail: 0.06,
+        lockProfitPct: 0.08,
+        lockProfitLockPct: 0.03,
+        maxSpread: 30,
+        elephantCandleMultiplier: 3
     };
 
     private static cycleTimer: NodeJS.Timeout | null = null;
+
+    static onEmergencyReset() {
+        this.processedQuadrants.clear();
+        console.log('[Omni] Emergency Reset — quadrantes zerados.');
+    }
 
     static start() {
         if (this.isRunning) return;
         this.loadSettings();
         this.isRunning = true;
+        console.log('[Omni] Engine INICIADO. Enabled:', this.settings.enabled, 'Strategy:', this.settings.strategy, 'Symbols:', this.settings.symbols);
         this.addLog('Omni Engine: Serviço Probabilístico Universal INICIADO', 'SUCCESS');
 
         const runCycle = async () => {
@@ -64,6 +111,7 @@ export class OmniProbabilisticEngine {
             try {
                 await this.processCycle();
             } catch (e: any) {
+                console.log('[Omni] ERRO no ciclo:', e.message || e);
                 this.addLog(`Erro no ciclo: ${e.message || e}`, 'ERROR');
             }
             this.cycleTimer = setTimeout(runCycle, 5000);
@@ -112,16 +160,20 @@ export class OmniProbabilisticEngine {
     }
 
     private static async processCycle() {
-        if (!this.settings.enabled) return;
+        if (!this.settings.enabled) {
+            console.log('[Omni] processCycle: disabled, skipping');
+            return;
+        }
 
         await this.manageTrailingStops();
 
         // Verificar Disciplina Global
         const discipline = await DisciplineEngine.getDailyStatus();
+        console.log('[Omni] Discipline:', discipline.isSafe, 'locked:', discipline.isLocked);
         if (!discipline.isSafe) {
             if (this.settings.enabled) {
                 this.settings.enabled = false;
-                this.saveSettings();
+                console.log('[Omni] Disabled by discipline');
                 AlertEngine.addAlert('GUARDIAN', 'CRITICAL', 'Motor Omni Pausado', 'Limite de disciplina atingido. Operações cessadas.');
             }
             return;
@@ -143,26 +195,61 @@ export class OmniProbabilisticEngine {
         else if (mod5 === 0 && seconds >= 55) targetVersion = 2;
         else if (mod5 === 1 && seconds >= 55) targetVersion = 3;
 
+        console.log('[Omni] Timing: mod5=' + mod5 + ' sec=' + seconds + ' targetVer=' + targetVersion);
+
         // Se a estratégia selecionada for MHI e não for o tempo dela, ignora
         if (this.settings.strategy.startsWith('MHI')) {
             const stratVersion = parseInt(this.settings.strategy.replace('MHI', ''));
-            if (targetVersion !== stratVersion) return;
+            if (targetVersion !== stratVersion) {
+                console.log('[Omni] Wrong MHI version, need ' + stratVersion + ' got ' + targetVersion);
+                return;
+            }
         } else if (targetVersion === 0) {
-            // Para outras estratégias, mantemos o ciclo de 5 min (MHI1 time)
-            if (!(mod5 === 4 && seconds >= 55)) return;
+            if (!(mod5 === 4 && seconds >= 55)) {
+                console.log('[Omni] Not entry time for non-MHI, returning');
+                return;
+            }
         }
 
         const quadrantId = `${now.getHours()}:${minutes}:${Math.floor(seconds / 55)}`;
-        if (this.processedQuadrants.has(quadrantId)) return;
+        console.log('[Omni] Entering! quadrantId=' + quadrantId + ' symbols=' + this.settings.symbols);
+        if (this.processedQuadrants.has(quadrantId)) {
+            console.log('[Omni] Quadrant already processed');
+            return;
+        }
+
+        // Limpeza de cooldowns expirados
+        const nowMs = Date.now();
+        for (const [sym, expiry] of this.cooldowns) {
+            if (nowMs >= expiry) this.cooldowns.delete(sym);
+        }
+
+        // Verificar perdas recentes para ativar cooldowns
+        await this.checkRecentLosses();
 
         for (const symbol of this.settings.symbols) {
+            // Verificar cooldown por perda
+            const cooldownUntil = this.cooldowns.get(symbol);
+            if (cooldownUntil && nowMs < cooldownUntil) {
+                const remaining = Math.round((cooldownUntil - nowMs) / 1000);
+                console.log(`[Omni] ${symbol} em cooldown por mais ${remaining}s`);
+                continue;
+            }
+
+            // Verificar limite de entradas por hora
+            if (!this.checkEntryRateLimit(symbol)) {
+                this.addLog(`[${symbol}] Limite de entradas por hora atingido`, 'WARN');
+                continue;
+            }
+
+            console.log('[Omni] Analyzing symbol:', symbol);
             await this.analyzeSymbol(symbol, quadrantId);
         }
     }
 
     private static async analyzeSymbol(symbol: string, quadrantId: string) {
         try {
-            // 1. Buscar Histórico (5 candles para o quadrante)
+            // 1. Buscar Histórico
             const resp = await axios.get(`${this.BRIDGE_URL}/candles`, {
                 params: { symbol, count: 200, timeframe: this.settings.timeframe }
             });
@@ -172,9 +259,21 @@ export class OmniProbabilisticEngine {
             const last5 = candles.slice(-5);
             const colors = last5.map((c: any) => c.close > c.open ? 'G' : 'R');
 
+            // 2. Filtro dinâmico ATR (apenas se habilitado)
+            if (this.settings.useDynamicEntry) {
+                const atr = this.calculateATR(candles, 14);
+                const currentClose = candles[candles.length - 1].close;
+                const atrPct = atr / currentClose;
+                // Entra apenas se ATR indicar volatilidade suficiente (pelo menos atrMultiplier %)
+                if (atrPct < this.settings.atrMultiplier * 0.001) {
+                    console.log(`[Omni] ${symbol} ATR muito baixo (${(atrPct * 100).toFixed(3)}%), ignorando`);
+                    return;
+                }
+            }
+
             let signal: 'BUY' | 'SELL' | null = null;
 
-            // 2. Aplicar Lógica por Estratégia
+            // 3. Aplicar Lógica por Estratégia
             switch (this.settings.strategy) {
                 case 'MHI1':
                     signal = this.calculateMHI(colors, 1);
@@ -186,22 +285,29 @@ export class OmniProbabilisticEngine {
                     signal = this.calculateMHI(colors, 3);
                     break;
                 case 'TWIN_TOWERS':
-                    signal = colors[0] === 'G' ? 'BUY' : 'SELL'; // Aposta na continuação da 1ª vela
+                    signal = colors[0] === 'G' ? 'BUY' : 'SELL';
                     break;
                 case 'CYCLE_OF_3':
                     if (colors[2] === colors[3] && colors[3] === colors[4]) {
-                        signal = colors[4] === 'G' ? 'SELL' : 'BUY'; // Reversão após 3 iguais
+                        signal = colors[4] === 'G' ? 'SELL' : 'BUY';
                     }
                     break;
             }
 
             if (!signal) return;
 
-            // 3. Filtros de Segurança
+            // 4. Verificar distância mínima da última entrada
+            const lastCandleClose = candles[candles.length - 1].close;
+            if (!this.isDistanceOk(symbol, lastCandleClose)) {
+                this.addLog(`[${symbol}] Distância mínima não atingida (${this.settings.minPipsFromLastEntry} pips)`, 'INFO');
+                return;
+            }
+
+            // 5. Filtros de Segurança
             const isSafe = await this.applyFilters(symbol, candles, signal);
             if (!isSafe) return;
 
-            // 4. Executar Ordem com suporte a Recuperação (Gale)
+            // 6. Executar Ordem com suporte a Recuperação (Gale)
             const activeGale = this.lastTickets.get(symbol);
             let currentLot = this.settings.defaultLot;
             let currentLevel = 0;
@@ -215,10 +321,6 @@ export class OmniProbabilisticEngine {
                         currentLevel = activeGale.level + 1;
                         currentLot = Number((activeGale.level === 0 ? this.settings.defaultLot * this.settings.martingaleMultiplier : currentLot * this.settings.martingaleMultiplier).toFixed(2));
                         this.addLog(`[Martingale] Perda detectada em ${symbol}. Aplicando Nível ${currentLevel} (Lote: ${currentLot})`, 'WARN');
-                        try {
-                            
-                            TradeNotificationBot.notifyTradeClosed('Omni', symbol, trade.type === 0 ? 'BUY' : 'SELL', trade.profit || 0, 'LOSS', 'Stop Loss / Martingale', trade.volume || currentLot);
-                        } catch (e) { /* notif fail */ }
                     }
                 } catch (e) {
                     this.addLog(`Erro ao verificar histórico de Gale para ${symbol}`, 'ERROR');
@@ -230,16 +332,14 @@ export class OmniProbabilisticEngine {
             
             if (ticket) {
                 this.lastTickets.set(symbol, { ticket, level: currentLevel, action: signal });
-                try {
-                    
-                    TradeNotificationBot.notifyTradeOpened('Omni', symbol, signal, currentLot, 0, 0, 0);
-                } catch (e) { /* notif fail */ }
+                this.lastEntryPrices.set(symbol, { price: lastCandleClose, time: Date.now() });
+                this.incrementEntryCounter(symbol);
             }
             
             this.processedQuadrants.add(quadrantId);
 
-        } catch (e) {
-            // Silencioso
+        } catch (e: any) {
+            this.addLog(`[${symbol}] Erro em analyzeSymbol: ${e?.message || e}`, 'ERROR');
         }
     }
 
@@ -282,17 +382,108 @@ export class OmniProbabilisticEngine {
             if (signal === 'SELL' && currentPrice > sma200) return false;
         }
 
+        // Filtro de spread
+        const spreadOk = await this.checkSpread(symbol);
+        if (!spreadOk) {
+            this.addLog(`[${symbol}] Blocked by Spread filter`, 'WARN');
+            return false;
+        }
+
         // Filtro de Marubozu (Vela de força gigante - perigosa para probabilística)
         const lastCandle = candles[candles.length - 1];
         const body = Math.abs(lastCandle.open - lastCandle.close);
         const avgBody = candles.slice(-20).reduce((s: number, c: any) => s + Math.abs(c.open - c.close), 0) / 20;
         
-        if (body > avgBody * 3) {
+        if (body > avgBody * this.settings.elephantCandleMultiplier) {
             console.log(`⚠️ Omni Filter: [${symbol}] Blocked by Elephant Candle (Volatility Spike)`);
             return false;
         }
 
         return true;
+    }
+
+    private static async checkSpread(symbol: string): Promise<boolean> {
+        try {
+            const resp = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [symbol] }, { timeout: 3000 });
+            const tick = resp.data?.[symbol];
+            if (!tick || !tick.ask || !tick.bid) return true;
+            const isForex = ['EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'NZD', 'CAD'].some(p => symbol.startsWith(p));
+            const spread = isForex ? (tick.ask - tick.bid) * 10000 : (tick.ask - tick.bid) * 100;
+            return spread <= this.settings.maxSpread;
+        } catch {
+            return true;
+        }
+    }
+
+    private static checkEntryRateLimit(symbol: string): boolean {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const counter = this.entryCounters.get(symbol);
+        if (!counter || counter.hour !== currentHour) {
+            this.entryCounters.set(symbol, { hour: currentHour, count: 0 });
+            return true;
+        }
+        return counter.count < this.settings.maxEntriesPerHour;
+    }
+
+    private static incrementEntryCounter(symbol: string) {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const counter = this.entryCounters.get(symbol);
+        if (!counter || counter.hour !== currentHour) {
+            this.entryCounters.set(symbol, { hour: currentHour, count: 1 });
+        } else {
+            counter.count++;
+        }
+    }
+
+    private static calculateATR(candles: any[], period: number = 14): number {
+        if (candles.length < period + 1) return 0;
+        const trues: number[] = [];
+        for (let i = candles.length - period; i < candles.length; i++) {
+            const c = candles[i];
+            const prev = candles[i - 1];
+            const tr = Math.max(
+                c.high - c.low,
+                Math.abs(c.high - prev.close),
+                Math.abs(c.low - prev.close)
+            );
+            trues.push(tr);
+        }
+        return trues.reduce((a, b) => a + b, 0) / trues.length;
+    }
+
+    private static async checkRecentLosses() {
+        try {
+            const resp = await axios.get(`${this.BRIDGE_URL}/history`, { timeout: 5000 });
+            if (!Array.isArray(resp.data)) return;
+            const nowMs = Date.now();
+            const cooldownMs = this.settings.cooldownMinutesAfterLoss * 60 * 1000;
+            for (const trade of resp.data) {
+                if (!trade.symbol || trade.profit === undefined) continue;
+                if ((trade.magic !== this.settings.magic && !(trade.comment || '').includes('Omni'))) continue;
+                if (trade.profit < 0) {
+                    const tradeCloseTime = (trade.time_close || trade.time) * 1000;
+                    if (nowMs - tradeCloseTime < 60000) {
+                        const expiry = nowMs + cooldownMs;
+                        if (!this.cooldowns.has(trade.symbol) || this.cooldowns.get(trade.symbol)! < expiry) {
+                            this.cooldowns.set(trade.symbol, expiry);
+                            this.addLog(`[${trade.symbol}] Perda detectada. Cooldown de ${this.settings.cooldownMinutesAfterLoss}min ativado.`, 'WARN');
+                        }
+                    }
+                }
+            }
+        } catch { /* fail silencioso */ }
+    }
+
+    private static isDistanceOk(symbol: string, currentPrice: number): boolean {
+        const last = this.lastEntryPrices.get(symbol);
+        if (!last) return true;
+        const diff = Math.abs(currentPrice - last.price);
+        const isForex = ['EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'NZD', 'CAD'].some(p => symbol.startsWith(p));
+        const pipMultiplier = isForex ? 10000 : 100;
+        const distPips = diff * pipMultiplier;
+        return distPips >= this.settings.minPipsFromLastEntry;
     }
 
     private static async executeTrade(symbol: string, action: 'BUY' | 'SELL', lot: number, level: number = 0): Promise<number | null> {
@@ -317,7 +508,12 @@ export class OmniProbabilisticEngine {
                     comment: `Omni ${this.settings.strategy} G${level}`.substring(0, 31)
                 });
                 const ticket = response.data?.ticket || response.data?.deal || null;
-                if (ticket) SymbolLockService.acquire(symbol, 'Omni', ticket, action);
+                if (ticket) {
+                    SymbolLockService.acquire(symbol, 'Omni', ticket, action);
+                    this.addLog(`Ordem EXECUTADA #${ticket} ${symbol} ${action} ${lot}`, 'SUCCESS');
+                } else {
+                    this.addLog(`Ordem enviada mas sem ticket retornado (${symbol} ${action})`, 'WARN');
+                }
                 return ticket;
             });
         } catch (e: any) {
@@ -332,30 +528,69 @@ export class OmniProbabilisticEngine {
             const positions: any[] = resp.data || [];
             for (const pos of positions) {
                 if (!pos.ticket || !pos.price_open || !pos.symbol) continue;
+                if (pos.comment && !pos.comment.includes('Omni') && pos.magic !== this.settings.magic) continue;
                 const isBuy = pos.type === 0;
                 const entry = pos.price_open;
                 const current = pos.price_current;
                 const profitPct = isBuy ? (current - entry) / entry : (entry - current) / entry;
 
-                // Breakeven at 2% profit
-                if (profitPct >= 0.02) {
+                // Breakeven em 1.5% com trailing após BE
+                if (this.settings.useBreakeven && profitPct >= this.settings.breakevenThreshold) {
                     const bePrice = isBuy ? entry + 0.0001 : entry - 0.0001;
                     if ((isBuy && (pos.sl || 0) < entry) || (!isBuy && (pos.sl || 0) > entry)) {
                         await axios.post(`${this.BRIDGE_URL}/update_order`, {
                             ticket: pos.ticket, sl: bePrice,
                         }, { timeout: 3000 });
-                        this.addLog(`🔒 Omni: Breakeven #${pos.ticket}`, 'INFO');
+                        this.addLog(`🔒 Omni: Breakeven #${pos.ticket} (${(profitPct * 100).toFixed(1)}%)`, 'INFO');
+                    } else {
+                        // Após BE ativado, pequeno trailing de proteção
+                        const trailAfterBe = isBuy ? current * 0.995 : current * 1.005;
+                        if ((isBuy && trailAfterBe > (pos.sl || 0)) || (!isBuy && trailAfterBe < (pos.sl || 999))) {
+                            await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                                ticket: pos.ticket, sl: trailAfterBe,
+                            }, { timeout: 3000 });
+                            this.addLog(`📐 Omni: BE Trailing #${pos.ticket} -> ${trailAfterBe.toFixed(5)}`, 'INFO');
+                        }
                     }
                 }
-                // Trailing at 5%+ profit
-                if (profitPct >= 0.05) {
-                    const trailSl = isBuy ? current * 0.98 : current * 1.02;
-                    if ((isBuy && trailSl > (pos.sl || 0)) || (!isBuy && trailSl < (pos.sl || 999))) {
-                        await axios.post(`${this.BRIDGE_URL}/update_order`, {
-                            ticket: pos.ticket, sl: trailSl,
-                        }, { timeout: 3000 });
-                        this.addLog(`📐 Omni: Trailing #${pos.ticket} -> ${trailSl.toFixed(5)}`, 'INFO');
+
+                // Multi-level trailing
+                if (this.settings.useTrailing) {
+                    let trailDistance = 0;
+                    if (profitPct >= this.settings.trailingLevel3Pct) {
+                        trailDistance = this.settings.trailingLevel3Trail;
+                    } else if (profitPct >= this.settings.trailingLevel2Pct) {
+                        trailDistance = this.settings.trailingLevel2Trail;
+                    } else if (profitPct >= this.settings.trailingLevel1Pct) {
+                        trailDistance = this.settings.trailingLevel1Trail;
                     }
+
+                    if (trailDistance > 0) {
+                        const trailSl = isBuy ? current * (1 - trailDistance) : current * (1 + trailDistance);
+                        if ((isBuy && trailSl > (pos.sl || 0)) || (!isBuy && trailSl < (pos.sl || 999))) {
+                            await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                                ticket: pos.ticket, sl: trailSl,
+                            }, { timeout: 3000 });
+                            this.addLog(`📐 Omni: Trail L${trailDistance === this.settings.trailingLevel1Trail ? 1 : trailDistance === this.settings.trailingLevel2Trail ? 2 : 3} #${pos.ticket} -> ${trailSl.toFixed(5)}`, 'INFO');
+                        }
+                    }
+                }
+
+                // Lock profit: se profit >= lockProfitPct, ajusta SL para travar lockProfitLockPct (respeita useTrailing)
+                if (this.settings.useTrailing && profitPct >= this.settings.lockProfitPct) {
+                    const lockSl = isBuy ? entry * (1 + this.settings.lockProfitLockPct) : entry * (1 - this.settings.lockProfitLockPct);
+                    if ((isBuy && lockSl > (pos.sl || 0)) || (!isBuy && lockSl < (pos.sl || 999))) {
+                        await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                            ticket: pos.ticket, sl: lockSl,
+                        }, { timeout: 3000 });
+                        this.addLog(`🔐 Omni: Lock Profit #${pos.ticket} -> ${lockSl.toFixed(5)}`, 'INFO');
+                    }
+                }
+
+                // Verificar se trade foi fechado como perda → ativar cooldown
+                if (pos.comment && pos.comment.includes('Omni') && pos.profit !== undefined && pos.profit < 0) {
+                    // Só seta cooldown se o trade já foi fechado (position não está mais aberta)
+                    // Isso é tratado quando olhamos o histórico, não via positions abertas
                 }
             }
         } catch (e) { /* trailing fail */ }
@@ -366,13 +601,19 @@ export class OmniProbabilisticEngine {
             const resp = await axios.get(`${this.BRIDGE_URL}/history`);
             if (!Array.isArray(resp.data)) return [];
             
-            // Filtro Híbrido: Novo Magic (999111) + Legado (7777 com "Omni" no comentário)
-            return resp.data
-                .filter((t: any) => 
-                    t.magic === this.settings.magic || 
-                    (t.magic === 7777 && (t.comment || '').toUpperCase().includes('OMNI'))
-                )
-                .sort((a: any, b: any) => b.time - a.time);
+            // Filtro: magic 999111 (novo) ou qualquer trade com "Omni" no comentário
+            // Se o bridge não retorna campo magic, usa fallback por comment
+            const hasMagicField = resp.data.length > 0 && resp.data[0].magic !== undefined;
+            const filtered = hasMagicField
+                ? resp.data.filter((t: any) =>
+                    t.magic === this.settings.magic ||
+                    (t.comment || '').toUpperCase().includes('OMNI')
+                  )
+                : resp.data.filter((t: any) =>
+                    (t.comment || '').toUpperCase().includes('OMNI')
+                  );
+            
+            return filtered.sort((a: any, b: any) => b.time - a.time);
         } catch (e) {
             return [];
         }
