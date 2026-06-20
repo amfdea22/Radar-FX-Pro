@@ -1,0 +1,526 @@
+{
+  "tradeHistory": [
+    {
+      "time": "2026-06-19T02:13:39.097Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4183.49,
+      "profit": 0.6,
+      "ticket": 325802597
+    },
+    {
+      "time": "2026-06-19T02:12:39.122Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4185.37,
+      "profit": 1.9,
+      "ticket": 325790972
+    },
+    {
+      "time": "2026-06-19T01:42:38.608Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4188.98,
+      "profit": 1.88,
+      "ticket": 325783585
+    },
+    {
+      "time": "2026-06-18T19:19:24.830Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4215.03,
+      "profit": 12.64,
+      "ticket": 325526876
+    },
+    {
+      "time": "2026-06-18T16:57:49.029Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4225.15,
+      "profit": 10.71,
+      "ticket": 325514000
+    },
+    {
+      "time": "2026-06-18T16:36:48.658Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4222.38,
+      "profit": 5.64,
+      "ticket": 325496595
+    },
+    {
+      "time": "2026-06-17T19:39:19.053Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4221.94,
+      "profit": 0.81,
+      "ticket": 324755593
+    },
+    {
+      "time": "2026-06-17T15:30:15.006Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4355.75,
+      "profit": 0.6,
+      "ticket": 324540674
+    },
+    {
+      "time": "2026-06-17T15:09:44.729Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4348.14,
+      "profit": 1.3599999999999999,
+      "ticket": 324531847
+    },
+    {
+      "time": "2026-06-17T14:52:14.424Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4348.35,
+      "profit": 0.43,
+      "ticket": 324521859
+    },
+    {
+      "time": "2026-06-17T00:35:05.517Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4336.97,
+      "profit": -1.2,
+      "ticket": 324102677
+    },
+    {
+      "time": "2026-06-17T00:30:35.431Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4337.52,
+      "profit": -0.4,
+      "ticket": 324085783
+    },
+    {
+      "time": "2026-06-17T00:05:40.139Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4334.05,
+      "profit": -3.08,
+      "ticket": 324083861
+    },
+    {
+      "time": "2026-06-17T00:02:39.824Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4331.07,
+      "profit": -6.45,
+      "ticket": 324081924
+    },
+    {
+      "time": "2026-06-17T00:01:09.819Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "entry": 4330.79,
+      "profit": 2.55,
+      "ticket": 324080343
+    },
+    {
+      "time": "2026-06-16T19:19:41.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4344.86,
+      "profit": -3.95,
+      "ticket": 255164572
+    },
+    {
+      "time": "2026-06-16T17:26:26.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4325.21,
+      "profit": -3.1,
+      "ticket": 255105053
+    },
+    {
+      "time": "2026-06-16T17:26:03.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4323.88,
+      "profit": 4.05,
+      "ticket": 255104888
+    },
+    {
+      "time": "2026-06-16T17:25:34.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4325.16,
+      "profit": -4.85,
+      "ticket": 255104699
+    },
+    {
+      "time": "2026-06-16T17:25:10.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4323.54,
+      "profit": 6.9,
+      "ticket": 255104572
+    },
+    {
+      "time": "2026-06-16T17:23:24.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4324.36,
+      "profit": -3.35,
+      "ticket": 255103562
+    },
+    {
+      "time": "2026-06-16T17:23:21.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4324.04,
+      "profit": 5,
+      "ticket": 255103518
+    },
+    {
+      "time": "2026-06-16T17:22:24.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4324.13,
+      "profit": -3.9,
+      "ticket": 255102591
+    },
+    {
+      "time": "2026-06-16T17:22:10.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4323.16,
+      "profit": 5.15,
+      "ticket": 255102447
+    },
+    {
+      "time": "2026-06-16T17:21:30.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4324.44,
+      "profit": 5.35,
+      "ticket": 255102146
+    },
+    {
+      "time": "2026-06-16T17:21:01.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4323.32,
+      "profit": -4.1,
+      "ticket": 255101683
+    },
+    {
+      "time": "2026-06-16T17:20:27.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4321.85,
+      "profit": 4.75,
+      "ticket": 255101105
+    },
+    {
+      "time": "2026-06-16T17:19:25.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4324.85,
+      "profit": -3.9,
+      "ticket": 255099919
+    },
+    {
+      "time": "2026-06-16T17:18:56.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4326.41,
+      "profit": -4,
+      "ticket": 255099379
+    },
+    {
+      "time": "2026-06-16T17:18:23.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4327.51,
+      "profit": -3.35,
+      "ticket": 255098653
+    },
+    {
+      "time": "2026-06-16T17:18:03.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4327.85,
+      "profit": 5.15,
+      "ticket": 255098265
+    },
+    {
+      "time": "2026-06-16T17:17:23.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4329.72,
+      "profit": -4.85,
+      "ticket": 255097709
+    },
+    {
+      "time": "2026-06-16T17:17:19.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4329,
+      "profit": 4.5,
+      "ticket": 255097462
+    },
+    {
+      "time": "2026-06-16T17:16:49.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4330.31,
+      "profit": 5.3,
+      "ticket": 255096757
+    },
+    {
+      "time": "2026-06-16T17:16:15.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4332.09,
+      "profit": 4.85,
+      "ticket": 255096020
+    },
+    {
+      "time": "2026-06-16T17:15:34.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4333.53,
+      "profit": 3.35,
+      "ticket": 255095560
+    },
+    {
+      "time": "2026-06-16T17:14:52.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4335.95,
+      "profit": -2.45,
+      "ticket": 255095091
+    },
+    {
+      "time": "2026-06-16T17:14:01.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4334.83,
+      "profit": -3.9,
+      "ticket": 255094716
+    },
+    {
+      "time": "2026-06-16T17:13:42.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4334.08,
+      "profit": -3.45,
+      "ticket": 255094567
+    },
+    {
+      "time": "2026-06-16T17:13:12.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4334.04,
+      "profit": 3.8,
+      "ticket": 255094344
+    },
+    {
+      "time": "2026-06-16T17:12:31.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4336.16,
+      "profit": -4,
+      "ticket": 255094033
+    },
+    {
+      "time": "2026-06-16T17:12:01.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4333.97,
+      "profit": 5.15,
+      "ticket": 255093664
+    },
+    {
+      "time": "2026-06-16T16:54:10.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4337.15,
+      "profit": -3.85,
+      "ticket": 255081059
+    },
+    {
+      "time": "2026-06-16T03:27:16.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4307.1,
+      "profit": 14.92,
+      "ticket": 254822233
+    },
+    {
+      "time": "2026-06-16T02:40:41.000Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "entry": 4315.19,
+      "profit": 0.28,
+      "ticket": 254811269
+    }
+  ],
+  "signalHistory": [
+    {
+      "time": "2026-06-19T02:12:39.180Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 105,
+      "sweepLevel": 4246.39,
+      "entryPrice": 4235.54,
+      "executed": true
+    },
+    {
+      "time": "2026-06-19T01:45:38.979Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 115,
+      "sweepLevel": 4246.39,
+      "entryPrice": 4235.54,
+      "executed": true
+    },
+    {
+      "time": "2026-06-19T01:30:08.496Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 115,
+      "sweepLevel": 4246.39,
+      "entryPrice": 4235.54,
+      "executed": true
+    },
+    {
+      "time": "2026-06-18T16:40:18.790Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 105,
+      "sweepLevel": 4246.39,
+      "entryPrice": 4243.38,
+      "executed": true
+    },
+    {
+      "time": "2026-06-18T16:24:51.670Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 105,
+      "sweepLevel": 4246.39,
+      "entryPrice": 4243.38,
+      "executed": true
+    },
+    {
+      "time": "2026-06-17T19:30:19.058Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 110,
+      "sweepLevel": 4246.39,
+      "entryPrice": 4227.26,
+      "executed": true
+    },
+    {
+      "time": "2026-06-17T19:25:48.942Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "score": 100,
+      "sweepLevel": 4366.29,
+      "entryPrice": 4376.59,
+      "executed": false
+    },
+    {
+      "time": "2026-06-17T19:10:48.811Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "score": 100,
+      "sweepLevel": 4366.29,
+      "entryPrice": 4376.59,
+      "executed": false
+    },
+    {
+      "time": "2026-06-17T18:55:21.581Z",
+      "symbol": "XAUUSD",
+      "direction": "BUY",
+      "score": 100,
+      "sweepLevel": 4366.29,
+      "entryPrice": 4376.59,
+      "executed": false
+    },
+    {
+      "time": "2026-06-17T15:22:14.965Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 95,
+      "sweepLevel": 4363.61,
+      "entryPrice": 4351.88,
+      "executed": true
+    },
+    {
+      "time": "2026-06-17T15:06:44.679Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 95,
+      "sweepLevel": 4363.61,
+      "entryPrice": 4351.88,
+      "executed": true
+    },
+    {
+      "time": "2026-06-17T14:51:14.474Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 95,
+      "sweepLevel": 4363.61,
+      "entryPrice": 4351.88,
+      "executed": true
+    },
+    {
+      "time": "2026-06-17T00:04:40.171Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 85,
+      "sweepLevel": 4346.76,
+      "entryPrice": 4345.78,
+      "executed": false
+    },
+    {
+      "time": "2026-06-17T00:03:10.073Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 85,
+      "sweepLevel": 4346.76,
+      "entryPrice": 4345.78,
+      "executed": false
+    },
+    {
+      "time": "2026-06-17T00:01:39.915Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 85,
+      "sweepLevel": 4346.76,
+      "entryPrice": 4345.78,
+      "executed": false
+    },
+    {
+      "time": "2026-06-17T00:00:10.092Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 85,
+      "sweepLevel": 4346.76,
+      "entryPrice": 4345.78,
+      "executed": false
+    },
+    {
+      "time": "2026-06-16T23:59:39.901Z",
+      "symbol": "XAUUSD",
+      "direction": "SELL",
+      "score": 85,
+      "sweepLevel": 4346.76,
+      "entryPrice": 4345.78,
+      "executed": false
+    }
+  ],
+  "wins": 26,
+  "losses": 19,
+  "totalTrades": 45,
+  "totalProfitClosed": 49.49,
+  "dailyProfit": 4.38,
+  "dailyLoss": 0,
+  "lastResetDay": "2026-06-19"
+}

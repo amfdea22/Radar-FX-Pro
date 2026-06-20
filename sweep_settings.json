@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "symbols": [
+    "XAUUSD",
+    "BTCUSD"
+  ],
+  "lotSize": 0.01,
+  "riskUSD": 10,
+  "minSwingDistance": 0.05,
+  "atrSlMultiplier": 1.5,
+  "atrTpMultiplier": 2,
+  "maxDailyLoss": 50,
+  "maxDailyProfit": 100,
+  "cooldownMinutes": 15,
+  "magic": 777555
+}
