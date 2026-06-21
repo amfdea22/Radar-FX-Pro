@@ -46,6 +46,7 @@ import { SweepEngine } from './services/SweepEngine';
 import { SweepTradeMonitor } from './services/SweepTradeMonitor';
 import { SwingTraderSimulator } from './services/SwingTraderSimulator';
 import { ForexScalperEngine } from './services/ForexScalperEngine';
+import { ForexScalperBacktest } from './services/ForexScalperBacktest';
 import { OmniProbabilisticEngine } from './services/OmniProbabilisticEngine';
 import { JournalService } from './services/JournalService';
 import { SecurityAuditService } from './services/SecurityAuditService';
@@ -1729,6 +1730,36 @@ app.post('/api/mt5/forex-scalper/close', async (req, res) => {
 
 app.get('/api/mt5/forex-scalper/report', (req, res) => {
     res.json(ForexScalperEngine.computePerformance());
+});
+
+app.post('/api/mt5/forex-scalper/backtest', async (req, res) => {
+    try {
+        const config = {
+            symbol: req.body.symbol || 'EURUSD',
+            days: req.body.days || 30,
+            lotSize: req.body.lotSize || 0.01,
+            gridDistancePoints: req.body.gridDistancePoints || 25,
+            maxGridLevels: req.body.maxGridLevels || 5,
+            takeProfitPoints: req.body.takeProfitPoints || 25,
+            stopLossPoints: req.body.stopLossPoints || 100,
+            smartBreakevenEnabled: req.body.smartBreakevenEnabled ?? true,
+            smartBreakevenTriggerPoints: req.body.smartBreakevenTriggerPoints || 12,
+            smartBreakevenLockPoints: req.body.smartBreakevenLockPoints || 3,
+            trailingStopEnabled: req.body.trailingStopEnabled ?? true,
+            trailingStopPoints: req.body.trailingStopPoints || 15,
+            basketSize: req.body.basketSize || 3,
+            basketOffsetPoints: req.body.basketOffsetPoints || 20,
+            basketTPMultiplier: req.body.basketTPMultiplier || 3.0,
+            gridMultiplier: req.body.gridMultiplier || 1.5,
+            gridDynamicDistance: req.body.gridDynamicDistance ?? true,
+            trendFilterM5: req.body.trendFilterM5 ?? false,
+            initialCapital: req.body.initialCapital || 1000,
+        };
+        const result = await ForexScalperBacktest.run(config);
+        res.json(result);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.get('/api/mt5/signals', async (req, res) => {
