@@ -350,8 +350,17 @@ export class ForexScalperBacktest {
     }
 
     private static getPointSize(symbol: string): number {
-        if (symbol.includes('BTC') || symbol.includes('ETH')) return 0.1;
-        if (symbol.includes('XAU') || symbol.includes('GOLD')) return 0.01;
+        // JPY pairs (3 decimal places)
+        if (symbol.endsWith('JPY') && !symbol.startsWith('X')) return 0.001;
+        // Metals
+        if (symbol === 'XAUUSD' || symbol === 'GOLD') return 0.01;
+        if (symbol === 'XAGUSD' || symbol === 'SILVER') return 0.001;
+        // Crypto
+        if (symbol === 'BTCUSD') return 0.01;
+        if (symbol === 'ETHUSD') return 0.01;
+        // Indices
+        if (symbol.includes('Cash') || symbol.includes('500')) return 0.1;
+        // Standard forex (5-digit)
         return 0.00001;
     }
 

@@ -56,7 +56,7 @@ export class ForexScalperEngine {
 
     private static settings: ForexScalperSettings = {
         enabled: false,
-        symbols: ['EURUSD', 'GBPUSD'],
+        symbols: ['GBPUSD', 'EURJPY', 'GBPJPY', 'EURUSD', 'USDCAD'],
         lotSize: 0.01,
         useRiskPercentage: false,
         riskPercentage: 1.0,
