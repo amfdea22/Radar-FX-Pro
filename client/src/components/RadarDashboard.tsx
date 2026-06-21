@@ -2,15 +2,17 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
     LayoutDashboard, Wallet, TrendingUp, TrendingDown, Target, Activity,
-    RefreshCw, Cpu, Zap, ArrowUp, ArrowDown, Minus, Eye, DollarSign, BarChart2
+    RefreshCw, Cpu, Zap, ArrowUp, ArrowDown, Minus, Eye, DollarSign, BarChart2,
+    ChevronDown, ChevronUp, Power
 } from 'lucide-react';
 import axios from 'axios';
 import { DisciplinePanel } from './DisciplinePanel';
 import { ActiveBotsCard } from './ActiveBotsCard';
 
+
 interface AccountInfo { balance: number; equity: number; margin: number; margin_free: number; profit: number; currency: string; }
 interface TickData { bid: number; ask: number; change: number; changePercent: number; changePercent5m: number; changePercent1h: number; is_open: boolean }
-interface Position { ticket: number; symbol: string; type: number; volume: number; price_open: number; price_current: number; profit: number; }
+interface Position { ticket: number; symbol: string; type: number; volume: number; price_open: number; price_current: number; profit: number; magic?: number; engine?: string; comment?: string; }
 interface Signal { id: string; asset: string; symbol: string; type: 'BUY' | 'SELL'; setup: string; confidence: number; price_entry: number; sl: number; tp: number; category: string; }
 interface Discipline { profit: number; tradeCount: number; consecutiveLosses: number; isLocked: boolean; }
 
@@ -86,6 +88,8 @@ export const RadarDashboard: React.FC = () => {
     const [strategyWinRates, setStrategyWinRates] = useState<Record<string, number>>({});
     const [elapsed, setElapsed] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+    const toggleSection = (key: string) => setCollapsedSections(prev => ({ ...prev, [key]: !prev[key] }));
 
     const fetchAll = useCallback(async () => {
         const syms = DASHBOARD_SYMBOLS.map(s => s.id.toUpperCase());
@@ -189,64 +193,219 @@ export const RadarDashboard: React.FC = () => {
                         className="p-3 bg-sky-500/10 border border-sky-500/20 text-sky-500 rounded-2xl hover:bg-sky-500/20 transition-all group">
                         <RefreshCw size={16} className="group-hover:rotate-90 transition-transform" />
                     </button>
-                    <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{account?.currency || 'USD'}</span>
-                        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${account ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 border-slate-500/20 text-slate-500'}`}>
-                            <div className={`w-2 h-2 rounded-full animate-pulse ${account ? 'bg-emerald-500' : 'bg-slate-500'}`} />
-                            <span className="text-[10px] font-black uppercase">{account ? `Conta ${account.balance.toFixed(0)}` : 'Desconectado'}</span>
-                        </div>
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${account ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-slate-500/10 border-slate-500/20 text-slate-500'}`}>
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${account ? 'bg-emerald-500' : 'bg-slate-500'}`} />
+                        <span className="text-[10px] font-black uppercase">{account?.currency || 'USD'}</span>
+                        {account && <span className="text-slate-500/50">•</span>}
+                        <span className="text-[10px] font-black uppercase">{account ? `Conta ${account.balance.toFixed(0)}` : 'Desconectado'}</span>
                     </div>
                 </div>
             </motion.div>
 
             {/* KPI ROW */}
-            <motion.div variants={container} initial="hidden" animate="show"
-                className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/10 p-6 relative overflow-hidden">
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/10 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent" />
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[
-                        { name: 'Saldo', value: account ? `$${account.balance.toFixed(2)}` : '---', icon: Wallet, color: 'text-white' },
-                        { name: 'Equity', value: account ? `$${account.equity.toFixed(2)}` : '---', icon: Activity, color: account && account.equity >= account.balance ? 'text-emerald-400' : account && account.equity < account.balance ? 'text-red-400' : 'text-white' },
-                        { name: 'Lucro (24h)', value: discipline ? `$${discipline.profit.toFixed(2)}` : '---', icon: Target, color: (discipline?.profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400' },
-                        { name: 'Flutuante', value: `$${totalFloatingPL.toFixed(2)}`, icon: TrendingUp, color: totalFloatingPL >= 0 ? 'text-emerald-400' : 'text-red-400' },
-                    ].map((kpi, i) => (
-                        <motion.div key={i} variants={itemAnim} whileHover={{ y: -4 }}
-                            className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 hover:border-sky-500/20 transition-all">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className={`p-3 rounded-xl ${kpi.name === 'Saldo' ? 'bg-sky-500/20 text-sky-500' : kpi.name === 'Equity' ? 'bg-indigo-500/20 text-indigo-500' : kpi.name === 'Lucro (24h)' ? (discipline?.profit || 0) >= 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500' : totalFloatingPL >= 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
-                                    <kpi.icon size={18} />
+                <button onClick={() => toggleSection('kpi')}
+                    className="w-full flex items-center justify-between p-6 pb-0">
+                    <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">Indicadores</h3>
+                    {collapsedSections['kpi'] ? <ChevronDown size={16} className="text-slate-500" /> : <ChevronUp size={16} className="text-slate-500" />}
+                </button>
+                {!collapsedSections['kpi'] && (
+                    <motion.div variants={container} initial="hidden" animate="show" className="p-6 pt-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {[
+                                { name: 'Saldo', value: account ? `$${account.balance.toFixed(2)}` : '---', icon: Wallet, color: 'text-white' },
+                                { name: 'Equity', value: account ? `$${account.equity.toFixed(2)}` : '---', icon: Activity, color: account && account.equity >= account.balance ? 'text-emerald-400' : account && account.equity < account.balance ? 'text-red-400' : 'text-white' },
+                                { name: 'Lucro (24h)', value: discipline ? `$${discipline.profit.toFixed(2)}` : '---', icon: Target, color: (discipline?.profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400' },
+                                { name: 'Flutuante', value: `$${totalFloatingPL.toFixed(2)}`, icon: TrendingUp, color: totalFloatingPL >= 0 ? 'text-emerald-400' : 'text-red-400' },
+                            ].map((kpi, i) => (
+                                <motion.div key={i} variants={itemAnim} whileHover={{ y: -4 }}
+                                    className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 hover:border-sky-500/20 transition-all">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className={`p-3 rounded-xl ${kpi.name === 'Saldo' ? 'bg-sky-500/20 text-sky-500' : kpi.name === 'Equity' ? 'bg-indigo-500/20 text-indigo-500' : kpi.name === 'Lucro (24h)' ? (discipline?.profit || 0) >= 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500' : totalFloatingPL >= 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
+                                            <kpi.icon size={18} />
+                                        </div>
+                                        {i === 0 && account && (
+                                            <span className="text-[9px] font-black text-slate-600 font-mono">MT5</span>
+                                        )}
+                                    </div>
+                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{kpi.name}</p>
+                                    <p className={`text-2xl font-black italic ${kpi.color}`}>{kpi.value}</p>
+                                     </motion.div>
+                                 ))}
+                             </div>
+                         </motion.div>
+                     )}
+                 </div>
+
+            {/* BOTTOM: POSITIONS + DISCIPLINE */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* POSITIONS */}
+                <div className="lg:col-span-2 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/10 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+                    <button onClick={() => toggleSection('positions')}
+                        className="w-full flex items-center justify-between p-6 pb-0">
+                        <div className="flex items-center gap-2.5">
+                            <Eye className="text-sky-400" size={18} />
+                            <h3 className="text-base font-black text-white italic uppercase tracking-tighter">Posições Abertas</h3>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-black text-slate-500 bg-slate-800/50 px-3 py-1 rounded-xl border border-slate-700/50">{positions.length} aberta(s)</span>
+                            {collapsedSections['positions'] ? <ChevronDown size={16} className="text-slate-500" /> : <ChevronUp size={16} className="text-slate-500" />}
+                        </div>
+                    </button>
+                    {!collapsedSections['positions'] && (
+                    <div className="p-6 pt-4">
+                    {positions.length > 0 ? (
+                        <div className="space-y-2">
+                            {positions.map(pos => (
+                                <div key={pos.ticket}
+                                    className="flex items-center gap-4 p-4 bg-slate-950/40 rounded-xl border border-white/5 hover:border-sky-500/20 transition-all">
+                                    <div className={`w-1 h-12 rounded-full ${pos.type === 0 ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                    <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-base font-black text-white italic">{pos.symbol}</span>
+                                        {pos.engine && (
+                                            <span className="text-[7px] font-black px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-wider">
+                                                {pos.engine}
+                                            </span>
+                                        )}
+                                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider ${pos.type === 0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
+                                            {pos.type === 0 ? 'BUY' : 'SELL'} {pos.volume}
+                                            </span>
+                                        </div>
+                                        <div className="flex gap-4 mt-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                            <span>Entry: <span className="text-slate-300 font-black">{pos.price_open.toFixed(2)}</span></span>
+                                            <span>Price: <span className="text-slate-300 font-black">{pos.price_current.toFixed(2)}</span></span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className={`text-xl font-black italic ${pos.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            {pos.profit >= 0 ? '+' : ''}{pos.profit.toFixed(2)}
+                                        </p>
+                                        <p className="text-[7px] font-black text-slate-600 uppercase tracking-widest">Flutuante</p>
+                                    </div>
                                 </div>
-                                {i === 0 && account && (
-                                    <span className="text-[9px] font-black text-slate-600 font-mono">MT5</span>
-                                )}
-                            </div>
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{kpi.name}</p>
-                            <p className={`text-2xl font-black italic ${kpi.color}`}>{kpi.value}</p>
-                             </motion.div>
-                         ))}
-                     </div>
-                 </motion.div>
-
-                 <ActiveBotsCard />
-
-                 {/* ASSET GRID HEADER */}
-                 <div className="flex items-center justify-between">
-
-                <div className="flex items-center gap-3">
-                    <BarChart2 size={18} className="text-sky-400" />
-                    <h3 className="text-lg font-black text-white italic uppercase tracking-tighter">Ativos do Radar FX</h3>
-                    <span className="text-[10px] font-black text-slate-500 bg-slate-800/50 px-3 py-1 rounded-xl border border-slate-700/50">{DASHBOARD_SYMBOLS.length} ativos</span>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-12 text-center">
+                            <Activity size={36} className="mx-auto mb-3 text-slate-700" />
+                            <p className="text-sm font-black text-slate-500 uppercase tracking-widest">Nenhuma posição aberta</p>
+                        </div>
+                    )}
                 </div>
-                {discipline && (
-                    <div className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                        <span className="flex items-center gap-1"><Eye size={12} className="text-sky-400" /> {discipline.tradeCount || 0} trades hoje</span>
-                        <span className="w-1 h-1 rounded-full bg-slate-700" />
-                        <span className={discipline.consecutiveLosses > 0 ? 'text-red-400' : 'text-emerald-400'}>{discipline.consecutiveLosses || 0} perdas consec</span>
+                    )}
+                </div>
+
+                {/* DISCIPLINE + QUICK INFO */}
+                <div className="space-y-4">
+                    <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white/5 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+                        <button onClick={() => toggleSection('discipline')}
+                            className="w-full flex items-center justify-between p-6 pb-0">
+                            <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Disciplina</h3>
+                            {collapsedSections['discipline'] ? <ChevronDown size={14} className="text-slate-500" /> : <ChevronUp size={14} className="text-slate-500" />}
+                        </button>
+                        {!collapsedSections['discipline'] && <div className="p-6 pt-4"><DisciplinePanel /></div>}
                     </div>
-                )}
+
+                    {/* METRICS SUMMARY */}
+                    <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white/5 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+                        <button onClick={() => toggleSection('resumo')}
+                            className="w-full flex items-center justify-between p-6 pb-0">
+                            <div className="flex items-center gap-2">
+                                <DollarSign className="text-sky-400" size={16} />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Resumo</span>
+                            </div>
+                            {collapsedSections['resumo'] ? <ChevronDown size={14} className="text-slate-500" /> : <ChevronUp size={14} className="text-slate-500" />}
+                        </button>
+                        {!collapsedSections['resumo'] && (
+                        <div className="p-6 pt-4">
+                        <div className="space-y-2.5">
+                            {[
+                                { label: 'Saldo', value: account ? `$${account.balance.toFixed(2)}` : '---', color: 'text-white' },
+                                { label: 'Margem', value: account ? `${((account.margin / account.balance) * 100).toFixed(1)}%` : '---', color: 'text-amber-400' },
+                                { label: 'Margem Livre', value: account ? `$${account.margin_free.toFixed(2)}` : '---', color: 'text-emerald-400' },
+                            ].map((r, i) => (
+                                <div key={i} className="flex items-center justify-between p-2.5 bg-slate-800/30 rounded-lg">
+                                    <span className="text-[10px] font-bold text-slate-500">{r.label}</span>
+                                    <span className={`text-xs font-black font-mono ${r.color}`}>{r.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                        </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            {/* ASSET GRID */}
+                {/* ACTIVE BOTS */}
+                <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/10 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+                    <button onClick={() => toggleSection('bots')}
+                        className="w-full flex items-center justify-between p-6 pb-0">
+                        <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">Robôs Ativos</h3>
+                        {collapsedSections['bots'] ? <ChevronDown size={16} className="text-slate-500" /> : <ChevronUp size={16} className="text-slate-500" />}
+                    </button>
+                    {!collapsedSections['bots'] && <div className="p-6 pt-4"><ActiveBotsCard /></div>}
+                </div>
+
+                {/* KILL SWITCH */}
+                <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-red-500/10 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-red-500/30 to-transparent" />
+                    <button onClick={() => toggleSection('killswitch')}
+                        className="w-full flex items-center justify-between p-6 pb-0">
+                        <div className="flex items-center gap-2.5">
+                            <Power size={18} className="text-red-400" />
+                            <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">Kill Switch</h3>
+                        </div>
+                        {collapsedSections['killswitch'] ? <ChevronDown size={16} className="text-slate-500" /> : <ChevronUp size={16} className="text-slate-500" />}
+                    </button>
+                    {!collapsedSections['killswitch'] && (
+                        <div className="p-6 pt-4">
+                            <p className="text-[10px] font-bold text-slate-500 mb-3 uppercase tracking-wider">
+                                Desliga todos os robôs do Radar FX instantaneamente
+                            </p>
+                            <button onClick={async () => {
+                                if (!confirm('Tem certeza? Todos os robôs serão desligados!')) return;
+                                try {
+                                    await axios.post('/api/system/engines/disable-all');
+                                    alert('✅ Todos os robôs foram desligados!');
+                                } catch { alert('❌ Erro ao desligar robôs'); }
+                            }}
+                                className="w-full flex items-center justify-center gap-2 p-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 font-black text-sm uppercase tracking-wider transition-all hover:scale-[1.02]">
+                                <Power size={16} />
+                                Desligar Todos
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* ASSET GRID */}
+                <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/10 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+                    <button onClick={() => toggleSection('assets')}
+                        className="w-full flex items-center justify-between p-6 pb-0">
+                        <div className="flex items-center gap-3">
+                            <BarChart2 size={18} className="text-sky-400" />
+                            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter">Ativos do Radar FX</h3>
+                            <span className="text-[10px] font-black text-slate-500 bg-slate-800/50 px-3 py-1 rounded-xl border border-slate-700/50">{DASHBOARD_SYMBOLS.length} ativos</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            {discipline && (
+                                <div className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest mr-2">
+                                    <span className="flex items-center gap-1"><Eye size={12} className="text-sky-400" /> {discipline.tradeCount || 0} trades hoje</span>
+                                    <span className="w-1 h-1 rounded-full bg-slate-700" />
+                                    <span className={discipline.consecutiveLosses > 0 ? 'text-red-400' : 'text-emerald-400'}>{discipline.consecutiveLosses || 0} perdas consec</span>
+                                </div>
+                            )}
+                            {collapsedSections['assets'] ? <ChevronDown size={16} className="text-slate-500" /> : <ChevronUp size={16} className="text-slate-500" />}
+                        </div>
+                    </button>
+                    {!collapsedSections['assets'] && (
+            <div className="p-6 pt-4">
             <motion.div variants={container} initial="hidden" animate="show"
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {sortedSymbols.map((sym, idx) => {
@@ -344,83 +503,10 @@ export const RadarDashboard: React.FC = () => {
                     );
                 })}
             </motion.div>
-
-            {/* BOTTOM: POSITIONS + DISCIPLINE */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* POSITIONS */}
-                <div className="lg:col-span-2 bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-sky-500/10 p-6 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
-                    <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-2.5">
-                            <Eye className="text-sky-400" size={18} />
-                            <h3 className="text-base font-black text-white italic uppercase tracking-tighter">Posições Abertas</h3>
-                        </div>
-                        <span className="text-[10px] font-black text-slate-500 bg-slate-800/50 px-3 py-1 rounded-xl border border-slate-700/50">{positions.length} aberta(s)</span>
-                    </div>
-                    {positions.length > 0 ? (
-                        <div className="space-y-2">
-                            {positions.map(pos => (
-                                <div key={pos.ticket}
-                                    className="flex items-center gap-4 p-4 bg-slate-950/40 rounded-xl border border-white/5 hover:border-sky-500/20 transition-all">
-                                    <div className={`w-1 h-12 rounded-full ${pos.type === 0 ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-base font-black text-white italic">{pos.symbol}</span>
-                                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider ${pos.type === 0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
-                                                {pos.type === 0 ? 'BUY' : 'SELL'} {pos.volume}
-                                            </span>
-                                        </div>
-                                        <div className="flex gap-4 mt-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                                            <span>Entry: <span className="text-slate-300 font-black">{pos.price_open.toFixed(2)}</span></span>
-                                            <span>Price: <span className="text-slate-300 font-black">{pos.price_current.toFixed(2)}</span></span>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className={`text-xl font-black italic ${pos.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            {pos.profit >= 0 ? '+' : ''}{pos.profit.toFixed(2)}
-                                        </p>
-                                        <p className="text-[7px] font-black text-slate-600 uppercase tracking-widest">Flutuante</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="py-12 text-center">
-                            <Activity size={36} className="mx-auto mb-3 text-slate-700" />
-                            <p className="text-sm font-black text-slate-500 uppercase tracking-widest">Nenhuma posição aberta</p>
-                        </div>
+            </div>
                     )}
                 </div>
 
-                {/* DISCIPLINE + QUICK INFO */}
-                <div className="space-y-4">
-                    <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[2rem] border border-white/5 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
-                        <DisciplinePanel />
-                    </div>
-
-                    {/* METRICS SUMMARY */}
-                    <div className="bg-slate-900/60 backdrop-blur-2xl p-6 rounded-[2rem] border border-white/5 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
-                        <div className="flex items-center gap-2 mb-4">
-                            <DollarSign className="text-sky-400" size={16} />
-                            <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Resumo</span>
-                        </div>
-                        <div className="space-y-2.5">
-                            {[
-                                { label: 'Saldo', value: account ? `$${account.balance.toFixed(2)}` : '---', color: 'text-white' },
-                                { label: 'Margem', value: account ? `${((account.margin / account.balance) * 100).toFixed(1)}%` : '---', color: 'text-amber-400' },
-                                { label: 'Margem Livre', value: account ? `$${account.margin_free.toFixed(2)}` : '---', color: 'text-emerald-400' },
-                            ].map((r, i) => (
-                                <div key={i} className="flex items-center justify-between p-2.5 bg-slate-800/30 rounded-lg">
-                                    <span className="text-[10px] font-bold text-slate-500">{r.label}</span>
-                                    <span className={`text-xs font-black font-mono ${r.color}`}>{r.value}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };

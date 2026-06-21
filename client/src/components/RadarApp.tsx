@@ -30,7 +30,10 @@ import {
     Bitcoin,
     Crown,
     Sigma,
-    FlaskConical
+    FlaskConical,
+    Eye,
+    EyeOff,
+    Calendar
 } from 'lucide-react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { TradingPanel } from './TradingPanel';
@@ -49,14 +52,17 @@ import { ForexScalperPanel } from './ForexScalperPanel';
 import { MicroScalperPanel } from './MicroScalperPanel';
 import { SwingTraderPanel } from './SwingTraderPanel';
 import { OmniProbabilisticPanel } from './OmniProbabilisticPanel';
+import { SweepPanel } from './SweepPanel';
 const GoldScalperPanel = React.lazy(() => import('./GoldScalperPanel').then(m => ({ default: m.GoldScalperPanel })));
 const SharkBotPanel = React.lazy(() => import('./SharkBotPanel').then(m => ({ default: m.SharkBotPanel })));
 const RobotControlPanel = React.lazy(() => import('./RobotControlPanel').then(m => ({ default: m.RobotControlPanel })));
 const CryptoIntelligenceHub = React.lazy(() => import('./CryptoIntelligenceHub').then(m => ({ default: m.CryptoIntelligenceHub })));
 const BitcoinProPanel = React.lazy(() => import('./BitcoinProPanel').then(m => ({ default: m.BitcoinProPanel })));
+const AuraQuantPanel = React.lazy(() => import('./AuraQuantPanel').then(m => ({ default: m.AuraQuantPanel })));
 const WolfBotPanel = React.lazy(() => import('./WolfBotPanel').then(m => ({ default: m.WolfBotPanel })));
+const AgendaPanel = React.lazy(() => import('./AgendaPanel').then(m => ({ default: m.AgendaPanel })));
 
-type TabType = 'home' | 'intelligence' | 'signals' | 'robot' | 'trade' | 'management' | 'backtest' | 'bitcoin_pro' | 'crypto' | 'gold_scalper' | 'micro_sniper' | 'swing_ia' | 'copy' | 'speed_scalper' | 'supreme' | 'analytics' | 'ml' | 'agent_ia' | 'ai_monitoring' | 'alerts' | 'settings' | 'risk' | 'financial' | 'statistics' | 'strategy_reports' | 'journal' | 'simulator' | 'costs' | 'analysis' | 'omni' | 'ranking';
+type TabType = 'home' | 'intelligence' | 'signals' | 'robot' | 'trade' | 'management' | 'agenda' | 'backtest' | 'bitcoin_pro' | 'aura_quant' | 'crypto' | 'gold_scalper' | 'micro_sniper' | 'swing_ia' | 'copy' | 'speed_scalper' | 'supreme' | 'analytics' | 'ml' | 'agent_ia' | 'ai_monitoring' | 'alerts' | 'settings' | 'risk' | 'financial' | 'statistics' | 'strategy_reports' | 'journal' | 'simulator' | 'costs' | 'analysis' | 'omni' | 'ranking';
 
 interface RadarAppProps {
     onOverrideDevice?: (mode: 'auto' | 'mobile' | 'tablet' | 'desktop') => void;
@@ -65,16 +71,18 @@ interface RadarAppProps {
 export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
     const [activeTab, setActiveTab] = useState<TabType>('home');
     const [intelTab, setIntelTab] = useState<'signals' | 'crypto' | 'ml'>('crypto');
-    const [robotTab, setRobotTab] = useState<'alpha' | 'gold' | 'speed' | 'titan' | 'swing' | 'bitcoin_pro' | 'shark_bot' | 'wolf'>('gold');
+    const [robotTab, setRobotTab] = useState<'alpha' | 'gold' | 'speed' | 'titan' | 'swing' | 'bitcoin_pro' | 'aura_quant' | 'shark_bot' | 'wolf'>('gold');
     const [manageTab, setManageTab] = useState<'reports' | 'journal' | 'stats' | 'risk' | 'agent' | 'backtest'>('reports');
     const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
     const [isConnectivityOpen, setIsConnectivityOpen] = useState(false);
     const [accountData, setAccountData] = useState<any>(null);
     const [isLoadingAccount, setIsLoadingAccount] = useState(false);
 
-    const [login, setLogin] = useState('');
+    const [login, setLogin] = useState(() => localStorage.getItem('radar_broker_login') || '');
     const [password, setPassword] = useState('');
-    const [server, setServer] = useState('Pepperstone-Demo');
+    const [server, setServer] = useState(() => localStorage.getItem('radar_broker_server') || 'Pepperstone-Demo');
+    const [brokerType, setBrokerType] = useState('MT5');
+    const [showPassword, setShowPassword] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [loginStatus, setLoginStatus] = useState<{ type: 'error' | 'success', msg: string } | null>(null);
 
@@ -113,9 +121,10 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
         }
     };
 
-    const tabOrder: TabType[] = ['home', 'intelligence', 'signals', 'robot', 'trade', 'management'];
+    const tabOrder: TabType[] = ['home', 'agenda', 'intelligence', 'signals', 'robot', 'trade', 'management'];
     const menuItems: { id: TabType; icon: any; label: string }[] = [
         { id: 'home', icon: LayoutGrid, label: 'Home' },
+        { id: 'agenda', icon: Calendar, label: 'Agenda' },
         { id: 'intelligence', icon: Brain, label: 'Intel' },
         { id: 'robot', icon: Bot, label: 'Robôs' },
         { id: 'trade', icon: Activity, label: 'Trade' },
@@ -142,9 +151,11 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
 
     const robotOptions = [
         { id: 'bitcoin_pro', label: 'BTC Pro', icon: Bitcoin },
+        { id: 'aura_quant', label: 'Aura Q.', icon: Zap },
         { id: 'wolf', label: 'Wolf', icon: Target },
         { id: 'shark_bot', label: 'Shark', icon: Zap },
         { id: 'gold', label: 'Gold', icon: Target },
+        { id: 'sweep', label: 'Sweep', icon: Activity },
         { id: 'speed', label: 'Speed', icon: Zap },
         { id: 'titan', label: 'Titan', icon: Star },
         { id: 'swing', label: 'Swing', icon: TrendingUp },
@@ -178,7 +189,9 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
             {robotTab === 'titan' && <MicroScalperPanel />}
             {robotTab === 'swing' && <SwingTraderPanel />}
             {robotTab === 'bitcoin_pro' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando...</div>}><BitcoinProPanel /></React.Suspense>}
+            {robotTab === 'aura_quant' && <React.Suspense fallback={<div className="text-violet-400 text-xs p-4">Carregando Aura Quant...</div>}><AuraQuantPanel /></React.Suspense>}
             {robotTab === 'shark_bot' && <React.Suspense fallback={<div className="text-cyan-400 text-xs p-4">Carregando Shark Bot...</div>}><SharkBotPanel /></React.Suspense>}
+            {robotTab === 'sweep' && <SweepPanel />}
         </div>
     );
 
@@ -186,6 +199,18 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
         switch (activeTab) {
             case 'home':
                 return <MobileHome onTradeClick={() => setActiveTab('trade')} />;
+            case 'agenda':
+                return (
+                    <div className="p-3 md:p-4 max-w-2xl mx-auto">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-sky-500/10 rounded-xl border border-sky-500/20">
+                                <Calendar size={18} className="text-sky-400" />
+                            </div>
+                            <h2 className="text-lg font-black uppercase tracking-tighter italic text-white">Agenda do Trader</h2>
+                        </div>
+                        <AgendaPanel />
+                    </div>
+                );
             case 'robot':
                 return renderRobots();
             case 'intelligence':
@@ -409,12 +434,29 @@ export const RadarApp: React.FC<RadarAppProps> = ({ onOverrideDevice }) => {
                                         </div>
                                         <div className="grid grid-cols-1 gap-4">
                                             <div className="space-y-2">
-                                                <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest ml-1">Login MT5</label>
+                                                <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo</label>
+                                                <select
+                                                    value={brokerType}
+                                                    onChange={e => setBrokerType(e.target.value)}
+                                                    className="w-full bg-slate-900 border border-white/5 rounded-2xl p-4 text-white text-xs font-black outline-none focus:border-trader-blue/50 transition-all appearance-none cursor-pointer"
+                                                >
+                                                    <option value="MT5">MetaTrader 5</option>
+                                                    <option value="TradingView">TradingView</option>
+                                                    <option value="Profit">Profit</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest ml-1">Login {brokerType}</label>
                                                 <input type="text" value={login} onChange={e => setLogin(e.target.value)} className="w-full bg-slate-900 border border-white/5 rounded-2xl p-4 text-white text-xs font-black outline-none focus:border-trader-blue/50 transition-all" placeholder="Número da conta" />
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest ml-1">Senha</label>
-                                                <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-slate-900 border border-white/5 rounded-2xl p-4 text-white text-xs font-black outline-none focus:border-trader-blue/50 transition-all" placeholder="••••••••" />
+                                                <div className="relative">
+                                                    <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-slate-900 border border-white/5 rounded-2xl p-4 pr-12 text-white text-xs font-black outline-none focus:border-trader-blue/50 transition-all" placeholder="••••••••" />
+                                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-trader-blue transition-colors">
+                                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest ml-1">Servidor</label>
