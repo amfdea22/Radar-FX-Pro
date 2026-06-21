@@ -58,6 +58,7 @@ import { MLService } from './services/MLService';
 import { NLPService, NewsArticle } from './services/NLPService';
 import { MotorIAEngine } from './services/MotorIAEngine';
 import authRouter from './routes/auth';
+import agendaRouter from './routes/agenda';
 import { authenticateToken } from './middleware/auth';
 import { InfraService } from './services/InfraService';
 import { GoldScalperTradeMonitor } from './services/GoldScalperTradeMonitor';
@@ -133,7 +134,7 @@ app.use(async (req, res, next) => {
 });
 
 // Auth middleware — protege todas as rotas /api/* exceto as públicas
-const PUBLIC_API_PATHS = ['/api/auth', '/api/health', '/api/health/full', '/api/tradingview', '/api/system', '/api/intel-engine', '/api/telemetry', '/api/copilot'];
+const PUBLIC_API_PATHS = ['/api/auth', '/api/health', '/api/health/full', '/api/tradingview', '/api/system', '/api/intel-engine', '/api/telemetry', '/api/copilot', '/api/agenda'];
 app.use('/api', (req, res, next) => {
   if (PUBLIC_API_PATHS.some(p => req.originalUrl.startsWith(p))) {
     return next();
@@ -1723,7 +1724,11 @@ app.post('/api/mt5/forex-scalper/settings', (req, res) => {
 app.post('/api/mt5/forex-scalper/close', async (req, res) => {
     const { ticket } = req.body;
     const success = await ForexScalperEngine.closePosition(Number(ticket));
-    res.json({ success });
+    res.json({ success, status: ForexScalperEngine.getStatus() });
+});
+
+app.get('/api/mt5/forex-scalper/report', (req, res) => {
+    res.json(ForexScalperEngine.computePerformance());
 });
 
 app.get('/api/mt5/signals', async (req, res) => {
@@ -2184,6 +2189,7 @@ app.get('/api/system/alerts/stats', (req, res) => {
 });
 
 app.use('/api/auth', authRouter);
+app.use('/api/agenda', agendaRouter);
 
 // --- SECURITY AUDIT LOGS ---
 
@@ -2480,7 +2486,7 @@ app.listen(Number(port), '0.0.0.0', () => {
     // CryptoIAEngine.init();
     // MicroScalperEngine.init();
     // SwingTraderEngine.init();
-    // ForexScalperEngine.init();
+    ForexScalperEngine.init();
     OmniProbabilisticEngine.start();
     // SharkBotEngine.init();
     // RecoveryEngine.init();

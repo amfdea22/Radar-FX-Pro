@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { SymbolLockService } from './SymbolLockService';
-import { TradeNotificationBot } from './TradeNotificationBot';
+import { DisciplineEngine } from './DisciplineEngine';
 
 interface ForexScalperSettings {
     enabled: boolean;
@@ -31,7 +31,25 @@ interface ForexScalperSettings {
     magic: number;
 }
 
+interface TradeRecord {
+    id: string;
+    ticket: number;
+    symbol: string;
+    type: 'BUY' | 'SELL';
+    lots: number;
+    entryPrice: number;
+    exitPrice: number;
+    profit: number;
+    result: 'WIN' | 'LOSS';
+    closeReason: 'TP' | 'SL' | 'BASKET_TP' | 'MANUAL' | 'UNKNOWN';
+    openTime: string;
+    closeTime: string;
+    magic: number;
+    comment: string;
+}
+
 const SETTINGS_PATH = path.join(process.cwd(), 'forex_scalper_settings.json');
+const HISTORY_PATH = path.join(process.cwd(), 'forex_scalper_history.json');
 
 export class ForexScalperEngine {
     private static BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
@@ -70,14 +88,18 @@ export class ForexScalperEngine {
         lastResetDay: '',
         activePositions: [] as any[],
         logs: [] as { time: string; msg: string; type: 'INFO' | 'TRADE' | 'SUCCESS' | 'WARN' }[],
-        lastTpSync: {} as Record<number, number>, // ticket -> last sync timestamp
+        lastTpSync: {} as Record<number, number>,
         lastGlobalTrail: 0
     };
 
+    private static tradeHistory: TradeRecord[] = [];
+    private static previousPositionTickets: Set<number> = new Set();
+
     static init() {
         this.loadSettings();
-        console.log('⚡ Speed Scalper Engine ONLINE | Magic:', this.settings.magic);
-        setInterval(() => this.mainCycle(), 2000); // 2 sec cycle for ULTRA FAST response
+        this.loadHistory();
+        console.log(`⚡ Speed Scalper Engine ONLINE | Magic: ${this.settings.magic} | Histórico: ${this.tradeHistory.length} trades`);
+        setInterval(() => this.mainCycle(), 2000);
     }
 
     private static loadSettings() {
@@ -109,7 +131,9 @@ export class ForexScalperEngine {
     static getStatus() {
         return {
             settings: this.settings,
-            state: this.state
+            state: this.state,
+            performance: this.computePerformance(),
+            recentTrades: this.tradeHistory.slice(-20).reverse(),
         };
     }
 
@@ -120,6 +144,57 @@ export class ForexScalperEngine {
         console.log(`[SpeedScalper] ${msg}`);
     }
 
+    private static loadHistory() {
+        try {
+            if (fs.existsSync(HISTORY_PATH)) {
+                this.tradeHistory = JSON.parse(fs.readFileSync(HISTORY_PATH, 'utf8'));
+            }
+        } catch { this.tradeHistory = []; }
+    }
+
+    private static saveHistory() {
+        try {
+            fs.writeFileSync(HISTORY_PATH, JSON.stringify(this.tradeHistory, null, 2));
+        } catch { /* ignore */ }
+    }
+
+    static computePerformance() {
+        const total = this.tradeHistory.length;
+        const wins = this.tradeHistory.filter(t => t.result === 'WIN');
+        const losses = this.tradeHistory.filter(t => t.result === 'LOSS');
+        const winCount = wins.length;
+        const lossCount = losses.length;
+        const winRate = total > 0 ? (winCount / total) * 100 : 0;
+        const totalProfit = this.tradeHistory.reduce((s, t) => s + t.profit, 0);
+        const avgWin = winCount > 0 ? wins.reduce((s, t) => s + t.profit, 0) / winCount : 0;
+        const avgLoss = lossCount > 0 ? Math.abs(losses.reduce((s, t) => s + t.profit, 0)) / lossCount : 0;
+        const profitFactor = avgLoss > 0 ? (winCount * avgWin) / (lossCount * avgLoss) : winCount > 0 ? 99.9 : 0;
+        const bestTrade = total > 0 ? Math.max(...this.tradeHistory.map(t => t.profit)) : 0;
+        const worstTrade = total > 0 ? Math.min(...this.tradeHistory.map(t => t.profit)) : 0;
+
+        let maxConsecutiveWins = 0, maxConsecutiveLosses = 0;
+        let curWins = 0, curLosses = 0;
+        for (const t of this.tradeHistory) {
+            if (t.result === 'WIN') { curWins++; curLosses = 0; maxConsecutiveWins = Math.max(maxConsecutiveWins, curWins); }
+            else { curLosses++; curWins = 0; maxConsecutiveLosses = Math.max(maxConsecutiveLosses, curLosses); }
+        }
+
+        return {
+            totalTrades: total,
+            wins: winCount,
+            losses: lossCount,
+            winRate: Math.round(winRate * 100) / 100,
+            totalProfit: Math.round(totalProfit * 100) / 100,
+            avgWin: Math.round(avgWin * 100) / 100,
+            avgLoss: Math.round(avgLoss * 100) / 100,
+            profitFactor: Math.round(profitFactor * 100) / 100,
+            maxConsecutiveWins,
+            maxConsecutiveLosses,
+            bestTrade: Math.round(bestTrade * 100) / 100,
+            worstTrade: Math.round(worstTrade * 100) / 100,
+        };
+    }
+
     private static async mainCycle() {
         if (!this.settings.enabled || this.state.isProcessing) return;
 
@@ -128,6 +203,14 @@ export class ForexScalperEngine {
 
         this.state.isProcessing = true;
         try {
+            // Verifica disciplina global
+            const discipline = await DisciplineEngine.getDailyStatus();
+            if (discipline.isLocked) {
+                this.addLog(`⛔ Safety Lock: ${discipline.reason}`, 'WARN');
+                this.state.isProcessing = false;
+                return;
+            }
+
             await this.syncState();
 
             // Daily limits
@@ -444,8 +527,6 @@ export class ForexScalperEngine {
                 const actionDesc = price > 0 ? `LIMIT ${side}` : side;
                 this.addLog(`⚡ Ordem ${actionDesc} em ${symbol} (${comment})`, 'TRADE');
                 try {
-                    
-                    TradeNotificationBot.notifyTradeOpened('Speed Scalper', symbol, side, lot, resp.data.price || price, 0, 0);
                 } catch (e) {}
             }
         } catch (err: any) {
@@ -480,11 +561,69 @@ export class ForexScalperEngine {
     private static async syncState() {
         try {
             const resp = await axios.get(`${this.BRIDGE_URL}/positions?magic=${this.settings.magic}`, { timeout: 4000 });
-            this.state.activePositions = Array.isArray(resp.data) ? resp.data : [];
+            const currentPositions = Array.isArray(resp.data) ? resp.data : [];
+            this.state.activePositions = currentPositions;
             this.state.dailyProfit = this.state.activePositions.reduce((sum, p) => sum + (parseFloat(p.profit) || 0), 0);
+
+            // Detect closed positions to record trades
+            const currentTickets = new Set(currentPositions.map((p: any) => p.ticket));
+            if (this.previousPositionTickets.size > 0) {
+                for (const prevTicket of this.previousPositionTickets) {
+                    if (!currentTickets.has(prevTicket)) {
+                        const closed = currentPositions.find((p: any) => p.ticket === prevTicket)
+                            || this.state.activePositions.find((p: any) => p.ticket === prevTicket);
+                        if (closed) {
+                            // Try to get detailed history from MT5
+                            this.recordTradeFromPosition(closed);
+                        }
+                    }
+                }
+            }
+            this.previousPositionTickets = currentTickets;
         } catch (err) {
             this.state.activePositions = [];
         }
+    }
+
+    private static async recordTradeFromPosition(pos: any) {
+        try {
+            // Try to fetch history details from MT5 bridge
+            const histResp = await axios.get(`${this.BRIDGE_URL}/history?magic=${this.settings.magic}&ticket=${pos.ticket}`, { timeout: 3000 }).catch(() => null);
+            const hist = histResp?.data;
+
+            const ticket = hist?.ticket || pos.ticket;
+            const symbol = pos.symbol || 'UNKNOWN';
+            const type = pos.type === 0 ? 'BUY' : 'SELL' as 'BUY' | 'SELL';
+            const lots = parseFloat(pos.volume) || parseFloat(pos.lot) || 0;
+            const entryPrice = parseFloat(pos.price_open) || 0;
+            const exitPrice = hist?.price_close || hist?.price || 0;
+            const profit = parseFloat(hist?.profit) || parseFloat(pos.profit) || 0;
+
+            // Avoid duplicate recording
+            if (this.tradeHistory.some(t => t.ticket === ticket)) return;
+
+            const trade: TradeRecord = {
+                id: `speed_${ticket}_${Date.now()}`,
+                ticket,
+                symbol,
+                type,
+                lots,
+                entryPrice,
+                exitPrice,
+                profit: Math.round(profit * 100) / 100,
+                result: profit >= 0 ? 'WIN' : 'LOSS',
+                closeReason: 'UNKNOWN',
+                openTime: pos.time || pos.openTime || new Date().toISOString(),
+                closeTime: new Date().toISOString(),
+                magic: this.settings.magic,
+                comment: pos.comment || '',
+            };
+
+            this.tradeHistory.unshift(trade);
+            if (this.tradeHistory.length > 500) this.tradeHistory.length = 500;
+            this.saveHistory();
+            this.addLog(`📊 Trade registrado: ${type} ${symbol} ${profit >= 0 ? '+' : ''}$${profit.toFixed(2)} (${trade.result})`, profit >= 0 ? 'SUCCESS' : 'WARN');
+        } catch { /* ignore recording errors */ }
     }
 
     private static checkDailyReset() {
