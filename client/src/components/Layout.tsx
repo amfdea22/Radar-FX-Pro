@@ -125,6 +125,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             label: 'PRINCIPAL',
             items: [
                 { id: 'dashboard', icon: Layers, label: 'Dashboard' },
+                { id: 'agenda', icon: Calendar, label: 'Agenda' },
                 { id: 'cockpit', icon: LayoutDashboard, label: 'Sinais' },
                 { id: 'backtest', icon: FlaskConical, label: 'Backtest' },
                 { id: 'analytics', icon: BarChart2, label: 'Analytics' },
