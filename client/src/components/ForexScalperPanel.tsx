@@ -374,6 +374,44 @@ export function ForexScalperPanel() {
                 </div>
             </div>
 
+            {/* SYMBOLS */}
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-cyan-500/10 p-6 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent"></div>
+                <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-4 flex items-center gap-2">
+                    <Activity size={18} className="text-cyan-500" /> Ativos Monitorados
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                    {[
+                        { label: 'Forex', symbols: ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'USDCHF', 'EURGBP', 'EURJPY', 'GBPJPY'] },
+                        { label: 'Metais', symbols: ['XAUUSD', 'XAGUSD'] },
+                        { label: 'Cripto', symbols: ['BTCUSD', 'ETHUSD', 'SOLUSD'] },
+                        { label: 'Índices', symbols: ['US100Cash', 'US30Cash', 'US500', 'GER40Cash'] },
+                    ].map(cat => (
+                        <div key={cat.label} className="bg-slate-950/40 p-3 rounded-2xl border border-white/5">
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2">{cat.label}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {cat.symbols.map(s => {
+                                    const active = settings.symbols.includes(s);
+                                    return (
+                                        <button key={s} onClick={() => {
+                                            const updated = active
+                                                ? settings.symbols.filter(x => x !== s)
+                                                : [...settings.symbols, s];
+                                            if (updated.length > 0) updateSetting('symbols', updated);
+                                        }}
+                                            className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all ${active
+                                                ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.15)]'
+                                                : 'bg-slate-800/40 border-white/5 text-slate-500 hover:text-slate-300'}`}>
+                                            {s}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* PARÂMETROS INTELIGENTES */}
             <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-cyan-500/10 p-8 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>

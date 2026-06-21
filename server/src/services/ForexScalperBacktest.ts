@@ -96,7 +96,8 @@ export class ForexScalperBacktest {
             const time = candle.time;
 
             if (positions.length > 0) {
-                await this.managePositions(positions, candle, config, trades, time);
+                const closedPnl = await this.managePositions(positions, candle, config, trades, time);
+                balance += closedPnl;
             }
 
             if (positions.length === 0) {
@@ -201,11 +202,12 @@ export class ForexScalperBacktest {
         };
     }
 
-    private static async managePositions(positions: SimPosition[], candle: any, config: BacktestConfig, trades: SimTrade[], time: number) {
+    private static async managePositions(positions: SimPosition[], candle: any, config: BacktestConfig, trades: SimTrade[], time: number): Promise<number> {
         const high = candle.high;
         const low = candle.low;
         const pointSize = this.getPointSize(config.symbol);
         const closed: number[] = [];
+        let closedPnl = 0;
 
         for (let j = 0; j < positions.length; j++) {
             const pos = positions[j];
@@ -239,7 +241,7 @@ export class ForexScalperBacktest {
                 if (pos.type === 'BUY' ? newSl > pos.sl : newSl < pos.sl) pos.sl = newSl;
             }
 
-            if (hit) {
+                if (hit) {
                 const profitPts = Math.abs(exitPrice - pos.entryPrice) / pointSize;
                 const profit = profitPts * pos.lots;
                 trades.push({
@@ -254,6 +256,7 @@ export class ForexScalperBacktest {
                     openTime: pos.openTime,
                     closeTime: time,
                 });
+                closedPnl += profit;
                 closed.push(j);
             }
         }
@@ -289,9 +292,11 @@ export class ForexScalperBacktest {
                     openTime: pos.openTime,
                     closeTime: time,
                 });
+                closedPnl += profit;
             }
             positions.length = 0;
         }
+        return closedPnl;
     }
 
     private static async checkGridAveraging(positions: SimPosition[], candle: any, config: BacktestConfig, time: number) {
