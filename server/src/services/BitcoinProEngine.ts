@@ -1,8 +1,11 @@
 import axios from 'axios';
+import * as fs from 'fs';
+import * as path from 'path';
 import { MarketDataService } from './MarketDataService';
 import { AlertEngine } from './AlertEngine';
 import { SymbolLockService } from './SymbolLockService';
-import { TradeNotificationBot } from './TradeNotificationBot';
+import { DisciplineEngine } from './DisciplineEngine';
+import { LoggerService } from './LoggerService';
 
 interface BitcoinProSettings {
     enabled: boolean;
@@ -70,6 +73,7 @@ interface DailyAnalysis {
 export class BitcoinProEngine {
     private static BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'http://127.0.0.1:5555';
     private static MAGIC = 444111;
+    private static SETTINGS_PATH = path.resolve(process.cwd(), 'bitcoin_pro_settings.json');
 
     private static settings: BitcoinProSettings = {
         enabled: false,
@@ -89,7 +93,7 @@ export class BitcoinProEngine {
     private static isRunning = false;
     private static lastAnalysis: DailyAnalysis | null = null;
     private static trades: TradeRecord[] = [];
-    private static marginOk = false;
+    private static marginOk = true;
     private static lastMarginCheck = 0;
 
     static getStatus() {
@@ -180,10 +184,31 @@ export class BitcoinProEngine {
 
     static updateSettings(partial: Partial<BitcoinProSettings>) {
         this.settings = { ...this.settings, ...partial };
+        this.saveSettings();
+    }
+
+    private static loadSettings() {
+        try {
+            if (fs.existsSync(this.SETTINGS_PATH)) {
+                const data = JSON.parse(fs.readFileSync(this.SETTINGS_PATH, 'utf-8'));
+                this.settings = { ...this.settings, ...data };
+            }
+        } catch (e) {
+            console.warn('₿ BitcoinPro: Erro ao carregar configurações', e);
+        }
+    }
+
+    private static saveSettings() {
+        try {
+            fs.writeFileSync(this.SETTINGS_PATH, JSON.stringify(this.settings, null, 2));
+        } catch (e) {
+            console.warn('₿ BitcoinPro: Erro ao salvar configurações', e);
+        }
     }
 
     static async init() {
         if (this.isRunning) return;
+        this.loadSettings();
         this.isRunning = true;
         console.log('₿ BitcoinPro: Iniciando robô estratégia 50/200 + RSI...');
         this.loop();
@@ -201,7 +226,7 @@ export class BitcoinProEngine {
             const resp = await axios.get(`${this.BRIDGE_URL}/account`);
             const free = parseFloat(resp.data?.margin_free || '0');
             const balance = parseFloat(resp.data?.balance || '0');
-            this.marginOk = free > balance * 0.15;
+            this.marginOk = free > balance * 0.05;
             if (!this.marginOk) console.log(`₿ BitcoinPro: Margem insuficiente (livre: $${free.toFixed(2)})`);
             return this.marginOk;
         } catch {
@@ -213,12 +238,24 @@ export class BitcoinProEngine {
     private static async loop() {
         while (this.isRunning) {
             try {
+                    LoggerService.log('BitcoinPro', 'INFO', 'Heartbeat: Cycle started');
+                await this.syncPosition();
+                await this.resetDailyIfNeeded();
+                const analysis = await this.analyzeDaily();
+                if (analysis) {
+                    this.lastAnalysis = analysis;
+                }
                 if (this.settings.enabled) {
-                    await this.syncPosition();
-                    await this.resetDailyIfNeeded();
-                    const analysis = await this.analyzeDaily();
+                    await this.checkMargin();
+                    this.recalcDailyCounters();
                     if (analysis) {
-                        this.lastAnalysis = analysis;
+                        // Verifica disciplina global
+                        const discipline = await DisciplineEngine.getDailyStatus();
+                        if (discipline.isLocked) {
+                            console.log(`₿ BitcoinPro: Safety Lock — ${discipline.reason}`);
+                            await new Promise(resolve => setTimeout(resolve, 30000));
+                            continue;
+                        }
                         if (!this.state.position) {
                             if (this.state.dailyLoss >= this.settings.maxDailyLoss) {
                                 if (this.state.dailyLoss === this.settings.maxDailyLoss) {
@@ -229,8 +266,7 @@ export class BitcoinProEngine {
                                     console.log(`₿ BitcoinPro: Meta diária atingida ($${this.state.dailyProfit.toFixed(2)}). Bloqueado.`);
                                 }
                             } else {
-                                const marginSufficient = await this.checkMargin();
-                                if (marginSufficient) {
+                                if (this.marginOk) {
                                     await this.evaluateEntry(analysis);
                                 }
                             }
@@ -250,7 +286,10 @@ export class BitcoinProEngine {
         try {
             let bars = await MarketDataService.getRecentBars(this.settings.symbol, 250, 'D1');
             bars = [...bars].reverse();
-            if (bars.length < 210) return null;
+            if (bars.length < 100) {
+                console.warn(`₿ BitcoinPro: Histórico insuficiente (${bars.length}/100 candles)`);
+                return null;
+            }
 
             const closePrices = bars.map(b => b.c);
             const highPrices = bars.map(b => b.h);
@@ -275,9 +314,9 @@ export class BitcoinProEngine {
 
             const distanceToEma50 = ((price - ema50) / ema50) * 100;
 
-            const pullbackToEma = distanceToEma50 > -3.0 && distanceToEma50 < 3.0;
+            const pullbackToEma = distanceToEma50 > -5.0 && distanceToEma50 < 5.0;
 
-            const nearPullback = !pullbackToEma && distanceToEma50 > -5.0 && distanceToEma50 < 5.0;
+            const nearPullback = !pullbackToEma && distanceToEma50 > -8.0 && distanceToEma50 < 8.0;
 
             const rsiSignal = rsi > 40 && rsi < 60 && rsi > rsiPrev;
 
@@ -289,22 +328,45 @@ export class BitcoinProEngine {
             const rsiBearSignal = rsi > 40 && rsi < 60 && rsi < rsiPrev;
 
             let bullScore = 0, bearScore = 0;
-            if (trend === 'STRONG_BULLISH') bullScore += 30;
-            else if (trend === 'BULLISH') bullScore += 15;
-            if (trend === 'STRONG_BEARISH') bearScore += 30;
-            else if (trend === 'BEARISH') bearScore += 15;
+
+            // 1. Estrutura de mercado (EMA50 vs EMA200)
+            if (ema50 > ema200) bullScore += 20;   // Bull market
+            if (ema50 < ema200) bearScore += 20;   // Bear market
+
+            // 2. Posição do preço relativo às EMAs
+            if (price > ema50 && price > ema200) bullScore += 15;
+            else if (price > ema50) bullScore += 10;
+            if (price < ema50 && price < ema200) bearScore += 15;
+            else if (price < ema50) bearScore += 10;
+
+            // 3. Inclinação da EMA50
             if (ema50Slope === 'UP') bullScore += 15;
             if (ema50Slope === 'DOWN') bearScore += 15;
-            if (pullbackToEma) { bullScore += 25; bearScore += 25; }
-            else if (nearPullback) { bullScore += 10; bearScore += 10; }
-            if (rsiBullSignal) bullScore += 20;
-            else if (rsi > 40 && rsi < 60) bullScore += 10;
-            if (rsiBearSignal) bearScore += 20;
-            else if (rsi > 40 && rsi < 60) bearScore += 10;
 
+            // 4. Pullback para EMA50 — oportunidade de entrada na direção do mercado
+            if (pullbackToEma) {
+                if (ema50 > ema200) bullScore += 30;
+                if (ema50 < ema200) bearScore += 30;
+            } else if (nearPullback) {
+                if (ema50 > ema200) bullScore += 15;
+                if (ema50 < ema200) bearScore += 15;
+            }
+
+            // 5. RSI — oversold/overbought + momentum
+            if (rsi < 35 && ema50 > ema200) bullScore += 20;
+            if (rsi > 65 && ema50 < ema200) bearScore += 20;
+            if (rsi > 45 && rsi < 60 && rsi > rsiPrev) bullScore += 10;
+            if (rsi > 40 && rsi < 55 && rsi < rsiPrev) bearScore += 10;
+
+            // 6. Anti-fragmentation — mercado indeciso
             const entryScore = Math.max(bullScore, bearScore);
             const direction: 'BUY' | 'SELL' = bullScore >= bearScore ? 'BUY' : 'SELL';
+            if (Math.abs(bullScore - bearScore) < 8) {
+                LoggerService.log('BitcoinPro', 'INFO', `Indecisão: bull=${bullScore} bear=${bearScore} — aguardando`);
+                return null;
+            }
 
+            LoggerService.log('BitcoinPro', 'INFO', `Analysis: Price: ${price}, Trend: ${trend}, RSI: ${rsi.toFixed(2)}, Score: ${entryScore}, Dir: ${direction}`);
             return {
                 price,
                 ema50,
@@ -337,16 +399,19 @@ export class BitcoinProEngine {
     }
 
     private static async evaluateEntry(analysis: DailyAnalysis) {
-        if (analysis.entryScore < 50) return;
+        if (analysis.entryScore < 35) {
+                    LoggerService.log('BitcoinPro', 'INFO', `Entry rejected: Score ${analysis.entryScore} < 35`);
+                    return;
+                }
 
         const currentPrice = await this.getCurrentPrice();
         if (!currentPrice) { console.log('₿ BitcoinPro: No current price'); return; }
 
-        if (analysis.direction === 'BUY' && currentPrice > analysis.ema50 * 1.08) {
-            console.log('₿ BitcoinPro: Price too far from EMA for BUY'); return;
+        if (analysis.direction === 'BUY' && currentPrice > analysis.ema50 * 1.25) {
+            LoggerService.log('BitcoinPro', 'INFO', 'Price too far from EMA for BUY'); return;
         }
-        if (analysis.direction === 'SELL' && currentPrice < analysis.ema50 * 0.92) {
-            console.log('₿ BitcoinPro: Price too far from EMA for SELL'); return;
+        if (analysis.direction === 'SELL' && currentPrice < analysis.ema50 * 0.75) {
+            LoggerService.log('BitcoinPro', 'INFO', 'Price too far from EMA for SELL'); return;
         }
 
         let sl: number, tp: number;
@@ -354,21 +419,21 @@ export class BitcoinProEngine {
 
         if (analysis.direction === 'BUY') {
             if (currentPrice > analysis.swingLow) {
-                sl = analysis.swingLow - swingRange * 0.15;
+                sl = analysis.swingLow - swingRange * 0.3;
             } else {
-                sl = currentPrice * 0.93;
+                sl = currentPrice * 0.92;
             }
             const risk = currentPrice - sl;
-            if (risk < currentPrice * 0.005) { console.log('₿ BitcoinPro: Risk too small for BUY'); return; }
+            if (risk < currentPrice * 0.003) { LoggerService.log('BitcoinPro', 'INFO', 'Risk too small for BUY'); return; }
             tp = currentPrice + Math.max(risk, currentPrice * 0.02) * 2;
         } else {
             if (currentPrice < analysis.swingHigh) {
-                sl = analysis.swingHigh + swingRange * 0.15;
+                sl = analysis.swingHigh + swingRange * 0.3;
             } else {
-                sl = currentPrice * 1.07;
+                sl = currentPrice * 1.08;
             }
             const risk = sl - currentPrice;
-            if (risk < currentPrice * 0.005) { console.log('₿ BitcoinPro: Risk too small for SELL'); return; }
+            if (risk < currentPrice * 0.003) { LoggerService.log('BitcoinPro', 'INFO', 'Risk too small for SELL'); return; }
             tp = currentPrice - Math.max(risk, currentPrice * 0.02) * 2;
         }
 
@@ -379,10 +444,13 @@ export class BitcoinProEngine {
                 symbol: this.settings.symbol,
                 action,
                 lot: this.settings.lotSize,
+                sl: Math.round(sl * 100) / 100,
+                tp: Math.round(tp * 100) / 100,
                 magic: this.MAGIC,
                 comment: 'BitcoinPro',
             });
 
+            LoggerService.log('BitcoinPro', 'INFO', `Executing Order: ${action} at ${currentPrice} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)}`);
             const ticket = resp.data?.order_id || resp.data?.ticket;
             if (ticket) {
                 SymbolLockService.acquire(this.settings.symbol, 'Bitcoin Pro', ticket, action);
@@ -407,7 +475,7 @@ export class BitcoinProEngine {
                         trendBullish: analysis.trend === 'BULLISH' || analysis.trend === 'STRONG_BULLISH',
                         ema50SlopeUp: analysis.ema50Slope === 'UP',
                         pullbackToEma: analysis.pullbackToEma,
-                        nearPullback: !analysis.pullbackToEma && analysis.distanceToEma50 > -5.0 && analysis.distanceToEma50 < 5.0,
+                        nearPullback: !analysis.pullbackToEma && analysis.distanceToEma50 > -8.0 && analysis.distanceToEma50 < 8.0,
                         rsiSignal: analysis.rsiSignal,
                         rsiInRange: analysis.rsi > 40 && analysis.rsi < 60,
                     },
@@ -417,8 +485,6 @@ export class BitcoinProEngine {
                 AlertEngine.addAlert('GUARDIAN', 'INFO', 'BitcoinPro', `${action} BTC: ${currentPrice} | SL: ${sl.toFixed(2)} | TP: ${tp.toFixed(2)} | Score: ${analysis.entryScore}`);
 
                 try {
-                    
-                    TradeNotificationBot.notifyTradeOpened('Bitcoin Pro', this.settings.symbol, action, this.settings.lotSize, currentPrice, sl, tp);
                 } catch (e) { /* notif fail */ }
 
                 await new Promise(resolve => setTimeout(resolve, 2000));
@@ -461,35 +527,37 @@ export class BitcoinProEngine {
             const pos = positions.find((p: any) => p.ticket === position.ticket);
 
             if (!pos) {
-                let result: 'WIN' | 'LOSS' = 'LOSS';
-                let profit = -this.settings.maxDailyLoss * 0.3;
-
-                const lastTrade = this.trades.find(t => t.entryTime === position.time);
-                const hitTp = this.state.position.type === 'BUY'
-                    ? this.state.position.tp <= currentPrice
-                    : this.state.position.tp >= currentPrice;
-
-                if (hitTp) {
-                    result = 'WIN';
-                    profit = this.settings.maxDailyProfit * 0.5;
-                }
-
-                if (lastTrade) {
-                    lastTrade.result = result;
-                    lastTrade.exitTime = Date.now();
-                    lastTrade.exitPrice = currentPrice;
-                    lastTrade.profit = Math.round(profit * 100) / 100;
-                }
-
-                if (profit > 0) this.state.dailyProfit += profit;
-                else this.state.dailyLoss += Math.abs(profit);
-
                 try {
-                    
-                    const dir = this.state.position?.type || (profit > 0 ? 'BUY' : 'SELL');
-                    TradeNotificationBot.notifyTradeClosed('Bitcoin Pro', this.settings.symbol, dir, Math.round(profit * 100) / 100, result, hitTp ? 'Take Profit' : 'Stop Loss', this.settings.lotSize);
-                } catch (e) { /* notif fail */ }
+                    const historyResp = await axios.get(`${this.BRIDGE_URL}/history`);
+                    const trades: any[] = historyResp.data || [];
+                    // Busca deal de saída (entry=1) pelo position_id
+                    const exitDeal = trades.find(t => t.position_id === position.ticket && t.entry === 1);
 
+                    let profit = 0;
+                    let result: 'WIN' | 'LOSS' = 'LOSS';
+
+                    if (exitDeal) {
+                        profit = (exitDeal.profit || 0) + (exitDeal.commission || 0) + (exitDeal.swap || 0);
+                        result = profit > 0 ? 'WIN' : 'LOSS';
+                    } else {
+                        // Fallback se não achar no histórico imediato
+                        profit = -(this.settings.lotSize * 100); // contract_size=100 para BTCUSD
+                        result = 'LOSS';
+                    }
+
+                    const lastTrade = this.trades.find(t => t.entryTime === position.time);
+                    if (lastTrade) {
+                        lastTrade.result = result;
+                        lastTrade.exitTime = Date.now();
+                        lastTrade.exitPrice = exitDeal?.price || position.price;
+                        lastTrade.profit = Math.round(profit * 100) / 100;
+                    }
+
+                    if (profit > 0) this.state.dailyProfit += profit;
+                    else this.state.dailyLoss += Math.abs(profit);
+                } catch (e) {
+                    console.error('₿ BitcoinPro: Erro ao buscar lucro real', e);
+                }
                 this.state.position = null;
                 return;
             }
@@ -511,7 +579,7 @@ export class BitcoinProEngine {
                         magic: this.MAGIC
                     });
                     this.state.position.sl = bePrice;
-                    console.log(`₿ BitcoinPro: Breakeven ativado #${this.state.position.ticket}`);
+                    LoggerService.log('BitcoinPro', 'INFO', `Breakeven ativado #${this.state.position.ticket}`);
                 }
             }
 
@@ -565,20 +633,64 @@ export class BitcoinProEngine {
                 };
             }
         } catch (e) {
-            if (this.state.position) {
-                this.state.position = null;
-            }
+            console.warn('₿ BitcoinPro: Falha na sincronia de posição, mantendo estado atual');
+            // Removido: this.state.position = null; (Não apagar posição em erro de rede)
         }
     }
 
     private static async resetDailyIfNeeded() {
         const now = new Date();
+        if (this.state.lastBarTime === 0) {
+            this.state.lastBarTime = now.getTime();
+            return;
+        }
         const lastReset = new Date(this.state.lastBarTime);
         if (now.getUTCDate() !== lastReset.getUTCDate() || now.getUTCMonth() !== lastReset.getUTCMonth()) {
             this.state.dailyProfit = 0;
             this.state.dailyLoss = 0;
             this.state.lastBarTime = now.getTime();
+            this.recalcDailyCounters();
         }
+    }
+
+    private static recalcDailyCounters() {
+        this._recalcLocal();
+        this._recalcFromBridge();
+    }
+
+    private static _recalcFromBridge() {
+        try {
+            axios.get(`${this.BRIDGE_URL}/history`, { timeout: 5000 }).then(histResp => {
+                const deals: any[] = Array.isArray(histResp.data) ? histResp.data : [];
+                const magic = this.MAGIC;
+                const now = Date.now();
+                const dayMs = 86400000;
+                let todayProfit = 0, todayLoss = 0;
+                for (const d of deals) {
+                    if (d.magic !== magic) continue;
+                    const dealTime = d.time * 1000;
+                    if (dealTime > now - dayMs && dealTime < now + dayMs) {
+                        const pnl = (d.profit || 0) + (d.commission || 0) + (d.swap || 0);
+                        if (pnl >= 0) todayProfit += pnl;
+                        else todayLoss += Math.abs(pnl);
+                    }
+                }
+                this.state.dailyProfit = Number(todayProfit.toFixed(2));
+                this.state.dailyLoss = Number(todayLoss.toFixed(2));
+            }).catch(() => {});
+        } catch {}
+    }
+
+    private static _recalcLocal() {
+        try {
+            const now = new Date();
+            const todayTrades = this.trades.filter(t => {
+                const d = new Date(t.entryTime);
+                return d.getUTCDate() === now.getUTCDate() && d.getUTCMonth() === now.getUTCMonth() && d.getUTCFullYear() === now.getUTCFullYear();
+            });
+            this.state.dailyProfit = Number(todayTrades.filter(t => t.result === 'WIN').reduce((s, t) => s + (t.profit || 0), 0).toFixed(2));
+            this.state.dailyLoss = Number(todayTrades.filter(t => t.result === 'LOSS').reduce((s, t) => s + Math.abs(t.profit || 0), 0).toFixed(2));
+        } catch {}
     }
 
     private static calcEMA(values: number[], period: number): number {

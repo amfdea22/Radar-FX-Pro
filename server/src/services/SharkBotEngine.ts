@@ -5,7 +5,7 @@ import { MarketDataService } from './MarketDataService';
 import { AlertEngine } from './AlertEngine';
 import { SymbolLockService } from './SymbolLockService';
 import { DisciplineEngine } from './DisciplineEngine';
-import { TradeNotificationBot } from './TradeNotificationBot';
+import { LoggerService } from './LoggerService';
 
 const BRIDGE_TIMEOUT = 5000;
 
@@ -157,6 +157,9 @@ export class SharkBotEngine {
     private static addLog(action: string, details: string) {
         const time = new Date().toLocaleTimeString('pt-BR');
         this.operationLog.push({ time, action, details });
+        
+        LoggerService.log('SharkBotEngine', 'INFO', `${action}: ${details}`);
+
         if (this.operationLog.length > 200) this.operationLog = this.operationLog.slice(-100);
         try {
             if (!this.logStream) this.logStream = fs.createWriteStream(this.LOGS_PATH, { flags: 'a' });
@@ -173,7 +176,22 @@ export class SharkBotEngine {
     }
 
     static getHistory() {
-        return this.trades.slice().reverse();
+        const trades = this.trades.slice().reverse();
+        return {
+            trades: trades,
+            stats: {
+                totalTrades: trades.length,
+                wins: trades.filter(t => t.result === 'WIN').length,
+                losses: trades.filter(t => t.result === 'LOSS').length,
+                winRate: trades.length > 0
+                    ? Number((trades.filter(t => t.result === 'WIN').length / trades.length * 100).toFixed(1))
+                    : 0,
+                closedPnL: Number(trades.reduce((s, t) => s + (t.profit || 0), 0).toFixed(2)),
+                avgProfit: trades.length > 0
+                    ? Number((trades.reduce((s, t) => s + (t.profit || 0), 0) / trades.length).toFixed(2))
+                    : 0,
+            }
+        };
     }
 
     static async getStatus() {
@@ -196,6 +214,11 @@ export class SharkBotEngine {
             breakdown: this.computeBreakdown(),
             operationLog: this.operationLog.slice(-50),
         };
+    }
+
+    static updateSettings(partial: Partial<SharkBotSettings>) {
+        this.settings = { ...this.settings, ...partial };
+        this.saveSettings();
     }
 
     private static computePerformance() {
@@ -233,22 +256,11 @@ export class SharkBotEngine {
         };
     }
 
-    static updateSettings(partial: Partial<SharkBotSettings>) {
-        // Se símbolo ou timeframe mudou, limpa buffer persistente de sinais
-        if ((partial.symbol && partial.symbol !== this.settings.symbol) || (partial.timeframe && partial.timeframe !== this.settings.timeframe)) {
-            this.persistentSetups = [];
-            this.persistentSetupsSell = [];
-            this.lastAnalysisCache = null;
-            this.setupBarCounter = 0;
-        }
-        this.settings = { ...this.settings, ...partial };
-        this.saveSettings();
-    }
-
     static async init() {
         if (this.isRunning) return;
         this.loadSettings();
         this.loadTrades();
+        this.recalcDailyCounters();
         this.isRunning = true;
         this.addLog('INICIO', 'Robô SMC Institucional iniciado');
         console.log('🦈 SharkBot: Robô SMC Institucional iniciado...');
@@ -291,6 +303,48 @@ export class SharkBotEngine {
         } catch (e) {
             console.warn('🦈 SharkBot: Erro ao salvar histórico de trades', e);
         }
+    }
+
+    private static recalcDailyCounters() {
+        // Fallback imediato: calcula dos trades locais
+        this._recalcLocal();
+        // Correção assíncrona: busca dados reais do MT5
+        this._recalcFromBridge();
+    }
+
+    private static _recalcFromBridge() {
+        try {
+            axios.get(`${this.BRIDGE_URL}/history`, { timeout: 5000 }).then(histResp => {
+                const deals: any[] = Array.isArray(histResp.data) ? histResp.data : [];
+                const magic = this.MAGIC;
+                const now = Date.now();
+                const dayMs = 86400000;
+                let todayProfit = 0, todayLoss = 0;
+                for (const d of deals) {
+                    if (d.magic !== magic) continue;
+                    const dealTime = d.time * 1000;
+                    if (dealTime > now - dayMs && dealTime < now + dayMs) {
+                        const pnl = (d.profit || 0) + (d.commission || 0) + (d.swap || 0);
+                        if (pnl >= 0) todayProfit += pnl;
+                        else todayLoss += Math.abs(pnl);
+                    }
+                }
+                this.state.dailyProfit = Number(todayProfit.toFixed(2));
+                this.state.dailyLoss = Number(todayLoss.toFixed(2));
+            }).catch(() => {});
+        } catch {}
+    }
+
+    private static _recalcLocal() {
+        try {
+            const now = new Date();
+            const todayTrades = this.trades.filter(t => {
+                const d = new Date(t.entryTime);
+                return d.getUTCDate() === now.getUTCDate() && d.getUTCMonth() === now.getUTCMonth() && d.getUTCFullYear() === now.getUTCFullYear();
+            });
+            this.state.dailyProfit = Number(todayTrades.filter(t => t.result === 'WIN').reduce((s, t) => s + (t.profit || 0), 0).toFixed(2));
+            this.state.dailyLoss = Number(todayTrades.filter(t => t.result === 'LOSS').reduce((s, t) => s + Math.abs(t.profit || 0), 0).toFixed(2));
+        } catch {}
     }
 
     static stop() {
@@ -389,6 +443,7 @@ export class SharkBotEngine {
             try {
                 if (this.settings.enabled) {
                     await this.syncPosition();
+                    this.recalcDailyCounters();
                     await this.resetDailyIfNeeded();
                     const analysis = await this.analyzeSmc();
                     if (analysis) {
@@ -498,14 +553,14 @@ export class SharkBotEngine {
                 const gapBearRelevant = gapBearSize > this.settings.fvgMinAtrRatio * atr;
                 const fvgBear = gapBearExists && gapBearRelevant;
                 const buyEntry = lowPrices[i - 2];
-                const buyArmed = fvgBear && buyEntry <= nivel50 && bars[i].c > sma50 && volumeOk;
+                const buyArmed = fvgBear && buyEntry <= nivel50 && volumeOk;
 
                 const gapBullExists = highPrices[i - 2] < lowPrices[i];
                 const gapBullSize = gapBullExists ? lowPrices[i] - highPrices[i - 2] : 0;
                 const gapBullRelevant = gapBullSize > this.settings.fvgMinAtrRatio * atr;
                 const fvgBull = gapBullExists && gapBullRelevant;
                 const sellEntry = highPrices[i - 2];
-                const sellArmed = fvgBull && sellEntry >= nivel50 && bars[i].c < sma50 && volumeOk;
+                const sellArmed = fvgBull && sellEntry >= nivel50 && volumeOk;
 
                 // C6: multi-timeframe confirmation
                 const buyConfirmed = !htTrend || htTrend !== 'BEARISH';
@@ -687,7 +742,7 @@ export class SharkBotEngine {
 
         // BUY
         const latestBuy = analysis.setups.length > 0 ? analysis.setups[analysis.setups.length - 1] : null;
-        if (latestBuy && currentPrice <= latestBuy.entradaLimit * 1.02) {
+        if (latestBuy && currentPrice <= latestBuy.entradaLimit * 1.05) {
             const correlationOk = await this.checkCorrelation('BUY');
             if (correlationOk) {
                 const sl = latestBuy.stopLoss;
@@ -706,7 +761,7 @@ export class SharkBotEngine {
 
         // SELL (avaliado independentemente)
         const latestSell = analysis.setupsSell.length > 0 ? analysis.setupsSell[analysis.setupsSell.length - 1] : null;
-        if (latestSell && currentPrice >= latestSell.entradaLimit * 0.98) {
+        if (latestSell && currentPrice >= latestSell.entradaLimit * 0.95) {
             const correlationOk = await this.checkCorrelation('SELL');
             if (correlationOk) {
                 const sl = latestSell.stopLoss;
@@ -767,8 +822,6 @@ export class SharkBotEngine {
                 };
 
                 try {
-                    
-                    TradeNotificationBot.notifyTradeOpened('Shark Bot', this.settings.symbol, direction, this.settings.lotSize, currentPrice, sl, tp);
                 } catch (e) { }
 
                 this.trades.push({
@@ -932,26 +985,26 @@ export class SharkBotEngine {
                         try {
                             const hist = await this.bridgeGet(`${this.BRIDGE_URL}/history`, { timeout: BRIDGE_TIMEOUT });
                             const trades: any[] = Array.isArray(hist.data) ? hist.data : [];
-                            const closed = trades.find((t: any) => t.ticket === pos.ticket);
+                            // Busca deal de saída (entry=1) pelo position_id
+                            const closed = trades.find((t: any) => t.position_id === pos.ticket && t.entry === 1);
                             if (closed) {
                                 const profit = (closed.profit || 0) + (closed.commission || 0) + (closed.swap || 0);
                                 lastTrade.profit = profit;
                                 lastTrade.result = profit >= 0 ? 'WIN' : 'LOSS';
+                                lastTrade.exitPrice = closed.price || priceNow;
                             } else {
                                 lastTrade.result = hitTp ? 'WIN' : 'LOSS';
-                                lastTrade.profit = hitTp ? Math.abs(tp - entry) * this.settings.lotSize * 10 : -Math.abs(sl - entry) * this.settings.lotSize * 10;
+                                lastTrade.profit = hitTp ? Math.abs(tp - entry) * this.settings.lotSize * 100 : -Math.abs(sl - entry) * this.settings.lotSize * 100;
                             }
                         } catch {
                             lastTrade.result = hitTp ? 'WIN' : 'LOSS';
-                            lastTrade.profit = hitTp ? Math.abs(tp - entry) * this.settings.lotSize * 10 : -Math.abs(sl - entry) * this.settings.lotSize * 10;
+                            lastTrade.profit = hitTp ? Math.abs(tp - entry) * this.settings.lotSize * 100 : -Math.abs(sl - entry) * this.settings.lotSize * 100;
                         }
                         if (lastTrade.profit > 0) this.state.dailyProfit += lastTrade.profit;
                         else this.state.dailyLoss += Math.abs(lastTrade.profit);
                         this.addLog('FECHOU', `${pos.type} ${this.settings.symbol} | ${lastTrade.result} | P&L: $${(lastTrade.profit || 0).toFixed(2)}`);
                         this.saveTrades();
                         try {
-                            
-                            TradeNotificationBot.notifyTradeClosed('Shark Bot', this.settings.symbol, pos.type, lastTrade.profit || 0, lastTrade.result, lastTrade.result === 'WIN' ? 'Take Profit' : 'Stop Loss', this.settings.lotSize);
                         } catch (e) { }
                     }
                     this.state.position = null;
@@ -984,7 +1037,7 @@ export class SharkBotEngine {
                         try {
                             const hist = await this.bridgeGet(`${this.BRIDGE_URL}/history`, { timeout: BRIDGE_TIMEOUT });
                             const trades: any[] = Array.isArray(hist.data) ? hist.data : [];
-                            const closed = trades.find((t: any) => t.ticket === this.state.position?.ticket);
+                            const closed = trades.find((t: any) => t.position_id === this.state.position?.ticket && t.entry === 1);
                             if (closed) {
                                 const profit = (closed.profit || 0) + (closed.commission || 0) + (closed.swap || 0);
                                 pending.exitTime = Date.now();
@@ -1001,15 +1054,13 @@ export class SharkBotEngine {
                                 const distToTp = Math.abs(pending.entryPrice - pos.tp);
                                 pending.result = distToTp <= distToSl ? 'WIN' : 'LOSS';
                                 pending.profit = pending.result === 'WIN'
-                                    ? tpDist * this.settings.lotSize * 10
-                                    : -slDist * this.settings.lotSize * 10;
+                                    ? tpDist * this.settings.lotSize * 100
+                                    : -slDist * this.settings.lotSize * 100;
                             }
+                            if (pending.profit > 0) this.state.dailyProfit += pending.profit;
+                            else this.state.dailyLoss += Math.abs(pending.profit);
                             this.addLog('FECHOU', `${pending.direction} ${this.settings.symbol} | ${pending.result} | P&L: $${(pending.profit || 0).toFixed(2)}`);
                             this.saveTrades();
-                            try {
-                                
-                                TradeNotificationBot.notifyTradeClosed('Shark Bot', this.settings.symbol, pending.direction, pending.profit, pending.result, pending.result === 'WIN' ? 'Take Profit' : 'Stop Loss', this.settings.lotSize);
-                            } catch (e) { }
                         } catch { }
                     }
                 }
@@ -1052,6 +1103,7 @@ export class SharkBotEngine {
             this.state.dailyProfit = 0;
             this.state.dailyLoss = 0;
             this.state.lastBarTime = now.getTime();
+            this.recalcDailyCounters();
         }
     }
 }
