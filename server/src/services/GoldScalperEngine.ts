@@ -3,7 +3,6 @@ import { AlertEngine } from './AlertEngine';
 import { MarketService } from './MarketService';
 import { DisciplineEngine } from './DisciplineEngine';
 import { AlphaAuditService } from './AlphaAuditService';
-import { TradeNotificationBot } from './TradeNotificationBot';
 import { SymbolLockService } from './SymbolLockService';
 import fs from 'fs';
 import path from 'path';
@@ -67,12 +66,21 @@ export interface GoldScalperSettings {
     smartAdaptiveIA: boolean;
     sniperMode: boolean;
     strategy: 'USD' | 'SMC';
+    useFixedLot: boolean;
+    useGrid: boolean;
     smcOnly: boolean;
     useTrendFallback: boolean;
     minSLPoints: number;
     trailingStopGrid: boolean;
     timeExitMinutes: number;
     ma200CrossExit: boolean;
+    tp1Enabled: boolean;
+    tp1PartialPercent: number;
+    tp1Multiplier: number;
+    moveSLToBEAfterTP1: boolean;
+    tp2Enabled: boolean;
+    tp2PartialPercent: number;
+    tp2Multiplier: number;
 }
 
 interface GoldPosition {
@@ -119,6 +127,8 @@ export class GoldScalperEngine {
     private static SETTINGS_PATH = path.resolve(process.cwd(), 'gold_scalper_settings.json');
     private static readonly LEARN_PATH = path.resolve(process.cwd(), 'ia_learning_state.json');
     private static HISTORY_PATH = path.resolve(process.cwd(), 'gold_scalper_history.json');
+    private static intervalIds: NodeJS.Timeout[] = [];
+    private static isSyncingTrades = false;
 
     private static learningState = {
         minScoreThreshold: 60,
@@ -142,8 +152,6 @@ export class GoldScalperEngine {
     private static dailyLoss = 0;
     private static lastTradeTime = 0;
     private static lastSyncTime = 0;
-    private static profitOffset = 0;
-    private static lossOffset = 0;
     private static operationLog: Array<{ time: string; action: string; details: string }> = [];
     private static currentSpread = 0;
     private static prevBid = 0;
@@ -190,23 +198,25 @@ export class GoldScalperEngine {
     private static openPositionsCount = 0;
     private static isKillZone = false;
     private static lastIAGuardLogTime = 0;
-    private static smcPositionData: Map<number, { tp1: number, tp2: number, partialHit: boolean, entry: number, spready: number }> = new Map();
+    private static smcPositionData: Map<number, { tp1: number, tp2: number, partialHit: boolean, tp2Hit: boolean, entry: number, spready: number }> = new Map();
 
     private static settings: GoldScalperSettings = {
-        enabled: false, lotSize: 0.01, gridLevels: 5, gridDistance: 4.0, gridMultiplier: 1.5,
-        trailingStart: 5.0, trailingStop: 3.0, trailingStep: 0.5, breakEvenTrigger: 3.0, breakEvenOffset: 0.03,
-        takeProfitUSD: 5.0, stopLossUSD: 1.5, useFixedTP: true, useFixedSL: true, basketTP: 15.0, basketSL: -30.0, basketTPEnabled: true, basketSLEnabled: true,
+        enabled: false, lotSize: 0.01, gridLevels: 1, gridDistance: 4.0, gridMultiplier: 1.5,
+        trailingStart: 0.0, trailingStop: 1.5, trailingStep: 0.5, breakEvenTrigger: 0.0, breakEvenOffset: 0.05,
+        takeProfitUSD: 10.0, stopLossUSD: 3.0, useFixedTP: false, useFixedSL: false, basketTP: 20.0, basketSL: -15.0, basketTPEnabled: true, basketSLEnabled: true,
         maxDailyLoss: 100.0, maxDailyProfit: 150.0, sessionFilter: false,
         direction: 'BOTH', cooldownSeconds: 30, maxSpreadPoints: 50, newsGuardEnabled: true,
         strategyMode: 'NORMAL', swingTrendFilter: false, strictMA200Filter: false, dynamicATRMode: false,
-        dynamicStopLoss: false, dynamicSLMultiplier: 1.5,
+        dynamicStopLoss: true, dynamicSLMultiplier: 2.0,
         antiMartingale: false, orderBlockFilter: false, smartTargeting: false,
-        smartTrailing: false, atrTrailingPeriod: 14, atrTrailingMultiplier: 2.5, atrTrailingTimeframe: 'M15', smartGridIA: false, smartBreakeven: false, dxyFilter: true,
+        smartTrailing: true, atrTrailingPeriod: 14, atrTrailingMultiplier: 2.0, atrTrailingTimeframe: 'M15', smartGridIA: false, smartBreakeven: false, dxyFilter: true,
         sentimentFilter: false, rsiFilter: false, volumeFilter: false, trendFiltroM5: true,
         trendFiltroM1: true, useRiskPercentage: false, riskPercentage: 1.0,
         smartNeuroIA: true, neuroConvergence: true, smartAdaptiveIA: true, sniperMode: true, strategy: 'USD',
-        smcOnly: false, useTrendFallback: true, minSLPoints: 10,
-        trailingStopGrid: false, timeExitMinutes: 60, ma200CrossExit: false
+        smcOnly: false, useTrendFallback: true, minSLPoints: 10, useFixedLot: true, useGrid: true,
+        trailingStopGrid: false, timeExitMinutes: 60, ma200CrossExit: false,
+        tp1Enabled: true, tp1PartialPercent: 50, tp1Multiplier: 1.5, moveSLToBEAfterTP1: true,
+        tp2Enabled: true, tp2PartialPercent: 100, tp2Multiplier: 2.5
     };
 
     public static async executeManualTrade(direction: 'BUY' | 'SELL'): Promise<{ success: boolean; message: string }> {
@@ -222,38 +232,49 @@ export class GoldScalperEngine {
         } catch (e: any) { return { success: false, message: e.message }; }
     }
 
+    static stop() {
+        this.isRunning = false;
+        for (const id of this.intervalIds) clearInterval(id);
+        this.intervalIds = [];
+        this.log('INFO', 'Gold Scalper Engine parado.');
+    }
+
     static async start() {
         if (this.isRunning) return;
         this.isRunning = true;
         this.loadSettings();
         this.loadTradeHistory();
         this.loadLearningState();
+        this.log('INIT', 'Gold Scalper Engine v3.2 inicializando...');
         await this.resolveGoldSymbol();
+        this.log('INIT', `Símbolo resolvido: ${this.resolvedSymbol || 'AGUARDANDO'}`);
+        this.log('INIT', `Modo: ${this.settings.strategyMode} | Lote: ${this.settings.lotSize} | Grid: ${this.settings.gridLevels} níveis`);
+        this.log('INIT', `IA Neuro: ${this.settings.smartNeuroIA ? 'ATIVA' : 'OFF'} | SMC Only: ${this.settings.smcOnly ? 'SIM' : 'NÃO'}`);
         console.log('🚀 Gold Scalper Engine: Iniciando...');
-        this.fetchMacroIndicators(); // Chamada imediata para não esperar 5 minutos
-        setInterval(() => this.mainCycle(), 3000);
-        setInterval(() => this.fetchMacroIndicators(), 60000); // Macro a cada 1min (Swing/DXY)
-        setInterval(async () => {
+        this.fetchMacroIndicators();
+        this.log('INFO', 'Macro indicadores carregados. Iniciando ciclo principal...');
+        this.intervalIds.push(setInterval(() => { try { this.mainCycle(); } catch (e) { console.error('[GoldScalper] mainCycle error:', e); } }, 3000));
+        this.intervalIds.push(setInterval(() => { try { this.fetchMacroIndicators(); } catch (e) { console.error('[GoldScalper] fetchMacroIndicators error:', e); } }, 60000));
+        this.intervalIds.push(setInterval(async () => {
             if (this.settings.enabled) {
                 try {
                     const status = await DisciplineEngine.getDailyStatus();
-                    this.globalDailyProfit = Math.max(0, (status.profit >= 0 ? status.profit : 0) - this.profitOffset);
-                    this.globalDailyLoss = Math.max(0, (status.profit < 0 ? Math.abs(status.profit) : 0) - this.lossOffset);
-                    
-                    // Kill Zone Logic: Usa perda global da conta (não só do robô)
+                    this.globalDailyProfit = status.profit > 0 ? status.profit : 0;
+                    this.globalDailyLoss = status.profit < 0 ? Math.abs(status.profit) : 0;
+
                     if (this.globalDailyLoss >= this.settings.maxDailyLoss) {
                         this.isKillZone = true;
                     } else {
                         this.isKillZone = false;
                     }
                 } catch (e) {
-                    console.warn('GoldScalper: discipline sync error', e);
+                    console.warn('[GoldScalper] discipline sync error', e);
                 }
             }
-        }, 10000);
+        }, 10000));
     }
 
-    private static saveSettings() { try { fs.writeFileSync(this.SETTINGS_PATH, JSON.stringify(this.settings, null, 2)); } catch (e) { } }
+    private static saveSettings() { try { fs.writeFileSync(this.SETTINGS_PATH, JSON.stringify(this.settings, null, 2)); } catch (e) { console.error('[GoldScalper] saveSettings error:', e); } }
 
     static updateSettings(s: Partial<GoldScalperSettings>) {
         this.settings = { ...this.settings, ...s };
@@ -289,18 +310,19 @@ export class GoldScalperEngine {
             for (const gs of this.GOLD_SYMBOLS) if (s.includes(gs)) return this.resolvedSymbol = gs;
             const f = s.find(x => x.toUpperCase().includes('GOLD') || x.toUpperCase().includes('XAU'));
             if (f) return this.resolvedSymbol = f;
-        } catch (e) { }
+        } catch (e) { console.warn('[GoldScalper] resolveGoldSymbol error:', e); }
         return '';
     }
 
     private static async fetchMacroIndicators() {
-        if (!this.resolvedSymbol) return;
+        if (!this.resolvedSymbol) { console.warn('[GoldScalper] fetchMacroIndicators: resolvedSymbol not set'); return; }
+        console.log('[GoldScalper] fetchMacroIndicators: fetching candles for', this.resolvedSymbol);
         try {
             const [h1r, m15r, m5r, tickR] = await Promise.all([
-                axios.get(`${this.BRIDGE_URL}/candles`, { params: { symbol: this.resolvedSymbol, count: 200, timeframe: 'H1' } }),
-                axios.get(`${this.BRIDGE_URL}/candles`, { params: { symbol: this.resolvedSymbol, count: 200, timeframe: 'M15' } }),
-                axios.get(`${this.BRIDGE_URL}/candles`, { params: { symbol: this.resolvedSymbol, count: 200, timeframe: 'M5' } }),
-                axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.resolvedSymbol] })
+                axios.get(`${this.BRIDGE_URL}/candles`, { params: { symbol: this.resolvedSymbol, count: 200, timeframe: 'H1' }, timeout: 8000 }),
+                axios.get(`${this.BRIDGE_URL}/candles`, { params: { symbol: this.resolvedSymbol, count: 200, timeframe: 'M15' }, timeout: 8000 }),
+                axios.get(`${this.BRIDGE_URL}/candles`, { params: { symbol: this.resolvedSymbol, count: 200, timeframe: 'M5' }, timeout: 8000 }),
+                axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.resolvedSymbol] }, { timeout: 15000 })
             ]);
             const cH1 = h1r.data; if (!cH1 || cH1.length < 50) return;
             const cM15 = m15r.data; if (!cM15 || cM15.length < 50) return;
@@ -361,7 +383,7 @@ export class GoldScalperEngine {
 
             // M1/M5 trends (60 candles each)
             const [m1] = await Promise.all([
-                axios.get(`${this.BRIDGE_URL}/candles?symbol=${this.resolvedSymbol}&timeframe=M1&count=60`)
+                axios.get(`${this.BRIDGE_URL}/candles?symbol=${this.resolvedSymbol}&timeframe=M1&count=60`, { timeout: 8000 })
             ]);
             if (m1.data?.length && clM5.length >= 21) {
                 const c1 = m1.data;
@@ -406,11 +428,13 @@ export class GoldScalperEngine {
                         if (smcResp.data) this.currentSMCData = smcResp.data;
                     }
                 } catch (e) {
-                    console.warn('GoldScalper: SMC levels error', e);
+                    this.log('WARN', `SMC levels erro: ${(e as any).message || 'desconhecido'}`);
                 }
             }
+            console.log('[GoldScalper] fetchMacroIndicators OK: price=' + this.currentPrice + ' MA200=' + this.currentMA200 + ' RSI=' + this.currentRSI + ' ma200Ready=' + this.ma200Ready);
         } catch (e) {
             console.warn('GoldScalper: macro indicators error', e);
+            this.log('WARN', `Macro indicadores erro: ${(e as any).message || 'desconhecido'}`);
         }
     }
 
@@ -420,25 +444,37 @@ export class GoldScalperEngine {
         try {
             await this.recalculateDailyStats();
             if (!this.settings.enabled) {
-                if (Math.random() < 0.01) console.log('⚠️ Gold Scalper: Robô está DESATIVADO nas configurações.');
+                if (Date.now() - this.lastSyncTime > 120000) {
+                    this.log('INFO', 'Robô DESATIVADO nas configurações. Aguardando ativação...');
+                    this.lastSyncTime = Date.now();
+                }
                 return;
             }
             
             if (!this.resolvedSymbol) {
                 await this.resolveGoldSymbol();
-                console.log('🔍 Gold Scalper: Resolvendo símbolo...', this.resolvedSymbol);
-                if (!this.resolvedSymbol) return;
+                if (!this.resolvedSymbol) {
+                    this.log('WARN', 'Símbolo não encontrado. Verificando bridge...');
+                    return;
+                }
+                this.log('INIT', `Símbolo resolvido: ${this.resolvedSymbol}`);
             }
 
             // Verifica saúde da conexão MT5 antes de operar
             try {
                 const healthResp = await axios.get(`${this.BRIDGE_URL}/health`, { timeout: 3000 });
                 if (!healthResp.data?.connected) {
-                    if (Math.random() < 0.05) console.log('🔌 Gold Scalper: Bridge MT5 offline. Aguardando reconexão...');
+                    if (Date.now() - this.lastSyncTime > 30000) {
+                        this.log('WARN', 'Bridge MT5 offline. Aguardando reconexão...');
+                        this.lastSyncTime = Date.now();
+                    }
                     return;
                 }
             } catch (e) {
-                if (Math.random() < 0.05) console.log('🔌 Gold Scalper: Bridge MT5 não respondeu. Aguardando...');
+                if (Date.now() - this.lastSyncTime > 30000) {
+                    this.log('ERROR', 'Bridge MT5 não respondeu. Reconectando...');
+                    this.lastSyncTime = Date.now();
+                }
                 return;
             }
 
@@ -461,27 +497,42 @@ export class GoldScalperEngine {
             const tr = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.resolvedSymbol] });
             const tick = tr.data[this.resolvedSymbol];
             if (!tick || !tick.bid) {
-                console.log('❌ Gold Scalper: Falha ao obter ticks do Bridge para', this.resolvedSymbol);
+                this.log('ERROR', `Falha ao obter ticks do Bridge para ${this.resolvedSymbol}`);
                 return;
             }
 
+            // Atualiza trend buffer para micro-tendência tick-a-tick
+            this.updateTrendBuffer(tick.bid);
+
             // --- ATUALIZA TENDÊNCIAS EM TEMPO REAL (RELÓGIO) ---
             await this.updateFastTrends();
-            if (this.settings.smcOnly && Math.random() < 0.05) await this.refreshSMCTrend(tick);
 
             this.currentSpread = Math.round((tick.ask - tick.bid) / (tick.point || 0.01));
+            const robotPositions = pos.filter((p: any) => p.magic === this.MAGIC) as GoldPosition[];
+            const openTickets = new Set(robotPositions.map(p => p.ticket));
+            for (const ticket of this.smcPositionData.keys()) {
+                if (!openTickets.has(ticket)) this.smcPositionData.delete(ticket);
+            }
             for (const p of pos) {
                 if (p.magic === this.MAGIC) {
                     await this.processBreakEven(p, tick);
                     await this.processTrailingStop(p, tick);
                     await this.processSMCDefense(p, tick);
+                    await this.processTP2(p, tick);
                 }
             }
-            const robotPositions = pos.filter((p: GoldPosition) => p.magic === this.MAGIC);
-            if (robotPositions.length === 0) {
-                 if (Math.random() < 0.1) console.log(`📊 Gold Scalper Cycle: Spread ${this.currentSpread} | IA Score: ${this.calculateNeuroScore()}% | MicroTrend: ${this.getMicroTrend()}`);
-            }
             if (!await this.processBasket(robotPositions)) await this.checkNewOpenings(tick, pos);
+
+            // Heartbeat: log a status line every 30s so the terminal feed stays alive
+            if (Date.now() - this.lastHeartbeatLogTime > 30000) {
+                this.lastHeartbeatLogTime = Date.now();
+                const trend = this.currentM1Trend || 'FLAT';
+                const spread = this.currentSpread;
+                const ia = this.calculateNeuroScore();
+                const posCount = robotPositions.length;
+                const floating = this.floatingProfit.toFixed(2);
+                this.log('HEARTBEAT', `Spread: ${spread}pts | Trend M1: ${trend} | IA: ${ia}% | Posições: ${posCount} | P&L: $${floating}`);
+            }
         } catch (e) {
             console.warn('GoldScalper: mainCycle error', e);
         } finally { this.isProcessingCycle = false; }
@@ -489,7 +540,8 @@ export class GoldScalperEngine {
 
     private static async checkNewOpenings(tick: any, pos: GoldPosition[]) {
         const robotPositions = pos.filter((p: GoldPosition) => p.magic === this.MAGIC);
-        if (robotPositions.length >= this.settings.gridLevels) return;
+        const maxLevels = this.settings.useGrid ? this.settings.gridLevels : 1;
+        if (robotPositions.length >= maxLevels) return;
         
         // Cooldown básico de tempo
         if (Date.now() - this.lastTradeTime < this.settings.cooldownSeconds * 1000) return;
@@ -516,7 +568,6 @@ export class GoldScalperEngine {
             if (this.settings.smcOnly) {
                 const smcDir = await this.getSMCMarketDirection();
                 if (!smcDir) {
-                    if (Math.random() < 0.05) console.log('⏳ [SMC Only] Aguardando sinal SMC...');
                     return;
                 }
                 dir = smcDir;
@@ -551,7 +602,6 @@ export class GoldScalperEngine {
                 if (this.currentSMCTrend !== 'NEUTRAL') {
                     const smcDir = this.currentSMCTrend === 'BULLISH' ? 'BUY' : 'SELL';
                     if (dir !== smcDir) {
-                        if (Math.random() < 0.05) console.log(`[SMC GRID GUARD] Grid ${dir} bloqueado: SMC trend é ${this.currentSMCTrend} (queria ${smcDir})`);
                         return;
                     }
                 }
@@ -560,23 +610,18 @@ export class GoldScalperEngine {
             // --- FILTRO DE TENDÊNCIA MACRO (MA200) ---
             if (this.settings.swingTrendFilter) {
                 if (!this.ma200Ready) {
-                    if (Math.random() < 0.05) console.log(`[MA200 GUARD] Aguardando cálculo da MA200...`);
                     return;
                 }
                 const cp = dir === 'BUY' ? tick.ask : tick.bid;
-                // Modo estrito: bloqueia BUY e SELL se preço abaixo da MA200
                 if (this.settings.strictMA200Filter) {
                     if (cp < this.currentMA200) {
-                        if (Math.random() < 0.05) console.log(`[MA200 STRICT] Entrada ${dir} bloqueada: Preço (${cp}) abaixo da MA200 (${this.currentMA200})`);
                         return;
                     }
                 } else {
                     if (dir === 'BUY' && cp < this.currentMA200) {
-                        if (Math.random() < 0.05) console.log(`[MA200 GUARD] Entrada BUY bloqueada: Preço (${cp}) abaixo da MA200 (${this.currentMA200})`);
                         return;
                     }
                     if (dir === 'SELL' && cp > this.currentMA200) {
-                        if (Math.random() < 0.05) console.log(`[MA200 GUARD] Entrada SELL bloqueada: Preço (${cp}) acima da MA200 (${this.currentMA200})`);
                         return;
                     }
                 }
@@ -588,7 +633,6 @@ export class GoldScalperEngine {
                     const neuroM1 = this.predictNextCandle('M1');
                     const neuroDir1 = neuroM1.direction === 'UP' ? 'BUY' : (neuroM1.direction === 'DOWN' ? 'SELL' : 'FLAT');
                     if (dir !== neuroDir1) {
-                        if (Math.random() < 0.05) console.log(`[NEURO GUARD] Entrada ${dir} cancelada: Contra Predição M1 (${neuroDir1})`);
                         return;
                     }
                 }
@@ -596,7 +640,6 @@ export class GoldScalperEngine {
                     const neuroM5 = this.predictNextCandle('M5');
                     const neuroDir5 = neuroM5.direction === 'UP' ? 'BUY' : (neuroM5.direction === 'DOWN' ? 'SELL' : 'FLAT');
                     if (dir !== neuroDir5) {
-                        if (Math.random() < 0.05) console.log(`[NEURO GUARD] Entrada ${dir} cancelada: Contra Predição M5 (${neuroDir5})`);
                         return;
                     }
                 }
@@ -656,8 +699,8 @@ export class GoldScalperEngine {
         if (!this.resolvedSymbol) return;
         try {
             const [m1, m5] = await Promise.all([
-                axios.get(`${this.BRIDGE_URL}/candles?symbol=${this.resolvedSymbol}&timeframe=M1&count=30`).catch(() => ({ data: [] })),
-                axios.get(`${this.BRIDGE_URL}/candles?symbol=${this.resolvedSymbol}&timeframe=M5&count=30`).catch(() => ({ data: [] }))
+                axios.get(`${this.BRIDGE_URL}/candles?symbol=${this.resolvedSymbol}&timeframe=M1&count=30`, { timeout: 5000 }).catch(() => ({ data: [] })),
+                axios.get(`${this.BRIDGE_URL}/candles?symbol=${this.resolvedSymbol}&timeframe=M5&count=30`, { timeout: 5000 }).catch(() => ({ data: [] }))
             ]);
 
             if (m1.data?.length > 10 && m5.data?.length > 10) {
@@ -729,6 +772,12 @@ export class GoldScalperEngine {
     private static async openPosition(dir: 'BUY' | 'SELL', tick: any, level: number, manual = false) {
         if (!this.resolvedSymbol) return false;
 
+        // Spread filter: skip if spread > 30% of ATR
+        if (this.currentATR > 0 && this.currentSpread > this.currentATR * 0.3) {
+            this.log('SKIP', `Spread ${this.currentSpread} > 30% ATR (${(this.currentATR * 0.3).toFixed(1)})`);
+            return false;
+        }
+
         // SAFETY LOCK: verificar DisciplineEngine antes de abrir posição
         try {
             const discipline = await DisciplineEngine.getDailyStatus();
@@ -770,8 +819,8 @@ export class GoldScalperEngine {
                     let balance = 1000;
                     try { const acc = await axios.get(`${this.BRIDGE_URL}/account`, { timeout: 2000 }); if (acc.data?.balance) balance = acc.data.balance; } catch (e) {}
                     const riskUSD = (balance * riskPct) / 100;
-                    const slDistPrice = Math.abs(entry - sl);
-                    if (slDistPrice > 0) {
+                    const slDistPrice = Math.max(1, Math.abs(entry - sl));
+                    if (!this.settings.useFixedLot) {
                         const calcLot = riskUSD / (slDistPrice * 100);
                         lot = Number(Math.max(0.01, Math.min(50, calcLot)).toFixed(2));
                     }
@@ -782,10 +831,12 @@ export class GoldScalperEngine {
                         sl = dir === 'BUY' ? entry - minDist : entry + minDist;
                         this.log('SMC', `SL expandido de ${slDistPrice.toFixed(2)}pts para ${minDist}pts (mínimo configurado)`);
                         // Recalcular lote com a nova distância
-                        const newSlDist = Math.abs(entry - (sl as number));
-                        if (newSlDist > 0) {
-                            const calcLot = riskUSD / (newSlDist * 100);
-                            lot = Number(Math.max(0.01, Math.min(50, calcLot)).toFixed(2));
+                        if (!this.settings.useFixedLot) {
+                            const newSlDist = Math.abs(entry - (sl as number));
+                            if (newSlDist > 0) {
+                                const calcLot = riskUSD / (newSlDist * 100);
+                                lot = Number(Math.max(0.01, Math.min(50, calcLot)).toFixed(2));
+                            }
                         }
                     }
                     this.log('SMC_v2', `SL=${(sl as number).toFixed(2)} TP1=${(tp as number).toFixed(2)} TP2=${smcResp.data.tp2} SL_dist=${Math.abs(entry - (sl as number)).toFixed(2)} Lote=${lot} (1% risco=$ ${riskUSD.toFixed(2)})`);
@@ -829,7 +880,23 @@ export class GoldScalperEngine {
             const defaultSL_USD = this.settings.stopLossUSD || 15;
             const dist = defaultSL_USD / (lot * 100);
             sl = dir === 'BUY' ? entry - dist : entry + dist;
-            this.log('FALLBACK_SL', `SL padrão $${defaultSL_USD}: ${(sl as number).toFixed(2)}`);
+        }
+
+        // --- TP1 / TP2: Calcular para todos os modos (SMC ou USD) ---
+        let tp1Price = 0;
+        let tp2Price = 0;
+        if (this.settings.tp1Enabled || this.settings.tp2Enabled) {
+            const slDist = Math.abs(entry - (sl as number));
+            if (slDist > 0) {
+                if (this.settings.tp1Enabled) {
+                    const mult = this.settings.tp1Multiplier || 1.5;
+                    tp1Price = dir === 'BUY' ? entry + (slDist * mult) : entry - (slDist * mult);
+                }
+                if (this.settings.tp2Enabled) {
+                    const mult = this.settings.tp2Multiplier || 3.0;
+                    tp2Price = dir === 'BUY' ? entry + (slDist * mult) : entry - (slDist * mult);
+                }
+            }
         }
         
         // Fallback TP absoluto
@@ -851,22 +918,23 @@ export class GoldScalperEngine {
                 comment: `GSL${level}${manual ? 'M' : ''}`
             });
             
-            if (r.data?.ticket || r.data?.status === 'success') { 
-                this.lastTradeTime = Date.now(); 
-                const ticket = r.data.order_id || r.data.ticket || 0;
-                SymbolLockService.acquire(this.resolvedSymbol, 'Gold Scalper', ticket, dir);
-                if (smcData) {
-                    this.smcPositionData.set(ticket, {
-                        tp1: smcData.partial_level || tp,
-                        tp2: smcData.tp2 || tp,
-                        partialHit: false,
-                        entry: entry,
-                        spready: this.currentSpread || 20
-                    });
-                }
-                const modo = smcData ? 'SMC_v2' : 'USD';
-                this.log('OPEN', `Sucesso #${ticket} ${dir} Lote:${lot} SL:${(sl as number).toFixed(2)} TP:${(tp as number).toFixed(2)} [${modo}]`);
-                TradeNotificationBot.notifyTradeOpened('Gold Scalper', this.resolvedSymbol, dir, lot, entry, sl as number, tp as number);
+                if (r.data?.ticket || r.data?.status === 'success') { 
+                    this.lastTradeTime = Date.now(); 
+                    const ticket = r.data.order_id || r.data.ticket || 0;
+                    SymbolLockService.acquire(this.resolvedSymbol, 'Gold Scalper', ticket, dir);
+                    if (smcData || this.settings.tp1Enabled || this.settings.tp2Enabled) {
+                        this.smcPositionData.set(ticket, {
+                            tp1: tp1Price || smcData?.partial_level || tp,
+                            tp2: tp2Price || smcData?.tp2 || tp,
+                            partialHit: false,
+                            tp2Hit: false,
+                            entry: entry,
+                            spready: this.currentSpread || 20
+                        });
+                    }
+                    const modo = smcData ? 'SMC_v2' : 'USD';
+                    const tpInfo = (tp1Price > 0 || tp2Price > 0) ? ` TP1:${tp1Price > 0 ? tp1Price.toFixed(2) : '-'} TP2:${tp2Price > 0 ? tp2Price.toFixed(2) : '-'}` : '';
+                    this.log('OPEN', `Sucesso #${ticket} ${dir} Lote:${lot} SL:${(sl as number).toFixed(2)} TP:${(tp as number).toFixed(2)}${tpInfo} [${modo}]`);
                 return true; 
             }
         } catch (e: any) { 
@@ -884,18 +952,29 @@ export class GoldScalperEngine {
     }
 
     private static async processBreakEven(p: GoldPosition, tick: any) {
-        if (p.profit >= this.settings.breakEvenTrigger) {
-            const isBuy = p.type === 0;
-            const newSl = isBuy ? p.price_open + this.settings.breakEvenOffset : p.price_open - this.settings.breakEvenOffset;
+        if (this.currentATR <= 0) return;
+        const isBuy = p.type === 0;
+        const profitDistance = isBuy
+            ? (tick.bid - p.price_open)
+            : (p.price_open - tick.ask);
+        const atrBETrigger = this.currentATR * 1.0;
+        const atrBEOffset = this.currentATR * 0.2;
+        if (profitDistance >= atrBETrigger) {
+            const newSl = isBuy ? p.price_open + atrBEOffset : p.price_open - atrBEOffset;
             if (isBuy ? (p.sl < newSl) : (p.sl > newSl || p.sl === 0)) {
                 await axios.post(`${this.BRIDGE_URL}/update_order`, { ticket: p.ticket, sl: Number(newSl.toFixed(2)) });
+                this.log('BE_ATR', `SL movido para BE+ATR #${p.ticket} trigger=${atrBETrigger.toFixed(2)} novoSL=${newSl.toFixed(2)}`);
             }
         }
     }
 
     private static async processTrailingStop(p: GoldPosition, tick: any) {
-        if (p.profit < this.settings.trailingStart) return;
         const isBuy = p.type === 0;
+        const profitDistance = isBuy
+            ? (tick.bid - p.price_open)
+            : (p.price_open - tick.ask);
+        const atrTrailStart = this.currentATR * 1.5;
+        if (profitDistance < atrTrailStart) return;
         let newSl: number;
 
         if (this.settings.smartTrailing) {
@@ -925,28 +1004,54 @@ export class GoldScalperEngine {
         // Verificar se atingiu o micro-alvo (TP1 / partial_level)
         const hitTarget = isBuy ? (currentPrice >= data.tp1) : (currentPrice <= data.tp1);
         if (!hitTarget) return;
-        // Fechar 50% do lote
-        const halfLot = p.volume / 2;
-        if (halfLot >= 0.01) {
+
+        // Usar configuração TP1 do usuário se habilitado, senão usar 50% fixo
+        const partialPercent = this.settings.tp1Enabled ? (this.settings.tp1PartialPercent || 50) : 50;
+        const closeLot = Number(((p.volume * partialPercent) / 100).toFixed(2));
+        if (closeLot >= 0.01) {
             try {
-                await axios.post(`${this.BRIDGE_URL}/close_order`, { ticket: p.ticket, lot: Number(halfLot.toFixed(2)) });
-                this.log('SMC_PARTIAL', `Parcial 50% fechada #${p.ticket} lucro≈${p.profit.toFixed(2)}`);
+                await axios.post(`${this.BRIDGE_URL}/close_order`, { ticket: p.ticket, lot: closeLot });
+                this.log('TP1', `Parcial ${partialPercent}% fechada #${p.ticket} lucro≈$${p.profit.toFixed(2)} (${closeLot} lotes)`);
             } catch (e: any) {
-                this.log('WARN', `Falha parcial #${p.ticket}: ${e.message}`);
+                this.log('WARN', `Falha TP1 #${p.ticket}: ${e.message}`);
             }
         }
-        // Mover SL do restante para entrada + spread×2
-        const newSl = isBuy ? (data.entry + data.spready * 2 * 0.01) : (data.entry - data.spready * 2 * 0.01);
-        const improved = isBuy ? (newSl > p.sl) : (newSl < p.sl);
-        if (improved) {
-            try {
-                await axios.post(`${this.BRIDGE_URL}/update_order`, { ticket: p.ticket, sl: Number(newSl.toFixed(2)) });
-                this.log('SMC_DEFENSE', `SL movido para BE+spread #${p.ticket} novoSL=${newSl.toFixed(2)}`);
-            } catch (e: any) {
-                this.log('WARN', `Falha SL defense #${p.ticket}: ${e.message}`);
+        // Mover SL para BE+spread após TP1 (se habilitado)
+        if (this.settings.moveSLToBEAfterTP1) {
+            const newSl = isBuy ? (data.entry + data.spready * 2 * 0.01) : (data.entry - data.spready * 2 * 0.01);
+            const improved = isBuy ? (newSl > p.sl) : (newSl < p.sl);
+            if (improved) {
+                try {
+                    await axios.post(`${this.BRIDGE_URL}/update_order`, { ticket: p.ticket, sl: Number(newSl.toFixed(2)) });
+                    this.log('BE_MOVE', `SL movido para BE+spread #${p.ticket} novoSL=${newSl.toFixed(2)}`);
+                } catch (e: any) {
+                    this.log('WARN', `Falha BE move #${p.ticket}: ${e.message}`);
+                }
             }
         }
         data.partialHit = true;
+    }
+
+    private static async processTP2(p: GoldPosition, tick: any) {
+        if (!this.settings.tp2Enabled) return;
+        const data = this.smcPositionData.get(p.ticket);
+        if (!data || !data.partialHit || data.tp2Hit) return;
+        const isBuy = p.type === 0;
+        const currentPrice = isBuy ? tick.bid : tick.ask;
+        const hitTP2 = isBuy ? (currentPrice >= data.tp2) : (currentPrice <= data.tp2);
+        if (!hitTP2) return;
+
+        // Fechar todo o restante no TP2
+        const remainingLot = p.volume;
+        if (remainingLot >= 0.01) {
+            try {
+                await axios.post(`${this.BRIDGE_URL}/close_order`, { ticket: p.ticket, lot: Number(remainingLot.toFixed(2)) });
+                this.log('TP2', `Posição fechada #${p.ticket} lucro≈$${p.profit.toFixed(2)} (${remainingLot} lotes)`);
+            } catch (e: any) {
+                this.log('WARN', `Falha TP2 #${p.ticket}: ${e.message}`);
+            }
+        }
+        data.tp2Hit = true;
     }
 
     private static async processBasket(pos: GoldPosition[]) {
@@ -1121,6 +1226,24 @@ export class GoldScalperEngine {
         return this.tradeHistory.slice();
     }
 
+    static getHistory() {
+        return {
+            trades: this.tradeHistory,
+            stats: {
+                totalTrades: this.tradeHistory.length,
+                wins: this.tradeHistory.filter(t => t.result === 'WIN').length,
+                losses: this.tradeHistory.filter(t => t.result === 'LOSS').length,
+                winRate: this.tradeHistory.length > 0
+                    ? Number((this.tradeHistory.filter(t => t.result === 'WIN').length / this.tradeHistory.length * 100).toFixed(1))
+                    : 0,
+                closedPnL: Number(this.tradeHistory.reduce((s, t) => s + t.profit, 0).toFixed(2)),
+                avgProfit: this.tradeHistory.length > 0
+                    ? Number((this.tradeHistory.reduce((s, t) => s + t.profit, 0) / this.tradeHistory.length).toFixed(2))
+                    : 0,
+            }
+        };
+    }
+
     static async getStatistics() {
         await this.recalculateDailyStats();
         const trades = this.tradeHistory;
@@ -1237,6 +1360,8 @@ export class GoldScalperEngine {
     }
 
     static async syncTradesFromMT5() {
+        if (this.isSyncingTrades) return { synced: 0, total: this.tradeHistory.length };
+        this.isSyncingTrades = true;
         try {
             const r = await axios.get(`${this.BRIDGE_URL}/history`);
             const h = r.data || [];
@@ -1314,8 +1439,11 @@ export class GoldScalperEngine {
                 if (!isRobot) continue;
                 this.tradeHistory.push(trade);
                 this.totalProfitAllTime += netProfit;
+                
+                // Log closed trade to operation feed
+                this.log('CLOSE', `Posição #${ticket} ${direction} ${entry.symbol} fechada. Lucro: $${netProfit.toFixed(2)} | Motivo: ${closeReason}`);
+                
                 if (this.settings.enabled) {
-                    TradeNotificationBot.notifyTradeClosed('Gold Scalper', this.resolvedSymbol, trade.type, trade.profit, trade.result, comment || 'Sincronizado', trade.lot);
                 }
                 added++;
             }
@@ -1329,15 +1457,19 @@ export class GoldScalperEngine {
             }
             return { synced: added, total: this.tradeHistory.length };
         } catch (e) {
-            console.error('[SYNC ERROR]', e);
+            console.error('[GoldScalper] syncTradesFromMT5 error:', e);
             return { synced: 0, total: this.tradeHistory.length };
+        } finally {
+            this.isSyncingTrades = false;
         }
     }
 
+    private static lastHeartbeatLogTime = 0;
+
     private static log(action: string, details: string) {
         this.operationLog.unshift({ time: new Date().toLocaleTimeString('pt-BR'), action, details });
-        if (this.operationLog.length > 50) this.operationLog.pop();
-        if (action !== 'IA_GUARD') console.log(`🥇 Gold Scalper [${action}]: ${details}`);
+        if (this.operationLog.length > 100) this.operationLog.pop();
+        if (action !== 'IA_GUARD' && action !== 'HEARTBEAT') console.log(`🥇 Gold Scalper [${action}]: ${details}`);
     }
 
     private static isHighLiquiditySession(): boolean {
@@ -1373,8 +1505,8 @@ export class GoldScalperEngine {
             }
         }
     }
-    private static saveTradeHistory() { fs.writeFileSync(this.HISTORY_PATH, JSON.stringify({ trades: this.tradeHistory, totalProfitAllTime: this.totalProfitAllTime }, null, 2)); }
-    private static loadLearningState() { if (fs.existsSync(this.LEARN_PATH)) try { this.learningState = JSON.parse(fs.readFileSync(this.LEARN_PATH, 'utf-8')); } catch (e) { } }
+    private static saveTradeHistory() { try { fs.writeFileSync(this.HISTORY_PATH, JSON.stringify({ trades: this.tradeHistory, totalProfitAllTime: this.totalProfitAllTime }, null, 2)); } catch (e) { console.error('[GoldScalper] saveTradeHistory error:', e); } }
+    private static loadLearningState() { if (fs.existsSync(this.LEARN_PATH)) try { this.learningState = JSON.parse(fs.readFileSync(this.LEARN_PATH, 'utf-8')); } catch (e) { console.warn('[GoldScalper] loadLearningState error:', e); } }
     private static async resolveDXYSymbol() {
         try {
             const r = await axios.get(`${this.BRIDGE_URL}/symbols`);
@@ -1459,8 +1591,8 @@ export class GoldScalperEngine {
         let pos: GoldPosition[] = [];
         try {
             const [accRes, posRes] = await Promise.all([
-                axios.get(`${this.BRIDGE_URL}/account`),
-                axios.get(`${this.BRIDGE_URL}/positions`)
+                axios.get(`${this.BRIDGE_URL}/account`, { timeout: 5000 }),
+                axios.get(`${this.BRIDGE_URL}/positions`, { timeout: 5000 })
             ]);
             accountData = accRes.data || {};
             pos = (posRes.data || []).filter((p: any) => p.symbol?.includes('XAU'));
@@ -1581,8 +1713,8 @@ export class GoldScalperEngine {
         let accountData: any = null;
         try {
             const [posRes, accRes] = await Promise.all([
-                axios.get(`${this.BRIDGE_URL}/positions`),
-                axios.get(`${this.BRIDGE_URL}/account`)
+                axios.get(`${this.BRIDGE_URL}/positions`, { timeout: 5000 }),
+                axios.get(`${this.BRIDGE_URL}/account`, { timeout: 5000 })
             ]);
             pos = (posRes.data || []).filter((p: any) =>
                 this.GOLD_SYMBOLS.some(gs => p.symbol.toUpperCase().includes(gs.toUpperCase())) &&
@@ -1632,6 +1764,7 @@ export class GoldScalperEngine {
         else if (ddPercent > 40) heatmapStatus = 'ALERTA';
 
         return {
+            isRunning: this.isRunning,
             enabled: this.settings.enabled, settings: this.settings, resolvedSymbol: this.resolvedSymbol,
             dailyProfit: this.dailyProfit, dailyLoss: this.dailyLoss, totalProfit: this.totalProfitAllTime,
             floatingProfit: Number(this.floatingProfit.toFixed(2)), openPositions: this.openPositionsCount,
@@ -1681,6 +1814,12 @@ export class GoldScalperEngine {
             isCoolingOff,
             coolOffRemainingMs,
             operationLog: this.operationLog,
+            basket: {
+                net: Number(this.floatingProfit.toFixed(2)),
+                tp: this.settings.basketTP,
+                sl: this.settings.basketSL,
+                progress: this.settings.maxDailyLoss > 0 ? Number(((this.floatingProfit / this.settings.basketTP) * 100).toFixed(0)) : 0
+            },
             smcLevels: this.currentSMCData ? {
                 market_trend: this.currentSMCData.market_trend || 'NEUTRAL',
                 tp1: this.currentSMCData.tp1,

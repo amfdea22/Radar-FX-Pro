@@ -16,7 +16,7 @@ async function runSimulation() {
 
     // 1. Carregar Configurações Atuais
     let s = {
-        lotSize: 0.10,
+        lotSize: 0.01,
         gridLevels: 3,
         gridDistance: 3.0,
         gridMultiplier: 1.0,

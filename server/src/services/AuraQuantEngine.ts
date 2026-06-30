@@ -1,8 +1,13 @@
 import axios from 'axios';
+import * as fs from 'fs';
+import * as path from 'path';
 import { MarketDataService } from './MarketDataService';
 import { AlertEngine } from './AlertEngine';
 import { SymbolLockService } from './SymbolLockService';
 import { DisciplineEngine } from './DisciplineEngine';
+
+const SETTINGS_PATH = path.join(process.cwd(), 'aura_quant_settings.json');
+const HISTORY_PATH = path.join(process.cwd(), 'aura_quant_history.json');
 
 interface AuraQuantSettings {
     enabled: boolean;
@@ -12,6 +17,14 @@ interface AuraQuantSettings {
     maxDailyProfit: number;
     maxSpread: number;
     riskPercent: number;
+    atrMultiplier: number;
+    rrRatio: number;
+    cooldownMinutes: number;
+    tradingStartHour: number;
+    tradingEndHour: number;
+    consecutiveLossLimit: number;
+    trailingDistanceMultiplier: number;
+    breakevenOffsetATR: number;
 }
 
 interface AuraQuantState {
@@ -28,6 +41,7 @@ interface AuraQuantState {
     } | null;
     dailyProfit: number;
     dailyLoss: number;
+    spread: number;
 }
 
 interface TradeRecord {
@@ -39,6 +53,12 @@ interface TradeRecord {
     result: 'WIN' | 'LOSS';
     profit: number;
     partialClose: boolean;
+    ticket: number;
+    lot: number;
+    sl: number;
+    tp: number;
+    closeReason: string;
+    symbol: string;
 }
 
 interface M15Analysis {
@@ -69,10 +89,18 @@ export class AuraQuantEngine {
         enabled: false,
         symbol: 'XAUUSD',
         lotSize: 0.01,
-        maxDailyLoss: 50,
-        maxDailyProfit: 100,
+        maxDailyLoss: 20,
+        maxDailyProfit: 30,
         maxSpread: 50,
         riskPercent: 1,
+        atrMultiplier: 2.5,
+        rrRatio: 2.0,
+        cooldownMinutes: 5,
+        tradingStartHour: 0,
+        tradingEndHour: 24,
+        consecutiveLossLimit: 3,
+        trailingDistanceMultiplier: 1.0,
+        breakevenOffsetATR: 0.3,
     };
 
     private static state: AuraQuantState = {
@@ -80,6 +108,7 @@ export class AuraQuantEngine {
         position: null,
         dailyProfit: 0,
         dailyLoss: 0,
+        spread: 0,
     };
 
     private static isRunning = false;
@@ -88,6 +117,10 @@ export class AuraQuantEngine {
     private static marginOk = true;
     private static lastMarginCheck = 0;
     private static operationLog: { time: string; action: string; details: string }[] = [];
+    private static lastTradeTime = 0;
+    private static consecutiveLosses = 0;
+    private static cooldownUntil = 0;
+    private static contractSizeCache: Record<string, number> = {};
     private static cachedCalendar: any[] | null = null;
     private static lastCalendarFetch = 0;
     private static dxyBiasCached: number = 0;
@@ -114,30 +147,103 @@ export class AuraQuantEngine {
         };
     }
 
+    static getLiveMonitor() {
+        const now = Date.now() / 1000;
+        const stats = this.computeStats();
+        const pos = this.state.position;
+
+        let activePosition = null;
+        if (pos) {
+            const isBuy = pos.type === 'BUY';
+            const entryPrice = pos.price;
+            const sl = pos.sl;
+            const tp = pos.tp;
+            const timeSeconds = pos.time ? Math.floor(now - pos.time / 1000) : 0;
+            const mins = Math.floor(timeSeconds / 60);
+            const secs = timeSeconds % 60;
+
+            activePosition = {
+                ticket: pos.ticket,
+                type: pos.type,
+                symbol: this.settings.symbol,
+                entryPrice: Math.round(entryPrice * 100) / 100,
+                sl: Math.round(sl * 100) / 100,
+                tp: Math.round(tp * 100) / 100,
+                timeInTrade: `${mins}m ${secs}s`,
+                timeSeconds,
+                comment: pos.comment,
+                partialHit: pos.partialHit,
+            };
+        }
+
+        const a = this.lastAnalysis;
+        return {
+            position: activePosition,
+            stats: {
+                totalTrades: stats.totalTrades,
+                wins: stats.winCount,
+                losses: stats.lossCount,
+                winRate: Math.round(stats.winRate * 10) / 10,
+                closedPnL: Math.round(stats.totalProfit * 100) / 100,
+                dailyPnL: Math.round((this.state.dailyProfit - this.state.dailyLoss) * 100) / 100,
+                profitFactor: stats.profitFactor,
+                avgWin: stats.avgWin,
+                avgLoss: stats.avgLoss,
+            },
+            indicators: {
+                price: a?.price || 0,
+                ema21: a?.ema21 || 0,
+                ema50: a?.ema50 || 0,
+                stochK: a?.stochK || 0,
+                stochD: a?.stochD || 0,
+                adx: a?.adx || 0,
+                atr: a?.atr || 0,
+                atrMA20: a?.atrMA20 || 0,
+                trend: a?.trend || 0,
+                trendLabel: a?.trend === 1 ? 'ALTA' : a?.trend === -1 ? 'BAIXA' : 'NEUTRA',
+                signal: a?.signal || null,
+                altSignal: a?.altSignal || null,
+                entryScore: a?.entryScore || 0,
+                altScore: a?.altScore || 0,
+                dxyBias: a?.dxyBias || 0,
+                calendarBlock: a?.calendarBlock || false,
+                calendarReason: a?.calendarReason || '',
+            },
+            cycleInfo: {
+                isRunning: this.isRunning,
+                enabled: this.settings.enabled,
+                marginOk: this.marginOk,
+                dailyProfit: this.state.dailyProfit,
+                dailyLoss: this.state.dailyLoss,
+            }
+        };
+    }
+
     private static computeStats() {
-        const total = this.trades.length;
-        const wins = this.trades.filter(t => t.result === 'WIN');
-        const losses = this.trades.filter(t => t.result === 'LOSS');
+        const closed = this.trades.filter(t => t.exitTime > 0 && t.profit !== 0);
+        const wins = closed.filter(t => t.result === 'WIN');
+        const losses = closed.filter(t => t.result === 'LOSS');
         const winCount = wins.length;
         const lossCount = losses.length;
-        const winRate = total > 0 ? (winCount / total) * 100 : 0;
-        const totalProfit = this.trades.reduce((s, t) => s + t.profit, 0);
+        const totalClosed = winCount + lossCount;
+        const winRate = totalClosed > 0 ? (winCount / totalClosed) * 100 : 0;
+        const totalProfit = closed.reduce((s, t) => s + t.profit, 0);
         const avgWin = winCount > 0 ? wins.reduce((s, t) => s + t.profit, 0) / winCount : 0;
         const avgLoss = lossCount > 0 ? losses.reduce((s, t) => s + Math.abs(t.profit), 0) / lossCount : 0;
         const profitFactor = avgLoss > 0 ? (winCount * avgWin) / (lossCount * avgLoss) : winCount > 0 ? Infinity : 0;
 
         let maxConsecutiveWins = 0, maxConsecutiveLosses = 0;
         let curWins = 0, curLosses = 0;
-        for (const t of this.trades) {
+        for (const t of closed) {
             if (t.result === 'WIN') { curWins++; curLosses = 0; maxConsecutiveWins = Math.max(maxConsecutiveWins, curWins); }
             else { curLosses++; curWins = 0; maxConsecutiveLosses = Math.max(maxConsecutiveLosses, curLosses); }
         }
 
-        const bestTrade = this.trades.length > 0 ? Math.max(...this.trades.map(t => t.profit)) : 0;
-        const worstTrade = this.trades.length > 0 ? Math.min(...this.trades.map(t => t.profit)) : 0;
+        const bestTrade = closed.length > 0 ? Math.max(...closed.map(t => t.profit)) : 0;
+        const worstTrade = closed.length > 0 ? Math.min(...closed.map(t => t.profit)) : 0;
 
         return {
-            totalTrades: total, winCount, lossCount, winRate: Math.round(winRate * 100) / 100,
+            totalTrades: totalClosed, winCount, lossCount, winRate: Math.round(winRate * 100) / 100,
             totalProfit: Math.round(totalProfit * 100) / 100,
             avgWin: Math.round(avgWin * 100) / 100, avgLoss: Math.round(avgLoss * 100) / 100,
             profitFactor: Math.round(profitFactor * 100) / 100,
@@ -147,14 +253,122 @@ export class AuraQuantEngine {
     }
 
     static updateSettings(partial: Partial<AuraQuantSettings>) {
+        const previousEnabled = this.settings.enabled;
         this.settings = { ...this.settings, ...partial };
+        this.saveSettings();
+
+        // Log mudanças importantes
+        if (partial.enabled !== undefined && partial.enabled !== previousEnabled) {
+            this.log('CONFIG', `Engine ${partial.enabled ? 'ATIVADO' : 'DESATIVADO'}`);
+        }
         this.log('CONFIG', `Config atualizada: ${JSON.stringify(partial)}`);
+    }
+
+    private static loadSettings() {
+        try {
+            if (fs.existsSync(SETTINGS_PATH)) {
+                const data = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'));
+                this.settings = { ...this.settings, ...data };
+            }
+        } catch (e) {
+            console.error('AuraQuant: Error loading settings:', e);
+        }
+    }
+
+    private static saveSettings() {
+        try {
+            fs.writeFileSync(SETTINGS_PATH, JSON.stringify(this.settings, null, 2));
+        } catch (e) {
+            console.error('AuraQuant: Error saving settings', e);
+        }
+    }
+
+    private static saveTrades() {
+        try {
+            const data = {
+                trades: this.trades.slice(-200),
+                stats: this.computeStats(),
+                operationLog: this.operationLog.slice(-50),
+            };
+            fs.writeFileSync(HISTORY_PATH, JSON.stringify(data, null, 2));
+        } catch (e) {
+            console.error('AuraQuant: Error saving trades', e);
+        }
+    }
+
+    private static loadTrades() {
+        try {
+            if (fs.existsSync(HISTORY_PATH)) {
+                const raw = JSON.parse(fs.readFileSync(HISTORY_PATH, 'utf8'));
+                if (raw.trades && Array.isArray(raw.trades)) {
+                    this.trades = raw.trades;
+                }
+                if (raw.operationLog && Array.isArray(raw.operationLog)) {
+                    this.operationLog = raw.operationLog;
+                }
+            }
+        } catch (e) {
+            console.error('AuraQuant: Error loading trades', e);
+        }
+    }
+
+    static getHistory() {
+        return {
+            trades: this.trades,
+            stats: this.computeStats(),
+            operationLog: this.operationLog.slice(-50),
+        };
+    }
+
+    private static async syncFromMT5History() {
+        try {
+            const resp = await axios.get(`${this.BRIDGE_URL}/history`, { timeout: 15000 });
+            const history: any[] = Array.isArray(resp.data) ? resp.data : [];
+            if (history.length === 0) return;
+
+            let updated = 0;
+            for (const trade of this.trades) {
+                if (trade.exitTime > 0 && trade.profit !== 0) continue;
+                const exitDeal = history.find((d: any) =>
+                    (d.position_id === trade.ticket || d.ticket === trade.ticket) &&
+                    d.entry === 1
+                );
+                if (exitDeal) {
+                    const profit = (exitDeal.profit || 0) + (exitDeal.commission || 0) + (exitDeal.swap || 0);
+                    trade.profit = Math.round(profit * 100) / 100;
+                    trade.result = profit >= 0 ? 'WIN' : 'LOSS';
+                    trade.exitTime = exitDeal.time ? exitDeal.time * 1000 : Date.now();
+                    trade.exitPrice = exitDeal.price || 0;
+                    updated++;
+                }
+            }
+
+            if (updated > 0) {
+                this.log('SYNC', `P&L sincronizado do MT5: ${updated} trades atualizados`);
+                this.saveTrades();
+            }
+
+            const today = new Date().toDateString();
+            this.state.dailyProfit = 0;
+            this.state.dailyLoss = 0;
+            for (const t of this.trades) {
+                if (t.exitTime > 0 && new Date(t.exitTime).toDateString() === today) {
+                    if (t.profit > 0) this.state.dailyProfit += t.profit;
+                    else this.state.dailyLoss += Math.abs(t.profit);
+                }
+            }
+        } catch (e: any) {
+            this.log('WARN', `Falha ao sincronizar com MT5: ${e?.message}`);
+        }
     }
 
     static async init() {
         if (this.isRunning) return;
+        this.loadSettings();
+        this.loadTrades();
         this.isRunning = true;
-        this.log('INIT', 'Aura Quant — Pullback + Stoch(14,3,3) + ADX + H4 Trend + Calendário + DXY');
+        await this.syncFromMT5History();
+        this.log('INIT', `Aura Quant — Pullback + Stoch(14,3,3) + ADX + H4 Trend + Calendário + DXY | Enabled: ${this.settings.enabled} | Histórico: ${this.trades.length} trades`);
         this.loop();
     }
 
@@ -168,7 +382,7 @@ export class AuraQuantEngine {
         this.lastMarginCheck = Date.now();
         try {
             const resp = await axios.get(`${this.BRIDGE_URL}/account`);
-            const free = parseFloat(resp.data?.margin_free || '0');
+            const free = parseFloat(resp.data?.freeMargin || resp.data?.margin_free || '0');
             const balance = parseFloat(resp.data?.balance || '0');
             this.marginOk = free > balance * 0.1;
             return this.marginOk;
@@ -179,33 +393,66 @@ export class AuraQuantEngine {
     }
 
     private static async loop() {
+        let cycleCount = 0;
         while (this.isRunning) {
+            cycleCount++;
             try {
                 await this.syncPosition();
                 await this.resetDailyIfNeeded();
-                this.lastAnalysis = await this.analyzeM15();
+
+                // Análise com timeout próprio (não depender de bridge lenta)
+                const analysisPromise = this.analyzeM15();
+                const analysisTimeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 25000));
+                this.lastAnalysis = await Promise.race([analysisPromise, analysisTimeout]) as M15Analysis | null;
+
+                if (!this.lastAnalysis) {
+                    if (cycleCount % 10 === 0) {
+                        this.log('WARN', `Análise M15 indisponível (ciclo #${cycleCount}). Bridge pode estar lenta.`);
+                    }
+                    // Continua rodando mas sem entrar em trades
+                    await new Promise(resolve => setTimeout(resolve, 10000));
+                    continue;
+                }
+
                 if (this.settings.enabled) {
                     await this.checkMargin();
-                    if (this.lastAnalysis) {
-                        // Verifica disciplina global
-                        const discipline = await DisciplineEngine.getDailyStatus();
-                        if (discipline.isLocked) {
-                            console.log(`AuraQuant: Safety Lock — ${discipline.reason}`);
-                            continue;
-                        }
-                        if (this.state.position) {
-                            await this.managePosition(this.lastAnalysis);
+
+                    // Verifica disciplina global com timeout próprio
+                    const disciplinePromise = DisciplineEngine.getDailyStatus();
+                    const disciplineTimeout = new Promise<{ isLocked: boolean; reason: string | null }>((resolve) =>
+                        setTimeout(() => resolve({ isLocked: false, reason: null }), 5000)
+                    );
+                    const discipline = await Promise.race([disciplinePromise, disciplineTimeout]);
+
+                    if (discipline.isLocked) {
+                        this.log('BLOCKED', `Safety Lock: ${discipline.reason}`);
+                        await new Promise(resolve => setTimeout(resolve, 30000));
+                        continue;
+                    }
+
+                    if (this.state.position) {
+                        await this.managePosition(this.lastAnalysis);
+                    } else {
+                        const limitLost = this.state.dailyLoss >= this.settings.maxDailyLoss;
+                        const limitGain = this.state.dailyProfit >= this.settings.maxDailyProfit;
+
+                        if (limitLost) {
+                            if (cycleCount % 30 === 0) this.log('LIMIT', `Loss diário ($${this.state.dailyLoss.toFixed(2)}) atingiu max ($${this.settings.maxDailyLoss}). Aguardando reset.`);
+                        } else if (limitGain) {
+                            if (cycleCount % 30 === 0) this.log('LIMIT', `Meta diária ($${this.state.dailyProfit.toFixed(2)}) atingida. Aguardando reset.`);
+                        } else if (!this.marginOk) {
+                            if (cycleCount % 30 === 0) this.log('LIMIT', 'Margin insuficiente.');
                         } else {
-                            const limitLost = this.state.dailyLoss >= this.settings.maxDailyLoss;
-                            const limitGain = this.state.dailyProfit >= this.settings.maxDailyProfit;
-                            if (!limitLost && !limitGain && this.marginOk) {
-                                await this.evaluateEntry(this.lastAnalysis);
-                            }
+                            await this.evaluateEntry(this.lastAnalysis);
                         }
                     }
+                } else {
+                    if (cycleCount % 50 === 0) {
+                        this.log('INFO', `Engine desabilitado. Use /api/mt5/aura-quant/settings para reativar.`);
+                    }
                 }
-            } catch (error) {
-                console.error('AuraQuant: Loop error', error);
+            } catch (error: any) {
+                this.log('ERROR', `Loop error: ${error?.message || error}`);
             }
             await new Promise(resolve => setTimeout(resolve, 10000));
         }
@@ -258,11 +505,17 @@ export class AuraQuantEngine {
 
     private static async filterMarket(): Promise<{ allowed: boolean; reason: string }> {
         try {
-            const tick = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.settings.symbol] });
-            const t = tick.data?.[this.settings.symbol] || tick.data;
+            const [tickRes, infoRes] = await Promise.all([
+                axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.settings.symbol] }),
+                axios.get(`${this.BRIDGE_URL}/symbol_info?symbol=${this.settings.symbol}`).catch(() => ({ data: {} }))
+            ]);
+            const t = tickRes.data?.[this.settings.symbol] || tickRes.data;
+            const info = infoRes.data;
             if (t?.ask && t?.bid) {
-                const spread = (t.ask - t.bid) * 100000;
-                if (spread > this.settings.maxSpread) return { allowed: false, reason: `Spread alto: ${spread.toFixed(0)}` };
+                const point = info?.point || (this.settings.symbol.includes('XAU') ? 0.01 : 0.0001);
+                const spreadPts = (t.ask - t.bid) / point;
+                this.state.spread = t.ask - t.bid;
+                if (spreadPts > this.settings.maxSpread) return { allowed: false, reason: `Spread alto: ${spreadPts.toFixed(0)} pts (max: ${this.settings.maxSpread})` };
             }
             return { allowed: true, reason: 'OK' };
         } catch {
@@ -457,8 +710,14 @@ export class AuraQuantEngine {
             const atr = atrSeries[atrSeries.length - 1] || 0;
             const atrMA20 = atrSeries.length > 20 ? atrSeries.slice(-20).reduce((s, v) => s + v, 0) / 20 : atr;
             const adx = this.calcADX(high, low, close, 14);
-            const trend = await this.getTrend();
             const price = close[close.length - 1];
+
+            // Buscar trend, DXY e calendário em paralelo
+            const [trend, dxyResult, calResult] = await Promise.all([
+                this.getTrend(),
+                this.getDXYBias(),
+                this.checkEconomicCalendar(),
+            ]);
 
             let signal: 'BUY' | 'SELL' | null = null;
             let score = 0;
@@ -470,20 +729,20 @@ export class AuraQuantEngine {
             const prevStochK = stoch.k;
 
             // Primary: pullback + Stoch extreme + Stoch crossover
-            if (trend === 1 && nearEma21 && stoch.k < 25 && stoch.k > stoch.d) {
+            if (trend === 1 && nearEma21 && stoch.k < 35 && stoch.k > stoch.d) {
                 signal = 'BUY';
                 const pullbackQual = Math.max(0, 30 - Math.abs(distanceToEma21) * 10);
-                const stochQual = Math.max(0, 25 - stoch.k);
-                score = Math.round(pullbackQual + stochQual + (adx > 20 ? 20 : 0) + 15);
-            } else if (trend === -1 && nearEma21 && stoch.k > 75 && stoch.k < stoch.d) {
+                const stochQual = Math.max(0, 35 - stoch.k);
+                score = Math.round(pullbackQual + stochQual + (adx > 18 ? 20 : 0) + 15);
+            } else if (trend === -1 && nearEma21 && stoch.k > 65 && stoch.k < stoch.d) {
                 signal = 'SELL';
                 const pullbackQual = Math.max(0, 30 - Math.abs(distanceToEma21) * 10);
-                const stochQual = Math.max(0, stoch.k - 75);
-                score = Math.round(pullbackQual + stochQual + (adx > 20 ? 20 : 0) + 15);
+                const stochQual = Math.max(0, stoch.k - 65);
+                score = Math.round(pullbackQual + stochQual + (adx > 18 ? 20 : 0) + 15);
             }
 
-            // Alternative: ADX > 25 + EMA21/50 cross aligned + near EMA21
-            if (!signal && trend !== 0 && adx > 25 && nearEma21) {
+            // Alternative: ADX > 20 + EMA21/50 cross aligned + near EMA21
+            if (!signal && trend !== 0 && adx > 20 && nearEma21) {
                 const emaCross = price > ema50 ? 1 : -1;
                 if (emaCross === trend) {
                     altSignal = trend === 1 ? 'BUY' : 'SELL';
@@ -493,17 +752,14 @@ export class AuraQuantEngine {
                 }
             }
 
-            const dxyInfo = await this.getDXYBias();
-            const calInfo = await this.checkEconomicCalendar();
-
             return {
                 price, ema21, ema50, stochK: stoch.k, stochD: stoch.d, prevStochK,
                 atr, atrMA20, trend, adx,
                 signal, entryScore: score,
                 altSignal, altScore,
-                dxyBias: dxyInfo.bias,
-                calendarBlock: calInfo.block,
-                calendarReason: calInfo.reason,
+                dxyBias: dxyResult.bias,
+                calendarBlock: calResult.block,
+                calendarReason: calResult.reason,
             };
         } catch {
             return null;
@@ -519,13 +775,29 @@ export class AuraQuantEngine {
         } catch { return null; }
     }
 
-    private static async calculateDynamicLot(slPoints: number): Promise<number> {
+    private static async getContractSize(symbol: string): Promise<number> {
+        if (this.contractSizeCache[symbol]) return this.contractSizeCache[symbol];
         try {
-            const ar = await axios.get(`${this.BRIDGE_URL}/account`, { timeout: 5000 });
+            const resp = await axios.get(`${this.BRIDGE_URL}/symbol_info?symbol=${symbol}`, { timeout: 5000 });
+            const cs = resp.data?.trade_contract_size || resp.data?.contract_size;
+            if (cs && cs > 0) { this.contractSizeCache[symbol] = cs; return cs; }
+        } catch {}
+        const fallback = symbol.includes('XAU') ? 100 : symbol.includes('BTC') ? 1 : 100000;
+        this.contractSizeCache[symbol] = fallback;
+        return fallback;
+    }
+
+    private static async calculateDynamicLot(slDistance: number): Promise<number> {
+        try {
+            const [ar, cs] = await Promise.all([
+                axios.get(`${this.BRIDGE_URL}/account`, { timeout: 5000 }),
+                this.getContractSize(this.settings.symbol),
+            ]);
             const balance = ar.data?.balance || 1000;
             const riskAmount = balance * (this.settings.riskPercent / 100);
-            if (slPoints > 0) {
-                let lot = riskAmount / (slPoints * 1);
+            const slMoneyPerLot = slDistance * cs;
+            if (slMoneyPerLot > 0) {
+                let lot = riskAmount / slMoneyPerLot;
                 const step = 0.01;
                 lot = Math.round(lot / step) * step;
                 return Math.max(0.01, Math.min(lot, 50));
@@ -535,27 +807,57 @@ export class AuraQuantEngine {
     }
 
     private static async evaluateEntry(analysis: M15Analysis) {
+        const now = Date.now();
+
+        if (now < this.cooldownUntil) {
+            const minsLeft = Math.ceil((this.cooldownUntil - now) / 60000);
+            this.log('FILTER', `Cooldown ativo — ${minsLeft}min restantes`);
+            return;
+        }
+
+        if (this.state.position) return;
+
+        const hour = new Date().getHours();
+        if (this.settings.tradingStartHour < this.settings.tradingEndHour) {
+            if (hour < this.settings.tradingStartHour || hour >= this.settings.tradingEndHour) {
+                this.log('FILTER', `Fora do horário (${hour}h). Sessão: ${this.settings.tradingStartHour}h-${this.settings.tradingEndHour}h`);
+                return;
+            }
+        }
+
+        if (this.consecutiveLosses >= this.settings.consecutiveLossLimit) {
+            this.cooldownUntil = now + 30 * 60 * 1000;
+            this.log('FILTER', `${this.consecutiveLosses} losses consecutivos — cooldown 30min`);
+            this.consecutiveLosses = 0;
+            return;
+        }
+
         if (analysis.calendarBlock) {
             this.log('FILTER', `Calendário bloqueado: ${analysis.calendarReason}`);
             return;
         }
 
         if (!analysis.signal && !analysis.altSignal) return;
-        if (analysis.signal && analysis.entryScore < 30) return;
-        if (analysis.altSignal && analysis.altScore < 25) return;
+        if (analysis.signal && analysis.entryScore < 20) return;
+        if (analysis.altSignal && analysis.altScore < 15) return;
 
-        if (analysis.adx < 20) {
-            this.log('FILTER', `ADX ${analysis.adx.toFixed(1)} < 20 — pulando`);
+        if (analysis.adx < 18) {
+            this.log('FILTER', `ADX ${analysis.adx.toFixed(1)} < 18 — pulando`);
             return;
         }
-        if (analysis.atr < analysis.atrMA20) {
-            this.log('FILTER', `ATR ${analysis.atr.toFixed(2)} < média ${analysis.atrMA20.toFixed(2)} — volatilidade baixa`);
+        if (analysis.atr < analysis.atrMA20 * 0.5) {
+            this.log('FILTER', `ATR ${analysis.atr.toFixed(2)} < 50% da média ${analysis.atrMA20.toFixed(2)} — volatilidade baixa`);
             return;
         }
 
         const marketCheck = await this.filterMarket();
         if (!marketCheck.allowed) {
             this.log('FILTER', `Mercado bloqueado: ${marketCheck.reason}`);
+            return;
+        }
+
+        if (analysis.atr > 0 && this.state.spread > analysis.atr * 0.3) {
+            this.log('SKIP', `Spread ${this.state.spread} > 30% ATR (${(analysis.atr * 0.3).toFixed(1)})`);
             return;
         }
 
@@ -576,8 +878,8 @@ export class AuraQuantEngine {
             }
         }
 
-        if (finalScore < 25) {
-            this.log('FILTER', `Score final ${finalScore} < 25, pulando`);
+        if (finalScore < 18) {
+            this.log('FILTER', `Score final ${finalScore} < 18, pulando`);
             return;
         }
 
@@ -585,10 +887,10 @@ export class AuraQuantEngine {
         if (!currentPrice) return;
 
         const atr = analysis.atr;
-        const slPoints = atr * 1.5;
-        const tp1Points = atr * 2.0;
+        const slPoints = atr * this.settings.atrMultiplier;
+        const tp1Points = slPoints * this.settings.rrRatio;
 
-        const lot = await this.calculateDynamicLot(slPoints * 10000);
+        const lot = await this.calculateDynamicLot(slPoints);
 
         this.log('ENTRY', `${action} Score:${finalScore}${isAlt ? ' (ALT)' : ''} ADX:${analysis.adx.toFixed(1)} ATR:${atr.toFixed(2)} DXY:${analysis.dxyBias} Lote:${lot}`);
 
@@ -614,15 +916,18 @@ export class AuraQuantEngine {
 
                 const tradeRec: TradeRecord = {
                     entryTime: Date.now(), exitTime: 0, entryPrice, exitPrice: 0,
-                    direction: action, result: 'WIN', profit: 0, partialClose: false,
+                    direction: action, result: 'LOSS', profit: 0, partialClose: false,
+                    ticket, lot, sl, tp: tp1, closeReason: '', symbol: this.settings.symbol,
                 };
                 this.trades.push(tradeRec);
-
+                this.lastTradeTime = Date.now();
+                this.saveTrades();
+                
                 AlertEngine.addAlert('GUARDIAN', 'INFO', 'AuraQuant', `${action} XAU: ${entryPrice.toFixed(2)} | SL: ${sl.toFixed(2)} | TP: ${tp1.toFixed(2)} | ADX: ${analysis.adx.toFixed(1)}`);
-
+                
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 await this.syncPosition();
-
+                
                 if (this.state.position) {
                     try {
                         await axios.post(`${this.BRIDGE_URL}/update_order`, {
@@ -647,16 +952,40 @@ export class AuraQuantEngine {
 
             if (!bridgePos) {
                 let result: 'WIN' | 'LOSS' = 'LOSS';
-                let profit = -5;
-                const lastTrade = this.trades.find(t => t.entryTime === pos.time);
-                if (lastTrade) {
-                    result = lastTrade.result;
-                    profit = lastTrade.profit;
+                let profit = 0;
+                const lastTrade = this.trades.find(t => t.ticket === pos.ticket);
+                
+                try {
+                    const histResp = await axios.get(`${this.BRIDGE_URL}/history`, { timeout: 10000 });
+                    const history: any[] = Array.isArray(histResp.data) ? histResp.data : [];
+                    const closed = history.find((t: any) => t.position_id === pos.ticket || t.ticket === pos.ticket);
+                    if (closed) {
+                        profit = (closed.profit || 0) + (closed.commission || 0) + (closed.swap || 0);
+                        result = profit >= 0 ? 'WIN' : 'LOSS';
+                    } else if (lastTrade) {
+                        profit = lastTrade.profit;
+                        result = profit >= 0 ? 'WIN' : 'LOSS';
+                    }
+                } catch {
+                    if (lastTrade) { profit = lastTrade.profit; result = profit >= 0 ? 'WIN' : 'LOSS'; }
                 }
-                if (profit > 0) this.state.dailyProfit += profit;
-                else this.state.dailyLoss += Math.abs(profit);
+
+                if (lastTrade) {
+                    lastTrade.result = result;
+                    lastTrade.profit = Math.round(profit * 100) / 100;
+                    lastTrade.exitTime = Date.now();
+                    this.saveTrades();
+                }
+                if (profit > 0) {
+                    this.state.dailyProfit += profit;
+                    this.consecutiveLosses = 0;
+                } else {
+                    this.state.dailyLoss += Math.abs(profit);
+                    this.consecutiveLosses++;
+                }
+                this.cooldownUntil = Date.now() + this.settings.cooldownMinutes * 60 * 1000;
                 this.state.position = null;
-                this.log('CLOSE', `Posição #${pos.ticket} fechada. Lucro: $${profit.toFixed(2)}`);
+                this.log('CLOSE', `Posição #${pos.ticket} fechada. Lucro: $${profit.toFixed(2)} (${result})`);
                 return;
             }
 
@@ -672,7 +1001,8 @@ export class AuraQuantEngine {
                         this.log('TP1', `Fechado 50% #${pos.ticket}`);
                     } catch {}
 
-                    const beSL = isBuy ? pos.price + 0.01 : pos.price - 0.01;
+                    const beOffset = Math.max(0.5, analysis.atr * this.settings.breakevenOffsetATR);
+                    const beSL = isBuy ? pos.price + beOffset : pos.price - beOffset;
                     try {
                         await axios.post(`${this.BRIDGE_URL}/update_order`, {
                             ticket: pos.ticket, sl: Number(beSL.toFixed(2)), magic: this.MAGIC,
@@ -681,11 +1011,12 @@ export class AuraQuantEngine {
 
                     this.state.position.partialHit = true;
                     this.state.position.comment = 'AuraTP2';
-                    let lastTrade = this.trades.find(t => t.entryTime === pos.time);
+                    let lastTrade = this.trades.find(t => t.ticket === pos.ticket);
                     if (lastTrade) lastTrade.partialClose = true;
                     this.log('TP1', `TP1 atingido. SL movido BE. Modo trailing ativado.`);
 
-                    const tp2 = isBuy ? (bridgePos.price_current + analysis.atr * 3) : (bridgePos.price_current - analysis.atr * 3);
+                    const tp2Distance = analysis.atr * this.settings.atrMultiplier * this.settings.rrRatio * 1.5;
+                    const tp2 = isBuy ? (pos.price + tp2Distance) : (pos.price - tp2Distance);
                     try {
                         await axios.post(`${this.BRIDGE_URL}/update_order`, {
                             ticket: pos.ticket, tp: Number(tp2.toFixed(2)), magic: this.MAGIC,
@@ -695,7 +1026,7 @@ export class AuraQuantEngine {
             } else {
                 const atr = analysis.atr || 0;
                 if (atr > 0) {
-                    const trailDist = atr * 2.0;
+                    const trailDist = atr * this.settings.trailingDistanceMultiplier;
                     const newSL = isBuy ? (currentPrice - trailDist) : (currentPrice + trailDist);
                     const improvedSL = isBuy ? (newSL > bridgePos.sl) : (newSL < bridgePos.sl || bridgePos.sl === 0);
                     if (improvedSL) {
@@ -713,12 +1044,14 @@ export class AuraQuantEngine {
                     try {
                         await axios.post(`${this.BRIDGE_URL}/close_order`, { ticket: pos.ticket, lot: Number(bridgePos.volume.toFixed(2)) });
                         this.log('TP2', `Posição restante fechada #${pos.ticket} (TP alvo)`);
-                        const lastTrade = this.trades.find(t => t.entryTime === pos.time);
+                        const lastTrade = this.trades.find(t => t.ticket === pos.ticket);
                         if (lastTrade) {
-                            lastTrade.result = 'WIN';
+                            const contractSize = await this.getContractSize(this.settings.symbol);
+                            lastTrade.profit = Math.round(((isBuy ? currentPrice - pos.price : pos.price - currentPrice)) * bridgePos.volume * contractSize * 100) / 100;
+                            lastTrade.result = lastTrade.profit >= 0 ? 'WIN' : 'LOSS';
                             lastTrade.exitTime = Date.now();
                             lastTrade.exitPrice = currentPrice;
-                            lastTrade.profit = Math.round(((isBuy ? currentPrice - pos.price : pos.price - currentPrice)) * this.settings.lotSize * 100);
+                            this.saveTrades();
                         }
                     } catch {}
                 }
@@ -730,30 +1063,41 @@ export class AuraQuantEngine {
 
     private static async syncPosition() {
         try {
-            const resp = await axios.get(`${this.BRIDGE_URL}/positions`);
+            const resp = await axios.get(`${this.BRIDGE_URL}/positions`, { timeout: 5000 });
             const positions: any[] = resp.data || [];
             const auraPos = positions.find((p: any) => p.symbol === this.settings.symbol && p.magic === this.MAGIC);
             if (!auraPos) {
                 if (this.state.position) {
+                    const closedTicket = this.state.position.ticket;
+                    const lastTrade = this.trades.find(t => t.ticket === closedTicket);
+                    if (lastTrade) {
+                        lastTrade.result = lastTrade.profit > 0 ? 'WIN' : 'LOSS';
+                        lastTrade.exitTime = Date.now();
+                        this.saveTrades();
+                    }
+                    this.log('CLOSE', `Posição #${closedTicket} fechada externamente.`);
                     this.state.position = null;
-                    this.log('SYNC', 'Posição fechada externamente');
                 }
             } else if (!this.state.position || this.state.position.ticket !== auraPos.ticket) {
                 const isBuy = auraPos.type === 0;
+                const mt5TimeMs = auraPos.time ? (auraPos.time > 1e11 ? auraPos.time : auraPos.time * 1000) : Date.now();
                 this.state.position = {
                     ticket: auraPos.ticket,
                     type: isBuy ? 'BUY' : 'SELL',
                     price: auraPos.price_open,
                     sl: auraPos.sl,
                     tp: auraPos.tp,
-                    time: auraPos.time || Date.now(),
+                    time: mt5TimeMs,
                     comment: auraPos.comment || 'AuraTP1',
                     partialHit: auraPos.comment === 'AuraTP2',
                 };
-                this.log('SYNC', `Posição sincronizada #${auraPos.ticket}`);
+                this.log('SYNC', `Posição sincronizada #${auraPos.ticket} ${isBuy ? 'BUY' : 'SELL'} @ ${auraPos.price_open}`);
             }
-        } catch {
-            if (this.state.position) this.state.position = null;
+        } catch (e: any) {
+            // Se o bridge caiu, NÃO apagar posição — apenas avisar
+            if (this.state.position) {
+                this.log('WARN', `Bridge offline — mantendo posição #${this.state.position.ticket} em cache`);
+            }
         }
     }
 
@@ -766,5 +1110,71 @@ export class AuraQuantEngine {
             this.state.lastBarTime = now.getTime();
             this.log('DAILY', 'Contadores diários resetados');
         }
+    }
+
+    static async forceTrade(direction?: 'BUY' | 'SELL', lot?: number) {
+        if (!this.settings.enabled) throw new Error('Engine disabled');
+        if (this.state.position) throw new Error('Position already open');
+        
+        const analysis = this.lastAnalysis || await this.analyzeM15();
+        if (!analysis) throw new Error('No analysis available');
+        
+        const action = direction || analysis.signal || analysis.altSignal;
+        if (!action) throw new Error('No valid signal');
+        
+        const currentPrice = await this.getCurrentPrice();
+        if (!currentPrice) throw new Error('No price data');
+        
+        const atr = analysis.atr;
+        const slPoints = atr * this.settings.atrMultiplier;
+        const tpPoints = slPoints * this.settings.rrRatio;
+        
+        const tradeLot = lot || await this.calculateDynamicLot(slPoints);
+        
+        this.log('FORCE_TRADE', `${action} ${this.settings.symbol} Lot:${tradeLot} SL:${slPoints.toFixed(2)} TP:${tpPoints.toFixed(2)}`);
+        
+        const entryPrice = currentPrice;
+        const sl = action === 'BUY' ? entryPrice - slPoints : entryPrice + slPoints;
+        const tp = action === 'BUY' ? entryPrice + tpPoints : entryPrice - tpPoints;
+        
+        const resp = await axios.post(`${this.BRIDGE_URL}/order`, {
+            symbol: this.settings.symbol,
+            action,
+            lot: tradeLot,
+            sl: Number(sl.toFixed(2)),
+            tp: Number(tp.toFixed(2)),
+            magic: this.MAGIC,
+            comment: 'AuraTP1',
+        });
+        
+        const ticket = resp.data?.order_id || resp.data?.ticket;
+        if (!ticket) throw new Error('Order failed');
+        
+        this.state.position = {
+            ticket, type: action, price: entryPrice,
+            sl, tp: tp, time: Date.now(), comment: 'AuraTP1',
+            partialHit: false,
+        };
+        
+        const tradeRec: TradeRecord = {
+            entryTime: Date.now(), exitTime: 0, entryPrice, exitPrice: 0,
+            direction: action, result: 'LOSS', profit: 0, partialClose: false,
+            ticket, lot: tradeLot, sl, tp, closeReason: '', symbol: this.settings.symbol,
+        };
+        this.trades.push(tradeRec);
+        this.lastTradeTime = Date.now();
+        this.saveTrades();
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await this.syncPosition();
+        
+        if (this.state.position) {
+            await axios.post(`${this.BRIDGE_URL}/update_order`, {
+                ticket, sl: Number(sl.toFixed(2)), tp: Number(tp.toFixed(2)), magic: this.MAGIC,
+            });
+        }
+        
+        this.log('FORCE_TRADE', `Ordem ${action} executada #${ticket}`);
+        return { ticket, action, entryPrice, sl, tp, lot: tradeLot };
     }
 }

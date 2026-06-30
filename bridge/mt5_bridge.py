@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import logging
 import pandas as pd
-import pandas_ta as ta
+# import pandas_ta as ta
 import numpy as np
 import json
 
@@ -474,7 +474,7 @@ def place_order():
 
         symbol = data.get('symbol')
         action = data.get('action') # 'BUY' or 'SELL'
-        lot = data.get('lot', 0.1)
+        lot = data.get('lot', 0.01)
         sl = data.get('sl')
         tp = data.get('tp')
         sl_points = data.get('sl_points')
@@ -877,6 +877,29 @@ def get_all_symbols():
     # Retorna apenas os nomes para ser leve
     return jsonify([s.name for s in symbols])
 
+@app.route('/symbol_info', methods=['GET'])
+def get_symbol_info():
+    symbol = request.args.get('symbol')
+    if not symbol:
+        return jsonify({"error": "Symbol parameter required"}), 400
+    if not ensure_connected():
+        return jsonify({"error": "Failed to connect to MT5"}), 500
+    info = mt5.symbol_info(symbol)
+    if info is None:
+        return jsonify({"error": f"Symbol {symbol} not found"}), 404
+    return jsonify({
+        "symbol": info.name,
+        "point": info.point,
+        "digits": info.digits,
+        "trade_tick_size": info.trade_tick_size,
+        "trade_tick_value": info.trade_tick_value,
+        "trade_contract_size": info.trade_contract_size,
+        "trade_stops_level": info.trade_stops_level,
+        "trade_mode": info.trade_mode,
+        "visible": info.visible,
+        "filling_mode": info.filling_mode
+    })
+
 @app.route('/ticks', methods=['POST'])
 def get_ticks():
     data = request.json
@@ -932,21 +955,22 @@ def get_analysis():
         
         # Calcular Indicadores com proteção
         try:
-            df['rsi'] = ta.rsi(df['close'], length=14)
-            df['ema9'] = ta.ema(df['close'], length=9)
-            df['ema21'] = ta.ema(df['close'], length=21)
-            if len(df) >= 200:
-                df['sma200'] = ta.sma(df['close'], length=200)
-            else:
-                df['sma200'] = None
-                
-            macd = ta.macd(df['close'])
-            if macd is not None and not macd.empty:
-                df = pd.concat([df, macd], axis=1)
-                
-            bbands = ta.bbands(df['close'], length=20, std=2)
-            if bbands is not None and not bbands.empty:
-                df = pd.concat([df, bbands], axis=1)
+            # df['rsi'] = ta.rsi(df['close'], length=14)
+            # df['ema9'] = ta.ema(df['close'], length=9)
+            # df['ema21'] = ta.ema(df['close'], length=21)
+            # if len(df) >= 200:
+            #     df['sma200'] = ta.sma(df['close'], length=200)
+            # else:
+            #     df['sma200'] = None
+            # 
+            # macd = ta.macd(df['close'])
+            # if macd is not None and not macd.empty:
+            #     df = pd.concat([df, macd], axis=1)
+            # 
+            # bbands = ta.bbands(df['close'], length=20, std=2)
+            # if bbands is not None and not bbands.empty:
+            #     df = pd.concat([df, bbands], axis=1)
+            pass
         except Exception as indicator_err:
             logging.warning(f"Indicator calculation warning: {str(indicator_err)}")
 
@@ -1112,6 +1136,17 @@ def get_smc_analysis():
     except Exception as e:
         logging.error(f"SMC Analysis Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/disconnect', methods=['POST'])
+def disconnect():
+    global _last_login_credentials
+    try:
+        mt5.shutdown()
+        _last_login_credentials = {"login": None, "password": None, "server": None}
+        return jsonify({"success": True, "message": "Desconectado do MT5"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 if __name__ == '__main__':

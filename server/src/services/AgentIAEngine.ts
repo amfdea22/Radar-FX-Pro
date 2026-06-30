@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 import { SymbolLockService } from './SymbolLockService';
 import { DisciplineEngine } from './DisciplineEngine';
-import { TradeNotificationBot } from './TradeNotificationBot';
 
 interface Candle {
   datetime: string;
@@ -62,7 +61,7 @@ const DEFAULT_CONFIG: AgentConfig = {
   maxSpread: 30,
   atrSlMultiplier: 0.8,
   atrTpMultiplier: 1.5,
-  lotBase: 0.02,
+  lotBase: 0.01,
   lotMin: 0.01,
   lotMax: 0.05,
 };
@@ -517,7 +516,6 @@ class AgentIAEngineClass {
         });
         try {
           
-          TradeNotificationBot.notifyTradeOpened('Agent IA', this.symbolMt5, action, lot, resp.data.price || this.state.lastPrice || 0, sl, tp);
         } catch (e) { /* notif fail */ }
       } else {
         this.log('error', `❌ Falha ordem: ${resp.data?.error || 'desconhecida'}`);
@@ -588,8 +586,6 @@ class AgentIAEngineClass {
       this.persistState();
       try {
         
-        const sig = this.state.signals[index];
-        TradeNotificationBot.notifyTradeClosed('Agent IA', this.symbolMt5, sig.direction === 'COMPRA' ? 'BUY' : 'SELL', profit, outcome === 'win' ? 'WIN' : 'LOSS', outcome === 'win' ? 'Take Profit' : 'Stop Loss', this.state.config.lotBase);
       } catch (e) { /* notif fail */ }
     }
   }

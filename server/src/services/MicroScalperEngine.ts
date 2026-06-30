@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { SymbolLockService } from './SymbolLockService';
-import { TradeNotificationBot } from './TradeNotificationBot';
+import { LoggerService } from './LoggerService';
 
 interface MicroSettings {
     enabled: boolean;
@@ -21,9 +21,35 @@ interface MicroSettings {
     trendFilterM5: boolean;
     quickTP: boolean;
     sniperMode: boolean;
+    breakevenThresholdPct: number;
+    trailingThresholdPct: number;
+    dailyTargetUSD: number;
+    atrMultiplier: number;
+    rrRatio: number;
+}
+
+interface TradeRecord {
+    ticket: number;
+    symbol: string;
+    type: 'BUY' | 'SELL';
+    volume: number;
+    entryPrice: number;
+    exitPrice: number;
+    sl: number;
+    tp: number;
+    profit: number;
+    profitPct: number;
+    entryTime: number;
+    exitTime: number;
+    openTime: string;
+    closeTime: string;
+    duration: number;
+    closeReason: string;
+    balance: number;
 }
 
 const SETTINGS_PATH = path.join(process.cwd(), 'micro_scalper_settings.json');
+const HISTORY_PATH = path.join(process.cwd(), 'micro_scalper_history.json');
 
 const SYMBOL_PIP_VALUE: Record<string, number> = {
     'BTCUSD': 1,      // 1 pip = $1 (digits=1)
@@ -41,22 +67,29 @@ function getPipValue(symbol: string): number {
 export class MicroScalperEngine {
     private static settings: MicroSettings = {
         enabled: false,
-        symbol: 'BTCUSD',
+        symbol: 'XAUUSD',
         lotBase: 0.01,
-        lotMultiplier: 1.2,
-        gridStepPips: 80,
-        maxLevels: 10,
-        targetProfitUSD: 1.5,
-        stopLossUSD: 50,
+        lotMultiplier: 1.0,
+        gridStepPips: 120,
+        maxLevels: 1,
+        targetProfitUSD: 8,
+        stopLossUSD: 8,
         rsiPeriod: 7,
-        rsiOverbought: 75,
-        rsiOversold: 25,
+        rsiOverbought: 70,
+        rsiOversold: 30,
         magic: 888111,
         trendFilterM1: true,
         trendFilterM5: true,
-        quickTP: true,
-        sniperMode: true
+        quickTP: false,
+        sniperMode: true,
+        breakevenThresholdPct: 0.3,
+        trailingThresholdPct: 0.6,
+        dailyTargetUSD: 10,
+        atrMultiplier: 2.0,
+        rrRatio: 2.0
     };
+
+    private static isRunning = false;
 
     private static state = {
         activeOrders: [] as any[],
@@ -66,7 +99,20 @@ export class MicroScalperEngine {
         lastTick: 0,
         isProcessing: false,
         sniperTrigger: null as 'BUY' | 'SELL' | null,
-        logs: [] as { time: string, msg: string, type: 'INFO' | 'TRADE' | 'WARN' }[]
+        logs: [] as { time: string, msg: string, type: 'INFO' | 'TRADE' | 'WARN' }[],
+        dailyProfit: 0,
+        dailyProfitDate: '',
+        lastCycleTime: 0,
+        spread: 0,
+        atr: 2,
+        atrMA20: 2,
+        stats: {
+            totalTrades: 0,
+            wins: 0,
+            losses: 0,
+            closedPnL: 0,
+        },
+        tradeHistory: [] as TradeRecord[],
     };
 
     // URL da Bridge REAL (porta 5555)
@@ -75,13 +121,16 @@ export class MicroScalperEngine {
     private static addLog(msg: string, type: 'INFO' | 'TRADE' | 'WARN' = 'INFO') {
         const time = new Date().toLocaleTimeString('pt-BR');
         this.state.logs.unshift({ time, msg, type });
-        if (this.state.logs.length > 50) this.state.logs.pop();
-        console.log(`[Titan Sniper] ${msg}`);
+        if (this.state.logs.length > 60) this.state.logs.pop();
+        
+        LoggerService.log('MicroScalperEngine', type, msg);
     }
 
     static init() {
         this.loadSettings();
-        console.log('⚡ Titan Micro-Sniper: Engine v2.0 ONLINE (Bridge :5555 | 1s Cycle)');
+        this.loadTradeHistory();
+        this.isRunning = true;
+        console.log(`⚡ Titan Micro-Sniper: Engine v2.0 ONLINE | Histórico: ${this.state.tradeHistory.length} trades`);
         setInterval(() => this.mainCycle(), 1000);
     }
 
@@ -104,12 +153,155 @@ export class MicroScalperEngine {
         }
     }
 
+    private static saveTradeHistory() {
+        try {
+            const data = {
+                trades: this.state.tradeHistory.slice(0, 200),
+                stats: this.state.stats,
+            };
+            fs.writeFileSync(HISTORY_PATH, JSON.stringify(data, null, 2));
+        } catch (err) {
+            console.error('Error saving MicroScalper trade history:', err);
+        }
+    }
+
+    private static loadTradeHistory() {
+        try {
+            if (fs.existsSync(HISTORY_PATH)) {
+                const raw = JSON.parse(fs.readFileSync(HISTORY_PATH, 'utf8'));
+                if (raw.trades && Array.isArray(raw.trades)) {
+                    this.state.tradeHistory = raw.trades;
+                }
+                if (raw.stats) {
+                    this.state.stats = { ...this.state.stats, ...raw.stats };
+                }
+            }
+        } catch (err) {
+            console.error('Error loading MicroScalper trade history:', err);
+        }
+    }
+
     static getStatus() {
+        const { totalTrades, wins, losses, closedPnL } = this.state.stats;
+        const winRate = totalTrades > 0 ? Math.round(wins / totalTrades * 1000) / 10 : 0;
         return {
+            isRunning: this.isRunning,
             settings: this.settings,
             ...this.state,
             activePositions: this.state.activeOrders.length,
-            totalProfit: this.state.activeOrders.reduce((acc, o) => acc + (o.profit || 0), 0)
+            totalProfit: this.state.activeOrders.reduce((acc, o) => acc + (o.profit || 0), 0),
+            dailyProgress: this.settings.dailyTargetUSD > 0
+                ? Math.min(100, Math.round((this.state.dailyProfit / this.settings.dailyTargetUSD) * 100))
+                : 0,
+            stats: {
+                totalTrades,
+                wins,
+                losses,
+                winRate,
+                closedPnL: Math.round(closedPnL * 100) / 100,
+                dailyPnL: Math.round(this.state.dailyProfit * 100) / 100,
+            }
+        };
+    }
+
+    static getLiveMonitor() {
+        const now = Date.now() / 1000;
+        const positions = this.state.activeOrders.map((o: any) => {
+            const entryPrice = o.price_open || 0;
+            const currentPrice = o.price_current || entryPrice;
+            const isBuy = o.type === 0;
+            const profitPct = entryPrice > 0
+                ? (isBuy ? (currentPrice - entryPrice) / entryPrice : (entryPrice - currentPrice) / entryPrice) * 100
+                : 0;
+            const pnlPerLot = isBuy ? (currentPrice - entryPrice) : (entryPrice - currentPrice);
+            const slPrice = o.sl || 0;
+            const tpPrice = o.tp || 0;
+            const slDistance = slPrice > 0 ? Math.abs(currentPrice - slPrice) : 0;
+            const slDistancePct = currentPrice > 0 ? (slDistance / currentPrice * 100) : 0;
+            const tpDistance = tpPrice > 0 ? Math.abs(tpPrice - currentPrice) : 0;
+            const tpDistancePct = currentPrice > 0 ? (tpDistance / currentPrice * 100) : 0;
+
+            // Breakeven / Trailing status
+            const targetProfitPct = this.settings.targetProfitUSD > 0 && entryPrice > 0
+                ? (this.settings.targetProfitUSD) / (entryPrice * (o.volume || 0.01) * (o.contract_size || 100) * (o.tick_value || 0.01)) * 100
+                : 0.0075;
+            const isBE = slPrice > 0 && entryPrice > 0 && ((isBuy && slPrice >= entryPrice) || (!isBuy && slPrice <= entryPrice));
+            const beTriggered = profitPct >= targetProfitPct * this.settings.breakevenThresholdPct;
+            const trailingTriggered = profitPct >= targetProfitPct * this.settings.trailingThresholdPct;
+
+            // Time in trade
+            const openTime = o.time || 0;
+            const timeInTrade = openTime > 0 ? Math.floor(now - openTime) : 0;
+            const mins = Math.floor(timeInTrade / 60);
+            const secs = timeInTrade % 60;
+            const timeStr = `${mins}m ${secs}s`;
+
+            return {
+                ticket: o.ticket,
+                symbol: o.symbol,
+                type: isBuy ? 'BUY' : 'SELL',
+                volume: o.volume,
+                entryPrice: Math.round(entryPrice * 100) / 100,
+                currentPrice: Math.round(currentPrice * 100) / 100,
+                sl: Math.round(slPrice * 100) / 100,
+                tp: Math.round(tpPrice * 100) / 100,
+                profit: Math.round((o.profit || 0) * 100) / 100,
+                profitPct: Math.round(profitPct * 10000) / 100,
+                pnlPerLot: Math.round(pnlPerLot * 100) / 100,
+                slDistance: Math.round(slDistance * 100) / 100,
+                slDistancePct: Math.round(slDistancePct * 10000) / 100,
+                tpDistance: Math.round(tpDistance * 100) / 100,
+                tpDistancePct: Math.round(tpDistancePct * 10000) / 100,
+                isBE,
+                beTriggered,
+                trailingTriggered,
+                timeInTrade: timeStr,
+                timeSeconds: timeInTrade,
+            };
+        });
+
+        return {
+            positions,
+            summary: {
+                totalPositions: positions.length,
+                totalProfit: Math.round(positions.reduce((a: number, p: any) => a + p.profit, 0) * 100) / 100,
+                totalVolume: Math.round(positions.reduce((a: number, p: any) => a + p.volume, 0) * 100) / 100,
+                avgProfitPct: positions.length > 0
+                    ? Math.round(positions.reduce((a: number, p: any) => a + p.profitPct, 0) / positions.length * 100) / 100
+                    : 0,
+            },
+            indicators: {
+                rsi: Math.round(this.state.rsi * 100) / 100,
+                rsiZone: this.state.rsi < 30 ? 'OVERSOLD' : this.state.rsi > 70 ? 'OVERBOUGHT' : 'NEUTRAL',
+                trendM1: this.state.trendM1,
+                trendM5: this.state.trendM5,
+                sniperTrigger: this.state.sniperTrigger,
+                sniperValid: this.state.sniperTrigger === 'BUY' && this.state.rsi < 40
+                    || this.state.sniperTrigger === 'SELL' && this.state.rsi > 60,
+            },
+            cycleInfo: {
+                lastCycleTime: this.state.lastCycleTime,
+                isProcessing: this.state.isProcessing,
+                enabled: this.settings.enabled,
+            }
+        };
+    }
+
+    static getHistory() {
+        return {
+            trades: this.state.tradeHistory,
+            stats: {
+                totalTrades: this.state.stats.totalTrades,
+                wins: this.state.stats.wins,
+                losses: this.state.stats.losses,
+                winRate: this.state.stats.totalTrades > 0
+                    ? Math.round(this.state.stats.wins / this.state.stats.totalTrades * 1000) / 10
+                    : 0,
+                closedPnL: Math.round(this.state.stats.closedPnL * 100) / 100,
+                avgProfit: this.state.stats.totalTrades > 0
+                    ? Math.round(this.state.stats.closedPnL / this.state.stats.totalTrades * 100) / 100
+                    : 0,
+            }
         };
     }
 
@@ -124,6 +316,13 @@ export class MicroScalperEngine {
         this.state.isProcessing = true;
 
         try {
+            // Reset diário da meta
+            const today = new Date().toDateString();
+            if (this.state.dailyProfitDate !== today) {
+                this.state.dailyProfit = 0;
+                this.state.dailyProfitDate = today;
+            }
+
             // 1. Sync posições e dados de mercado da Bridge real
             await this.syncPositions();
             await this.syncMarketData();
@@ -133,31 +332,54 @@ export class MicroScalperEngine {
             if (this.state.activeOrders.length > 0) {
                 if (totalProfit >= this.settings.targetProfitUSD) {
                     this.addLog(`🎯 Alvo da cesta alcançado: +$${totalProfit.toFixed(2)}. Fechando tudo.`, 'TRADE');
-                    await this.closeAllPositions();
+                    await this.closeAllPositions('BASKET_TP');
                     this.state.isProcessing = false;
                     return;
                 }
                 if (totalProfit <= -this.settings.stopLossUSD) {
                     this.addLog(`⚠️ Stop Loss da cesta atingido: -$${Math.abs(totalProfit).toFixed(2)}. Fechando tudo.`, 'WARN');
-                    await this.closeAllPositions();
+                    await this.closeAllPositions('BASKET_SL');
                     this.state.isProcessing = false;
                     return;
                 }
-                // Quick TP: fecha antecipadamente em 50% do alvo quando ativado
                 if (this.settings.quickTP && totalProfit >= this.settings.targetProfitUSD * 0.5) {
                     this.addLog(`⚡ Quick TP: +$${totalProfit.toFixed(2)}. Fechando tudo.`, 'TRADE');
-                    await this.closeAllPositions();
+                    await this.closeAllPositions('QUICK_TP');
                     this.state.isProcessing = false;
                     return;
                 }
             }
 
-            // 3. Position Management (trailing stop / breakeven)
+            // 3. Individual SL/TP check per position
+            if (this.state.activeOrders.length > 0) {
+                try {
+                    const tickResp = await axios.post(`${this.BRIDGE_URL}/ticks`, {
+                        symbols: [this.settings.symbol]
+                    }, { timeout: 5000 });
+                    const tick = tickResp.data?.[this.settings.symbol];
+                    if (tick) {
+                        const snapshot = [...this.state.activeOrders];
+                        for (const pos of snapshot) {
+                            const isBuy = pos.type === 0;
+                            const currentPrice = isBuy ? tick.bid : tick.ask;
+                            if (pos.sl > 0 && ((isBuy && currentPrice <= pos.sl) || (!isBuy && currentPrice >= pos.sl))) {
+                                this.addLog(`🛑 SL atingido #${pos.ticket} (${isBuy ? 'BUY' : 'SELL'}) a $${currentPrice.toFixed(2)}`, 'TRADE');
+                                await this.closeSinglePosition(pos.ticket, 'SL');
+                            } else if (pos.tp > 0 && ((isBuy && currentPrice >= pos.tp) || (!isBuy && currentPrice <= pos.tp))) {
+                                this.addLog(`🎯 TP atingido #${pos.ticket} (${isBuy ? 'BUY' : 'SELL'}) a $${currentPrice.toFixed(2)}`, 'TRADE');
+                                await this.closeSinglePosition(pos.ticket, 'TP');
+                            }
+                        }
+                    }
+                } catch (e) { /* tick fail */ }
+            }
+
+            // 4. Position Management (trailing stop / breakeven)
             if (this.state.activeOrders.length > 0) {
                 await this.managePositions();
             }
 
-            // 4. Trading Logic
+            // 5. Trading Logic
             if (this.state.activeOrders.length === 0) {
                 await this.checkFirstEntry();
             } else if (this.state.activeOrders.length < this.settings.maxLevels) {
@@ -167,6 +389,7 @@ export class MicroScalperEngine {
         } catch (err) {
             console.error('Titan Sniper Cycle Error:', (err as any).message);
         } finally {
+            this.state.lastCycleTime = Date.now();
             this.state.isProcessing = false;
         }
     }
@@ -201,12 +424,14 @@ export class MicroScalperEngine {
                 }
             }
 
-            // Buscar candles M5 para tendência de médio prazo
-            const m5Resp = await axios.get(`${this.BRIDGE_URL}/candles?symbol=${this.settings.symbol}&timeframe=M5&count=14`, { timeout: 10000 });
+            // Buscar candles M5 para tendência de médio prazo + ATR
+            const m5Resp = await axios.get(`${this.BRIDGE_URL}/candles?symbol=${this.settings.symbol}&timeframe=M5&count=20`, { timeout: 10000 });
             const m5Candles = Array.isArray(m5Resp.data) ? m5Resp.data : [];
 
-            if (m5Candles.length >= 9) {
+            if (m5Candles.length >= 14) {
                 this.state.trendM5 = this.detectTrend(m5Candles.slice(-9));
+                this.state.atr = this.calculateATR(m5Candles, 14);
+                this.state.atrMA20 = this.state.atr;
             }
 
         } catch (err) {
@@ -287,6 +512,24 @@ export class MicroScalperEngine {
         return null;
     }
 
+    // ========== ATR (Average True Range) ==========
+    private static calculateATR(candles: any[], period: number = 14): number {
+        if (candles.length < period + 1) return 2;
+        const ranges: number[] = [];
+        for (let i = candles.length - period; i < candles.length; i++) {
+            const high = candles[i].high;
+            const low = candles[i].low;
+            const prevClose = i > 0 ? candles[i - 1].close || 0 : low;
+            const tr = Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose));
+            ranges.push(tr);
+        }
+        let atr = ranges.slice(0, period).reduce((a, b) => a + b, 0) / period;
+        for (let i = period; i < ranges.length; i++) {
+            atr = (atr * (period - 1) + ranges[i]) / period;
+        }
+        return atr;
+    }
+
     // ========== PRIMEIRA ENTRADA (Sniper Shot) ==========
     private static async checkFirstEntry() {
         const { rsi, trendM1, trendM5, sniperTrigger } = this.state;
@@ -298,14 +541,17 @@ export class MicroScalperEngine {
         if (sniperMode) {
             if (!sniperTrigger) return; // Sem gatilho = sem entrada
 
-            // Validar confluência RSI + Sniper Trigger (endurecido para maior assertividade)
             if (sniperTrigger === 'BUY' && rsi < 40) {
                 if (!trendFilterM5 || trendM5 !== 'BEARISH') {
-                    side = 'BUY';
+                    if (!trendFilterM1 || trendM1 !== 'BEARISH') {
+                        side = 'BUY';
+                    }
                 }
             } else if (sniperTrigger === 'SELL' && rsi > 60) {
                 if (!trendFilterM5 || trendM5 !== 'BULLISH') {
-                    side = 'SELL';
+                    if (!trendFilterM1 || trendM1 !== 'BULLISH') {
+                        side = 'SELL';
+                    }
                 }
             }
         } else {
@@ -318,8 +564,20 @@ export class MicroScalperEngine {
         }
 
         if (side) {
+            if (this.state.atr > 0) {
+                const tickResp = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.settings.symbol] }, { timeout: 5000 });
+                const tick = tickResp.data?.[this.settings.symbol];
+                if (tick) {
+                    const currentSpread = (tick.ask - tick.bid);
+                    const maxSpread = this.state.atr * 0.3;
+                    if (currentSpread > maxSpread) {
+                        this.addLog(`⚠️ Spread ${currentSpread.toFixed(2)} > 30% ATR (${maxSpread.toFixed(2)})`, 'WARN');
+                        return;
+                    }
+                }
+            }
             const reason = sniperMode ? `Sniper ${sniperTrigger}` : 'RSI Signal';
-            this.addLog(`🚀 Titan disparo detectado [${side}] (${reason}). RSI: ${rsi.toFixed(1)}`, 'TRADE');
+            this.addLog(`🚀 Titan disparo detectado [${side}] (${reason}). RSI: ${rsi.toFixed(1)} | TendM1: ${trendM1} | TendM5: ${trendM5}`, 'TRADE');
             await this.placeOrder(side, this.settings.lotBase);
         }
     }
@@ -365,6 +623,14 @@ export class MicroScalperEngine {
                 }
 
                 const nextLot = Number((lastOrder.volume * this.settings.lotMultiplier).toFixed(2));
+                if (this.state.atr > 0 && tickData) {
+                    const currentSpread = (tickData.ask - tickData.bid);
+                    const maxSpread = this.state.atr * 0.3;
+                    if (currentSpread > maxSpread) {
+                        this.addLog(`⚠️ Grid spread ${currentSpread.toFixed(2)} > 30% ATR (${maxSpread.toFixed(2)})`, 'WARN');
+                        return;
+                    }
+                }
                 this.addLog(`⛓️ Grid nível ${this.state.activeOrders.length + 1} (${diffPips.toFixed(0)}/${gridDistPips} pips). Lote: ${nextLot}`, 'INFO');
                 await this.placeOrder(side, nextLot);
             }
@@ -379,6 +645,8 @@ export class MicroScalperEngine {
             const tickResp = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.settings.symbol] }, { timeout: 5000 });
             const tick = tickResp.data?.[this.settings.symbol];
             if (!tick) return;
+            const atr = Math.max(this.state.atr || 2, 1.5);
+            const tpDistance = atr * this.settings.atrMultiplier * this.settings.rrRatio;
             for (const order of this.state.activeOrders) {
                 const entryPrice = order.price_open || 0;
                 if (!entryPrice || !order.ticket) continue;
@@ -386,34 +654,29 @@ export class MicroScalperEngine {
                 const currentPrice = isBuy ? tick.bid : tick.ask;
                 const profitPct = isBuy ? (currentPrice - entryPrice) / entryPrice : (entryPrice - currentPrice) / entryPrice;
                 const sl = order.sl || 0;
-                const volume = order.volume || 0.01;
-                const contractSize = this.settings.symbol?.includes('BTC') ? 1 : (this.settings.symbol?.includes('XAU') ? 100 : 100000);
-                const tickValue = this.settings.symbol?.includes('BTC') ? 1 : (this.settings.symbol?.includes('XAU') ? 0.01 : 0.00001);
-                const targetProfitPct = this.settings.targetProfitUSD > 0 && entryPrice > 0
-                    ? (this.settings.targetProfitUSD * 2) / (entryPrice * volume * contractSize * tickValue)
-                    : 0.0075;
+                const targetProfitPct = tpDistance / entryPrice;
+                if (targetProfitPct <= 0) continue;
 
-                // Breakeven: se atingiu 50% do TP, move SL para entrada
-                if (profitPct > 0 && targetProfitPct > 0 && profitPct >= targetProfitPct * 0.5) {
-                    const bePrice = isBuy ? entryPrice + 0.01 : entryPrice - 0.01;
+                if (profitPct > 0 && profitPct >= targetProfitPct * this.settings.breakevenThresholdPct) {
+                    const beOffset = Math.max(0.5, atr * 0.3);
+                    const bePrice = isBuy ? entryPrice + beOffset : entryPrice - beOffset;
                     if ((isBuy && sl < entryPrice) || (!isBuy && sl > entryPrice)) {
                         await axios.post(`${this.BRIDGE_URL}/update_order`, {
                             ticket: order.ticket,
                             sl: Math.round(bePrice * 100) / 100,
                         }, { timeout: 3000 });
-                        this.addLog(`Breakeven ativado ticket #${order.ticket} (${(profitPct * 100).toFixed(2)}%)`, 'TRADE');
+                        this.addLog(`🛡️ Breakeven #${order.ticket} (${(profitPct * 100).toFixed(2)}%)`, 'TRADE');
                     }
                 }
-                // Trailing: após 100% do TP, trail a 25% do movimento
-                if (profitPct > 0 && targetProfitPct > 0 && profitPct >= targetProfitPct) {
-                    const trailDist = profitPct * 0.25;
-                    const newSl = isBuy ? currentPrice * (1 - trailDist) : currentPrice * (1 + trailDist);
+                if (profitPct > 0 && profitPct >= targetProfitPct * this.settings.trailingThresholdPct) {
+                    const trailDistPrice = atr * 0.8;
+                    const newSl = isBuy ? currentPrice - trailDistPrice : currentPrice + trailDistPrice;
                     if ((isBuy && newSl > sl) || (!isBuy && (sl === 0 || newSl < sl))) {
                         await axios.post(`${this.BRIDGE_URL}/update_order`, {
                             ticket: order.ticket,
                             sl: Math.round(newSl * 100) / 100,
                         }, { timeout: 3000 });
-                        this.addLog(`Trailing atualizado ticket #${order.ticket} (${(profitPct * 100).toFixed(2)}%)`, 'TRADE');
+                        this.addLog(`🔁 Trailing #${order.ticket} (${(profitPct * 100).toFixed(2)}%)`, 'TRADE');
                     }
                 }
             }
@@ -427,29 +690,34 @@ export class MicroScalperEngine {
             const tick = tickResp.data?.[this.settings.symbol];
             const price = side === 'BUY' ? tick?.ask || 0 : tick?.bid || 0;
 
-            const symbolUpper = this.settings.symbol.toUpperCase();
-            const isCrypto = symbolUpper.includes('BTC') || symbolUpper.includes('ETH') || symbolUpper.includes('SOL') || symbolUpper.includes('XRP');
-            const slPct = isCrypto ? 0.03 : 0.005;
-            const sl = side === 'BUY' ? price * (1 - slPct) : price * (1 + slPct);
+            const atr = Math.max(this.state.atr || 2, 1.5);
+            const slDistance = Math.round((atr * this.settings.atrMultiplier) * 100) / 100;
+            const tpDistance = Math.round((slDistance * this.settings.rrRatio) * 100) / 100;
+
+            const sl = side === 'BUY'
+                ? Math.round((price - slDistance) * 100) / 100
+                : Math.round((price + slDistance) * 100) / 100;
+            const tp = side === 'BUY'
+                ? Math.round((price + tpDistance) * 100) / 100
+                : Math.round((price - tpDistance) * 100) / 100;
 
             const resp = await axios.post(`${this.BRIDGE_URL}/order`, {
                 action: side,
                 symbol: this.settings.symbol,
                 lot: lot,
-                sl: Math.round(sl * 100) / 100,
+                sl: sl,
+                tp: tp,
                 magic: this.settings.magic,
                 comment: 'Titan_Sniper'
             }, { timeout: 15000 });
 
             if (resp.data?.status === 'success') {
                 SymbolLockService.acquire(this.settings.symbol, 'Micro Sniper', resp.data.order_id || 0, side);
-                this.addLog(`✅ Ordem ${side} aberta. Ticket: #${resp.data.order_id}`, 'TRADE');
+                this.addLog(`✅ Ordem ${side} aberta. Ticket: #${resp.data.order_id} SL:${sl} TP:${tp} (ATR:${atr.toFixed(2)})`, 'TRADE');
                 try {
                     const tickResp = await axios.post(`${this.BRIDGE_URL}/ticks`, { symbols: [this.settings.symbol] });
                     const tick = tickResp.data?.[this.settings.symbol];
                     const price = side === 'BUY' ? tick?.ask || 0 : tick?.bid || 0;
-                    
-                    TradeNotificationBot.notifyTradeOpened('Micro Sniper', this.settings.symbol, side, lot, price, 0, 0);
                 } catch (e) {}
             } else {
                 this.addLog(`❌ Falha ao abrir ordem: ${resp.data?.error || 'Unknown'}`, 'WARN');
@@ -460,24 +728,77 @@ export class MicroScalperEngine {
         }
     }
 
-    // ========== FECHAR TODAS AS POSIÇÕES (endpoint /close_order por ticket) ==========
-    private static async closeAllPositions() {
+    // ========== FECHAR POSIÇÃO INDIVIDUAL ==========
+    private static async closeSinglePosition(ticket: number, reason: string) {
+        const pos = this.state.activeOrders.find(p => p.ticket === ticket);
+        if (!pos) return;
+        const exitTime = Math.floor(Date.now() / 1000);
+        const entryTime = pos.time || 0;
+        const duration = entryTime > 0 ? exitTime - entryTime : 0;
+        const profit = pos.profit || 0;
+        const isBuy = pos.type === 0;
+        const entryPrice = pos.price_open || 0;
+        const currentPrice = pos.price_current || 0;
+        const profitPct = entryPrice > 0
+            ? (isBuy ? (currentPrice - entryPrice) / entryPrice : (entryPrice - currentPrice) / entryPrice) * 100
+            : 0;
+
+        this.state.dailyProfit += profit;
+        this.state.stats.closedPnL += profit;
+        this.state.stats.totalTrades++;
+        if (profit >= 0) this.state.stats.wins++;
+        else this.state.stats.losses++;
+
+        const runningBalance = this.state.tradeHistory.length > 0
+            ? this.state.tradeHistory[0].balance + profit
+            : profit;
+
+        this.state.tradeHistory.unshift({
+            ticket,
+            symbol: pos.symbol || this.settings.symbol,
+            type: isBuy ? 'BUY' : 'SELL',
+            volume: pos.volume || 0,
+            entryPrice: Math.round(entryPrice * 100) / 100,
+            exitPrice: Math.round(currentPrice * 100) / 100,
+            sl: pos.sl || 0,
+            tp: pos.tp || 0,
+            profit: Math.round(profit * 100) / 100,
+            profitPct: Math.round(profitPct * 100) / 100,
+            entryTime,
+            exitTime,
+            closeTime: new Date(exitTime * 1000).toISOString(),
+            openTime: new Date(entryTime * 1000).toISOString(),
+            duration,
+            closeReason: reason,
+            balance: Math.round(runningBalance * 100) / 100,
+        });
+        if (this.state.tradeHistory.length > 200) this.state.tradeHistory.pop();
+        this.saveTradeHistory();
+
         try {
-            for (const pos of this.state.activeOrders) {
+            await axios.post(`${this.BRIDGE_URL}/close_order`, {
+                ticket, magic: this.settings.magic, comment: `Titan_${reason}`
+            }, { timeout: 10000 });
+            this.addLog(`🔒 #${ticket} fechada (${reason}) P&L: $${profit.toFixed(2)}`, 'TRADE');
+        } catch (err: any) {
+            this.addLog(`❌ Erro ao fechar #${ticket}: ${err.message}`, 'WARN');
+        }
+    }
+
+    // ========== FECHAR TODAS AS POSIÇÕES ==========
+    private static async closeAllPositions(reason: string = 'MANUAL') {
+        try {
+            const snapshot = [...this.state.activeOrders];
+            const realizedPnl = snapshot.reduce((acc, o) => acc + (o.profit || 0), 0);
+
+            for (const pos of snapshot) {
                 const ticket = pos.ticket;
                 if (!ticket) continue;
-
-                try {
-                    await axios.post(`${this.BRIDGE_URL}/close_order`, {
-                        ticket: ticket,
-                        magic: this.settings.magic,
-                        comment: 'Titan_Close'
-                    }, { timeout: 15000 });
-                    this.addLog(`🔒 Fechada posição #${ticket}`, 'INFO');
-                } catch (closeErr: any) {
-                    this.addLog(`❌ Falha ao fechar #${ticket}: ${closeErr.message}`, 'WARN');
-                }
+                await this.closeSinglePosition(ticket, reason);
             }
+
+            this.addLog(`📊 Stats: ${this.state.stats.totalTrades} trades | WR: ${this.state.stats.totalTrades > 0 ? Math.round(this.state.stats.wins / this.state.stats.totalTrades * 100) : 0}% | P&L: $${this.state.stats.closedPnL.toFixed(2)}`, 'INFO');
+
             this.state.activeOrders = [];
         } catch (err) {
             console.error('CloseAll failed:', (err as any).message);
@@ -487,6 +808,6 @@ export class MicroScalperEngine {
     // ========== RESET MANUAL ==========
     static async resetBasket() {
         this.addLog('🔄 Titan Sniper: Reset manual solicitado.', 'INFO');
-        await this.closeAllPositions();
+        await this.closeAllPositions('MANUAL');
     }
 }
