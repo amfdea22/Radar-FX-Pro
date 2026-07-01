@@ -186,10 +186,15 @@ export class MicroScalperEngine {
         const winRate = totalTrades > 0 ? Math.round(wins / totalTrades * 1000) / 10 : 0;
         return {
             isRunning: this.isRunning,
-            settings: this.settings,
-            ...this.state,
+            settings: { ...this.settings },
             activePositions: this.state.activeOrders.length,
+            activeOrders: this.state.activeOrders,
             totalProfit: this.state.activeOrders.reduce((acc, o) => acc + (o.profit || 0), 0),
+            rsi: this.state.rsi,
+            trendM1: this.state.trendM1,
+            trendM5: this.state.trendM5,
+            spread: this.state.spread,
+            atr: this.state.atr,
             dailyProgress: this.settings.dailyTargetUSD > 0
                 ? Math.min(100, Math.round((this.state.dailyProfit / this.settings.dailyTargetUSD) * 100))
                 : 0,
@@ -200,7 +205,8 @@ export class MicroScalperEngine {
                 winRate,
                 closedPnL: Math.round(closedPnL * 100) / 100,
                 dailyPnL: Math.round(this.state.dailyProfit * 100) / 100,
-            }
+            },
+            logs: this.state.logs,
         };
     }
 

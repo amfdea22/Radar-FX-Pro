@@ -3,12 +3,25 @@ import {
     Zap, Activity, Target, Shield, Layers,
     RefreshCw, DollarSign, TrendingUp, Cpu,
     Power, Settings, Timer, AlertTriangle, ArrowRight,
-    Crosshair, Gauge
+    Crosshair, Gauge, Minimize2, Maximize2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
+interface AccountInfo {
+    balance: number;
+    equity: number;
+    margin: number;
+    margin_free: number;
+    profit: number;
+    daily_profit: number;
+    daily_closed_profit: number;
+    leverage: number;
+    currency: string;
+}
+
 interface MicroStatus {
+    isRunning: boolean;
     settings: {
         enabled: boolean;
         symbol: string;
@@ -17,20 +30,35 @@ interface MicroStatus {
         gridStepPips: number;
         maxLevels: number;
         targetProfitUSD: number;
+        dailyTargetUSD: number;
         stopLossUSD: number;
         rsiPeriod: number;
         rsiOverbought: number;
         rsiOversold: number;
         trendFilterM1: boolean;
+        trendFilterM5: boolean;
         quickTP: boolean;
+        sniperMode: boolean;
+        magic: number;
     };
-    rsi: number;
-    trendM1: string;
-    trendM5: string;
     activePositions: number;
     activeOrders: any[];
     totalProfit: number;
-    logs: { time: string, msg: string, type: 'INFO' | 'TRADE' | 'WARN' }[];
+    rsi: number;
+    trendM1: string;
+    trendM5: string;
+    spread: number;
+    atr: number;
+    dailyProgress: number;
+    stats: {
+        totalTrades: number;
+        wins: number;
+        losses: number;
+        winRate: number;
+        closedPnL: number;
+        dailyPnL: number;
+    };
+    logs: { time: string; msg: string; type: 'INFO' | 'TRADE' | 'WARN' }[];
 }
 
 function SniperLogo() {
@@ -54,13 +82,19 @@ function SniperLogo() {
 
 export const MicroScalperPanel: React.FC = () => {
     const [status, setStatus] = useState<MicroStatus | null>(null);
+    const [account, setAccount] = useState<AccountInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
+    const [settingsOpen, setSettingsOpen] = useState(true);
 
     const fetchStatus = async () => {
         try {
-            const resp = await axios.get('/api/mt5/micro-scalper/status');
-            setStatus(resp.data);
+            const [statusResult, accountResult] = await Promise.allSettled([
+                axios.get('/api/mt5/micro-scalper/status'),
+                axios.get('/api/mt5/account')
+            ]);
+            if (statusResult.status === 'fulfilled') setStatus(statusResult.value.data);
+            if (accountResult.status === 'fulfilled') setAccount(accountResult.value.data);
             setLoading(false);
         } catch (err) {
             console.error('Micro Scalper fetch error:', err);
@@ -148,6 +182,50 @@ export const MicroScalperPanel: React.FC = () => {
                 </div>
             </div>
 
+            {/* SALDO / MARGEM / P&L DIÁRIO */}
+            {account && (
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-indigo-500/10 p-5 relative overflow-hidden group hover:border-indigo-500/30 transition-all">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-indigo-500/15 rounded-xl">
+                                <DollarSign size={16} className="text-indigo-400" />
+                            </div>
+                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Saldo</span>
+                        </div>
+                        <p className={`text-2xl font-black italic ${(account.balance || 0) >= 0 ? 'text-white' : 'text-rose-400'}`}>
+                            ${(account.balance || 0).toFixed(2)}
+                        </p>
+                    </div>
+
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-emerald-500/10 p-5 relative overflow-hidden group hover:border-emerald-500/30 transition-all">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-emerald-500/15 rounded-xl">
+                                <Shield size={16} className="text-emerald-400" />
+                            </div>
+                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Margem Livre</span>
+                        </div>
+                        <p className="text-2xl font-black italic text-emerald-400">
+                            ${(account.margin_free || 0).toFixed(2)}
+                        </p>
+                    </div>
+
+                    <div className={`bg-slate-900/40 backdrop-blur-xl rounded-3xl border p-5 relative overflow-hidden group transition-all ${(account.daily_profit || 0) >= 0 ? 'border-emerald-500/10 hover:border-emerald-500/30' : 'border-rose-500/10 hover:border-rose-500/30'}`}>
+                        <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent ${(account.daily_profit || 0) >= 0 ? 'via-emerald-500/40' : 'via-rose-500/40'} to-transparent`}></div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className={`p-2 rounded-xl ${(account.daily_profit || 0) >= 0 ? 'bg-emerald-500/15' : 'bg-rose-500/15'}`}>
+                                <TrendingUp size={16} className={(account.daily_profit || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'} />
+                            </div>
+                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">P&L Diário</span>
+                        </div>
+                        <p className={`text-2xl font-black italic ${(account.daily_profit || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            ${(account.daily_profit || 0).toFixed(2)}
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* MICRO SNIPER ENGINE */}
             <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-indigo-500/10 p-8 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
@@ -166,224 +244,91 @@ export const MicroScalperPanel: React.FC = () => {
                     </div>
                 </div>
 
-                {/* PERFORMANCE STATS GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
-                        <div className="p-3 bg-emerald-500/20 text-emerald-500 rounded-xl">
-                            <DollarSign size={20} />
+                {/* PERFORMANCE STATS */}
+                <div className="space-y-4 mb-8">
+                    {/* Row 1: Win Rate */}
+                    <div className="bg-slate-950/40 p-5 rounded-2xl border border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Win Rate</span>
+                            <span className="text-xs font-black text-indigo-400">{status.stats.winRate}%</span>
                         </div>
-                        <div>
-                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Lucro do Ciclo</p>
-                            <p className={`text-xl font-black italic ${status.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                ${status.totalProfit.toFixed(2)}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
-                        <div className="p-3 bg-indigo-500/20 text-indigo-500 rounded-xl">
-                            <Layers size={20} />
-                        </div>
-                        <div>
-                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Posições / Max</p>
-                            <p className="text-xl font-black text-white italic">{status.activePositions} / {s.maxLevels}</p>
+                        <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" style={{ width: `${status.stats.winRate}%` }}></div>
                         </div>
                     </div>
-                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
-                        <div className="p-3 bg-purple-500/20 text-purple-500 rounded-xl">
-                            <Activity size={20} />
+
+                    {/* Row 2: Total / Wins / Losses */}
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 text-center">
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Total Trades</p>
+                            <p className="text-2xl font-black text-white italic">{status.stats.totalTrades}</p>
                         </div>
-                        <div>
-                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">RSI Sniper M1</p>
-                            <p className={`text-xl font-black italic ${status.rsi > 70 ? 'text-rose-400' : status.rsi < 30 ? 'text-emerald-400' : 'text-white'}`}>
-                                {status.rsi.toFixed(1)}
-                            </p>
+                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-emerald-500/10 text-center">
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Wins</p>
+                            <p className="text-2xl font-black text-emerald-400 italic">{status.stats.wins}</p>
+                        </div>
+                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-rose-500/10 text-center">
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Losses</p>
+                            <p className="text-2xl font-black text-rose-400 italic">{status.stats.losses}</p>
                         </div>
                     </div>
-                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
-                        <div className="p-3 bg-amber-500/20 text-amber-500 rounded-xl">
-                            <TrendingUp size={20} />
+
+                    {/* Row 3: P&L Fechado / Daily P&L */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                            <div className={`p-3 rounded-xl ${status.stats.closedPnL >= 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}>
+                                <DollarSign size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">P&L Fechado</p>
+                                <p className={`text-xl font-black italic ${status.stats.closedPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    ${status.stats.closedPnL.toFixed(2)}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Bias M1/M5</p>
-                            <p className="text-xl font-black text-white italic">{status.trendM1} / {status.trendM5}</p>
+                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+                            <div className={`p-3 rounded-xl ${status.stats.dailyPnL >= 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}>
+                                <TrendingUp size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Daily P&L</p>
+                                <p className={`text-xl font-black italic ${status.stats.dailyPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    ${status.stats.dailyPnL.toFixed(2)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Row 4: Meta Diária */}
+                    <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Meta Diária</span>
+                            <span className="text-xs font-black text-amber-400">{status.dailyProgress}%</span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-lg font-black text-white italic">${status.stats.dailyPnL.toFixed(2)}</span>
+                            <span className="text-sm font-black text-slate-500">/ ${s.dailyTargetUSD.toFixed(2)}</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500" style={{ width: `${status.dailyProgress}%` }}></div>
                         </div>
                     </div>
                 </div>
 
-                {/* SNIPER SETTINGS */}
-                <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-indigo-500/10 p-8 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
-                    <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">
-                        <Settings className="text-indigo-500" size={18} /> Sniper Settings
+            {/* MONITOR DE EXECUTION — FULL WIDTH */}
+            <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-indigo-500/10 p-8 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
+                <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-lg font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
+                        <Layers className="text-indigo-500" size={18} /> Monitor de Execution
                     </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* SYMBOL SELECTOR */}
-                        <div className="md:col-span-2 bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Ativo</span>
-                                <span className="text-sm font-black text-indigo-400">{s.symbol}</span>
-                            </div>
-                            <div className="grid grid-cols-6 gap-2 mt-3">
-                                {['BTCUSD', 'ETHUSD', 'SOLUSD', 'XRPUSD', 'EURUSD', 'XAUUSD'].map(sym => (
-                                    <button key={sym}
-                                        onClick={() => updateSetting('symbol', sym)}
-                                        className={`py-2 rounded-xl border font-black text-[10px] transition-all ${s.symbol === sym
-                                            ? 'bg-indigo-500/20 border-indigo-500/30 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]'
-                                            : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
-                                        {sym}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Alvo Cesta ($)</span>
-                                <span className="text-sm font-black text-emerald-400">${s.targetProfitUSD.toFixed(1)}</span>
-                            </div>
-                            <div className="flex items-center justify-between mt-3">
-                                <button onClick={() => updateSetting('targetProfitUSD', Math.max(0.5, s.targetProfitUSD - 0.1))}
-                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">-</button>
-                                <span className="text-2xl font-black text-white">{s.targetProfitUSD.toFixed(1)}</span>
-                                <button onClick={() => updateSetting('targetProfitUSD', Math.min(10, s.targetProfitUSD + 0.1))}
-                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">+</button>
-                            </div>
-                        </div>
-                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Grade Step (Pips)</span>
-                                <span className="text-sm font-black text-indigo-400">{s.gridStepPips}</span>
-                            </div>
-                            <div className="flex items-center justify-between mt-3">
-                                <button onClick={() => updateSetting('gridStepPips', Math.max(20, s.gridStepPips - 10))}
-                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">-</button>
-                                <span className="text-2xl font-black text-white">{s.gridStepPips}</span>
-                                <button onClick={() => updateSetting('gridStepPips', Math.min(1000, s.gridStepPips + 10))}
-                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">+</button>
-                            </div>
-                        </div>
-                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Lote Base</span>
-                                <span className="text-sm font-black text-white">{s.lotBase.toFixed(2)}</span>
-                            </div>
-                            <div className="grid grid-cols-3 gap-2 mt-3">
-                                {[0.01, 0.05, 0.1].map(lot => (
-                                    <button key={lot}
-                                        onClick={() => updateSetting('lotBase', lot)}
-                                        className={`py-2 rounded-xl border font-black text-[10px] transition-all ${s.lotBase === lot
-                                            ? 'bg-indigo-500/20 border-indigo-500/30 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]'
-                                            : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
-                                        {lot}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Multiplicador Lote</span>
-                                <span className="text-sm font-black text-amber-400">{s.lotMultiplier}x</span>
-                            </div>
-                            <div className="grid grid-cols-4 gap-2 mt-3">
-                                {[1, 1.5, 2, 2.5].map(m => (
-                                    <button key={m}
-                                        onClick={() => updateSetting('lotMultiplier', m)}
-                                        className={`py-2 rounded-xl border font-black text-[10px] transition-all ${s.lotMultiplier === m
-                                            ? 'bg-amber-500/20 border-amber-500/30 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)]'
-                                            : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
-                                        {m}x
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Níveis Máximos</span>
-                                <span className="text-sm font-black text-white">{s.maxLevels}</span>
-                            </div>
-                            <input type="range" min={1} max={20} value={s.maxLevels}
-                                onChange={(e) => updateSetting('maxLevels', parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-indigo-500 mt-3" />
-                        </div>
-                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Stop Loss Cesta ($)</span>
-                                <span className="text-sm font-black text-rose-400">${s.stopLossUSD.toFixed(1)}</span>
-                            </div>
-                            <div className="flex items-center justify-between mt-3">
-                                <button onClick={() => updateSetting('stopLossUSD', Math.max(1, s.stopLossUSD - 1))}
-                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">-</button>
-                                <span className="text-2xl font-black text-white">{s.stopLossUSD}</span>
-                                <button onClick={() => updateSetting('stopLossUSD', Math.min(50, s.stopLossUSD + 1))}
-                                    className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">+</button>
-                            </div>
-                        </div>
-                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Período RSI</span>
-                                <span className="text-sm font-black text-purple-400">{s.rsiPeriod}</span>
-                            </div>
-                            <input type="range" min={7} max={21} value={s.rsiPeriod}
-                                onChange={(e) => updateSetting('rsiPeriod', parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-purple-500 mt-3" />
-                        </div>
-                        <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">RSI Overbought / Oversold</span>
-                                <span className="text-sm font-black text-rose-400">{s.rsiOverbought} / <span className="text-emerald-400">{s.rsiOversold}</span></span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 mt-3">
-                                <button onClick={() => updateSetting('rsiOverbought', Math.min(90, s.rsiOverbought + 5))}
-                                    className="py-2 rounded-xl bg-slate-800/50 border border-white/5 text-slate-400 font-black text-[9px] hover:bg-slate-700/50">OB +5</button>
-                                <button onClick={() => updateSetting('rsiOversold', Math.max(10, s.rsiOversold - 5))}
-                                    className="py-2 rounded-xl bg-slate-800/50 border border-white/5 text-slate-400 font-black text-[9px] hover:bg-slate-700/50">OS -5</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                        <button
-                            onClick={() => updateSetting('trendFilterM1', !s.trendFilterM1)}
-                            className={`p-4 rounded-2xl border flex items-center gap-4 transition-all ${s.trendFilterM1
-                                ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.3)]'
-                                : 'bg-slate-950/40 border-white/5 text-slate-600'}`}>
-                            <Gauge size={20} className={s.trendFilterM1 ? 'text-indigo-400' : ''} />
-                            <div className="text-left">
-                                <span className="text-[8px] font-black uppercase tracking-widest block">Filtro Tendência M1</span>
-                                <span className="text-[7px] text-slate-500 tracking-widest uppercase">{s.trendFilterM1 ? 'Opera apenas na direção do bias M1' : 'Sem restrição de tendência'}</span>
-                            </div>
-                        </button>
-                        <button
-                            onClick={() => updateSetting('quickTP', !s.quickTP)}
-                            className={`p-4 rounded-2xl border flex items-center gap-4 transition-all ${s.quickTP
-                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]'
-                                : 'bg-slate-950/40 border-white/5 text-slate-600'}`}>
-                            <Zap size={20} className={s.quickTP ? 'text-emerald-400' : ''} />
-                            <div className="text-left">
-                                <span className="text-[8px] font-black uppercase tracking-widest block">Quick TP</span>
-                                <span className="text-[7px] text-slate-500 tracking-widest uppercase">{s.quickTP ? 'Take profit rápido ativado' : 'TP normal'}</span>
-                            </div>
-                        </button>
-                    </div>
+                    <button
+                        onClick={fetchStatus}
+                        className="p-3 bg-slate-800/50 text-slate-400 rounded-2xl border border-white/5 hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-indigo-400 transition-all"
+                    >
+                        <RefreshCw size={14} className={updating ? 'animate-spin' : ''} />
+                    </button>
                 </div>
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                {/* LEFT: MONITOR DE EXECUTION */}
-                <div className="xl:col-span-2 space-y-6">
-                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-indigo-500/10 p-8 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
-                        <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
-                                <Layers className="text-indigo-500" size={18} /> Monitor de Execution
-                            </h3>
-                            <button
-                                onClick={fetchStatus}
-                                className="p-3 bg-slate-800/50 text-slate-400 rounded-2xl border border-white/5 hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-indigo-400 transition-all"
-                            >
-                                <RefreshCw size={14} className={updating ? 'animate-spin' : ''} />
-                            </button>
-                        </div>
 
                         <div className="bg-slate-950/60 rounded-[2rem] border border-white/5 overflow-hidden">
                             <div className="max-h-72 overflow-x-auto overflow-y-auto custom-scrollbar">
@@ -458,10 +403,191 @@ export const MicroScalperPanel: React.FC = () => {
                             </button>
                         </div>
                     </div>
-                </div>
 
-                {/* RIGHT: TERMINAL & LOGS */}
+                {/* RIGHT: SETTINGS + TERMINAL */}
                 <div className="space-y-6">
+                    {/* SNIPER SETTINGS */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-indigo-500/10 p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
+                                <Settings className="text-indigo-500" size={18} /> Sniper Settings
+                            </h3>
+                            <button
+                                onClick={() => setSettingsOpen(!settingsOpen)}
+                                className="p-2 rounded-xl bg-slate-800/50 border border-white/5 text-slate-400 hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-indigo-400 transition-all"
+                            >
+                                {settingsOpen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                            </button>
+                        </div>
+
+                        {settingsOpen && (<div className="space-y-4">
+                            {/* SYMBOL SELECTOR */}
+                            <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Ativo</span>
+                                    <span className="text-sm font-black text-indigo-400">{s.symbol}</span>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 mt-3">
+                                    {['BTCUSD', 'ETHUSD', 'SOLUSD', 'XRPUSD', 'EURUSD', 'XAUUSD'].map(sym => (
+                                        <button key={sym}
+                                            onClick={() => updateSetting('symbol', sym)}
+                                            className={`py-2 rounded-xl border font-black text-[10px] transition-all ${s.symbol === sym
+                                                ? 'bg-indigo-500/20 border-indigo-500/30 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                                                : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
+                                            {sym}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Alvo Cesta ($)</span>
+                                        <span className="text-sm font-black text-emerald-400">${s.targetProfitUSD.toFixed(1)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-3">
+                                        <button onClick={() => updateSetting('targetProfitUSD', Math.max(0.5, s.targetProfitUSD - 0.1))}
+                                            className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">-</button>
+                                        <span className="text-2xl font-black text-white">{s.targetProfitUSD.toFixed(1)}</span>
+                                        <button onClick={() => updateSetting('targetProfitUSD', Math.min(10, s.targetProfitUSD + 0.1))}
+                                            className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">+</button>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Meta Diária ($)</span>
+                                        <span className="text-sm font-black text-amber-400">${s.dailyTargetUSD.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-3">
+                                        <button onClick={() => updateSetting('dailyTargetUSD', Math.max(1, s.dailyTargetUSD - 1))}
+                                            className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">-</button>
+                                        <span className="text-2xl font-black text-white">{s.dailyTargetUSD.toFixed(2)}</span>
+                                        <button onClick={() => updateSetting('dailyTargetUSD', Math.min(100, s.dailyTargetUSD + 1))}
+                                            className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">+</button>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Grade Step (Pips)</span>
+                                        <span className="text-sm font-black text-indigo-400">{s.gridStepPips}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-3">
+                                        <button onClick={() => updateSetting('gridStepPips', Math.max(20, s.gridStepPips - 10))}
+                                            className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">-</button>
+                                        <span className="text-2xl font-black text-white">{s.gridStepPips}</span>
+                                        <button onClick={() => updateSetting('gridStepPips', Math.min(1000, s.gridStepPips + 10))}
+                                            className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">+</button>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Lote Base</span>
+                                        <span className="text-sm font-black text-white">{s.lotBase.toFixed(2)}</span>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2 mt-3">
+                                        {[0.01, 0.05, 0.1].map(lot => (
+                                            <button key={lot}
+                                                onClick={() => updateSetting('lotBase', lot)}
+                                                className={`py-2 rounded-xl border font-black text-[10px] transition-all ${s.lotBase === lot
+                                                    ? 'bg-indigo-500/20 border-indigo-500/30 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                                                    : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
+                                                {lot}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Multiplicador Lote</span>
+                                        <span className="text-sm font-black text-amber-400">{s.lotMultiplier}x</span>
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-2 mt-3">
+                                        {[1, 1.5, 2, 2.5].map(m => (
+                                            <button key={m}
+                                                onClick={() => updateSetting('lotMultiplier', m)}
+                                                className={`py-2 rounded-xl border font-black text-[10px] transition-all ${s.lotMultiplier === m
+                                                    ? 'bg-amber-500/20 border-amber-500/30 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                                                    : 'bg-slate-800/50 border-white/5 text-slate-500 hover:bg-slate-700/50'}`}>
+                                                {m}x
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Níveis Máximos</span>
+                                        <span className="text-sm font-black text-white">{s.maxLevels}</span>
+                                    </div>
+                                    <input type="range" min={1} max={20} value={s.maxLevels}
+                                        onChange={(e) => updateSetting('maxLevels', parseInt(e.target.value))}
+                                        className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-indigo-500 mt-3" />
+                                </div>
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Stop Loss Cesta ($)</span>
+                                        <span className="text-sm font-black text-rose-400">${s.stopLossUSD.toFixed(1)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-3">
+                                        <button onClick={() => updateSetting('stopLossUSD', Math.max(1, s.stopLossUSD - 1))}
+                                            className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">-</button>
+                                        <span className="text-2xl font-black text-white">{s.stopLossUSD}</span>
+                                        <button onClick={() => updateSetting('stopLossUSD', Math.min(50, s.stopLossUSD + 1))}
+                                            className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700">+</button>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Período RSI</span>
+                                        <span className="text-sm font-black text-purple-400">{s.rsiPeriod}</span>
+                                    </div>
+                                    <input type="range" min={7} max={21} value={s.rsiPeriod}
+                                        onChange={(e) => updateSetting('rsiPeriod', parseInt(e.target.value))}
+                                        className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-purple-500 mt-3" />
+                                </div>
+                                <div className="bg-slate-950/40 p-4 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">RSI OB / OS</span>
+                                        <span className="text-sm font-black text-rose-400">{s.rsiOverbought} / <span className="text-emerald-400">{s.rsiOversold}</span></span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 mt-3">
+                                        <button onClick={() => updateSetting('rsiOverbought', Math.min(90, s.rsiOverbought + 5))}
+                                            className="py-2 rounded-xl bg-slate-800/50 border border-white/5 text-slate-400 font-black text-[9px] hover:bg-slate-700/50">OB +5</button>
+                                        <button onClick={() => updateSetting('rsiOversold', Math.max(10, s.rsiOversold - 5))}
+                                            className="py-2 rounded-xl bg-slate-800/50 border border-white/5 text-slate-400 font-black text-[9px] hover:bg-slate-700/50">OS -5</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={() => updateSetting('trendFilterM1', !s.trendFilterM1)}
+                                    className={`p-4 rounded-2xl border flex items-center gap-4 transition-all ${s.trendFilterM1
+                                        ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.3)]'
+                                        : 'bg-slate-950/40 border-white/5 text-slate-600'}`}>
+                                    <Gauge size={20} className={s.trendFilterM1 ? 'text-indigo-400' : ''} />
+                                    <div className="text-left">
+                                        <span className="text-[8px] font-black uppercase tracking-widest block">Filtro Tendência M1</span>
+                                        <span className="text-[7px] text-slate-500 tracking-widest uppercase">{s.trendFilterM1 ? 'Ativado' : 'Sem restrição'}</span>
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => updateSetting('quickTP', !s.quickTP)}
+                                    className={`p-4 rounded-2xl border flex items-center gap-4 transition-all ${s.quickTP
+                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]'
+                                        : 'bg-slate-950/40 border-white/5 text-slate-600'}`}>
+                                    <Zap size={20} className={s.quickTP ? 'text-emerald-400' : ''} />
+                                    <div className="text-left">
+                                        <span className="text-[8px] font-black uppercase tracking-widest block">Quick TP</span>
+                                        <span className="text-[7px] text-slate-500 tracking-widest uppercase">{s.quickTP ? 'Ativado' : 'Desativado'}</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        )}
+                    </div>
+
+                    {/* TERMINAL DEV MODE */}
                     <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-indigo-500/10 p-8 relative overflow-hidden h-full flex flex-col">
                         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
                         <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6 flex items-center gap-2">

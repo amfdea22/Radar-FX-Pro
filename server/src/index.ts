@@ -13,6 +13,8 @@ process.on('unhandledRejection', (reason) => {
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
+import * as fs from 'fs';
+import * as nodePath from 'path';
 import rateLimit from 'express-rate-limit';
 import { spawn, ChildProcess } from 'child_process';
 import { SignalEngine } from './services/SignalEngine';
@@ -41,10 +43,9 @@ import { HealthService } from './services/HealthService';
 import { SymbolLockService } from './services/SymbolLockService';
 import { DatabaseService } from './services/DatabaseService';
 import { MicroScalperEngine } from './services/MicroScalperEngine';
-import { SwingTraderEngine } from './services/SwingTraderEngine';
+import { MicroScalperBacktest } from './services/MicroScalperBacktest';
 import { SweepEngine } from './services/SweepEngine';
 import { SweepTradeMonitor } from './services/SweepTradeMonitor';
-import { SwingTraderSimulator } from './services/SwingTraderSimulator';
 import { ForexScalperEngine } from './services/ForexScalperEngine';
 import { ForexScalperBacktest } from './services/ForexScalperBacktest';
 import { OmniProbabilisticEngine } from './services/OmniProbabilisticEngine';
@@ -53,14 +54,15 @@ import { SecurityAuditService } from './services/SecurityAuditService';
 import { z } from 'zod';
 
 import { AgentIAEngine } from './services/AgentIAEngine';
+import { runAgentIABacktest } from './services/AgentIABacktest';
 import { MLInsightsService } from './services/MLInsightsService';
 import { AIAnalystAgent } from './services/AIAnalystAgent';
 import { MLService } from './services/MLService';
 import { NLPService, NewsArticle } from './services/NLPService';
-import { MotorIAEngine } from './services/MotorIAEngine';
 import authRouter from './routes/auth';
 import agendaRouter from './routes/agenda';
 import { authenticateToken } from './middleware/auth';
+import { LoggerService } from './services/LoggerService';
 import { InfraService } from './services/InfraService';
 import { GoldScalperTradeMonitor } from './services/GoldScalperTradeMonitor';
 import { MAGIC_MAP } from './services/MagicMap';
@@ -94,6 +96,15 @@ bridgeAxios.interceptors.request.use(config => {
     return config;
 });
 
+// Cache de preços para calcular changePercent (fallback quando LiteFinance estiver offline)
+const PRICE_CACHE: Record<string, { price5m: number; price1h: number; time5m: number; time1h: number }> = {};
+
+// ============================================================
+// GLOBAL SAFETY NET: Garante timeout padrão em TODAS as chamadas axios
+// Evita que chamadas sem timeout travem o sistema inteiro
+// ============================================================
+axios.defaults.timeout = 10000; // 10s padrão para qualquer chamada sem timeout explícito
+
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:3006,http://127.0.0.1:3006').split(',');
 app.use(cors({
   origin: (origin, callback) => {
@@ -116,26 +127,34 @@ const readBody = (req: any): Promise<string> => {
     });
 };
 
-app.use(async (req, res, next) => {
-    if (req.method === 'POST' && Number(req.headers['content-length'] || '0') > 0) {
-        try {
-            const raw = await readBody(req);
+// Body parser: apenas para rotas que NÃO são proxy (backtest usa leitura própria)
+app.use((req: any, res: any, next: any) => {
+    if (req.method !== 'POST') return next();
+    if (req.url.startsWith('/api/backtest')) return next();
+    let body = '';
+    req.setEncoding('utf8');
+    req.on('data', (chunk: string) => { body += chunk; });
+    req.on('end', () => {
+        if (body && body.length > 0) {
             const ct = (req.headers['content-type'] || '').toLowerCase();
             if (ct.includes('application/json')) {
-                try { req.body = JSON.parse(raw); } catch { req.body = raw; }
+                try { req.body = JSON.parse(body); } catch { req.body = body; }
             } else if (ct.includes('application/x-www-form-urlencoded')) {
-                const params = new URLSearchParams(raw);
+                const params = new URLSearchParams(body);
                 req.body = Object.fromEntries(params.entries());
             } else {
-                req.body = raw;
+                req.body = body;
             }
-        } catch { req.body = {}; }
-    }
-    next();
+        } else {
+            req.body = req.body || {};
+        }
+        next();
+    });
+    req.resume();
 });
 
 // Auth middleware — protege todas as rotas /api/* exceto as públicas
-const PUBLIC_API_PATHS = ['/api/auth', '/api/health', '/api/health/full', '/api/tradingview', '/api/system', '/api/intel-engine', '/api/telemetry', '/api/copilot', '/api/agenda'];
+const PUBLIC_API_PATHS = ['/api/auth', '/api/health', '/api/health/full', '/api/tradingview', '/api/system', '/api/intel-engine', '/api/telemetry', '/api/copilot', '/api/agenda', '/api/backtest', '/api/mt5/agent-ia/backtest'];
 app.use('/api', (req, res, next) => {
   if (PUBLIC_API_PATHS.some(p => req.originalUrl.startsWith(p))) {
     return next();
@@ -221,8 +240,7 @@ app.post('/api/db/migrate', async (req, res) => {
         const fs = require('fs');
         const path = require('path');
         const dataDir = process.cwd();
-        const migrations = [
-            { name: 'Motor IA', file: 'motor_ia_history.json', dataKey: 'executions' },
+        const migrations: { name: string; file: string; dataKey?: string }[] = [
             { name: 'Gold Scalper', file: 'gold_scalper_history.json' },
             { name: 'Alpha Robot', file: 'alpha_robot_history.json' },
             { name: 'Recovery', file: 'recovery_history.json' },
@@ -392,7 +410,7 @@ app.get('/api/mt5/account', async (req, res) => {
             balance: d.balance || 0,
             equity: d.equity || 0,
             margin: d.margin || 0,
-            margin_free: d.margin_free || 0,
+            margin_free: d.freeMargin || d.margin_free || 0,
             profit: d.daily_profit || d.profit || 0,
             daily_profit: d.daily_profit || 0,
             daily_closed_profit: d.daily_closed_profit || 0,
@@ -467,10 +485,270 @@ app.get('/api/mt5/positions', async (req, res) => {
 
 app.get('/api/mt5/history', async (req, res) => {
     try {
-        const response = await bridgeAxios.get('/history');
-        res.json(response.data);
+        const _fs = require('fs');
+        const _path = require('path');
+        const allTrades: any[] = [];
+
+        const toISO = (v: any): string => {
+            if (!v) return '';
+            if (typeof v === 'string') {
+                const d = new Date(v);
+                return isNaN(d.getTime()) ? '' : d.toISOString();
+            }
+            if (typeof v === 'number') {
+                const ms = v > 1e12 ? v : v * 1000;
+                return new Date(ms).toISOString();
+            }
+            return '';
+        };
+
+        const MAGIC_MAP: Record<number, string> = {
+            9999: 'Gold Scalper', 777111: 'Speed Scalper', 888111: 'Micro Sniper',
+            1447597644: 'Aura Quant', 777555: 'Sweep H4 M15', 9876: 'Shark Bot',
+            7777: 'Wolf Bot', 999001: 'Motor IA', 999000: 'Recovery',
+            444111: 'Bitcoin Pro', 202605: 'Agent IA', 88881: 'Alpha',
+            8888: 'Crypto IA', 999111: 'Omni',
+        };
+
+        // 1. Fetch real MT5 history from bridge (deals dos últimos 30 dias)
+        let bridgeDeals: any[] = [];
+        try {
+            const br = await axios.get(`${MT5_BRIDGE_URL}/history`, { timeout: 10000 });
+            bridgeDeals = Array.isArray(br.data) ? br.data : [];
+        } catch {}
+
+        // 2. Agrupar deals por position_id (uma posição = entrada + saída)
+        const dealMap = new Map<number, any[]>();
+        for (const d of bridgeDeals) {
+            const pid = d.position_id || d.ticket;
+            if (!dealMap.has(pid)) dealMap.set(pid, []);
+            dealMap.get(pid)!.push(d);
+        }
+
+        // 3. Converter cada grupo em um trade com profit REAL do MT5
+        for (const [posId, deals] of dealMap) {
+            try {
+                // Soma profit + commission + swap de TODOS os deals da posição
+                const totalProfit = deals.reduce((s, d) => s + (d.profit || 0) + (d.commission || 0) + (d.swap || 0), 0);
+                const entryDeal = deals.find((d: any) => d.entry === 0); // DEAL_ENTRY_IN
+                const exitDeal = deals.find((d: any) => d.entry === 1); // DEAL_ENTRY_OUT
+                const info = deals[0];
+                if (!info) continue;
+                const magic = info.magic || 0;
+                const engineName = MAGIC_MAP[magic] || `Magic ${magic}`;
+                const type = entryDeal?.type === 1 ? 'SELL' : (entryDeal?.type === 0 ? 'BUY' : info.type === 1 ? 'SELL' : 'BUY');
+                allTrades.push({
+                    ticket: posId,
+                    symbol: info.symbol || '',
+                    type,
+                    lot: info.volume || 0.01,
+                    entryPrice: entryDeal?.price || 0,
+                    exitPrice: exitDeal?.price || 0,
+                    profit: totalProfit,
+                    result: totalProfit > 0 ? 'WIN' : totalProfit < 0 ? 'LOSS' : 'EMPATE',
+                    closeReason: exitDeal ? 'FECHADO' : '',
+                    openTime: toISO(entryDeal?.time || info.time),
+                    closeTime: toISO(exitDeal?.time || ''),
+                    duration: '',
+                    magic,
+                    engine: engineName,
+                    comment: info.comment || '',
+                });
+            } catch {}
+        }
+
+        // 4. Engine data como fallback para trades > 30 dias (bridge não tem)
+        const loadJsonArray = (filePath: string): any[] => {
+            try {
+                if (_fs.existsSync(filePath)) {
+                    const data = JSON.parse(_fs.readFileSync(filePath, 'utf-8'));
+                    if (Array.isArray(data)) return data;
+                }
+            } catch {}
+            return [];
+        };
+
+        const normalize = (trade: any, engineName: string, magic: number): any => {
+            const type = trade.type || trade.direction || 'BUY';
+            const lot = trade.lot || trade.lots || trade.lotSize || 0.01;
+            const entryPrice = trade.entryPrice ?? trade.entry ?? 0;
+            const exitPrice = trade.exitPrice ?? trade.exit ?? 0;
+            const openTime = trade.openTime || trade.entryTime || trade.time || '';
+            const closeTime = trade.closeTime || trade.exitTime || '';
+            const closeReason = trade.closeReason || trade.reason || '';
+            return { ticket: trade.ticket || 0, symbol: trade.symbol || '', type, lot, entryPrice, exitPrice, profit: trade.profit ?? 0, result: trade.result || (trade.profit >= 0 ? 'WIN' : 'LOSS'), closeReason, openTime: toISO(openTime), closeTime: toISO(closeTime), duration: trade.duration ?? '', magic, engine: engineName, comment: trade.comment || '' };
+        };
+
+        const engines = [
+            { name: 'Gold Scalper', magic: 9999, get: () => GoldScalperEngine.getHistory() },
+            { name: 'Micro Sniper', magic: 888111, get: () => MicroScalperEngine.getHistory() },
+            { name: 'Aura Quant', magic: 1447597644, get: () => AuraQuantEngine.getHistory() },
+            { name: 'Sweep H4 M15', magic: 777555, get: () => SweepEngine.getHistory() },
+            { name: 'Speed Scalper', magic: 777111, get: () => ForexScalperEngine.getHistory?.() },
+            { name: 'Shark Bot', magic: 9876, get: () => { const h = SharkBotEngine.getHistory?.(); if (h?.trades?.length) return h; const a = loadJsonArray(_path.join(process.cwd(), 'shark_bot_trades.json')); return a.length ? { trades: a } : null; }},
+            { name: 'Wolf Bot', magic: 7777, get: () => { const h = WolfBotEngine.getHistory?.(); if (h?.trades?.length) return h; const a = loadJsonArray(_path.join(process.cwd(), 'wolf_bot_trades.json')); return a.length ? { trades: a } : null; }},
+            { name: 'Bitcoin Pro', magic: 444111, get: () => { const s = BitcoinProEngine.getStatus?.(); if (s?.trades?.length) return { trades: s.trades }; return null; }},
+        ];
+
+        const seenTickets = new Set(allTrades.map(t => `${t.magic}_${t.ticket}`));
+
+        for (const engine of engines) {
+            try {
+                const h = engine.get();
+                if (h?.trades?.length) {
+                    for (const t of h.trades) {
+                        const dedupKey = t.positionId || t.ticket || 0;
+                        const key = `${engine.magic}_${dedupKey}`;
+                        if (!seenTickets.has(key)) {
+                            const normalized = normalize(t, engine.name, engine.magic);
+                            if (normalized.ticket) seenTickets.add(`${engine.magic}_${normalized.ticket}`);
+                            allTrades.push(normalized);
+                        }
+                    }
+                }
+            } catch {}
+        }
+
+        allTrades.sort((a, b) => {
+            const ta = a.closeTime ? new Date(a.closeTime).getTime() : 0;
+            const tb = b.closeTime ? new Date(b.closeTime).getTime() : 0;
+            return tb - ta;
+        });
+
+        res.json(allTrades);
     } catch (error: any) {
         res.json([]);
+    }
+});
+
+app.get('/api/mt5/trading-duration', async (req, res) => {
+    try {
+        const toTS = (v: any): number => {
+            if (!v) return 0;
+            if (typeof v === 'number') return v > 1e12 ? v : v * 1000;
+            if (typeof v === 'string') { const d = new Date(v); return isNaN(d.getTime()) ? 0 : d.getTime(); }
+            return 0;
+        };
+
+        const MAGIC_MAP_LOCAL: Record<number, string> = {
+            9999: 'Gold Scalper', 888111: 'Micro Sniper', 777111: 'Speed Scalper',
+            777555: 'Sweep H4 M15', 9876: 'Shark Bot', 777333: 'Wolf Bot',
+            8888: 'Crypto IA', 88881: 'Alpha Robot', 7777: 'Supreme',
+            999111: 'Omni', 444111: 'Bitcoin Pro', 202605: 'Agent IA',
+            999000: 'Recovery', 1447597644: 'Aura Quant',
+        };
+
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayMs = todayStart.getTime();
+
+        let bridgeDeals: any[] = [];
+        try {
+            const br = await axios.get(`${MT5_BRIDGE_URL}/history`, { timeout: 10000 });
+            bridgeDeals = Array.isArray(br.data) ? br.data : [];
+        } catch {}
+
+        const dealMap = new Map<number, any[]>();
+        for (const d of bridgeDeals) {
+            const pid = d.position_id || d.ticket;
+            if (!dealMap.has(pid)) dealMap.set(pid, []);
+            dealMap.get(pid)!.push(d);
+        }
+
+        interface TradeRecord {
+            start: string; end: string; durationMs: number; symbol: string; type: string; profit: number;
+        }
+        interface EngineDuration {
+            engine: string; magic: number; trades: TradeRecord[];
+            totalDurationMs: number; tradeCount: number; avgDurationMs: number; totalProfit: number;
+        }
+
+        const engineMap = new Map<number, EngineDuration>();
+
+        for (const [posId, deals] of dealMap) {
+            try {
+                const entryDeal = deals.find((d: any) => d.entry === 0);
+                const exitDeal = deals.find((d: any) => d.entry === 1);
+                const info = deals[0];
+                if (!info) continue;
+                const magic = info.magic || 0;
+
+                const entryTime = toTS(entryDeal?.time || info.time);
+                const exitTime = toTS(exitDeal?.time || 0);
+                if (entryTime < todayMs) continue;
+
+                const durationMs = exitTime > 0 ? exitTime - entryTime : Date.now() - entryTime;
+                const totalProfit = deals.reduce((s, d) => s + (d.profit || 0) + (d.commission || 0) + (d.swap || 0), 0);
+                const type = entryDeal?.type === 1 ? 'SELL' : 'BUY';
+
+                const tr: TradeRecord = {
+                    start: new Date(entryTime).toISOString(),
+                    end: exitTime > 0 ? new Date(exitTime).toISOString() : '',
+                    durationMs,
+                    symbol: info.symbol || '',
+                    type,
+                    profit: totalProfit,
+                };
+
+                if (!engineMap.has(magic)) {
+                    engineMap.set(magic, {
+                        engine: MAGIC_MAP_LOCAL[magic] || `Magic ${magic}`,
+                        magic, trades: [], totalDurationMs: 0, tradeCount: 0, avgDurationMs: 0, totalProfit: 0,
+                    });
+                }
+                const eng = engineMap.get(magic)!;
+                eng.trades.push(tr);
+                eng.totalDurationMs += durationMs;
+                eng.totalProfit += totalProfit;
+                eng.tradeCount++;
+            } catch {}
+        }
+
+        let openPositions: any[] = [];
+        try {
+            const pr = await axios.get(`${MT5_BRIDGE_URL}/positions`, { timeout: 5000 });
+            openPositions = Array.isArray(pr.data) ? pr.data : [];
+        } catch {}
+
+        for (const pos of openPositions) {
+            const magic = pos.magic || 0;
+            const entryTime = toTS(pos.time);
+            if (!entryTime || entryTime < todayMs) continue;
+
+            const durationMs = Date.now() - entryTime;
+            const tr: TradeRecord = {
+                start: new Date(entryTime).toISOString(),
+                end: '',
+                durationMs,
+                symbol: pos.symbol || '',
+                type: pos.type === 1 ? 'SELL' : 'BUY',
+                profit: pos.profit || 0,
+            };
+
+            if (!engineMap.has(magic)) {
+                engineMap.set(magic, {
+                    engine: MAGIC_MAP_LOCAL[magic] || `Magic ${magic}`,
+                    magic, trades: [], totalDurationMs: 0, tradeCount: 0, avgDurationMs: 0, totalProfit: 0,
+                });
+            }
+            const eng = engineMap.get(magic)!;
+            eng.trades.push(tr);
+            eng.totalDurationMs += durationMs;
+            eng.totalProfit += tr.profit;
+            eng.tradeCount++;
+        }
+
+        const result = Array.from(engineMap.values())
+            .map(e => ({ ...e, avgDurationMs: e.tradeCount > 0 ? Math.round(e.totalDurationMs / e.tradeCount) : 0 }))
+            .sort((a, b) => b.totalDurationMs - a.totalDurationMs);
+
+        const grandTotalMs = result.reduce((s, e) => s + e.totalDurationMs, 0);
+        const grandTotalTrades = result.reduce((s, e) => s + e.tradeCount, 0);
+        const grandTotalProfit = result.reduce((s, e) => s + e.totalProfit, 0);
+
+        res.json({ engines: result, grandTotalMs, grandTotalTrades, grandTotalProfit, date: todayStart.toISOString().slice(0, 10) });
+    } catch (error: any) {
+        res.json({ engines: [], grandTotalMs: 0, grandTotalTrades: 0, date: new Date().toISOString().slice(0, 10) });
     }
 });
 
@@ -519,14 +797,49 @@ app.post('/api/mt5/ticks', async (req, res) => {
         if (lfResult.status === 'fulfilled') lfData = lfResult.value;
 
         const merged: any = {};
+        const now = Date.now();
         for (const sym of symbols) {
             if (mt5Data[sym]?.bid) {
+                const tick = mt5Data[sym];
+                const bid = tick.bid;
+
+                // Inicializa cache com dados históricos (primeira vez)
+                if (!PRICE_CACHE[sym]) {
+                    PRICE_CACHE[sym] = { price5m: 0, price1h: 0, time5m: 0, time1h: 0 };
+                    bridgeAxios.get('/candles', { params: { symbol: sym, timeframe: 'M1', count: 60 }, timeout: 3000 })
+                        .then(r => {
+                            const c = r.data;
+                            if (Array.isArray(c) && c.length > 0) {
+                                const lastIdx = c.length - 1;
+                                const idx5m = Math.max(0, lastIdx - 5);
+                                const idx1h = Math.max(0, lastIdx - 60);
+                                const cache = PRICE_CACHE[sym]!;
+                                cache.price5m = c[idx5m]?.close || bid;
+                                cache.price1h = c[idx1h]?.close || bid;
+                                cache.time5m = now;
+                                cache.time1h = now;
+                            }
+                        })
+                        .catch(() => {});
+                }
+
+                const cache = PRICE_CACHE[sym]!;
+                if (cache.time5m > 0 && now - cache.time5m > 300000) { cache.price5m = bid; cache.time5m = now; }
+                if (cache.time1h > 0 && now - cache.time1h > 3600000) { cache.price1h = bid; cache.time1h = now; }
+
+                let chg5m = lfData[sym]?.changePercent5m;
+                let chg1h = lfData[sym]?.changePercent1h;
+
+                // Fallback da cache se LiteFinance falhou
+                if (!chg5m && cache.time5m > 0 && cache.price5m > 0 && bid > 0) chg5m = ((bid - cache.price5m) / cache.price5m) * 100;
+                if (!chg1h && cache.time1h > 0 && cache.price1h > 0 && bid > 0) chg1h = ((bid - cache.price1h) / cache.price1h) * 100;
+
                 merged[sym] = {
-                    ...mt5Data[sym],
+                    ...tick,
                     change: lfData[sym]?.change || 0,
                     changePercent: lfData[sym]?.changePercent || 0,
-                    changePercent5m: lfData[sym]?.changePercent5m || 0,
-                    changePercent1h: lfData[sym]?.changePercent1h || 0,
+                    changePercent5m: chg5m || 0,
+                    changePercent1h: chg1h || 0,
                 };
             } else if (lfData[sym]) {
                 merged[sym] = lfData[sym];
@@ -542,8 +855,9 @@ app.post('/api/mt5/ticks', async (req, res) => {
 
 app.get('/api/mt5/discipline', async (req, res) => {
     try {
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
         const [status, gs] = await Promise.all([
-            DisciplineEngine.getDailyStatus().catch(() => null),
+            Promise.race([DisciplineEngine.getDailyStatus(), timeoutPromise]),
             GoldScalperEngine.getStatus().catch(() => null)
         ]);
         const base = status || {
@@ -586,8 +900,11 @@ app.get('/api/reports/daily', async (req, res) => {
         
         const safeGetHistory = async (engine: any, name: string): Promise<{ trades: any[]; robot: string }> => {
             try {
-                const status = await engine.getStatus();
-                const history = status.tradeHistory || status.trades || [];
+                const status = await Promise.race([
+                    engine.getStatus(),
+                    new Promise<null>((r) => setTimeout(() => r(null), 10000))
+                ]);
+                const history = (status?.tradeHistory || status?.trades || []);
                 const todayTrades = history.filter((t: any) => t.closeTime?.startsWith(today) || t.time?.startsWith(today));
                 return { trades: todayTrades.map((t: any) => ({ ...t, robot: name })), robot: name };
             } catch {
@@ -604,7 +921,6 @@ app.get('/api/reports/daily', async (req, res) => {
             safeGetHistory(WolfBotEngine, 'Wolf Bot'),
             safeGetHistory(BitcoinProEngine, 'Bitcoin Pro'),
             safeGetHistory(CryptoIAEngine, 'Alpha Cripto'),
-            safeGetHistory(SwingTraderEngine, 'Day Swing IA'),
             safeGetHistory(ForexScalperEngine, 'Forex Scalper'),
             safeGetHistory(MicroScalperEngine, 'Micro Sniper'),
             safeGetHistory(OmniProbabilisticEngine, 'Omni Prob'),
@@ -673,10 +989,12 @@ app.get('/api/mt5/guardian/status', (req, res) => {
 
 app.get('/api/mt5/risk-management', async (req, res) => {
     try {
+        const withTimeout = <T>(p: Promise<T>, ms: number, fallback: T): Promise<T> =>
+            Promise.race([p, new Promise<T>(r => setTimeout(() => r(fallback), ms))]);
         const [accountRes, goldRes, disciplineRes] = await Promise.all([
             bridgeAxios.get('/account').catch(() => ({ data: {} })),
             GoldScalperEngine.getRiskReport().catch(() => null),
-            DisciplineEngine.getDailyStatus().catch(() => null)
+            withTimeout(DisciplineEngine.getDailyStatus(), 8000, null)
         ]);
         const accountData = accountRes.data || {};
         const balance = accountData.balance || 0;
@@ -754,14 +1072,50 @@ app.post('/api/mt5/bitcoin-pro/settings', (req, res) => {
     res.json({ status: 'success', statusData: BitcoinProEngine.getStatus() });
 });
 
+app.get('/api/mt5/bitcoin-pro/backtest', async (req, res) => {
+    try {
+        const { BitcoinProBacktest } = await import('./services/BitcoinProBacktest');
+        const days = parseInt((req as any).query?.days as string) || 365;
+        const config = {
+            symbol: BitcoinProEngine.getStatus().settings?.symbol || 'BTCUSD',
+            days,
+            lotSize: 0.01,
+            minScore: 35,
+            initialCapital: 10000,
+        };
+        const result = await BitcoinProBacktest.run(config);
+        res.json(result);
+    } catch (e: any) {
+        res.status(500).json({ error: e.message || 'Backtest failed' });
+    }
+});
+
 // --- AURA QUANT ENGINE ---
 app.get('/api/mt5/aura-quant/status', (req, res) => {
     res.json(AuraQuantEngine.getStatus());
 });
 
+app.get('/api/mt5/aura-quant/live-monitor', (req, res) => {
+    res.json(AuraQuantEngine.getLiveMonitor());
+});
+
+app.get('/api/mt5/aura-quant/history', (req, res) => {
+    res.json(AuraQuantEngine.getHistory());
+});
+
 app.post('/api/mt5/aura-quant/settings', (req, res) => {
     AuraQuantEngine.updateSettings(req.body);
     res.json({ status: 'success', statusData: AuraQuantEngine.getStatus() });
+});
+
+app.post('/api/mt5/aura-quant/trade', async (req, res) => {
+    try {
+        const { direction, lot } = req.body || {};
+        const result = await AuraQuantEngine.forceTrade(direction, lot);
+        res.json({ success: true, result });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // --- RECOVERY ENGINE ---
@@ -777,28 +1131,6 @@ app.post('/api/mt5/recovery/settings', (req, res) => {
 app.get('/api/mt5/recovery/signals', async (req, res) => {
     const signals = await RecoveryEngine.getRecoverySignals();
     res.json(signals);
-});
-
-// --- MOTOR IA ENGINE ---
-app.get('/api/mt5/motor-ia/status', (req, res) => {
-    res.json(MotorIAEngine.getStatus());
-});
-
-app.post('/api/mt5/motor-ia/settings', (req, res) => {
-    MotorIAEngine.updateSettings(req.body);
-    res.json({ status: 'success', statusData: MotorIAEngine.getStatus() });
-});
-
-app.get('/api/mt5/motor-ia/executions', (req, res) => {
-    const filters: { symbol?: string; result?: string; limit?: number } = {};
-    if (req.query.symbol) filters.symbol = req.query.symbol as string;
-    if (req.query.result) filters.result = req.query.result as string;
-    if (req.query.limit) filters.limit = Number(req.query.limit);
-    res.json(MotorIAEngine.getExecutions(filters));
-});
-
-app.get('/api/mt5/motor-ia/learning', (req, res) => {
-    res.json(MotorIAEngine.getLearningInsights());
 });
 
 // --- SHARK BOT ENGINE ---
@@ -1001,7 +1333,6 @@ app.post('/api/tradingview/webhook/execute', webhookLimiter, validateWebhookSecr
             lot: execLot,
             sl: 0,
             tp: 0,
-            magic: 999001,
             comment: comment.replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/\s+/g, ' ').trim().substring(0, 30),
         });
 
@@ -1359,6 +1690,14 @@ app.get('/api/mt5/micro-scalper/status', (req, res) => {
     res.json(MicroScalperEngine.getStatus());
 });
 
+app.get('/api/mt5/micro-scalper/live-monitor', (req, res) => {
+    res.json(MicroScalperEngine.getLiveMonitor());
+});
+
+app.get('/api/mt5/micro-scalper/history', (req, res) => {
+    res.json(MicroScalperEngine.getHistory());
+});
+
 app.post('/api/mt5/micro-scalper/settings', (req, res) => {
     MicroScalperEngine.updateSettings(req.body);
     res.json({ success: true, status: MicroScalperEngine.getStatus() });
@@ -1367,6 +1706,64 @@ app.post('/api/mt5/micro-scalper/settings', (req, res) => {
 app.post('/api/mt5/micro-scalper/reset', async (req, res) => {
     await MicroScalperEngine.resetBasket();
     res.json({ success: true });
+});
+
+app.post('/api/mt5/micro-scalper/backtest', async (req, res) => {
+    try {
+        const settings = MicroScalperEngine.getStatus().settings;
+        const body = req.body || {};
+        const config = {
+            symbol: body.symbol || settings.symbol,
+            days: body.days || 14,
+            timeframe: body.timeframe || 'M1',
+            lotBase: body.lotBase ?? settings.lotBase,
+            lotMultiplier: body.lotMultiplier ?? settings.lotMultiplier,
+            gridStepPips: body.gridStepPips ?? settings.gridStepPips,
+            maxLevels: body.maxLevels ?? settings.maxLevels,
+            targetProfitUSD: body.targetProfitUSD ?? settings.targetProfitUSD,
+            stopLossUSD: body.stopLossUSD ?? settings.stopLossUSD,
+            rsiPeriod: body.rsiPeriod ?? settings.rsiPeriod,
+            rsiOverbought: body.rsiOverbought ?? settings.rsiOverbought,
+            rsiOversold: body.rsiOversold ?? settings.rsiOversold,
+            initialCapital: body.initialCapital || 1000,
+            sniperMode: body.sniperMode ?? true,
+            breakevenThresholdPct: body.breakevenThresholdPct ?? 0.5,
+            trailingThresholdPct: body.trailingThresholdPct ?? 0.8,
+        };
+        const result = await MicroScalperBacktest.run(config);
+        res.json(result);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/mt5/micro-scalper/backtest', async (req, res) => {
+    try {
+        const settings = MicroScalperEngine.getStatus().settings;
+        const days = parseInt(req.query.days as string) || 14;
+        const config = {
+            symbol: (req.query.symbol as string) || settings.symbol,
+            days,
+            timeframe: (req.query.timeframe as string) || 'M1',
+            lotBase: settings.lotBase,
+            lotMultiplier: settings.lotMultiplier,
+            gridStepPips: settings.gridStepPips,
+            maxLevels: settings.maxLevels,
+            targetProfitUSD: settings.targetProfitUSD,
+            stopLossUSD: settings.stopLossUSD,
+            rsiPeriod: settings.rsiPeriod,
+            rsiOverbought: settings.rsiOverbought,
+            rsiOversold: settings.rsiOversold,
+            initialCapital: 1000,
+            sniperMode: settings.sniperMode,
+            breakevenThresholdPct: settings.breakevenThresholdPct || 0.5,
+            trailingThresholdPct: settings.trailingThresholdPct || 0.8,
+        };
+        const result = await MicroScalperBacktest.run(config);
+        res.json(result);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // --- ROTAS GOLD SCALPER (XAUUSD) ---
@@ -1384,6 +1781,10 @@ app.get('/api/mt5/gold-scalper/risk-report', async (req, res) => {
 
 app.get('/api/mt5/gold-scalper/report', async (req, res) => {
     res.json(await GoldScalperEngine.getTradeReport());
+});
+
+app.get('/api/mt5/gold-scalper/history', (req, res) => {
+    res.json(GoldScalperEngine.getHistory());
 });
 
 app.post('/api/mt5/gold-scalper/settings', (req, res) => {
@@ -1550,18 +1951,30 @@ app.post('/api/agent-ia/reset-daily', (_req, res) => {
 app.get('/api/mt5/ai-monitoring', async (req, res) => {
      try {
          const safe = <T>(fn: () => T): Promise<T | null> => Promise.resolve(fn()).catch(() => null);
-        const [gold, shark_bot, wolf_bot, swing, omni, supreme, robot, analytics, discipline] = await Promise.all([
+        const withTimeout = <T>(p: Promise<T>, ms: number, fallback: T): Promise<T> =>
+            Promise.race([p, new Promise<T>(r => setTimeout(() => r(fallback), ms))]);
+        const [gold_status, shark_bot_status, wolf_bot_status, omni_status, supreme_status, robot_status, analytics_status, discipline_status] = await Promise.all([
             GoldScalperEngine.getStatus().catch(() => null),
             safe(() => SharkBotEngine.getStatus()),
             safe(() => WolfBotEngine.getStatus()),
-            safe(() => SwingTraderEngine.getStatus()),
             safe(() => OmniProbabilisticEngine.getStatus()),
             safe(() => SupremeEngine.getStatus()),
             safe(() => AlphaRobotEngine.getStatus()),
             (async () => { try { return await ReportEngine.getAdvancedAnalytics(); } catch { return null; } })(),
-            (async () => { try { return await DisciplineEngine.getDailyStatus(); } catch { return null; } })()
+            (async () => { try { return await withTimeout(DisciplineEngine.getDailyStatus(), 8000, null); } catch { return null; } })()
         ]);
-        res.json({ gold, shark_bot, wolf_bot, swing, omni, supreme, robot, analytics, discipline });
+        
+        const results = {
+            gold: gold_status,
+            shark_bot: shark_bot_status,
+            wolf_bot: wolf_bot_status,
+            omni: omni_status,
+            supreme: supreme_status,
+            robot: robot_status,
+            analytics: analytics_status,
+            discipline: discipline_status
+        };
+        res.json(results);
      } catch (e: any) {
          res.status(500).json({ error: e.message });
      }
@@ -1680,38 +2093,6 @@ app.get('/api/mt5/sweep/trade-monitor', async (req, res) => {
     const data = await SweepTradeMonitor.refresh();
     res.json(data);
 });
-
-// --- ROTAS SWING TRADER IA ---
-app.get('/api/mt5/swing-trader/status', (req, res) => {
-    res.json(SwingTraderEngine.getStatus());
-});
-
-app.post('/api/mt5/swing-trader/settings', (req, res) => {
-    SwingTraderEngine.updateSettings(req.body);
-    res.json({ success: true, status: SwingTraderEngine.getStatus() });
-});
-
-app.post('/api/mt5/swing-trader/command', async (req, res) => {
-    const { command } = req.body;
-    const response = await SwingTraderEngine.executeCommand(command);
-    res.json({ response });
-});
-
-app.get('/api/mt5/swing-trader/backtest', async (req, res) => {
-    try {
-        const { symbol, days } = req.query;
-        const result = await SwingTraderSimulator.runBacktest(symbol as string, Number(days) || 30);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({ error: 'Backtest failed' });
-    }
-});
-
-app.post('/api/mt5/swing-trader/reset', async (req, res) => {
-    await SwingTraderEngine.resetDay();
-    res.json({ success: true });
-});
-
 // --- ROTAS FOREX SPEED SCALPER ---
 app.get('/api/mt5/forex-scalper/status', (req, res) => {
     res.json(ForexScalperEngine.getStatus());
@@ -1756,6 +2137,25 @@ app.post('/api/mt5/forex-scalper/backtest', async (req, res) => {
             initialCapital: req.body.initialCapital || 1000,
         };
         const result = await ForexScalperBacktest.run(config);
+        res.json(result);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/mt5/agent-ia/backtest', async (req, res) => {
+    try {
+        const config = {
+            symbol: req.body.symbol || 'XAUUSD',
+            days: req.body.days || 30,
+            lotSize: req.body.lotSize || 0.02,
+            initialCapital: req.body.initialCapital || 1000,
+            timeframe: req.body.timeframe || 'M5',
+            minFvgAtrRatio: req.body.minFvgAtrRatio || 0.5,
+            atrSlMultiplier: req.body.atrSlMultiplier || 0.8,
+            atrTpMultiplier: req.body.atrTpMultiplier || 1.5,
+        };
+        const result = await runAgentIABacktest(config);
         res.json(result);
     } catch (err: any) {
         res.status(500).json({ error: err.message });
@@ -1852,27 +2252,39 @@ app.post('/api/mt5/reports/sync', async (req, res) => {
     try {
         console.log('🔄 [Global Sync] Iniciando sincronização de todos os motores...');
 
-        // Frontend:
-        // - [x] Grid de Stats com 5 colunas (incluindo Meta e Stop visíveis). [QuantumBitcoinPanel.tsx]
-        // - [x] Controles interativos para metas editáveis de TP e SL.
-        // - [x] Botão "Hard Reset Cesta" com confirmação de segurança.
-        // - [x] Design Premium com feedback visual de zonas de risco (RSI).
-        // Sincroniza todos em paralelo para ser rápido
-        const results = await Promise.allSettled([
-            GoldScalperEngine.syncTradesFromMT5(),
-            AlphaRobotEngine.syncTradesFromMT5(),
-            SupremeEngine.syncTradesFromMT5()
-        ]);
+        const syncTasks = [
+            { engine: GoldScalperEngine, method: 'syncTradesFromMT5' },
+            { engine: AlphaRobotEngine, method: 'syncTradesFromMT5' },
+            { engine: SupremeEngine, method: 'syncTradesFromMT5' },
+            { engine: BitcoinProEngine, method: 'syncPosition' },
+            { engine: CryptoIAEngine, method: 'syncPositions' },
+            { engine: AuraQuantEngine, method: 'syncPosition' },
+            { engine: MicroScalperEngine, method: 'syncPosition' },
+            { engine: ForexScalperEngine, method: 'syncPosition' },
+            { engine: OmniProbabilisticEngine, method: 'syncPosition' },
+            { engine: SweepEngine, method: 'syncPosition' },
+            { engine: SharkBotEngine, method: 'syncPosition' },
+            { engine: WolfBotEngine, method: 'syncPosition' },
+            { engine: RecoveryEngine, method: 'syncPosition' },
+            { engine: AgentIAEngine, method: 'syncPosition' },
+        ];
+
+        const results = await Promise.allSettled(syncTasks.map(async (task) => {
+            const fn = (task.engine as any)[task.method];
+            if (typeof fn === 'function') {
+                return await fn.call(task.engine);
+            }
+            throw new Error(`Método ${task.method} não encontrado no motor ${(task.engine as any).name || 'Unknown'}`);
+        }));
 
         const successful = results.filter(r => r.status === 'fulfilled').length;
         const failed = results.filter(r => r.status === 'rejected').length;
 
         console.log(`✅ [Global Sync] Concluído. Sucesso: ${successful}, Falha: ${failed}`);
 
-        // Retorna o relatório atualizado após o sync
         const report = await SignalEngine.getStrategyReport();
         res.json({ status: 'success', successful, failed, report });
-    } catch (error) {
+    } catch (error: any) {
         console.error('❌ [Global Sync] Erro crítico:', error);
         res.status(500).json({ error: 'Failed to sync all reports' });
     }
@@ -1917,13 +2329,11 @@ app.get('/api/mt5/global-report', async (req, res) => {
         const statusEndpoints = [
             { id: 'micro-scalper', name: 'Micro Sniper' },
             { id: 'forex-scalper', name: 'Speed Scalper' },
-            { id: 'swing-trader', name: 'Day Swing IA' },
             { id: 'sweep', name: 'Sweep H4 M15' },
             { id: 'bitcoin-pro', name: 'Bitcoin Pro' },
             { id: 'shark-bot', name: 'Shark Bot' },
             { id: 'crypto-ia', name: 'Crypto IA' },
             { id: 'omni', name: 'Omni Probabilistic' },
-            { id: 'motor-ia', name: 'Motor IA' },
             { id: 'agent-ia', name: 'Agent IA' },
             { id: 'recovery', name: 'Recovery Engine' },
         ];
@@ -2040,16 +2450,6 @@ app.get('/api/mt5/global-report', async (req, res) => {
     }
 });
 
-// --- ALL POSITIONS ---
-app.get('/api/mt5/positions', async (req, res) => {
-    try {
-        const resp = await bridgeAxios.get('/positions', { timeout: 5000 });
-        res.json(resp.data || []);
-    } catch (error) {
-        res.json([]);
-    }
-});
-
 // --- MANUAL TRADE EXECUTION (Telegram) ---
 app.post('/api/mt5/trade/open', async (req, res) => {
     try {
@@ -2158,12 +2558,12 @@ app.post('/api/system/engines/disable-all', (req, res) => {
             { name: 'Bitcoin Pro', fn: () => BitcoinProEngine.updateSettings({ enabled: false }) },
             { name: 'Aura Quant', fn: () => AuraQuantEngine.updateSettings({ enabled: false }) },
             { name: 'Crypto IA', fn: () => CryptoIAEngine.updateSettings({ enabled: false }) },
-            { name: 'Motor IA', fn: () => MotorIAEngine.updateSettings({ enabled: false }) },
             { name: 'Recovery', fn: () => RecoveryEngine.updateSettings({ enabled: false }) },
             { name: 'Micro Scalper', fn: () => MicroScalperEngine.updateSettings({ enabled: false }) },
-            { name: 'Swing Trader', fn: () => SwingTraderEngine.updateSettings({ enabled: false }) },
             { name: 'Forex Scalper', fn: () => ForexScalperEngine.updateSettings({ enabled: false }) },
             { name: 'Sweep', fn: () => SweepEngine.updateSettings({ enabled: false }) },
+            { name: 'Agent IA', fn: () => { try { AgentIAEngine.stop(); } catch {} } },
+            { name: 'Copy Trader', fn: () => CopyTraderEngine.stop() },
         ];
 
         const results: { name: string; success: boolean; error?: string }[] = [];
@@ -2201,14 +2601,72 @@ app.get('/api/system/health', async (req: any, res: any) => {
 });
 
 app.get('/api/system/engines', (req, res) => {
-    const engines: Record<string, any> = {
-        GoldScalperEngine: { running: typeof GoldScalperEngine !== 'undefined' },
-        SweepEngine: { running: typeof SweepEngine !== 'undefined' },
-        MotorIAEngine: { running: typeof MotorIAEngine !== 'undefined' },
-        DisciplineEngine: { running: typeof DisciplineEngine !== 'undefined' },
-        CryptoRiskEngine: { running: typeof CryptoRiskEngine !== 'undefined' },
+    const ENGINE_MAP: Record<string, any> = {
+        GoldScalperEngine, SweepEngine, AuraQuantEngine, MicroScalperEngine,
+        ForexScalperEngine, OmniProbabilisticEngine, DisciplineEngine,
+        CryptoRiskEngine, AgentIAEngine, AlphaRobotEngine, WolfBotEngine,
+        SupremeEngine, SharkBotEngine, BitcoinProEngine, CryptoIAEngine,
+        RecoveryEngine, CopyTraderEngine
     };
+    const engines: Record<string, any> = {};
+    for (const [name, ref] of Object.entries(ENGINE_MAP)) {
+        try {
+            engines[name] = { running: !!ref, started: ref?.isRunning || ref?.state?.isRunning || false };
+        } catch { engines[name] = { running: false }; }
+    }
     res.json(engines);
+});
+
+// --- ENDPOINT CONSOLIDADO: Status de TODOS os engines em 1 request ---
+app.get('/api/mt5/engines/status', async (req, res) => {
+    try {
+        const engines = [
+            { key: 'micro-scalper', name: 'Micro Sniper', getStatus: () => Promise.resolve(MicroScalperEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: { symbol: '', lotSize: 0.01, maxDrawdown: 100, stopLossUSD: 100, targetProfitUSD: 100, enableAlerts: true, maxLevels: 1, tradingEnabled: true }, state: { activeOrders: [], history: [], currentPrice: 0, atr: 0, dailyProfit: 0, dailyLoss: 0, totalTrades: 0, wins: 0, losses: 0, totalProfit: 0, totalLoss: 0, floatingProfit: 0, maxDrawdown: 0, openingOrders: [], dailyVolume: 0, lastReportTime: 0, emergencyActive: false, lastEmergencyReset: 0, disciplineLockTime: 0, lastTradeTime: 0, lastTradeProfit: 0, maxConsecutiveWins: 0, maxConsecutiveLosses: 0, todayPnL: 0, todayVolume: 0, totalVolume: 0, winRate: 0, avgWinLoss: 0, expectancy: 0, openTradesCount: 0, safeZoneActive: false, signalScore: 0, atrValue: 0, currentTrend: 'NEUTRAL', lastPriceUpdate: 0, lastMarketAnalysis: 0, lastExecutionTime: 0, lastExecutionResult: 'NONE' }, uptime: 0, positions: 0, dailyProfit: 0, totalProfit: 0, stats: {}} ) },
+            { key: 'aura-quant', name: 'Aura Quant', getStatus: () => Promise.resolve(AuraQuantEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: { symbol: 'XAUUSD', atrMultiplier: 1.5, rrRatio: 2.5, quantity: 0.01, riskPercent: 1, historicalVolatility: 1, maxSpread: 10, targetProfit: 50, maxDailyLoss: 100, maxDailyGain: 150, emergencyReset: false, alertEnabled: true }, state: { position: null, tradeHistory: [], currentPrice: 0, atr: 0, dailyProfit: 0, dailyLoss: 0, totalTrades: 0, wins: 0, losses: 0, totalProfit: 0, floatingProfit: 0, maxDrawdown: 0 } } ) },
+            { key: 'gold-scalper', name: 'Gold Scalper', getStatus: () => Promise.resolve(GoldScalperEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'forex-scalper', name: 'Speed Scalper', getStatus: () => Promise.resolve(ForexScalperEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'sweep', name: 'Sweep H4 M15', getStatus: () => Promise.resolve(SweepEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'shark-bot', name: 'Shark Bot', getStatus: () => Promise.resolve(SharkBotEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'wolf-bot', name: 'Wolf Bot', getStatus: () => Promise.resolve(WolfBotEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'omni', name: 'Omni Probabilistic', getStatus: () => Promise.resolve(OmniProbabilisticEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'supreme', name: 'Alpha Supreme', getStatus: () => Promise.resolve(SupremeEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'alpha', name: 'Alpha Robot', getStatus: () => Promise.resolve(AlphaRobotEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'recovery', name: 'Recovery', getStatus: () => Promise.resolve(RecoveryEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'bitcoin-pro', name: 'Bitcoin Pro', getStatus: () => Promise.resolve(BitcoinProEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'crypto-ia', name: 'Crypto IA', getStatus: () => Promise.resolve(CryptoIAEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'copy-trader', name: 'Copy Trader', getStatus: () => Promise.resolve(CopyTraderEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+            { key: 'agent-ia', name: 'Agent IA', getStatus: () => Promise.resolve(AgentIAEngine.getStatus?.() || { enabled: false, isRunning: false, isExecuting: false, settings: {}, state: {} }) },
+        ];
+
+        // Execute all getStatus() in parallel with 3s timeout each
+        const promises = engines.map(async (engine) => {
+            if (!engine) return { key: 'unknown', name: 'Unknown', error: 'Engine undefined' };
+            try {
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000));
+                const status = (await Promise.race([engine.getStatus(), timeoutPromise])) as any;
+                return {
+                    key: engine.key,
+                    name: engine.name,
+                    enabled: status.settings?.enabled ?? status.enabled ?? false,
+                    isRunning: status.isRunning ?? status.state?.isRunning ?? false,
+                    uptime: status.uptime ?? 0,
+                    positions: status.state?.positions?.length ?? status.state?.activeOrders?.length ?? status.state?.activePositions?.length ?? 0,
+                    dailyProfit: status.state?.dailyProfit ?? status.dailyProfit ?? 0,
+                    totalProfit: status.totalProfit ?? status.state?.totalProfit ?? 0,
+                    stats: status.stats ?? status.performance ?? {},
+                };
+            } catch (e) {
+                return { key: engine.key, name: engine.name, error: String(e) };
+            }
+        });
+
+        const results = await Promise.all(promises);
+        const resultsObj = Object.fromEntries(results.map(r => [r.key, r]));
+
+        res.json({ engines: resultsObj, timestamp: Date.now() });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.get('/api/system/backup', (req, res) => {
@@ -2263,20 +2721,45 @@ const INTEL_ENGINE_URL = 'http://127.0.0.1:5004';
 let intelEngineProcess: ChildProcess | null = null;
 const TELEMETRY_URL = 'http://127.0.0.1:5006';
 
-app.all('/api/backtest/*', async (req, res) => {
+const backtestProxy = async (req: any, res: any) => {
     try {
-        const path = req.url.replace('/api/backtest', '');
-        if (path === '/node/history' || path === '/node/history/') {
+        const btPath = req.url.replace('/api/backtest', '');
+        if (btPath === '/node/history' || btPath === '/node/history/') {
             const history = await DatabaseService.getBacktestHistory();
             return res.json(history);
         }
-        const url = `${BACKTEST_URL}/api/backtest${path}`;
+        const url = `${BACKTEST_URL}/api/backtest${btPath}`;
         const method = req.method.toLowerCase() as 'get' | 'post';
-        const config: any = { timeout: 300000 };
         if (req.method === 'POST' || req.method === 'PUT') {
-            config.data = req.body;
+            let bodyData: any = req.body;
+            if (!bodyData || typeof bodyData !== 'object' || Object.keys(bodyData).length === 0) {
+                const raw = await readBody(req);
+                try { bodyData = raw ? JSON.parse(raw) : {}; } catch { bodyData = {}; }
+            }
+            const resp = await axios.post(url, bodyData, { timeout: 300000, headers: { 'Content-Type': 'application/json' } });
+            if (resp.data?.status === 'completed' && resp.data?.metrics) {
+                const m = resp.data.metrics;
+                DatabaseService.saveBacktest({
+                    jobId: resp.data.job_id || 'unknown',
+                    strategy: resp.data.config?.strategy || 'smc',
+                    symbol: resp.data.config?.symbol,
+                    timeframe: resp.data.config?.timeframe,
+                    initialCapital: m.initial_capital || 0,
+                    finalBalance: m.final_balance || 0,
+                    totalTrades: m.total_trades || 0,
+                    winTrades: m.win_trades || 0,
+                    lossTrades: m.loss_trades || 0,
+                    winRate: m.win_rate || 0,
+                    totalPnl: m.total_pnl || 0,
+                    totalReturn: m.total_return || 0,
+                    profitFactor: m.profit_factor || 0,
+                    maxDrawdown: m.max_drawdown || 0,
+                    config: resp.data.config,
+                }).catch(() => {});
+            }
+            return res.json(resp.data);
         }
-        const resp = await (axios as any)[method](url, config);
+        const resp = await (axios as any)[method](url, { timeout: 300000 });
         if (method === 'get' && resp.data?.status === 'completed' && resp.data?.metrics) {
             const m = resp.data.metrics;
             DatabaseService.saveBacktest({
@@ -2306,13 +2789,16 @@ app.all('/api/backtest/*', async (req, res) => {
             res.status(502).json({ error: 'Backtest service unavailable', detail: e.message });
         }
     }
-});
+};
+app.all('/api/backtest/*', backtestProxy);
 
 app.get('/api/trader/profile', async (req, res) => {
     try {
+        const withTimeout = <T>(p: Promise<T>, ms: number, fallback: T): Promise<T> =>
+            Promise.race([p, new Promise<T>(r => setTimeout(() => r(fallback), ms))]);
         const [accountRes, historyRes] = await Promise.all([
-            bridgeAxios.get('/account').catch(() => ({ data: null })),
-            bridgeAxios.get('/history').catch(() => ({ data: [] }))
+            withTimeout(bridgeAxios.get('/account'), 8000, { data: null } as any),
+            withTimeout(bridgeAxios.get('/history'), 10000, { data: [] } as any)
         ]);
 
         const account = accountRes.data;
@@ -2331,23 +2817,32 @@ app.get('/api/trader/profile', async (req, res) => {
         const totalDeposits = deposits.reduce((s: number, d: any) => s + d.amount, 0);
         const totalWithdrawals = withdrawals.reduce((s: number, w: any) => s + w.amount, 0);
 
+        const manual = loadManualRecords();
+        const manualDeposits = manual.deposits.map((d: any) => ({ ...d, ticket: d.ticket }));
+        const manualWithdrawals = manual.withdrawals.map((w: any) => ({ ...w, ticket: w.ticket }));
+
+        const allDeposits = [...deposits, ...manualDeposits].sort((a: any, b: any) => b.time - a.time);
+        const allWithdrawals = [...withdrawals, ...manualWithdrawals].sort((a: any, b: any) => b.time - a.time);
+        const allTotalDeposits = allDeposits.reduce((s: number, d: any) => s + d.amount, 0);
+        const allTotalWithdrawals = allWithdrawals.reduce((s: number, w: any) => s + w.amount, 0);
+
         res.json({
             account: account ? {
                 login: account.login || 0,
                 balance: account.balance || 0,
                 equity: account.equity || 0,
                 margin: account.margin || 0,
-                margin_free: account.margin_free || 0,
+                margin_free: account.freeMargin || account.margin_free || 0,
                 profit: account.daily_profit || account.profit || 0,
                 leverage: account.leverage || 0,
                 currency: account.currency || 'USD',
                 name: account.company || 'MT5',
                 server: account.server || '---',
             } : null,
-            deposits,
-            withdrawals,
-            totalDeposits,
-            totalWithdrawals,
+            deposits: allDeposits,
+            withdrawals: allWithdrawals,
+            totalDeposits: allTotalDeposits,
+            totalWithdrawals: allTotalWithdrawals,
             totalDeals: deals.length,
             balanceHistory: deals
                 .filter((d: any) => [2, 3, 4].includes(d.type) || d.symbol)
@@ -2361,6 +2856,85 @@ app.get('/api/trader/profile', async (req, res) => {
         });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// --- TRADER MANUAL DEPOSITS/WITHDRAWALS ---
+const TRADER_MANUAL_PATH = nodePath.join(process.cwd(), 'trader_manual_records.json');
+
+function loadManualRecords(): { deposits: any[]; withdrawals: any[] } {
+    try {
+        if (fs.existsSync(TRADER_MANUAL_PATH)) {
+            return JSON.parse(fs.readFileSync(TRADER_MANUAL_PATH, 'utf8'));
+        }
+    } catch {}
+    return { deposits: [], withdrawals: [] };
+}
+
+function saveManualRecords(data: { deposits: any[]; withdrawals: any[] }) {
+    try {
+        fs.writeFileSync(TRADER_MANUAL_PATH, JSON.stringify(data, null, 2));
+    } catch (e) {
+        console.error('Erro ao salvar registros manuais:', e);
+    }
+}
+
+app.post('/api/trader/deposit', async (req, res) => {
+    try {
+        const body = await readBody(req);
+        const { amount, date, comment } = JSON.parse(body);
+        if (!amount || amount <= 0) return res.status(400).json({ error: 'Valor inválido' });
+
+        const records = loadManualRecords();
+        const entry = {
+            ticket: Date.now(),
+            time: date ? Math.floor(new Date(date).getTime() / 1000) : Math.floor(Date.now() / 1000),
+            amount: Number(amount),
+            comment: comment || '',
+            manual: true,
+        };
+        records.deposits.push(entry);
+        saveManualRecords(records);
+        res.json({ ok: true, deposit: entry });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/trader/withdrawal', async (req, res) => {
+    try {
+        const body = await readBody(req);
+        const { amount, date, comment } = JSON.parse(body);
+        if (!amount || amount <= 0) return res.status(400).json({ error: 'Valor inválido' });
+
+        const records = loadManualRecords();
+        const entry = {
+            ticket: Date.now(),
+            time: date ? Math.floor(new Date(date).getTime() / 1000) : Math.floor(Date.now() / 1000),
+            amount: Number(amount),
+            comment: comment || '',
+            manual: true,
+        };
+        records.withdrawals.push(entry);
+        saveManualRecords(records);
+        res.json({ ok: true, withdrawal: entry });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.delete('/api/trader/record/:type/:ticket', async (req, res) => {
+    try {
+        const { type, ticket } = req.params;
+        const records = loadManualRecords();
+        const key = type === 'deposit' ? 'deposits' : 'withdrawals';
+        const before = records[key].length;
+        records[key] = records[key].filter((r: any) => r.ticket !== Number(ticket));
+        if (records[key].length === before) return res.status(404).json({ error: 'Registro não encontrado' });
+        saveManualRecords(records);
+        res.json({ ok: true });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
     }
 });
 
@@ -2435,10 +3009,9 @@ app.listen(Number(port), '0.0.0.0', () => {
     (async () => {
         try {
             const fs = require('fs');
-            const path = require('path');
+const path = require('path');
             const dataDir = process.cwd();
-            const migrations = [
-                { name: 'Motor IA', file: 'motor_ia_history.json', dataKey: 'executions' },
+            const migrations: { name: string; file: string; dataKey?: string }[] = [
                 { name: 'Gold Scalper', file: 'gold_scalper_history.json' },
                 { name: 'Alpha Robot', file: 'alpha_robot_history.json' },
                 { name: 'Recovery', file: 'recovery_history.json' },
@@ -2462,12 +3035,13 @@ app.listen(Number(port), '0.0.0.0', () => {
     console.log('🚀 Iniciando serviços de infraestrutura...');
     AlertEngine.init();
     InfraService.init();
+    LoggerService.init();
     CopilotService.initMemory();
 
     console.log('🚀 Iniciando Intel Engine (Python :5004)...');
     (async () => {
         try {
-            intelEngineProcess = spawn('C:\\Users\\Deah\\AppData\\Local\\Python\\bin\\python.exe', ['-m', 'server.python.ai_agents.intel_service', '5004'], {
+            intelEngineProcess = spawn('C:\\Users\\Deah\\AppData\\Local\\Programs\\Python\\Python314\\python.exe', ['-m', 'server.python.ai_agents.intel_service', '5004'], {
                 cwd: path.resolve(__dirname, '../..'),
                 stdio: ['ignore', 'pipe', 'pipe'],
             });
@@ -2503,7 +3077,6 @@ app.listen(Number(port), '0.0.0.0', () => {
     GoldScalperEngine.start();
     GoldScalperTradeMonitor.start(3000);
     SweepTradeMonitor.start(3000);
-    MotorIAEngine.init();
     SweepEngine.init();
     // Motores desativados para reduzir carga:
     // TradeGuardian.start();
@@ -2512,21 +3085,20 @@ app.listen(Number(port), '0.0.0.0', () => {
     // CopyTraderEngine.start();
     // SupremeEngine.start();
     // MLService.init();
-    // BitcoinProEngine.init();
-    // AuraQuantEngine.init();
+    BitcoinProEngine.init();
+    AuraQuantEngine.init();
     // CryptoIAEngine.init();
-    // MicroScalperEngine.init();
-    // SwingTraderEngine.init();
+    MicroScalperEngine.init();
     ForexScalperEngine.init();
     OmniProbabilisticEngine.start();
-    // SharkBotEngine.init();
-    // RecoveryEngine.init();
+    SharkBotEngine.init();
+    RecoveryEngine.init();
     console.log('⚡ Todos os motores iniciados com sucesso!');
 
     // Process shutdown handlers
     const shutdown = async (signal: string) => {
         console.log(`\n// Restart trigger 2⚠️  Recebido ${signal}. Iniciando desligamento gracioso...`);
-        const engines = [MotorIAEngine, GoldScalperEngine, CryptoIAEngine, AlphaRobotEngine, WolfBotEngine, SupremeEngine, RecoveryEngine, SharkBotEngine, BitcoinProEngine, AuraQuantEngine, MicroScalperEngine, SwingTraderEngine, SweepEngine, ForexScalperEngine, OmniProbabilisticEngine, TradeGuardian, CopyTraderEngine];
+        const engines = [GoldScalperEngine, CryptoIAEngine, AlphaRobotEngine, WolfBotEngine, SupremeEngine, RecoveryEngine, SharkBotEngine, BitcoinProEngine, AuraQuantEngine, MicroScalperEngine, SweepEngine, ForexScalperEngine, OmniProbabilisticEngine, TradeGuardian, CopyTraderEngine, AgentIAEngine];
         for (const eng of engines) { try { (eng as any).stop?.(); } catch { /* ignore */ } }
         if (intelEngineProcess) { try { intelEngineProcess.kill('SIGTERM'); } catch {} }
         try { await DatabaseService.disconnect(); } catch (e) { console.error('DB disconnect fail', e); }
@@ -2536,12 +3108,6 @@ app.listen(Number(port), '0.0.0.0', () => {
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
 
-    // SPA fallback (deve vir DEPOIS de todas as rotas de API)
-    app.get('*', (req, res) => {
-        if (!req.path.startsWith('/api')) {
-            res.sendFile(path.join(clientDist, 'index.html'));
-        }
-    });
 }).on('error', (err: any) => {
     console.error('❌ HTTP Server error:', err.message);
     if (err.code === 'EADDRINUSE') {
